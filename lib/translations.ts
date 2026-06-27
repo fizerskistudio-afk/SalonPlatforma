@@ -108,6 +108,21 @@ export const translations = {
     date: { mk: "Датум", sq: "Data", en: "Date" },
     time: { mk: "Време", sq: "Koha", en: "Time" },
     premiumService: { mk: "Премиум услуга", sq: "Shërbim premium", en: "Premium Service" },
+    languageSelector: {
+  mk: "Избор на јазик",
+  sq: "Përzgjedhja e gjuhës",
+  en: "Language selector",
+},
+switchToLanguage: {
+  mk: "Премини на",
+  sq: "Kalo në",
+  en: "Switch to",
+},
+selected: {
+  mk: "избрано",
+  sq: "zgjedhur",
+  en: "selected",
+},
   },
 };
 
