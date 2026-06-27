@@ -316,10 +316,15 @@ completePreviousStepsDescription: {
     en: "Switch to",
   },
   selected: {
-    mk: "избрано",
-    sq: "zgjedhur",
-    en: "selected",
-  },
+  mk: "избрано",
+  sq: "zgjedhur",
+  en: "selected",
+},
+notSelected: {
+  mk: "Не е избрано",
+  sq: "Nuk është zgjedhur",
+  en: "Not selected",
+},
 },
 
 customer: {
