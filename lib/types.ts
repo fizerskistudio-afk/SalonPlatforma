@@ -104,6 +104,7 @@ export type ServiceCategory = {
   id: string;
   icon: ServiceCategoryIcon;
   name: LocalizedText;
+  isActive: boolean;
 };
 
 export type ServicePriceType = "fixed" | "from" | "range";
@@ -116,6 +117,7 @@ export type Service = {
   priceType: ServicePriceType;
   priceFrom: number;
   priceTo?: number;
+  isActive: boolean;
 };
 
 export type Employee = {
@@ -125,7 +127,8 @@ export type Employee = {
   image: string;
   bio: LocalizedText;
   serviceIds: string[];
-  workingHours?: WorkingHours[]; // Optional: ako nema, koristi se businessConfig.workingHours
+  workingHours?: WorkingHours[];
+  isActive: boolean;
 };
 
 // ============================================

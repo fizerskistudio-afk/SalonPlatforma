@@ -1,12 +1,12 @@
 import type {
   AvailabilitySlot,
+  DayOfWeek,
   MockAvailabilityParams,
   MockBusyPeriod,
-  DayOfWeek,
   WorkingHours,
 } from "./types";
-import { services, employees } from "./mockData";
-import { businessConfig, bookingConfig } from "./config";
+import { employees, services } from "./mockData";
+import { bookingConfig, businessConfig } from "./config";
 
 /**
  * Mock busy periods - simulira zauzete termine zaposlenih.
@@ -14,77 +14,213 @@ import { businessConfig, bookingConfig } from "./config";
  */
 export const MOCK_BUSY_PERIODS: MockBusyPeriod[] = [
   // Arben (e1) - Monday
-  { employeeId: "e1", dayOfWeek: 1, startTime: "10:00", endTime: "11:00" },
-  { employeeId: "e1", dayOfWeek: 1, startTime: "14:00", endTime: "15:00" },
+  {
+    employeeId: "e1",
+    dayOfWeek: 1,
+    startTime: "10:00",
+    endTime: "11:00",
+  },
+  {
+    employeeId: "e1",
+    dayOfWeek: 1,
+    startTime: "14:00",
+    endTime: "15:00",
+  },
+
   // Arben (e1) - Wednesday
-  { employeeId: "e1", dayOfWeek: 3, startTime: "09:00", endTime: "10:30" },
+  {
+    employeeId: "e1",
+    dayOfWeek: 3,
+    startTime: "09:00",
+    endTime: "10:30",
+  },
+
   // Elira (e2) - Tuesday
-  { employeeId: "e2", dayOfWeek: 2, startTime: "11:00", endTime: "12:30" },
-  { employeeId: "e2", dayOfWeek: 2, startTime: "15:00", endTime: "16:00" },
+  {
+    employeeId: "e2",
+    dayOfWeek: 2,
+    startTime: "11:00",
+    endTime: "12:30",
+  },
+  {
+    employeeId: "e2",
+    dayOfWeek: 2,
+    startTime: "15:00",
+    endTime: "16:00",
+  },
+
   // Elira (e2) - Thursday
-  { employeeId: "e2", dayOfWeek: 4, startTime: "13:00", endTime: "14:30" },
+  {
+    employeeId: "e2",
+    dayOfWeek: 4,
+    startTime: "13:00",
+    endTime: "14:30",
+  },
 ];
 
 /**
- * Helper: Konvertuj "HH:MM" u minute od ponoći
+ * Konvertuje "HH:MM" u minute od ponoći.
  */
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);
+
   return hours * 60 + minutes;
 }
 
 /**
- * Helper: Konvertuj minute od ponoći u "HH:MM"
+ * Konvertuje minute od ponoći u "HH:MM".
  */
 function minutesToTime(minutes: number): string {
   const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+  const remainingMinutes = minutes % 60;
+
+  return `${hours.toString().padStart(2, "0")}:${remainingMinutes
+    .toString()
+    .padStart(2, "0")}`;
 }
 
 /**
- * Helper: Proveri da li se dva vremenska intervala preklapaju
+ * Proverava da li se dva vremenska intervala preklapaju.
  */
 function doIntervalsOverlap(
-  start1: number,
-  end1: number,
-  start2: number,
-  end2: number
+  firstStart: number,
+  firstEnd: number,
+  secondStart: number,
+  secondEnd: number
 ): boolean {
-  return start1 < end2 && end1 > start2;
+  return firstStart < secondEnd && firstEnd > secondStart;
 }
 
 /**
- * Helper: Vrati dan u nedelji za dati datum (0-6)
- * Koristi lokalno parsiranje da izbegne timezone probleme
+ * Parsira YYYY-MM-DD kao lokalni datum.
+ * Ne koristi UTC parsiranje, pa nema timezone pomeranja.
  */
-function getDayOfWeek(date: string): DayOfWeek {
+function parseLocalDate(date: string): Date | null {
   const [year, month, day] = date.split("-").map(Number);
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day)
+  ) {
+    return null;
+  }
+
   const localDate = new Date(year, month - 1, day);
+
+  const isValid =
+    localDate.getFullYear() === year &&
+    localDate.getMonth() === month - 1 &&
+    localDate.getDate() === day;
+
+  return isValid ? localDate : null;
+}
+
+/**
+ * Vraća dan u nedelji za dati datum.
+ */
+function getDayOfWeek(date: string): DayOfWeek | null {
+  const localDate = parseLocalDate(date);
+
+  if (!localDate) {
+    return null;
+  }
+
   return localDate.getDay() as DayOfWeek;
 }
 
 /**
- * Helper: Vrati radno vreme za zaposlenog na određeni dan
- * Ako zaposleni nema workingHours, koristi businessConfig.workingHours
+ * Kreira lokalni Date objekat za određeni datum i vreme.
+ */
+function getSlotDateTime(
+  date: string,
+  time: string
+): Date | null {
+  const localDate = parseLocalDate(date);
+  const [hours, minutes] = time.split(":").map(Number);
+
+  if (
+    !localDate ||
+    !Number.isInteger(hours) ||
+    !Number.isInteger(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
+  return new Date(
+    localDate.getFullYear(),
+    localDate.getMonth(),
+    localDate.getDate(),
+    hours,
+    minutes,
+    0,
+    0
+  );
+}
+
+/**
+ * Proverava minimalni period unapred za rezervaciju.
+ *
+ * Na primer, ako je minimumAdvanceMinutes 60,
+ * termin mora početi najmanje 60 minuta od trenutnog vremena.
+ */
+function meetsMinimumAdvance(
+  date: string,
+  time: string
+): boolean {
+  const slotDateTime = getSlotDateTime(date, time);
+
+  if (!slotDateTime) {
+    return false;
+  }
+
+  const earliestAllowedTime =
+    Date.now() +
+    bookingConfig.minimumAdvanceMinutes * 60 * 1000;
+
+  return slotDateTime.getTime() >= earliestAllowedTime;
+}
+
+/**
+ * Vraća radno vreme zaposlenog za određeni dan.
+ *
+ * Ako zaposleni nema posebno radno vreme,
+ * koristi glavno radno vreme salona.
  */
 function getEmployeeWorkingHours(
   employeeId: string,
   dayOfWeek: DayOfWeek
 ): WorkingHours | null {
-  const employee = employees.find((emp) => emp.id === employeeId);
-  
-  // Ako zaposleni ima svoje workingHours, koristi ih
-  if (employee?.workingHours) {
-    return employee.workingHours.find((wh) => wh.dayOfWeek === dayOfWeek) || null;
+  const employee = employees.find(
+    (item) => item.id === employeeId && item.isActive
+  );
+
+  if (!employee) {
+    return null;
   }
-  
-  // Fallback na businessConfig.workingHours
-  return businessConfig.workingHours.find((wh) => wh.dayOfWeek === dayOfWeek) || null;
+
+  if (employee.workingHours) {
+    return (
+      employee.workingHours.find(
+        (hours) => hours.dayOfWeek === dayOfWeek
+      ) ?? null
+    );
+  }
+
+  return (
+    businessConfig.workingHours.find(
+      (hours) => hours.dayOfWeek === dayOfWeek
+    ) ?? null
+  );
 }
 
 /**
- * Helper: Proveri da li zaposleni ima dovoljno slobodnog vremena za uslugu
+ * Proverava da li zaposleni ima dovoljno slobodnog vremena
+ * za celu izabranu uslugu.
  */
 function employeeHasAvailability(
   employeeId: string,
@@ -92,33 +228,61 @@ function employeeHasAvailability(
   slotStartMinutes: number,
   durationMinutes: number
 ): boolean {
-  const slotEndMinutes = slotStartMinutes + durationMinutes;
+  const slotEndMinutes =
+    slotStartMinutes + durationMinutes;
 
-  // Proveri radno vreme zaposlenog
-  const workingHours = getEmployeeWorkingHours(employeeId, dayOfWeek);
-  if (!workingHours || workingHours.isClosed || !workingHours.openTime || !workingHours.closeTime) {
-    return false; // Zaposleni ne radi tog dana
-  }
+  const workingHours = getEmployeeWorkingHours(
+    employeeId,
+    dayOfWeek
+  );
 
-  const openMinutes = timeToMinutes(workingHours.openTime);
-  const closeMinutes = timeToMinutes(workingHours.closeTime);
-
-  // Proveri da li cela usluga može da stane u smenu
-  if (slotStartMinutes < openMinutes || slotEndMinutes > closeMinutes) {
+  if (
+    !workingHours ||
+    workingHours.isClosed ||
+    !workingHours.openTime ||
+    !workingHours.closeTime
+  ) {
     return false;
   }
 
-  // Proveri sve busy periode za ovog zaposlenog na ovaj dan
-  const busyPeriods = MOCK_BUSY_PERIODS.filter(
-    (period) => period.employeeId === employeeId && period.dayOfWeek === dayOfWeek
+  const employeeOpenMinutes = timeToMinutes(
+    workingHours.openTime
   );
 
-  for (const busy of busyPeriods) {
-    const busyStart = timeToMinutes(busy.startTime);
-    const busyEnd = timeToMinutes(busy.endTime);
+  const employeeCloseMinutes = timeToMinutes(
+    workingHours.closeTime
+  );
 
-    // Ako se slot preklapa sa busy periodom, nema dostupnosti
-    if (doIntervalsOverlap(slotStartMinutes, slotEndMinutes, busyStart, busyEnd)) {
+  if (
+    slotStartMinutes < employeeOpenMinutes ||
+    slotEndMinutes > employeeCloseMinutes
+  ) {
+    return false;
+  }
+
+  const busyPeriods = MOCK_BUSY_PERIODS.filter(
+    (period) =>
+      period.employeeId === employeeId &&
+      period.dayOfWeek === dayOfWeek
+  );
+
+  for (const busyPeriod of busyPeriods) {
+    const busyStartMinutes = timeToMinutes(
+      busyPeriod.startTime
+    );
+
+    const busyEndMinutes = timeToMinutes(
+      busyPeriod.endTime
+    );
+
+    if (
+      doIntervalsOverlap(
+        slotStartMinutes,
+        slotEndMinutes,
+        busyStartMinutes,
+        busyEndMinutes
+      )
+    ) {
       return false;
     }
   }
@@ -127,104 +291,157 @@ function employeeHasAvailability(
 }
 
 /**
- * Glavna funkcija: Vrati listu slotova sa statusom dostupnosti
+ * Vraća listu slotova sa statusom dostupnosti.
  */
-export function getMockAvailability(params: MockAvailabilityParams): AvailabilitySlot[] {
-  const { employeePreference, serviceId, date } = params;
+export function getMockAvailability(
+  params: MockAvailabilityParams
+): AvailabilitySlot[] {
+  const {
+    employeePreference,
+    serviceId,
+    date,
+  } = params;
 
-  // Ako nedostaju osnovni podaci, vrati praznu listu
   if (!serviceId || !date || !employeePreference) {
     return [];
   }
 
-  // Pronađi izabranu uslugu
-  const service = services.find((s) => s.id === serviceId);
+  const service = services.find(
+    (item) =>
+      item.id === serviceId && item.isActive
+  );
+
   if (!service) {
     return [];
   }
 
-  // Odredi dan u nedelji
   const dayOfWeek = getDayOfWeek(date);
 
-  // Odredi koje zaposlene da proverimo
-  let employeesToCheck: string[];
+  if (dayOfWeek === null) {
+    return [];
+  }
+
+  let employeeIdsToCheck: string[];
 
   if (employeePreference === "any") {
-    // Svi zaposleni koji rade ovu uslugu
-    employeesToCheck = employees
-      .filter((emp) => emp.serviceIds.includes(serviceId))
-      .map((emp) => emp.id);
+    employeeIdsToCheck = employees
+      .filter(
+        (employee) =>
+          employee.isActive &&
+          employee.serviceIds.includes(serviceId)
+      )
+      .map((employee) => employee.id);
   } else {
-    // Specifičan zaposleni - validiraj
-    const employee = employees.find((emp) => emp.id === employeePreference);
-    if (!employee) {
-      return []; // Zaposleni ne postoji
+    const selectedEmployee = employees.find(
+      (employee) =>
+        employee.id === employeePreference &&
+        employee.isActive
+    );
+
+    if (
+      !selectedEmployee ||
+      !selectedEmployee.serviceIds.includes(serviceId)
+    ) {
+      return [];
     }
-    if (!employee.serviceIds.includes(serviceId)) {
-      return []; // Zaposleni ne radi ovu uslugu
-    }
-    employeesToCheck = [employeePreference];
+
+    employeeIdsToCheck = [selectedEmployee.id];
   }
 
-  if (employeesToCheck.length === 0) {
-    return []; // Nema zaposlenih za ovu uslugu
+  if (employeeIdsToCheck.length === 0) {
+    return [];
   }
 
-  // Proveri radno vreme salona za ovaj dan (kao krajnja granica)
-  const salonWorkingHours = businessConfig.workingHours.find((wh) => wh.dayOfWeek === dayOfWeek);
-  if (!salonWorkingHours || salonWorkingHours.isClosed || !salonWorkingHours.openTime || !salonWorkingHours.closeTime) {
-    return []; // Salon je zatvoren
+  const salonWorkingHours =
+    businessConfig.workingHours.find(
+      (hours) => hours.dayOfWeek === dayOfWeek
+    );
+
+  if (
+    !salonWorkingHours ||
+    salonWorkingHours.isClosed ||
+    !salonWorkingHours.openTime ||
+    !salonWorkingHours.closeTime
+  ) {
+    return [];
   }
 
-  const salonOpenMinutes = timeToMinutes(salonWorkingHours.openTime);
-  const salonCloseMinutes = timeToMinutes(salonWorkingHours.closeTime);
+  const salonOpenMinutes = timeToMinutes(
+    salonWorkingHours.openTime
+  );
 
-  // Generiši sve moguće slotove unutar radnog vremena salona
-  const intervalMinutes = bookingConfig.slotIntervalMinutes;
+  const salonCloseMinutes = timeToMinutes(
+    salonWorkingHours.closeTime
+  );
+
   const allSlots: string[] = [];
 
-  for (let minutes = salonOpenMinutes; minutes < salonCloseMinutes; minutes += intervalMinutes) {
+  for (
+    let minutes = salonOpenMinutes;
+    minutes < salonCloseMinutes;
+    minutes += bookingConfig.slotIntervalMinutes
+  ) {
     allSlots.push(minutesToTime(minutes));
   }
 
-  // Proveri dostupnost za svaki slot
-  const slots: AvailabilitySlot[] = allSlots.map((time) => {
+  return allSlots.map((time) => {
     const slotStartMinutes = timeToMinutes(time);
-    const slotEndMinutes = slotStartMinutes + service.durationMinutes;
 
-    // Proveri da li usluga može da se završi pre zatvaranja salona
-    if (slotEndMinutes > salonCloseMinutes) {
-      return { time, available: false };
+    const slotEndMinutes =
+      slotStartMinutes + service.durationMinutes;
+
+    if (!meetsMinimumAdvance(date, time)) {
+      return {
+        time,
+        available: false,
+      };
     }
 
-    // Proveri da li bar jedan zaposleni ima dostupnosti
-    const hasAvailability = employeesToCheck.some((empId) =>
-      employeeHasAvailability(empId, dayOfWeek, slotStartMinutes, service.durationMinutes)
-    );
+    if (slotEndMinutes > salonCloseMinutes) {
+      return {
+        time,
+        available: false,
+      };
+    }
 
-    return { time, available: hasAvailability };
+    const hasAvailableEmployee =
+      employeeIdsToCheck.some((employeeId) =>
+        employeeHasAvailability(
+          employeeId,
+          dayOfWeek,
+          slotStartMinutes,
+          service.durationMinutes
+        )
+      );
+
+    return {
+      time,
+      available: hasAvailableEmployee,
+    };
   });
-
-  return slots;
 }
 
 /**
- * Helper: Vrati samo dostupne slotove
+ * Vraća samo dostupna vremena.
  */
-export function getAvailableSlots(params: MockAvailabilityParams): string[] {
+export function getAvailableSlots(
+  params: MockAvailabilityParams
+): string[] {
   return getMockAvailability(params)
     .filter((slot) => slot.available)
     .map((slot) => slot.time);
 }
 
 /**
- * Helper: Proveri da li je specifičan slot dostupan
+ * Proverava da li je određeni termin dostupan.
  */
 export function isSlotAvailable(
   params: MockAvailabilityParams,
   time: string
 ): boolean {
-  const slots = getMockAvailability(params);
-  const slot = slots.find((s) => s.time === time);
+  const slot = getMockAvailability(params).find(
+    (item) => item.time === time
+  );
+
   return slot?.available ?? false;
 }

@@ -48,27 +48,52 @@ export const serviceCategories: ServiceCategory[] = [
   {
     id: "hair",
     icon: "scissors",
-    name: { mk: "Коса", sq: "Flokë", en: "Hair" },
+    name: {
+      mk: "Коса",
+      sq: "Flokë",
+      en: "Hair",
+    },
+    isActive: true,
   },
   {
     id: "coloring",
     icon: "palette",
-    name: { mk: "Фарбање", sq: "Ngjyrosje", en: "Coloring" },
+    name: {
+      mk: "Фарбање",
+      sq: "Ngjyrosje",
+      en: "Coloring",
+    },
+    isActive: true,
   },
   {
     id: "styling",
     icon: "sparkles",
-    name: { mk: "Фризури", sq: "Stilim", en: "Styling" },
+    name: {
+      mk: "Фризури",
+      sq: "Stilim",
+      en: "Styling",
+    },
+    isActive: true,
   },
   {
     id: "beauty",
     icon: "heart",
-    name: { mk: "Убавина", sq: "Bukuri", en: "Beauty" },
+    name: {
+      mk: "Убавина",
+      sq: "Bukuri",
+      en: "Beauty",
+    },
+    isActive: true,
   },
   {
     id: "nails",
     icon: "hand",
-    name: { mk: "Нокти", sq: "Thonj", en: "Nails" },
+    name: {
+      mk: "Нокти",
+      sq: "Thonj",
+      en: "Nails",
+    },
+    isActive: true,
   },
 ];
 
@@ -81,104 +106,168 @@ export const services: Service[] = [
   {
     id: "s1",
     categoryId: "hair",
-    name: { mk: "Машко стрижење", sq: "Prerje mashkullore", en: "Men's Cut" },
+    name: {
+      mk: "Машко стрижење",
+      sq: "Prerje mashkullore",
+      en: "Men's Cut",
+    },
     durationMinutes: 30,
     priceType: "fixed",
     priceFrom: 15,
+    isActive: true,
   },
   {
     id: "s2",
     categoryId: "hair",
-    name: { mk: "Женско стрижење", sq: "Prerje femërore", en: "Women's Cut" },
+    name: {
+      mk: "Женско стрижење",
+      sq: "Prerje femërore",
+      en: "Women's Cut",
+    },
     durationMinutes: 45,
     priceType: "fixed",
     priceFrom: 25,
+    isActive: true,
   },
   {
     id: "s3",
     categoryId: "hair",
-    name: { mk: "Детско стрижење", sq: "Prerje fëmijësh", en: "Kids Cut" },
+    name: {
+      mk: "Детско стрижење",
+      sq: "Prerje fëmijësh",
+      en: "Kids Cut",
+    },
     durationMinutes: 20,
     priceType: "fixed",
     priceFrom: 10,
+    isActive: true,
   },
+
   // Coloring
   {
     id: "s4",
     categoryId: "coloring",
-    name: { mk: "Целосно фарбање", sq: "Ngjyrosje e plotë", en: "Full Color" },
+    name: {
+      mk: "Целосно фарбање",
+      sq: "Ngjyrosje e plotë",
+      en: "Full Color",
+    },
     durationMinutes: 90,
     priceType: "from",
     priceFrom: 45,
+    isActive: true,
   },
   {
     id: "s5",
     categoryId: "coloring",
-    name: { mk: "Балајаж", sq: "Balayage", en: "Balayage" },
+    name: {
+      mk: "Балајаж",
+      sq: "Balayage",
+      en: "Balayage",
+    },
     durationMinutes: 150,
     priceType: "range",
     priceFrom: 85,
     priceTo: 150,
+    isActive: true,
   },
   {
     id: "s6",
     categoryId: "coloring",
-    name: { mk: "Истакнување", sq: "Theksim", en: "Highlights" },
+    name: {
+      mk: "Истакнување",
+      sq: "Theksim",
+      en: "Highlights",
+    },
     durationMinutes: 120,
     priceType: "range",
     priceFrom: 65,
     priceTo: 120,
+    isActive: true,
   },
+
   // Styling
   {
     id: "s7",
     categoryId: "styling",
-    name: { mk: "Фенирање", sq: "Fenim", en: "Blow Dry" },
+    name: {
+      mk: "Фенирање",
+      sq: "Fenim",
+      en: "Blow Dry",
+    },
     durationMinutes: 30,
     priceType: "fixed",
     priceFrom: 15,
+    isActive: true,
   },
   {
     id: "s8",
     categoryId: "styling",
-    name: { mk: "Свечена фризура", sq: "Fryrë feste", en: "Special Occasion" },
+    name: {
+      mk: "Свечена фризура",
+      sq: "Fryrë feste",
+      en: "Special Occasion",
+    },
     durationMinutes: 60,
     priceType: "from",
     priceFrom: 40,
+    isActive: true,
   },
+
   // Beauty
   {
     id: "s9",
     categoryId: "beauty",
-    name: { mk: "Обликување веѓи", sq: "Formë vetullash", en: "Brow Shaping" },
+    name: {
+      mk: "Обликување веѓи",
+      sq: "Formë vetullash",
+      en: "Brow Shaping",
+    },
     durationMinutes: 20,
     priceType: "fixed",
     priceFrom: 10,
+    isActive: true,
   },
   {
     id: "s10",
     categoryId: "beauty",
-    name: { mk: "Третман за лице", sq: "Trajtim fytyre", en: "Facial Treatment" },
+    name: {
+      mk: "Третман за лице",
+      sq: "Trajtim fytyre",
+      en: "Facial Treatment",
+    },
     durationMinutes: 60,
     priceType: "from",
     priceFrom: 35,
+    isActive: true,
   },
+
   // Nails
   {
     id: "s11",
     categoryId: "nails",
-    name: { mk: "Маникир", sq: "Manikyr", en: "Manicure" },
+    name: {
+      mk: "Маникир",
+      sq: "Manikyr",
+      en: "Manicure",
+    },
     durationMinutes: 45,
     priceType: "fixed",
     priceFrom: 20,
+    isActive: true,
   },
   {
     id: "s12",
     categoryId: "nails",
-    name: { mk: "Педикир", sq: "Pedikyr", en: "Pedicure" },
+    name: {
+      mk: "Педикир",
+      sq: "Pedikyr",
+      en: "Pedicure",
+    },
     durationMinutes: 60,
     priceType: "fixed",
     priceFrom: 30,
+    isActive: true,
   },
 ];
 
@@ -203,14 +292,50 @@ export const employees: Employee[] = [
     },
     serviceIds: ["s1", "s2", "s3", "s7", "s8"],
     workingHours: [
-      { dayOfWeek: 1, openTime: "09:00", closeTime: "18:00", isClosed: false }, // Monday
-      { dayOfWeek: 2, openTime: "09:00", closeTime: "18:00", isClosed: false }, // Tuesday
-      { dayOfWeek: 3, openTime: "09:00", closeTime: "18:00", isClosed: false }, // Wednesday
-      { dayOfWeek: 4, openTime: "09:00", closeTime: "18:00", isClosed: false }, // Thursday
-      { dayOfWeek: 5, openTime: "09:00", closeTime: "20:00", isClosed: false }, // Friday
-      { dayOfWeek: 6, openTime: "10:00", closeTime: "14:00", isClosed: false }, // Saturday
-      { dayOfWeek: 0, openTime: null, closeTime: null, isClosed: true }, // Sunday
+      {
+        dayOfWeek: 1,
+        openTime: "09:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 2,
+        openTime: "09:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 3,
+        openTime: "09:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 4,
+        openTime: "09:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 5,
+        openTime: "09:00",
+        closeTime: "20:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 6,
+        openTime: "10:00",
+        closeTime: "14:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 0,
+        openTime: null,
+        closeTime: null,
+        isClosed: true,
+      },
     ],
+    isActive: true,
   },
   {
     id: "e2",
@@ -226,16 +351,61 @@ export const employees: Employee[] = [
       sq: "Experte e balayage, ngjyrosjes dhe trajtimeve të fytyrës.",
       en: "Expert in balayage, coloring, and facial treatments.",
     },
-    serviceIds: ["s2", "s4", "s5", "s6", "s9", "s10", "s11", "s12"],
-    workingHours: [
-      { dayOfWeek: 1, openTime: null, closeTime: null, isClosed: true }, // Monday
-      { dayOfWeek: 2, openTime: "10:00", closeTime: "18:00", isClosed: false }, // Tuesday
-      { dayOfWeek: 3, openTime: "10:00", closeTime: "18:00", isClosed: false }, // Wednesday
-      { dayOfWeek: 4, openTime: "10:00", closeTime: "18:00", isClosed: false }, // Thursday
-      { dayOfWeek: 5, openTime: "10:00", closeTime: "18:00", isClosed: false }, // Friday
-      { dayOfWeek: 6, openTime: "10:00", closeTime: "16:00", isClosed: false }, // Saturday
-      { dayOfWeek: 0, openTime: null, closeTime: null, isClosed: true }, // Sunday
+    serviceIds: [
+      "s2",
+      "s4",
+      "s5",
+      "s6",
+      "s9",
+      "s10",
+      "s11",
+      "s12",
     ],
+    workingHours: [
+      {
+        dayOfWeek: 1,
+        openTime: null,
+        closeTime: null,
+        isClosed: true,
+      },
+      {
+        dayOfWeek: 2,
+        openTime: "10:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 3,
+        openTime: "10:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 4,
+        openTime: "10:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 5,
+        openTime: "10:00",
+        closeTime: "18:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 6,
+        openTime: "10:00",
+        closeTime: "16:00",
+        isClosed: false,
+      },
+      {
+        dayOfWeek: 0,
+        openTime: null,
+        closeTime: null,
+        isClosed: true,
+      },
+    ],
+    isActive: true,
   },
 ];
 
