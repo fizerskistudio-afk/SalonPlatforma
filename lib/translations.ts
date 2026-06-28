@@ -424,10 +424,10 @@ export const translations = {
       en: "No available employees",
     },
     noEmployeesDescription: {
-  mk: "Моментално нема достапни членови на тимот.",
-  sq: "Aktualisht nuk ka anëtarë të ekipit në dispozicion.",
-  en: "No team members are available at the moment.",
-},
+      mk: "Моментално нема достапни членови на тимот.",
+      sq: "Aktualisht nuk ka anëtarë të ekipit në dispozicion.",
+      en: "No team members are available at the moment.",
+    },
     noTimes: {
       mk: "Нема слободни термини",
       sq: "Nuk ka orare",
@@ -513,6 +513,16 @@ export const translations = {
       sq: "Navigimi kryesor",
       en: "Main navigation",
     },
+    allRightsReserved: {
+      mk: "Сите права се задржани",
+      sq: "Të gjitha të drejtat e rezervuara",
+      en: "All rights reserved",
+    },
+    footerNavigation: {
+      mk: "Навигација во подножјето",
+      sq: "Navigimi i fundit të faqes",
+      en: "Footer navigation",
+    },
   },
 
   // Customer Form
@@ -543,20 +553,14 @@ export const translations = {
 /**
  * Helper funkcija za pristup lokalizovanom tekstu.
  */
-export function t(
-  text: LocalizedText,
-  locale: Locale
-): string {
+export function t(text: LocalizedText, locale: Locale): string {
   return text[locale];
 }
 
 /**
  * Vraća prevedeni naziv dana u nedelji.
  */
-export function getDayTranslation(
-  dayOfWeek: number,
-  locale: Locale
-): string {
+export function getDayTranslation(dayOfWeek: number, locale: Locale): string {
   const dayMap: Record<number, LocalizedText> = {
     0: translations.days.sunday,
     1: translations.days.monday,
