@@ -1,39 +1,77 @@
 "use client";
 
+import type { MouseEvent } from "react";
+import { Clock } from "lucide-react";
+
 import type {
   Locale,
   Service,
   ServicePriceType,
 } from "@/lib/types";
 import { businessConfig } from "@/lib/config";
-import { t, translations } from "@/lib/translations";
-import { Clock } from "lucide-react";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
 
 type ServiceCardBaseProps = {
   service: Service;
   locale: Locale;
 };
 
-type ServiceCardSelectableProps = ServiceCardBaseProps & {
-  mode: "selectable";
-  isSelected: boolean;
-  onSelect: (serviceId: string) => void;
-};
+type ServiceCardSelectableProps =
+  ServiceCardBaseProps & {
+    mode: "selectable";
+    isSelected: boolean;
+    onSelect: (serviceId: string) => void;
+  };
 
-type ServiceCardDisplayProps = ServiceCardBaseProps & {
-  mode: "display";
-  onBook: (serviceId: string) => void;
-};
+type ServiceCardDisplayProps =
+  ServiceCardBaseProps & {
+    mode: "display";
+    onBook: (serviceId: string) => void;
+  };
 
 type ServiceCardProps =
   | ServiceCardSelectableProps
   | ServiceCardDisplayProps;
 
-const intlLocaleMap: Record<Locale, string> = {
-  mk: "mk-MK",
-  sq: "sq-MK",
-  en: "en-GB",
-};
+function formatAmount(value: number): string {
+  if (Number.isInteger(value)) {
+    return String(value);
+  }
+
+  return value
+    .toFixed(2)
+    .replace(/\.?0+$/, "");
+}
+
+function formatCurrencyAmount(
+  value: number,
+  currency: string,
+  locale: Locale
+): string {
+  const amount = formatAmount(value);
+
+  switch (currency) {
+    case "EUR":
+      return locale === "en"
+        ? `€${amount}`
+        : `${amount} €`;
+
+    case "USD":
+      return `$${amount}`;
+
+    case "GBP":
+      return `£${amount}`;
+
+    case "MKD":
+      return `${amount} ден`;
+
+    default:
+      return `${amount} ${currency}`;
+  }
+}
 
 function formatPrice(
   priceType: ServicePriceType,
@@ -42,18 +80,14 @@ function formatPrice(
   currency: string,
   locale: Locale
 ): string {
-  const formatter = new Intl.NumberFormat(
-    intlLocaleMap[locale],
-    {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }
+  const formattedFrom = formatCurrencyAmount(
+    priceFrom,
+    currency,
+    locale
   );
 
   if (priceType === "fixed") {
-    return formatter.format(priceFrom);
+    return formattedFrom;
   }
 
   if (priceType === "from") {
@@ -62,7 +96,7 @@ function formatPrice(
       locale
     );
 
-    return `${prefix} ${formatter.format(priceFrom)}`;
+    return `${prefix} ${formattedFrom}`;
   }
 
   if (
@@ -74,32 +108,28 @@ function formatPrice(
       locale
     );
 
-    return `${formatter.format(
-      priceFrom
-    )} ${separator} ${formatter.format(priceTo)}`;
+    const formattedTo = formatCurrencyAmount(
+      priceTo,
+      currency,
+      locale
+    );
+
+    return `${formattedFrom} ${separator} ${formattedTo}`;
   }
 
-  return formatter.format(priceFrom);
+  return formattedFrom;
 }
 
 export default function ServiceCard(
   props: ServiceCardProps
 ) {
   const { service, locale } = props;
-  const { currency } = businessConfig;
-
-  const serviceName = t(service.name, locale);
-
-  const minutesLabel = t(
-    translations.booking.minutes,
-    locale
-  );
 
   const price = formatPrice(
     service.priceType,
     service.priceFrom,
     service.priceTo,
-    currency,
+    businessConfig.currency,
     locale
   );
 
@@ -110,62 +140,73 @@ export default function ServiceCard(
       <button
         type="button"
         onClick={() => onSelect(service.id)}
-        className={`group relative w-full rounded-2xl border-2 p-5 text-left transition-all focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none ${
-          isSelected
-            ? "border-[var(--brand-primary)] bg-[var(--brand-surface)] shadow-lg"
-            : "border-[var(--brand-border)] bg-[var(--brand-surface)] hover:border-[var(--brand-primary)] hover:shadow-md"
-        }`}
         aria-pressed={isSelected}
-        aria-label={`${serviceName} - ${price}`}
+        aria-label={`${t(
+          service.name,
+          locale
+        )} - ${price}`}
+        className={`group relative w-full rounded-2xl border-2 bg-[var(--brand-surface)] p-5 text-left transition-all focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none ${
+          isSelected
+            ? "border-[var(--brand-primary)] shadow-lg"
+            : "border-[var(--brand-border)] hover:border-[var(--brand-primary)] hover:shadow-md"
+        }`}
       >
-        <span className="flex items-start justify-between gap-4">
-          <span className="block flex-1">
-            <span className="block font-medium text-[var(--brand-text)] transition-colors group-hover:text-[var(--brand-primary)] motion-reduce:transition-none">
-              {serviceName}
-            </span>
+        <div className="mb-3 flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium text-[var(--brand-text)] transition-colors group-hover:text-[var(--brand-primary)] motion-reduce:transition-none">
+              {t(service.name, locale)}
+            </h3>
 
-            <span className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--brand-muted)]">
+            <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--brand-muted)]">
               <Clock
                 className="h-3.5 w-3.5"
                 aria-hidden="true"
               />
 
               <span>
-                {service.durationMinutes} {minutesLabel}
+                {service.durationMinutes}{" "}
+                {t(
+                  translations.booking.minutes,
+                  locale
+                )}
               </span>
-            </span>
-          </span>
+            </div>
+          </div>
 
-          <span className="block text-right">
-            <span className="font-display block text-lg font-semibold text-[var(--brand-primary)]">
+          <div className="flex-shrink-0 text-right">
+            <div className="font-display text-lg font-semibold text-[var(--brand-primary)]">
               {price}
-            </span>
+            </div>
 
             {isSelected && (
-              <span
-                className="mt-1 block text-xs font-medium text-[var(--brand-primary)]"
+              <div
+                className="mt-1 text-xs font-medium text-[var(--brand-primary)]"
                 aria-hidden="true"
               >
                 ✓
-              </span>
+              </div>
             )}
-          </span>
-        </span>
+          </div>
+        </div>
       </button>
     );
   }
 
-  const bookLabel = t(
-    translations.nav.book,
-    locale
-  );
+  const { onBook } = props;
+
+  const handleBook = (
+    event: MouseEvent<HTMLButtonElement>
+  ) => {
+    event.stopPropagation();
+    onBook(service.id);
+  };
 
   return (
     <article className="group relative rounded-2xl border-2 border-[var(--brand-border)] bg-[var(--brand-surface)] p-5">
       <div className="mb-3 flex items-start justify-between gap-4">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h3 className="font-medium text-[var(--brand-text)]">
-            {serviceName}
+            {t(service.name, locale)}
           </h3>
 
           <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--brand-muted)]">
@@ -175,12 +216,16 @@ export default function ServiceCard(
             />
 
             <span>
-              {service.durationMinutes} {minutesLabel}
+              {service.durationMinutes}{" "}
+              {t(
+                translations.booking.minutes,
+                locale
+              )}
             </span>
           </div>
         </div>
 
-        <div className="text-right">
+        <div className="flex-shrink-0 text-right">
           <div className="font-display text-lg font-semibold text-[var(--brand-primary)]">
             {price}
           </div>
@@ -189,11 +234,14 @@ export default function ServiceCard(
 
       <button
         type="button"
-        onClick={() => props.onBook(service.id)}
+        onClick={handleBook}
+        aria-label={`${t(
+          translations.nav.book,
+          locale
+        )} ${t(service.name, locale)}`}
         className="mt-3 w-full rounded-xl bg-[var(--brand-text)] py-2.5 text-sm font-medium text-[var(--brand-surface)] transition-colors hover:bg-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none"
-        aria-label={`${bookLabel} ${serviceName}`}
       >
-        {bookLabel}
+        {t(translations.nav.book, locale)}
       </button>
     </article>
   );

@@ -1,10 +1,14 @@
 "use client";
 
+import { Scissors } from "lucide-react";
+
 import type { Locale } from "@/lib/types";
 import { businessConfig } from "@/lib/config";
-import { t, translations } from "@/lib/translations";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
 import LanguageSwitcher from "../shared/LanguageSwitcher";
-import { Scissors } from "lucide-react";
 
 type HeaderProps = {
   locale: Locale;
@@ -12,67 +16,106 @@ type HeaderProps = {
   onBook: () => void;
 };
 
-const navItems: { key: keyof typeof translations.nav; href: string }[] = [
-  { key: "home", href: "#home" },
-  { key: "services", href: "#services" },
-  { key: "team", href: "#team" },
-  { key: "gallery", href: "#gallery" },
-  { key: "contact", href: "#contact" },
+const navItems: {
+  key: keyof typeof translations.nav;
+  href: string;
+}[] = [
+  {
+    key: "home",
+    href: "#home",
+  },
+  {
+    key: "services",
+    href: "#services",
+  },
+  {
+    key: "team",
+    href: "#team",
+  },
+  {
+    key: "gallery",
+    href: "#gallery",
+  },
+  {
+    key: "contact",
+    href: "#contact",
+  },
 ];
 
-/**
- * Desktop header sa navigacijom, language switcher-om i book dugmetom.
- * Sticky pozicija sa backdrop blur efektom.
- */
-export default function Header({ locale, onLocaleChange, onBook }: HeaderProps) {
+export default function Header({
+  locale,
+  onLocaleChange,
+  onBook,
+}: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-[var(--brand-surface)]/80 border-b border-[var(--brand-border)]/50">
-      <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
-        {/* Logo */}
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/10 bg-black/15 backdrop-blur-sm">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-8">
         <a
           href="#home"
-          className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 rounded-lg"
-          aria-label={`${businessConfig.name} - ${t(translations.nav.home, locale)}`}
+          aria-label={`${businessConfig.name} - ${t(
+            translations.nav.home,
+            locale
+          )}`}
+          className="group flex items-center gap-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black"
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] flex items-center justify-center transition-transform motion-reduce:transition-none group-hover:scale-105">
-            <Scissors className="w-5 h-5 text-[var(--brand-surface)]" aria-hidden="true" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[var(--brand-primary)] transition-transform group-hover:scale-105 motion-reduce:transition-none">
+            <Scissors
+              className="h-5 w-5 text-black"
+              aria-hidden="true"
+            />
           </div>
+
           <div>
-            <div className="font-display text-xl font-semibold tracking-tight text-[var(--brand-text)]">
+            <div className="font-serif text-xl font-semibold tracking-tight text-white">
               {businessConfig.name}
             </div>
-            <div className="text-xs text-[var(--brand-muted)] -mt-0.5">
-              {t(businessConfig.tagline, locale)}
+
+            <div className="-mt-0.5 hidden text-xs text-white/60 sm:block">
+              {t(
+                businessConfig.tagline,
+                locale
+              )}
             </div>
           </div>
         </a>
 
-        {/* Navigation */}
-        <nav className="hidden lg:flex items-center gap-8" aria-label={t(translations.common.mainNavigation, locale)}>
+        <nav
+          className="hidden items-center gap-8 lg:flex"
+          aria-label={t(
+            translations.common.mainNavigation,
+            locale
+          )}
+        >
           {navItems.map((item) => (
             <a
               key={item.key}
               href={item.href}
-              className="text-sm font-medium text-[var(--brand-muted)] hover:text-[var(--brand-primary)] transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 rounded px-2 py-1"
+              className="rounded px-2 py-1 text-sm font-medium text-white/75 transition-colors hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black motion-reduce:transition-none"
             >
-              {t(translations.nav[item.key], locale)}
+              {t(
+                translations.nav[item.key],
+                locale
+              )}
             </a>
           ))}
         </nav>
 
-        {/* Right side */}
         <div className="flex items-center gap-4">
           <LanguageSwitcher
             currentLocale={locale}
             onLocaleChange={onLocaleChange}
             variant="header"
           />
+
           <button
             type="button"
             onClick={onBook}
-            className="hidden md:inline-flex px-5 py-2.5 bg-[var(--brand-text)] text-[var(--brand-surface)] text-sm font-medium rounded-full hover:bg-[var(--brand-primary)] transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2"
+            className="hidden min-h-11 rounded-full bg-[var(--brand-primary)] px-6 py-2.5 text-sm font-semibold text-black transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black motion-reduce:transition-none md:inline-flex md:items-center"
           >
-            {t(translations.nav.book, locale)}
+            {t(
+              translations.nav.book,
+              locale
+            )}
           </button>
         </div>
       </div>
