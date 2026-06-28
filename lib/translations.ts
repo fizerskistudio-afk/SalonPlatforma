@@ -423,6 +423,11 @@ export const translations = {
       sq: "Nuk ka punonjës",
       en: "No available employees",
     },
+    noEmployeesDescription: {
+  mk: "Моментално нема достапни членови на тимот.",
+  sq: "Aktualisht nuk ka anëtarë të ekipit në dispozicion.",
+  en: "No team members are available at the moment.",
+},
     noTimes: {
       mk: "Нема слободни термини",
       sq: "Nuk ka orare",
