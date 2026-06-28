@@ -518,6 +518,11 @@ export const translations = {
       sq: "Të gjitha të drejtat e rezervuara",
       en: "All rights reserved",
     },
+    close: {
+     mk: "Затвори",
+     sq: "Mbyll",
+     en: "Close",
+    },
     footerNavigation: {
       mk: "Навигација во подножјето",
       sq: "Navigimi i fundit të faqes",
