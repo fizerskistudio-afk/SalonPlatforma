@@ -4,8 +4,11 @@ import {
   useEffect,
   useMemo,
   useState,
+  useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   CalendarCheck2,
   CalendarDays,
   CheckCircle2,
@@ -15,13 +18,19 @@ import {
   FilterX,
   Mail,
   Phone,
+  Save,
   Search,
   Scissors,
   UserRound,
   UsersRound,
   X,
+  XCircle,
 } from "lucide-react";
 
+import {
+  updateBookingInternalNoteAction,
+  updateBookingStatusAction,
+} from "@/app/admin/(protected)/bookings/actions";
 import type {
   AdminBookingListItem,
   BookingSource,
@@ -41,18 +50,16 @@ type PeriodFilter =
   | "upcoming"
   | "past";
 
-type StatusFilter =
-  | "all"
-  | BookingStatus;
+type StatusFilter = "all" | BookingStatus;
 
-type SourceFilter =
-  | "all"
-  | BookingSource;
+type SourceFilter = "all" | BookingSource;
 
-const statusLabels: Record<
-  BookingStatus,
-  string
-> = {
+type ActionMessage = {
+  type: "success" | "error";
+  text: string;
+};
+
+const statusLabels: Record<BookingStatus, string> = {
   pending: "Na čekanju",
   confirmed: "Potvrđena",
   completed: "Završena",
@@ -60,40 +67,27 @@ const statusLabels: Record<
   no_show: "Nije došao",
 };
 
-const statusClasses: Record<
-  BookingStatus,
-  string
-> = {
+const statusClasses: Record<BookingStatus, string> = {
   pending:
     "border-amber-300/20 bg-amber-300/10 text-amber-200",
-
   confirmed:
     "border-blue-400/20 bg-blue-400/10 text-blue-300",
-
   completed:
     "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
-
   cancelled:
     "border-red-400/20 bg-red-400/10 text-red-300",
-
   no_show:
     "border-orange-400/20 bg-orange-400/10 text-orange-300",
 };
 
-const sourceLabels: Record<
-  BookingSource,
-  string
-> = {
+const sourceLabels: Record<BookingSource, string> = {
   web: "Web",
   admin: "Admin",
   phone: "Telefon",
   walk_in: "Bez najave",
 };
 
-const periodLabels: Record<
-  PeriodFilter,
-  string
-> = {
+const periodLabels: Record<PeriodFilter, string> = {
   all: "Svi datumi",
   today: "Danas",
   upcoming: "Predstojeće",
@@ -103,8 +97,7 @@ const periodLabels: Record<
 function getServiceName(
   booking: AdminBookingListItem
 ): string {
-  const name =
-    booking.serviceName;
+  const name = booking.serviceName;
 
   if (!name) {
     return "Nepoznata usluga";
@@ -124,43 +117,26 @@ function getZonedParts(
 ) {
   const date = new Date(value);
 
-  if (
-    Number.isNaN(date.getTime())
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return null;
   }
 
-  const formatter =
-    new Intl.DateTimeFormat(
-      "en-GB",
-      {
-        timeZone: timezone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23",
-      }
-    );
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
 
-  const parts =
-    formatter.formatToParts(
-      date
-    );
+  const parts = formatter.formatToParts(date);
 
   const getPart = (
-    type:
-      | "year"
-      | "month"
-      | "day"
-      | "hour"
-      | "minute"
+    type: "year" | "month" | "day" | "hour" | "minute"
   ) =>
-    parts.find(
-      (part) =>
-        part.type === type
-    )?.value ?? "";
+    parts.find((part) => part.type === type)?.value ?? "";
 
   return {
     year: getPart("year"),
@@ -175,11 +151,7 @@ function getDateKey(
   value: string,
   timezone: string
 ): string {
-  const parts =
-    getZonedParts(
-      value,
-      timezone
-    );
+  const parts = getZonedParts(value, timezone);
 
   if (!parts) {
     return "";
@@ -192,11 +164,7 @@ function formatDate(
   value: string,
   timezone: string
 ): string {
-  const parts =
-    getZonedParts(
-      value,
-      timezone
-    );
+  const parts = getZonedParts(value, timezone);
 
   if (!parts) {
     return "—";
@@ -209,11 +177,7 @@ function formatTime(
   value: string,
   timezone: string
 ): string {
-  const parts =
-    getZonedParts(
-      value,
-      timezone
-    );
+  const parts = getZonedParts(value, timezone);
 
   if (!parts) {
     return "—";
@@ -226,39 +190,27 @@ function formatDateTime(
   value: string,
   timezone: string
 ): string {
-  return `${formatDate(
-    value,
-    timezone
-  )} u ${formatTime(
+  return `${formatDate(value, timezone)} u ${formatTime(
     value,
     timezone
   )}`;
 }
 
-function formatAmount(
-  value: number
-): string {
-  if (
-    Number.isInteger(value)
-  ) {
+function formatAmount(value: number): string {
+  if (Number.isInteger(value)) {
     return String(value);
   }
 
-  return value
-    .toFixed(2)
-    .replace(/\.?0+$/, "");
+  return value.toFixed(2).replace(/\.?0+$/, "");
 }
 
 function formatPrice(
   amount: number,
   currency: string
 ): string {
-  const formattedAmount =
-    formatAmount(amount);
+  const formattedAmount = formatAmount(amount);
 
-  switch (
-    currency.trim().toUpperCase()
-  ) {
+  switch (currency.trim().toUpperCase()) {
     case "EUR":
       return `${formattedAmount} €`;
 
@@ -282,11 +234,7 @@ function formatPrice(
 function normalizeSearchValue(
   value: string | null
 ): string {
-  return (
-    value
-      ?.trim()
-      .toLocaleLowerCase() ?? ""
-  );
+  return value?.trim().toLocaleLowerCase() ?? "";
 }
 
 function StatusBadge({
@@ -309,351 +257,241 @@ export default function AdminBookingsView({
   generatedAt,
   bookings,
 }: AdminBookingsViewProps) {
-  const [
-    query,
-    setQuery,
-  ] = useState("");
+  const router = useRouter();
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] =
-    useState<StatusFilter>(
-      "all"
+  const [isPending, startTransition] = useTransition();
+
+  const [query, setQuery] = useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState<StatusFilter>("all");
+
+  const [periodFilter, setPeriodFilter] =
+    useState<PeriodFilter>("all");
+
+  const [sourceFilter, setSourceFilter] =
+    useState<SourceFilter>("all");
+
+  const [employeeFilter, setEmployeeFilter] =
+    useState("all");
+
+  const [selectedBookingId, setSelectedBookingId] =
+    useState<string | null>(null);
+
+  const [internalNote, setInternalNote] = useState("");
+
+  const [cancellationReason, setCancellationReason] =
+    useState("");
+
+  const [cancelDialogOpen, setCancelDialogOpen] =
+    useState(false);
+
+  const [actionMessage, setActionMessage] =
+    useState<ActionMessage | null>(null);
+
+  const nowTimestamp = new Date(generatedAt).getTime();
+
+  const todayKey = getDateKey(generatedAt, timezone);
+
+  const employees = useMemo(() => {
+    const employeeMap = new Map<string, string>();
+
+    bookings.forEach((booking) => {
+      employeeMap.set(
+        booking.employeeId,
+        booking.employeeName ?? "Nepoznati zaposleni"
+      );
+    });
+
+    return Array.from(employeeMap.entries())
+      .map(([id, name]) => ({
+        id,
+        name,
+      }))
+      .sort((first, second) =>
+        first.name.localeCompare(second.name)
+      );
+  }, [bookings]);
+
+  const metrics = useMemo(() => {
+    const todayBookings = bookings.filter(
+      (booking) =>
+        getDateKey(booking.startsAt, timezone) === todayKey
     );
 
-  const [
-    periodFilter,
-    setPeriodFilter,
-  ] =
-    useState<PeriodFilter>(
-      "all"
+    const pendingBookings = bookings.filter(
+      (booking) => booking.status === "pending"
     );
 
-  const [
-    sourceFilter,
-    setSourceFilter,
-  ] =
-    useState<SourceFilter>(
-      "all"
+    const upcomingBookings = bookings.filter(
+      (booking) =>
+        new Date(booking.startsAt).getTime() >= nowTimestamp &&
+        (booking.status === "pending" ||
+          booking.status === "confirmed")
     );
 
-  const [
+    const completedRevenue = bookings
+      .filter((booking) => booking.status === "completed")
+      .reduce(
+        (total, booking) => total + booking.priceAmount,
+        0
+      );
+
+    return {
+      total: bookings.length,
+      today: todayBookings.length,
+      pending: pendingBookings.length,
+      upcoming: upcomingBookings.length,
+      completedRevenue,
+    };
+  }, [
+    bookings,
+    nowTimestamp,
+    timezone,
+    todayKey,
+  ]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<BookingStatus, number> = {
+      pending: 0,
+      confirmed: 0,
+      completed: 0,
+      cancelled: 0,
+      no_show: 0,
+    };
+
+    bookings.forEach((booking) => {
+      counts[booking.status] += 1;
+    });
+
+    return counts;
+  }, [bookings]);
+
+  const filteredBookings = useMemo(() => {
+    const normalizedQuery = query
+      .trim()
+      .toLocaleLowerCase();
+
+    const result = bookings.filter((booking) => {
+      if (
+        statusFilter !== "all" &&
+        booking.status !== statusFilter
+      ) {
+        return false;
+      }
+
+      if (
+        sourceFilter !== "all" &&
+        booking.source !== sourceFilter
+      ) {
+        return false;
+      }
+
+      if (
+        employeeFilter !== "all" &&
+        booking.employeeId !== employeeFilter
+      ) {
+        return false;
+      }
+
+      const startsAt = new Date(
+        booking.startsAt
+      ).getTime();
+
+      const bookingDateKey = getDateKey(
+        booking.startsAt,
+        timezone
+      );
+
+      if (
+        periodFilter === "today" &&
+        bookingDateKey !== todayKey
+      ) {
+        return false;
+      }
+
+      if (
+        periodFilter === "upcoming" &&
+        startsAt < nowTimestamp
+      ) {
+        return false;
+      }
+
+      if (
+        periodFilter === "past" &&
+        startsAt >= nowTimestamp
+      ) {
+        return false;
+      }
+
+      if (normalizedQuery) {
+        const searchableValues = [
+          booking.referenceCode,
+          booking.customerName,
+          booking.customerPhone,
+          booking.customerEmail,
+          getServiceName(booking),
+          booking.employeeName,
+        ]
+          .map(normalizeSearchValue)
+          .join(" ");
+
+        if (!searchableValues.includes(normalizedQuery)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    return result.sort((first, second) => {
+      const firstTime = new Date(
+        first.startsAt
+      ).getTime();
+
+      const secondTime = new Date(
+        second.startsAt
+      ).getTime();
+
+      if (
+        periodFilter === "today" ||
+        periodFilter === "upcoming"
+      ) {
+        return firstTime - secondTime;
+      }
+
+      return secondTime - firstTime;
+    });
+  }, [
+    bookings,
     employeeFilter,
-    setEmployeeFilter,
-  ] = useState("all");
+    nowTimestamp,
+    periodFilter,
+    query,
+    sourceFilter,
+    statusFilter,
+    timezone,
+    todayKey,
+  ]);
 
-  const [
-    selectedBookingId,
-    setSelectedBookingId,
-  ] = useState<string | null>(
-    null
+  const selectedBooking = useMemo(
+    () =>
+      bookings.find(
+        (booking) => booking.id === selectedBookingId
+      ) ?? null,
+    [bookings, selectedBookingId]
   );
 
-  const nowTimestamp =
-    new Date(
-      generatedAt
-    ).getTime();
+  useEffect(() => {
+    if (!selectedBooking) {
+      return;
+    }
 
-  const todayKey =
-    getDateKey(
-      generatedAt,
-      timezone
-    );
-
-  const employees =
-    useMemo(() => {
-      const employeeMap =
-        new Map<
-          string,
-          string
-        >();
-
-      bookings.forEach(
-        (booking) => {
-          employeeMap.set(
-            booking.employeeId,
-            booking.employeeName ??
-              "Nepoznati zaposleni"
-          );
-        }
-      );
-
-      return Array.from(
-        employeeMap.entries()
-      )
-        .map(
-          ([
-            id,
-            name,
-          ]) => ({
-            id,
-            name,
-          })
-        )
-        .sort((first, second) =>
-          first.name.localeCompare(
-            second.name
-          )
-        );
-    }, [bookings]);
-
-  const metrics =
-    useMemo(() => {
-      const todayBookings =
-        bookings.filter(
-          (booking) =>
-            getDateKey(
-              booking.startsAt,
-              timezone
-            ) === todayKey
-        );
-
-      const pendingBookings =
-        bookings.filter(
-          (booking) =>
-            booking.status ===
-            "pending"
-        );
-
-      const upcomingBookings =
-        bookings.filter(
-          (booking) =>
-            new Date(
-              booking.startsAt
-            ).getTime() >=
-              nowTimestamp &&
-            (booking.status ===
-              "pending" ||
-              booking.status ===
-                "confirmed")
-        );
-
-      const completedRevenue =
-        bookings
-          .filter(
-            (booking) =>
-              booking.status ===
-              "completed"
-          )
-          .reduce(
-            (
-              total,
-              booking
-            ) =>
-              total +
-              booking.priceAmount,
-            0
-          );
-
-      return {
-        total:
-          bookings.length,
-
-        today:
-          todayBookings.length,
-
-        pending:
-          pendingBookings.length,
-
-        upcoming:
-          upcomingBookings.length,
-
-        completedRevenue,
-      };
-    }, [
-      bookings,
-      nowTimestamp,
-      timezone,
-      todayKey,
-    ]);
-
-  const statusCounts =
-    useMemo(() => {
-      const counts: Record<
-        BookingStatus,
-        number
-      > = {
-        pending: 0,
-        confirmed: 0,
-        completed: 0,
-        cancelled: 0,
-        no_show: 0,
-      };
-
-      bookings.forEach(
-        (booking) => {
-          counts[
-            booking.status
-          ] += 1;
-        }
-      );
-
-      return counts;
-    }, [bookings]);
-
-  const filteredBookings =
-    useMemo(() => {
-      const normalizedQuery =
-        query
-          .trim()
-          .toLocaleLowerCase();
-
-      const result =
-        bookings.filter(
-          (booking) => {
-            if (
-              statusFilter !==
-                "all" &&
-              booking.status !==
-                statusFilter
-            ) {
-              return false;
-            }
-
-            if (
-              sourceFilter !==
-                "all" &&
-              booking.source !==
-                sourceFilter
-            ) {
-              return false;
-            }
-
-            if (
-              employeeFilter !==
-                "all" &&
-              booking.employeeId !==
-                employeeFilter
-            ) {
-              return false;
-            }
-
-            const startsAt =
-              new Date(
-                booking.startsAt
-              ).getTime();
-
-            const bookingDateKey =
-              getDateKey(
-                booking.startsAt,
-                timezone
-              );
-
-            if (
-              periodFilter ===
-                "today" &&
-              bookingDateKey !==
-                todayKey
-            ) {
-              return false;
-            }
-
-            if (
-              periodFilter ===
-                "upcoming" &&
-              startsAt <
-                nowTimestamp
-            ) {
-              return false;
-            }
-
-            if (
-              periodFilter ===
-                "past" &&
-              startsAt >=
-                nowTimestamp
-            ) {
-              return false;
-            }
-
-            if (
-              normalizedQuery
-            ) {
-              const searchableValues =
-                [
-                  booking.referenceCode,
-                  booking.customerName,
-                  booking.customerPhone,
-                  booking.customerEmail,
-                  getServiceName(
-                    booking
-                  ),
-                  booking.employeeName,
-                ]
-                  .map(
-                    normalizeSearchValue
-                  )
-                  .join(" ");
-
-              if (
-                !searchableValues.includes(
-                  normalizedQuery
-                )
-              ) {
-                return false;
-              }
-            }
-
-            return true;
-          }
-        );
-
-      return result.sort(
-        (first, second) => {
-          const firstTime =
-            new Date(
-              first.startsAt
-            ).getTime();
-
-          const secondTime =
-            new Date(
-              second.startsAt
-            ).getTime();
-
-          if (
-            periodFilter ===
-              "today" ||
-            periodFilter ===
-              "upcoming"
-          ) {
-            return (
-              firstTime -
-              secondTime
-            );
-          }
-
-          return (
-            secondTime -
-            firstTime
-          );
-        }
-      );
-    }, [
-      bookings,
-      employeeFilter,
-      nowTimestamp,
-      periodFilter,
-      query,
-      sourceFilter,
-      statusFilter,
-      timezone,
-      todayKey,
-    ]);
-
-  const selectedBooking =
-    useMemo(
-      () =>
-        bookings.find(
-          (booking) =>
-            booking.id ===
-            selectedBookingId
-        ) ?? null,
-      [
-        bookings,
-        selectedBookingId,
-      ]
-    );
+    setInternalNote(selectedBooking.internalNote ?? "");
+  }, [
+    selectedBooking?.id,
+    selectedBooking?.internalNote,
+  ]);
 
   useEffect(() => {
     if (!selectedBooking) {
@@ -661,40 +499,32 @@ export default function AdminBookingsView({
     }
 
     const previousOverflow =
-      document.body.style
-        .overflow;
+      document.body.style.overflow;
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (
-      event: KeyboardEvent
-    ) => {
-      if (
-        event.key ===
-        "Escape"
-      ) {
-        setSelectedBookingId(
-          null
-        );
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (cancelDialogOpen) {
+          setCancelDialogOpen(false);
+          return;
+        }
+
+        setSelectedBookingId(null);
       }
     };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
 
       window.removeEventListener(
         "keydown",
         handleKeyDown
       );
     };
-  }, [selectedBooking]);
+  }, [selectedBooking, cancelDialogOpen]);
 
   const hasActiveFilters =
     query.trim().length > 0 ||
@@ -713,12 +543,80 @@ export default function AdminBookingsView({
 
   const revenueCurrency =
     bookings.find(
-      (booking) =>
-        booking.status ===
-        "completed"
+      (booking) => booking.status === "completed"
     )?.currency ??
     bookings[0]?.currency ??
     "EUR";
+
+  const closeBookingDetails = () => {
+    if (isPending) {
+      return;
+    }
+
+    setSelectedBookingId(null);
+    setCancelDialogOpen(false);
+    setCancellationReason("");
+    setActionMessage(null);
+  };
+
+  const handleStatusUpdate = (
+    nextStatus: BookingStatus,
+    reason?: string
+  ) => {
+    if (!selectedBooking || isPending) {
+      return;
+    }
+
+    setActionMessage(null);
+
+    startTransition(async () => {
+      const result = await updateBookingStatusAction({
+        bookingId: selectedBooking.id,
+        nextStatus,
+        cancellationReason: reason,
+      });
+
+      setActionMessage({
+        type: result.ok ? "success" : "error",
+        text: result.message,
+      });
+
+      if (result.ok) {
+        setCancelDialogOpen(false);
+        setCancellationReason("");
+        router.refresh();
+      }
+    });
+  };
+
+  const handleInternalNoteSave = () => {
+    if (!selectedBooking || isPending) {
+      return;
+    }
+
+    setActionMessage(null);
+
+    startTransition(async () => {
+      const result =
+        await updateBookingInternalNoteAction({
+          bookingId: selectedBooking.id,
+          internalNote,
+        });
+
+      setActionMessage({
+        type: result.ok ? "success" : "error",
+        text: result.message,
+      });
+
+      if (result.ok) {
+        router.refresh();
+      }
+    });
+  };
+
+  const internalNoteChanged =
+    internalNote.trim() !==
+    (selectedBooking?.internalNote ?? "").trim();
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -734,12 +632,8 @@ export default function AdminBookingsView({
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-500">
-              Pregledaj termine,
-              pronađi klijenta i
-              filtriraj rezervacije po
-              statusu, zaposlenom,
-              izvoru i vremenskom
-              periodu.
+              Pregledaj termine, pronađi klijenta i upravljaj
+              statusom svake rezervacije.
             </p>
           </div>
 
@@ -749,7 +643,8 @@ export default function AdminBookingsView({
               aria-hidden="true"
             />
 
-            Vremenska zona:{" "}
+            Vremenska zona:
+
             <span className="font-medium text-zinc-300">
               {timezone}
             </span>
@@ -872,14 +767,9 @@ export default function AdminBookingsView({
           <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               type="button"
-              onClick={() =>
-                setStatusFilter(
-                  "all"
-                )
-              }
+              onClick={() => setStatusFilter("all")}
               className={`flex-shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                statusFilter ===
-                "all"
+                statusFilter === "all"
                   ? "border-amber-300 bg-amber-300 text-zinc-950"
                   : "border-white/10 bg-white/[0.03] text-zinc-500 hover:border-white/20 hover:text-white"
               }`}
@@ -888,39 +778,19 @@ export default function AdminBookingsView({
             </button>
 
             {(
-              Object.keys(
-                statusLabels
-              ) as BookingStatus[]
+              Object.keys(statusLabels) as BookingStatus[]
             ).map((status) => (
               <button
                 key={status}
                 type="button"
-                onClick={() =>
-                  setStatusFilter(
-                    status
-                  )
-                }
+                onClick={() => setStatusFilter(status)}
                 className={`flex-shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                  statusFilter ===
-                  status
-                    ? statusClasses[
-                        status
-                      ]
+                  statusFilter === status
+                    ? statusClasses[status]
                     : "border-white/10 bg-white/[0.03] text-zinc-500 hover:border-white/20 hover:text-white"
                 }`}
               >
-                {
-                  statusLabels[
-                    status
-                  ]
-                }{" "}
-                (
-                {
-                  statusCounts[
-                    status
-                  ]
-                }
-                )
+                {statusLabels[status]} ({statusCounts[status]})
               </button>
             ))}
           </div>
@@ -938,10 +808,7 @@ export default function AdminBookingsView({
                 type="search"
                 value={query}
                 onChange={(event) =>
-                  setQuery(
-                    event.target
-                      .value
-                  )
+                  setQuery(event.target.value)
                 }
                 placeholder="Ime, telefon, email, šifra..."
                 className="h-11 w-full rounded-xl border border-white/[0.08] bg-black/15 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-zinc-700 hover:border-white/15 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
@@ -952,39 +819,27 @@ export default function AdminBookingsView({
               value={periodFilter}
               onChange={(event) =>
                 setPeriodFilter(
-                  event.target
-                    .value as PeriodFilter
+                  event.target.value as PeriodFilter
                 )
               }
               className="h-11 rounded-xl border border-white/[0.08] bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-white/15 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
             >
               {(
-                Object.keys(
-                  periodLabels
-                ) as PeriodFilter[]
+                Object.keys(periodLabels) as PeriodFilter[]
               ).map((period) => (
                 <option
                   key={period}
                   value={period}
                 >
-                  {
-                    periodLabels[
-                      period
-                    ]
-                  }
+                  {periodLabels[period]}
                 </option>
               ))}
             </select>
 
             <select
-              value={
-                employeeFilter
-              }
+              value={employeeFilter}
               onChange={(event) =>
-                setEmployeeFilter(
-                  event.target
-                    .value
-                )
+                setEmployeeFilter(event.target.value)
               }
               className="h-11 rounded-xl border border-white/[0.08] bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-white/15 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
             >
@@ -992,30 +847,21 @@ export default function AdminBookingsView({
                 Svi zaposleni
               </option>
 
-              {employees.map(
-                (employee) => (
-                  <option
-                    key={
-                      employee.id
-                    }
-                    value={
-                      employee.id
-                    }
-                  >
-                    {
-                      employee.name
-                    }
-                  </option>
-                )
-              )}
+              {employees.map((employee) => (
+                <option
+                  key={employee.id}
+                  value={employee.id}
+                >
+                  {employee.name}
+                </option>
+              ))}
             </select>
 
             <select
               value={sourceFilter}
               onChange={(event) =>
                 setSourceFilter(
-                  event.target
-                    .value as SourceFilter
+                  event.target.value as SourceFilter
                 )
               }
               className="h-11 rounded-xl border border-white/[0.08] bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-white/15 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
@@ -1025,31 +871,21 @@ export default function AdminBookingsView({
               </option>
 
               {(
-                Object.keys(
-                  sourceLabels
-                ) as BookingSource[]
+                Object.keys(sourceLabels) as BookingSource[]
               ).map((source) => (
                 <option
                   key={source}
                   value={source}
                 >
-                  {
-                    sourceLabels[
-                      source
-                    ]
-                  }
+                  {sourceLabels[source]}
                 </option>
               ))}
             </select>
 
             <button
               type="button"
-              disabled={
-                !hasActiveFilters
-              }
-              onClick={
-                clearFilters
-              }
+              disabled={!hasActiveFilters}
+              onClick={clearFilters}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 text-sm font-medium text-zinc-400 transition hover:border-white/15 hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
               <FilterX
@@ -1066,21 +902,15 @@ export default function AdminBookingsView({
           <span>
             Prikazano{" "}
             <strong className="text-zinc-300">
-              {
-                filteredBookings.length
-              }
+              {filteredBookings.length}
             </strong>{" "}
             od {bookings.length}
           </span>
 
-          <span>
-            Klikni rezervaciju za
-            detalje
-          </span>
+          <span>Klikni rezervaciju za detalje</span>
         </div>
 
-        {filteredBookings.length ===
-        0 ? (
+        {filteredBookings.length === 0 ? (
           <div className="flex min-h-72 flex-col items-center justify-center px-5 py-12 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.05] text-zinc-600">
               <CalendarDays
@@ -1094,17 +924,14 @@ export default function AdminBookingsView({
             </h3>
 
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-600">
-              Nijedna rezervacija ne
-              odgovara trenutno
+              Nijedna rezervacija ne odgovara trenutno
               izabranim filterima.
             </p>
 
             {hasActiveFilters && (
               <button
                 type="button"
-                onClick={
-                  clearFilters
-                }
+                onClick={clearFilters}
                 className="mt-5 rounded-xl bg-amber-300 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-200"
               >
                 Očisti filtere
@@ -1154,210 +981,175 @@ export default function AdminBookingsView({
                 </thead>
 
                 <tbody>
-                  {filteredBookings.map(
-                    (booking) => (
-                      <tr
-                        key={
-                          booking.id
-                        }
-                        className="cursor-pointer border-b border-white/[0.055] transition last:border-b-0 hover:bg-white/[0.035]"
-                        onClick={() =>
-                          setSelectedBookingId(
-                            booking.id
-                          )
-                        }
-                      >
-                        <td className="whitespace-nowrap px-5 py-4">
-                          <div className="font-medium text-white">
-                            {formatDate(
-                              booking.startsAt,
-                              timezone
-                            )}
-                          </div>
-
-                          <div className="mt-1 text-xs text-zinc-500">
-                            {formatTime(
-                              booking.startsAt,
-                              timezone
-                            )}{" "}
-                            –{" "}
-                            {formatTime(
-                              booking.endsAt,
-                              timezone
-                            )}
-                          </div>
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <div className="font-medium text-zinc-200">
-                            {
-                              booking.customerName
-                            }
-                          </div>
-
-                          <div className="mt-1 text-xs text-zinc-600">
-                            #
-                            {
-                              booking.referenceCode
-                            }
-                          </div>
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <div className="text-sm text-zinc-300">
-                            {getServiceName(
-                              booking
-                            )}
-                          </div>
-
-                          <div className="mt-1 text-xs text-zinc-600">
-                            {
-                              booking.durationMinutes
-                            }{" "}
-                            min
-                          </div>
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-zinc-400">
-                          {booking.employeeName ??
-                            "Nepoznato"}
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <StatusBadge
-                            status={
-                              booking.status
-                            }
-                          />
-                        </td>
-
-                        <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-zinc-200">
-                          {formatPrice(
-                            booking.priceAmount,
-                            booking.currency
+                  {filteredBookings.map((booking) => (
+                    <tr
+                      key={booking.id}
+                      className="cursor-pointer border-b border-white/[0.055] transition last:border-b-0 hover:bg-white/[0.035]"
+                      onClick={() => {
+                        setSelectedBookingId(booking.id);
+                        setActionMessage(null);
+                      }}
+                    >
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <div className="font-medium text-white">
+                          {formatDate(
+                            booking.startsAt,
+                            timezone
                           )}
-                        </td>
+                        </div>
 
-                        <td className="px-5 py-4">
-                          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-zinc-500">
-                            {
-                              sourceLabels[
-                                booking.source
-                              ]
-                            }
-                          </span>
-                        </td>
+                        <div className="mt-1 text-xs text-zinc-500">
+                          {formatTime(
+                            booking.startsAt,
+                            timezone
+                          )}{" "}
+                          –{" "}
+                          {formatTime(
+                            booking.endsAt,
+                            timezone
+                          )}
+                        </div>
+                      </td>
 
-                        <td className="px-5 py-4">
-                          <ChevronRight
-                            className="h-4 w-4 text-zinc-700"
-                            aria-hidden="true"
-                          />
-                        </td>
-                      </tr>
-                    )
-                  )}
+                      <td className="px-5 py-4">
+                        <div className="font-medium text-zinc-200">
+                          {booking.customerName}
+                        </div>
+
+                        <div className="mt-1 text-xs text-zinc-600">
+                          #{booking.referenceCode}
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="text-sm text-zinc-300">
+                          {getServiceName(booking)}
+                        </div>
+
+                        <div className="mt-1 text-xs text-zinc-600">
+                          {booking.durationMinutes} min
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4 text-sm text-zinc-400">
+                        {booking.employeeName ?? "Nepoznato"}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <StatusBadge
+                          status={booking.status}
+                        />
+                      </td>
+
+                      <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-zinc-200">
+                        {formatPrice(
+                          booking.priceAmount,
+                          booking.currency
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-zinc-500">
+                          {sourceLabels[booking.source]}
+                        </span>
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <ChevronRight
+                          className="h-4 w-4 text-zinc-700"
+                          aria-hidden="true"
+                        />
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
 
             <div className="divide-y divide-white/[0.06] lg:hidden">
-              {filteredBookings.map(
-                (booking) => (
-                  <button
-                    key={booking.id}
-                    type="button"
-                    onClick={() =>
-                      setSelectedBookingId(
-                        booking.id
-                      )
-                    }
-                    className="w-full p-4 text-left transition hover:bg-white/[0.035] sm:p-5"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-white">
-                          {
-                            booking.customerName
-                          }
-                        </div>
-
-                        <div className="mt-1 text-xs text-zinc-600">
-                          #
-                          {
-                            booking.referenceCode
-                          }
-                        </div>
+              {filteredBookings.map((booking) => (
+                <button
+                  key={booking.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedBookingId(booking.id);
+                    setActionMessage(null);
+                  }}
+                  className="w-full p-4 text-left transition hover:bg-white/[0.035] sm:p-5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold text-white">
+                        {booking.customerName}
                       </div>
 
-                      <StatusBadge
-                        status={
-                          booking.status
-                        }
+                      <div className="mt-1 text-xs text-zinc-600">
+                        #{booking.referenceCode}
+                      </div>
+                    </div>
+
+                    <StatusBadge
+                      status={booking.status}
+                    />
+                  </div>
+
+                  <div className="mt-4 grid gap-3 rounded-2xl border border-white/[0.06] bg-black/10 p-4">
+                    <div className="flex items-center gap-3">
+                      <CalendarDays
+                        className="h-4 w-4 text-amber-300"
+                        aria-hidden="true"
                       />
-                    </div>
 
-                    <div className="mt-4 grid gap-3 rounded-2xl border border-white/[0.06] bg-black/10 p-4">
-                      <div className="flex items-center gap-3">
-                        <CalendarDays
-                          className="h-4 w-4 text-amber-300"
-                          aria-hidden="true"
-                        />
-
-                        <span className="text-sm text-zinc-300">
-                          {formatDateTime(
-                            booking.startsAt,
-                            timezone
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <Scissors
-                          className="h-4 w-4 text-zinc-600"
-                          aria-hidden="true"
-                        />
-
-                        <span className="text-sm text-zinc-400">
-                          {getServiceName(
-                            booking
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <UserRound
-                          className="h-4 w-4 text-zinc-600"
-                          aria-hidden="true"
-                        />
-
-                        <span className="text-sm text-zinc-400">
-                          {booking.employeeName ??
-                            "Nepoznato"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-amber-200">
-                        {formatPrice(
-                          booking.priceAmount,
-                          booking.currency
+                      <span className="text-sm text-zinc-300">
+                        {formatDateTime(
+                          booking.startsAt,
+                          timezone
                         )}
                       </span>
+                    </div>
 
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-zinc-600">
-                        Detalji
+                    <div className="flex items-center gap-3">
+                      <Scissors
+                        className="h-4 w-4 text-zinc-600"
+                        aria-hidden="true"
+                      />
 
-                        <ChevronRight
-                          className="h-3.5 w-3.5"
-                          aria-hidden="true"
-                        />
+                      <span className="text-sm text-zinc-400">
+                        {getServiceName(booking)}
                       </span>
                     </div>
-                  </button>
-                )
-              )}
+
+                    <div className="flex items-center gap-3">
+                      <UserRound
+                        className="h-4 w-4 text-zinc-600"
+                        aria-hidden="true"
+                      />
+
+                      <span className="text-sm text-zinc-400">
+                        {booking.employeeName ?? "Nepoznato"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-amber-200">
+                      {formatPrice(
+                        booking.priceAmount,
+                        booking.currency
+                      )}
+                    </span>
+
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-zinc-600">
+                      Detalji
+
+                      <ChevronRight
+                        className="h-3.5 w-3.5"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
           </>
         )}
@@ -1368,11 +1160,7 @@ export default function AdminBookingsView({
           <button
             type="button"
             aria-label="Zatvori detalje rezervacije"
-            onClick={() =>
-              setSelectedBookingId(
-                null
-              )
-            }
+            onClick={closeBookingDetails}
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
           />
 
@@ -1384,22 +1172,16 @@ export default function AdminBookingsView({
                 </div>
 
                 <div className="mt-1 text-lg font-semibold text-white">
-                  #
-                  {
-                    selectedBooking.referenceCode
-                  }
+                  #{selectedBooking.referenceCode}
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={() =>
-                  setSelectedBookingId(
-                    null
-                  )
-                }
+                onClick={closeBookingDetails}
+                disabled={isPending}
                 aria-label="Zatvori"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-500 transition hover:bg-white/[0.08] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-500 transition hover:bg-white/[0.08] hover:text-white disabled:opacity-40"
               >
                 <X
                   className="h-5 w-5"
@@ -1409,6 +1191,33 @@ export default function AdminBookingsView({
             </div>
 
             <div className="space-y-5 p-5 sm:p-6">
+              {actionMessage && (
+                <div
+                  aria-live="polite"
+                  className={`flex items-start gap-3 rounded-2xl border p-4 ${
+                    actionMessage.type === "success"
+                      ? "border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-200"
+                      : "border-red-400/20 bg-red-400/[0.07] text-red-200"
+                  }`}
+                >
+                  {actionMessage.type === "success" ? (
+                    <CheckCircle2
+                      className="mt-0.5 h-5 w-5 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <AlertCircle
+                      className="mt-0.5 h-5 w-5 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  )}
+
+                  <span className="text-sm leading-relaxed">
+                    {actionMessage.text}
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4">
                 <div>
                   <div className="text-xs text-zinc-600">
@@ -1417,9 +1226,7 @@ export default function AdminBookingsView({
 
                   <div className="mt-2">
                     <StatusBadge
-                      status={
-                        selectedBooking.status
-                      }
+                      status={selectedBooking.status}
                     />
                   </div>
                 </div>
@@ -1437,6 +1244,119 @@ export default function AdminBookingsView({
                   </div>
                 </div>
               </div>
+
+              {(selectedBooking.status === "pending" ||
+                selectedBooking.status === "confirmed") && (
+                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5">
+                  <div className="mb-4">
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-600">
+                      Upravljanje statusom
+                    </div>
+
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                      Izaberi sledeće stanje rezervacije.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {selectedBooking.status === "pending" && (
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() =>
+                          handleStatusUpdate("confirmed")
+                        }
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-blue-300 disabled:cursor-wait disabled:opacity-50"
+                      >
+                        <CheckCircle2
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+
+                        Potvrdi rezervaciju
+                      </button>
+                    )}
+
+                    {selectedBooking.status === "confirmed" && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() =>
+                            handleStatusUpdate("completed")
+                          }
+                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-wait disabled:opacity-50"
+                        >
+                          <CheckCircle2
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          />
+
+                          Označi kao završenu
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() =>
+                            handleStatusUpdate("no_show")
+                          }
+                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-orange-400/25 bg-orange-400/10 px-4 py-3 text-sm font-semibold text-orange-200 transition hover:bg-orange-400/20 disabled:cursor-wait disabled:opacity-50"
+                        >
+                          <AlertCircle
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          />
+
+                          Klijent nije došao
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => {
+                        setCancellationReason("");
+                        setCancelDialogOpen(true);
+                        setActionMessage(null);
+                      }}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm font-semibold text-red-200 transition hover:bg-red-400/20 disabled:cursor-wait disabled:opacity-50 sm:col-span-2"
+                    >
+                      <XCircle
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      />
+
+                      Otkaži rezervaciju
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {(selectedBooking.status === "completed" ||
+                selectedBooking.status === "cancelled" ||
+                selectedBooking.status === "no_show") && (
+                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2
+                      className="mt-0.5 h-5 w-5 flex-shrink-0 text-zinc-600"
+                      aria-hidden="true"
+                    />
+
+                    <div>
+                      <div className="text-sm font-semibold text-zinc-300">
+                        Rezervacija je završena
+                      </div>
+
+                      <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+                        Status više nije moguće menjati iz
+                        administratorskog panela.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
 
               <section className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5">
                 <div className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-600">
@@ -1480,16 +1400,11 @@ export default function AdminBookingsView({
 
                     <div>
                       <div className="text-sm font-medium text-white">
-                        {getServiceName(
-                          selectedBooking
-                        )}
+                        {getServiceName(selectedBooking)}
                       </div>
 
                       <div className="mt-1 text-sm text-zinc-500">
-                        {
-                          selectedBooking.durationMinutes
-                        }{" "}
-                        minuta
+                        {selectedBooking.durationMinutes} minuta
                       </div>
                     </div>
                   </div>
@@ -1527,9 +1442,7 @@ export default function AdminBookingsView({
                     />
 
                     <span className="text-sm font-medium text-white">
-                      {
-                        selectedBooking.customerName
-                      }
+                      {selectedBooking.customerName}
                     </span>
                   </div>
 
@@ -1539,32 +1452,28 @@ export default function AdminBookingsView({
                         /[^\d+]/g,
                         ""
                       )}`}
-                      className="flex items-center gap-3 rounded-xl text-sm text-zinc-400 transition hover:text-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                      className="flex items-center gap-3 rounded-xl text-sm text-zinc-400 transition hover:text-amber-200"
                     >
                       <Phone
                         className="h-4 w-4 text-zinc-600"
                         aria-hidden="true"
                       />
 
-                      {
-                        selectedBooking.customerPhone
-                      }
+                      {selectedBooking.customerPhone}
                     </a>
                   )}
 
                   {selectedBooking.customerEmail && (
                     <a
                       href={`mailto:${selectedBooking.customerEmail}`}
-                      className="flex items-center gap-3 rounded-xl text-sm text-zinc-400 transition hover:text-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                      className="flex items-center gap-3 rounded-xl text-sm text-zinc-400 transition hover:text-amber-200"
                     >
                       <Mail
                         className="h-4 w-4 text-zinc-600"
                         aria-hidden="true"
                       />
 
-                      {
-                        selectedBooking.customerEmail
-                      }
+                      {selectedBooking.customerEmail}
                     </a>
                   )}
                 </div>
@@ -1577,26 +1486,52 @@ export default function AdminBookingsView({
                   </div>
 
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-blue-100/80">
-                    {
-                      selectedBooking.customerNote
-                    }
+                    {selectedBooking.customerNote}
                   </p>
                 </section>
               )}
 
-              {selectedBooking.internalNote && (
-                <section className="rounded-2xl border border-amber-300/15 bg-amber-300/[0.05] p-5">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-300/60">
-                    Interna napomena
-                  </div>
+              <section className="rounded-2xl border border-amber-300/15 bg-amber-300/[0.04] p-5">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-300/60">
+                  Interna napomena
+                </div>
 
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-amber-100/80">
-                    {
-                      selectedBooking.internalNote
+                <textarea
+                  value={internalNote}
+                  onChange={(event) =>
+                    setInternalNote(event.target.value)
+                  }
+                  disabled={isPending}
+                  maxLength={2000}
+                  rows={5}
+                  placeholder="Napomena vidljiva samo zaposlenima..."
+                  className="mt-4 w-full resize-y rounded-xl border border-white/[0.08] bg-zinc-950/70 px-4 py-3 text-sm leading-relaxed text-white outline-none transition placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15 disabled:opacity-50"
+                />
+
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="text-xs text-zinc-600">
+                    {internalNote.length}/2000
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled={
+                      isPending || !internalNoteChanged
                     }
-                  </p>
-                </section>
-              )}
+                    onClick={handleInternalNoteSave}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Save
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    />
+
+                    {isPending
+                      ? "Čuvanje..."
+                      : "Sačuvaj napomenu"}
+                  </button>
+                </div>
+              </section>
 
               {selectedBooking.cancellationReason && (
                 <section className="rounded-2xl border border-red-400/15 bg-red-400/[0.05] p-5">
@@ -1605,10 +1540,18 @@ export default function AdminBookingsView({
                   </div>
 
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-red-100/80">
-                    {
-                      selectedBooking.cancellationReason
-                    }
+                    {selectedBooking.cancellationReason}
                   </p>
+
+                  {selectedBooking.cancelledAt && (
+                    <div className="mt-3 text-xs text-red-300/50">
+                      Otkazano{" "}
+                      {formatDateTime(
+                        selectedBooking.cancelledAt,
+                        timezone
+                      )}
+                    </div>
+                  )}
                 </section>
               )}
 
@@ -1624,11 +1567,7 @@ export default function AdminBookingsView({
                     </div>
 
                     <div className="mt-1 font-medium text-zinc-300">
-                      {
-                        sourceLabels[
-                          selectedBooking.source
-                        ]
-                      }
+                      {sourceLabels[selectedBooking.source]}
                     </div>
                   </div>
 
@@ -1646,15 +1585,127 @@ export default function AdminBookingsView({
                   </div>
                 </div>
               </section>
-
-              <div className="rounded-2xl border border-white/[0.06] bg-black/10 px-4 py-3 text-xs leading-relaxed text-zinc-600">
-                Promenu statusa,
-                otkazivanje i interne
-                napomene povezujemo u
-                sledećem koraku.
-              </div>
             </div>
           </aside>
+
+          {cancelDialogOpen && (
+            <div className="absolute inset-0 z-[60] flex items-center justify-center p-4">
+              <button
+                type="button"
+                aria-label="Zatvori dijalog za otkazivanje"
+                onClick={() => {
+                  if (!isPending) {
+                    setCancelDialogOpen(false);
+                  }
+                }}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              />
+
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="cancel-booking-title"
+                className="relative w-full max-w-lg rounded-[2rem] border border-red-400/20 bg-zinc-950 p-6 shadow-2xl sm:p-7"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-400/10 text-red-300">
+                      <XCircle
+                        className="h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <h3
+                      id="cancel-booking-title"
+                      className="mt-5 text-xl font-semibold text-white"
+                    >
+                      Otkaži rezervaciju
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                      Rezervacija će dobiti status „Otkazana“.
+                      Ovu promenu trenutno nije moguće vratiti.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() =>
+                      setCancelDialogOpen(false)
+                    }
+                    aria-label="Zatvori"
+                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-500 transition hover:text-white disabled:opacity-40"
+                  >
+                    <X
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                <label className="mt-6 block">
+                  <span className="text-sm font-medium text-zinc-300">
+                    Razlog otkazivanja
+                  </span>
+
+                  <textarea
+                    value={cancellationReason}
+                    onChange={(event) =>
+                      setCancellationReason(event.target.value)
+                    }
+                    disabled={isPending}
+                    maxLength={500}
+                    rows={4}
+                    placeholder="Na primer: klijent je telefonom otkazao termin..."
+                    className="mt-2 w-full resize-none rounded-xl border border-white/[0.08] bg-black/20 px-4 py-3 text-sm leading-relaxed text-white outline-none transition placeholder:text-zinc-700 focus:border-red-300 focus:ring-2 focus:ring-red-300/15 disabled:opacity-50"
+                  />
+                </label>
+
+                <div className="mt-2 text-right text-xs text-zinc-600">
+                  {cancellationReason.length}/500
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() =>
+                      setCancelDialogOpen(false)
+                    }
+                    className="min-h-11 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-zinc-300 transition hover:bg-white/[0.08] disabled:opacity-40"
+                  >
+                    Odustani
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={
+                      isPending ||
+                      cancellationReason.trim().length < 3
+                    }
+                    onClick={() =>
+                      handleStatusUpdate(
+                        "cancelled",
+                        cancellationReason
+                      )
+                    }
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-red-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <XCircle
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    />
+
+                    {isPending
+                      ? "Otkazivanje..."
+                      : "Potvrdi otkazivanje"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
