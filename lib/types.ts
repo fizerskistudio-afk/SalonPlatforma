@@ -4,19 +4,36 @@
 
 export type Locale = "mk" | "sq" | "en";
 
-export type LocalizedText = Record<Locale, string>;
+export type LocalizedText = Record<
+  Locale,
+  string
+>;
 
 // ============================================
 // BUSINESS CONFIG TYPES
 // ============================================
 
-export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-// 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+export type DayOfWeek =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6;
+
+// 0 = Sunday
+// 1 = Monday
+// 2 = Tuesday
+// 3 = Wednesday
+// 4 = Thursday
+// 5 = Friday
+// 6 = Saturday
 
 export type WorkingHours = {
   dayOfWeek: DayOfWeek;
-  openTime: string | null; // "HH:MM" format or null if closed
-  closeTime: string | null; // "HH:MM" format or null if closed
+  openTime: string | null;
+  closeTime: string | null;
   isClosed: boolean;
 };
 
@@ -48,6 +65,32 @@ export type BusinessConfig = {
   showStats: boolean;
   stats: BusinessStats;
   showReviews: boolean;
+};
+
+// ============================================
+// SUPABASE CATALOG BUSINESS
+// ============================================
+
+export type CatalogBusiness = {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: LocalizedText;
+  description: LocalizedText;
+  phone: string;
+  email: string;
+  address: LocalizedText;
+  city: LocalizedText;
+  country: LocalizedText;
+  instagramHandle: string;
+  instagramUrl: string;
+  heroImageUrl: string;
+  logoUrl: string;
+  defaultLocale: Locale;
+  supportedLocales: Locale[];
+  currency: string;
+  timezone: string;
+  workingHours: WorkingHours[];
 };
 
 // ============================================
@@ -89,6 +132,11 @@ export type BookingConfig = {
   allowNotes: boolean;
 };
 
+export type CatalogBookingConfig =
+  BookingConfig & {
+    autoConfirm: boolean;
+  };
+
 // ============================================
 // SERVICE & EMPLOYEE TYPES
 // ============================================
@@ -102,33 +150,56 @@ export type ServiceCategoryIcon =
 
 export type ServiceCategory = {
   id: string;
+  slug?: string;
   icon: ServiceCategoryIcon;
   name: LocalizedText;
+  description?: LocalizedText;
+  sortOrder?: number;
   isActive: boolean;
 };
 
-export type ServicePriceType = "fixed" | "from" | "range";
+export type ServicePriceType =
+  | "fixed"
+  | "from"
+  | "range";
 
 export type Service = {
   id: string;
   categoryId: string;
+  slug?: string;
   name: LocalizedText;
+  description?: LocalizedText;
   durationMinutes: number;
   priceType: ServicePriceType;
   priceFrom: number;
   priceTo?: number;
+  sortOrder?: number;
   isActive: boolean;
 };
 
 export type Employee = {
   id: string;
+  slug?: string;
   name: string;
   role: LocalizedText;
   image: string;
   bio: LocalizedText;
   serviceIds: string[];
   workingHours?: WorkingHours[];
+  sortOrder?: number;
   isActive: boolean;
+};
+
+// ============================================
+// COMPLETE CATALOG
+// ============================================
+
+export type CatalogData = {
+  business: CatalogBusiness;
+  booking: CatalogBookingConfig;
+  categories: ServiceCategory[];
+  services: Service[];
+  employees: Employee[];
 };
 
 // ============================================
@@ -156,9 +227,15 @@ export type GalleryItem = {
 
 export type BookingDraft = {
   serviceId: string | null;
-  employeePreference: "any" | string | null;
+
+  employeePreference:
+    | "any"
+    | string
+    | null;
+
   date: string | null;
   time: string | null;
+
   customer: {
     name: string;
     phone: string;
@@ -167,13 +244,20 @@ export type BookingDraft = {
   };
 };
 
+// Stari mock tipovi ostaju privremeno.
+// Brišemo ih na kraju Faze 8.9.
+
 export type AvailabilitySlot = {
   time: string;
   available: boolean;
 };
 
 export type MockAvailabilityParams = {
-  employeePreference: "any" | string | null;
+  employeePreference:
+    | "any"
+    | string
+    | null;
+
   serviceId: string | null;
   date: string | null;
 };
@@ -181,8 +265,8 @@ export type MockAvailabilityParams = {
 export type MockBusyPeriod = {
   employeeId: string;
   dayOfWeek: DayOfWeek;
-  startTime: string; // "HH:MM"
-  endTime: string; // "HH:MM"
+  startTime: string;
+  endTime: string;
 };
 
 // ============================================

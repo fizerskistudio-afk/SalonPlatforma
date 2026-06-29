@@ -1,13 +1,5 @@
 "use client";
 
-import type {
-  BookingDraft,
-  Locale,
-  ServicePriceType,
-} from "@/lib/types";
-import { businessConfig } from "@/lib/config";
-import { employees, services } from "@/lib/mockData";
-import { t, translations } from "@/lib/translations";
 import {
   Clock,
   Edit2,
@@ -17,20 +9,35 @@ import {
   User,
 } from "lucide-react";
 
-type BookingStepId =
-  | "service"
-  | "employee"
-  | "date"
-  | "time"
-  | "customer";
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  BookingDraft,
+  Locale,
+  ServicePriceType,
+} from "@/lib/types";
 
 type BookingSummaryProps = {
   locale: Locale;
   draft: BookingDraft;
-  onChangeStep?: (step: BookingStepId) => void;
+
+  onChangeStep?: (
+    step:
+      | "service"
+      | "employee"
+      | "date"
+      | "time"
+      | "customer"
+  ) => void;
 };
 
-const intlLocaleMap: Record<Locale, string> = {
+const intlLocaleMap: Record<
+  Locale,
+  string
+> = {
   mk: "mk-MK",
   sq: "sq-MK",
   en: "en-GB",
@@ -39,42 +46,59 @@ const intlLocaleMap: Record<Locale, string> = {
 function formatDisplayDate(
   dateString: string | null,
   locale: Locale,
-  fallback: string
+  notSelectedLabel: string
 ): string {
   if (!dateString) {
-    return fallback;
+    return notSelectedLabel;
   }
 
-  const parts = dateString.split("-");
+  const parts =
+    dateString.split("-");
 
   if (parts.length !== 3) {
-    return fallback;
+    return notSelectedLabel;
   }
 
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
+  const [
+    yearString,
+    monthString,
+    dayString,
+  ] = parts;
+
+  const year = Number.parseInt(
+    yearString,
+    10
+  );
+
+  const month = Number.parseInt(
+    monthString,
+    10
+  );
+
+  const day = Number.parseInt(
+    dayString,
+    10
+  );
 
   if (
-    !Number.isInteger(year) ||
-    !Number.isInteger(month) ||
-    !Number.isInteger(day)
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
   ) {
-    return fallback;
+    return notSelectedLabel;
   }
 
-  const date = new Date(year, month - 1, day);
+  const date = new Date(
+    year,
+    month - 1,
+    day
+  );
 
-  const isValidDate =
-    date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day;
-
-  if (!isValidDate) {
-    return fallback;
-  }
-
-  return new Intl.DateTimeFormat(
+  return date.toLocaleDateString(
     intlLocaleMap[locale],
     {
       weekday: "long",
@@ -82,7 +106,7 @@ function formatDisplayDate(
       month: "long",
       day: "numeric",
     }
-  ).format(date);
+  );
 }
 
 function formatPrice(
@@ -92,44 +116,53 @@ function formatPrice(
   currency: string,
   locale: Locale
 ): string {
-  const formatter = new Intl.NumberFormat(
-    intlLocaleMap[locale],
-    {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }
-  );
-
-  if (priceType === "fixed") {
-    return formatter.format(priceFrom);
-  }
-
-  if (priceType === "from") {
-    const prefix = t(
-      translations.priceTypes.from,
-      locale
+  const formatter =
+    new Intl.NumberFormat(
+      intlLocaleMap[locale],
+      {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }
     );
 
-    return `${prefix} ${formatter.format(priceFrom)}`;
+  if (
+    priceType === "fixed"
+  ) {
+    return formatter.format(
+      priceFrom
+    );
+  }
+
+  if (
+    priceType === "from"
+  ) {
+    return `${t(
+      translations.priceTypes.from,
+      locale
+    )} ${formatter.format(
+      priceFrom
+    )}`;
   }
 
   if (
     priceType === "range" &&
     priceTo !== undefined
   ) {
-    const separator = t(
-      translations.priceTypes.range,
-      locale
-    );
-
     return `${formatter.format(
       priceFrom
-    )} ${separator} ${formatter.format(priceTo)}`;
+    )} ${t(
+      translations.priceTypes.range,
+      locale
+    )} ${formatter.format(
+      priceTo
+    )}`;
   }
 
-  return formatter.format(priceFrom);
+  return formatter.format(
+    priceFrom
+  );
 }
 
 export default function BookingSummary({
@@ -137,70 +170,78 @@ export default function BookingSummary({
   draft,
   onChangeStep,
 }: BookingSummaryProps) {
+  const {
+    business,
+    services,
+    employees,
+  } = useCatalogData();
+
   const notSelectedLabel = t(
     translations.common.notSelected,
     locale
   );
 
-  const service = draft.serviceId
-    ? services.find(
-        (item) =>
-          item.id === draft.serviceId &&
-          item.isActive
-      ) ?? null
-    : null;
+  const service =
+    draft.serviceId
+      ? services.find(
+          (item) =>
+            item.id ===
+              draft.serviceId &&
+            item.isActive
+        ) ?? null
+      : null;
 
   const employee =
     draft.employeePreference &&
-    draft.employeePreference !== "any"
+    draft.employeePreference !==
+      "any"
       ? employees.find(
           (item) =>
-            item.id === draft.employeePreference &&
+            item.id ===
+              draft.employeePreference &&
             item.isActive
         ) ?? null
       : null;
 
   const employeeDisplay =
-    draft.employeePreference === "any"
+    draft.employeePreference ===
+    "any"
       ? t(
-          translations.booking.anyAvailable,
+          translations.booking
+            .anyAvailable,
           locale
         )
-      : employee?.name ?? notSelectedLabel;
-
-  const displayDate = formatDisplayDate(
-    draft.date,
-    locale,
-    notSelectedLabel
-  );
-
-  const changeLabel = t(
-    translations.booking.change,
-    locale
-  );
+      : employee
+        ? employee.name
+        : notSelectedLabel;
 
   return (
-    <section
-      className="space-y-4"
-      aria-labelledby="booking-summary-title"
-    >
-      <h3
-        id="booking-summary-title"
-        className="font-display mb-4 text-lg font-semibold text-[var(--brand-text)]"
-      >
-        {t(translations.booking.summary, locale)}
+    <div className="space-y-4">
+      <h3 className="font-display mb-4 text-lg font-semibold text-[var(--brand-text)]">
+        {t(
+          translations.booking
+            .summary,
+          locale
+        )}
       </h3>
 
       <div className="space-y-3">
         <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
           <div className="flex-1">
             <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
-              {t(translations.common.service, locale)}
+              {t(
+                translations.common
+                  .service,
+                locale
+              )}
             </div>
 
             <div className="font-medium text-[var(--brand-text)]">
               {service
-                ? t(service.name, locale)
+                ? t(
+                    service.name,
+                    locale
+                  )
                 : notSelectedLabel}
             </div>
 
@@ -212,21 +253,26 @@ export default function BookingSummary({
                 />
 
                 <span>
-                  {service.durationMinutes}{" "}
+                  {
+                    service.durationMinutes
+                  }{" "}
                   {t(
-                    translations.booking.minutes,
+                    translations.booking
+                      .minutes,
                     locale
                   )}
                 </span>
 
-                <span aria-hidden="true">·</span>
+                <span aria-hidden="true">
+                  ·
+                </span>
 
                 <span className="font-semibold text-[var(--brand-primary)]">
                   {formatPrice(
                     service.priceType,
                     service.priceFrom,
                     service.priceTo,
-                    businessConfig.currency,
+                    business.currency,
                     locale
                   )}
                 </span>
@@ -238,11 +284,18 @@ export default function BookingSummary({
             <button
               type="button"
               onClick={() =>
-                onChangeStep("service")
+                onChangeStep(
+                  "service"
+                )
               }
               className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
-              aria-label={`${changeLabel} ${t(
-                translations.common.service,
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .service,
                 locale
               )}`}
             >
@@ -257,7 +310,11 @@ export default function BookingSummary({
         <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
           <div className="flex-1">
             <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
-              {t(translations.common.stylist, locale)}
+              {t(
+                translations.common
+                  .stylist,
+                locale
+              )}
             </div>
 
             <div className="font-medium text-[var(--brand-text)]">
@@ -269,11 +326,18 @@ export default function BookingSummary({
             <button
               type="button"
               onClick={() =>
-                onChangeStep("employee")
+                onChangeStep(
+                  "employee"
+                )
               }
               className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
-              aria-label={`${changeLabel} ${t(
-                translations.common.stylist,
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .stylist,
                 locale
               )}`}
             >
@@ -288,21 +352,36 @@ export default function BookingSummary({
         <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
           <div className="flex-1">
             <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
-              {t(translations.common.date, locale)}
+              {t(
+                translations.common
+                  .date,
+                locale
+              )}
             </div>
 
             <div className="font-medium text-[var(--brand-text)]">
-              {displayDate}
+              {formatDisplayDate(
+                draft.date,
+                locale,
+                notSelectedLabel
+              )}
             </div>
           </div>
 
           {onChangeStep && (
             <button
               type="button"
-              onClick={() => onChangeStep("date")}
+              onClick={() =>
+                onChangeStep("date")
+              }
               className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
-              aria-label={`${changeLabel} ${t(
-                translations.common.date,
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .date,
                 locale
               )}`}
             >
@@ -317,21 +396,33 @@ export default function BookingSummary({
         <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
           <div className="flex-1">
             <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
-              {t(translations.common.time, locale)}
+              {t(
+                translations.common
+                  .time,
+                locale
+              )}
             </div>
 
             <div className="font-medium text-[var(--brand-text)]">
-              {draft.time || notSelectedLabel}
+              {draft.time ||
+                notSelectedLabel}
             </div>
           </div>
 
           {onChangeStep && (
             <button
               type="button"
-              onClick={() => onChangeStep("time")}
+              onClick={() =>
+                onChangeStep("time")
+              }
               className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
-              aria-label={`${changeLabel} ${t(
-                translations.common.time,
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .time,
                 locale
               )}`}
             >
@@ -347,7 +438,8 @@ export default function BookingSummary({
           <div className="mb-3 flex items-start justify-between">
             <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
               {t(
-                translations.booking.yourInfo,
+                translations.booking
+                  .yourInfo,
                 locale
               )}
             </div>
@@ -356,11 +448,18 @@ export default function BookingSummary({
               <button
                 type="button"
                 onClick={() =>
-                  onChangeStep("customer")
+                  onChangeStep(
+                    "customer"
+                  )
                 }
                 className="rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
-                aria-label={`${changeLabel} ${t(
-                  translations.booking.yourInfo,
+                aria-label={`${t(
+                  translations.booking
+                    .change,
+                  locale
+                )} ${t(
+                  translations.booking
+                    .yourInfo,
                   locale
                 )}`}
               >
@@ -405,7 +504,10 @@ export default function BookingSummary({
                 />
 
                 <span className="text-[var(--brand-text)]">
-                  {draft.customer.email}
+                  {
+                    draft.customer
+                      .email
+                  }
                 </span>
               </div>
             )}
@@ -418,13 +520,16 @@ export default function BookingSummary({
                 />
 
                 <span className="italic text-[var(--brand-muted)]">
-                  {draft.customer.note}
+                  {
+                    draft.customer
+                      .note
+                  }
                 </span>
               </div>
             )}
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

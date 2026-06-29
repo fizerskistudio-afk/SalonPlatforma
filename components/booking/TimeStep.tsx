@@ -9,11 +9,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 
-import {
-  DEFAULT_BUSINESS_SLUG,
-  getBackendEmployeeId,
-  getBackendServiceId,
-} from "@/lib/backendIds";
+import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
   translations,
@@ -25,7 +21,9 @@ import SectionHeader from "../shared/SectionHeader";
 
 type TimeStepProps = {
   locale: Locale;
-  selectedServiceId: string | null;
+  selectedServiceId:
+    | string
+    | null;
   selectedDate: string | null;
   selectedEmployeePreference:
     | "any"
@@ -34,7 +32,7 @@ type TimeStepProps = {
   selectedTime: string | null;
   onSelectTime: (
     time: string,
-    employeeBackendId: string,
+    employeeId: string,
     startsAt: string
   ) => void;
 };
@@ -48,11 +46,13 @@ type AvailableSlotRow = {
 
 type AvailabilitySuccessResponse = {
   ok: true;
+
   business: {
     id: string;
     slug: string;
     timezone: string;
   };
+
   count: number;
   slots: AvailableSlotRow[];
 };
@@ -69,7 +69,7 @@ type AvailabilityResponse =
 
 type DisplaySlot = {
   time: string;
-  employeeBackendId: string;
+  employeeId: string;
   employeeName: string;
   startsAt: string;
   endsAt: string;
@@ -77,11 +77,13 @@ type DisplaySlot = {
 
 type AvailabilityState = {
   requestKey: string | null;
+
   status:
     | "idle"
     | "loading"
     | "success"
     | "error";
+
   slots: DisplaySlot[];
 };
 
@@ -91,27 +93,34 @@ function formatTimeInTimezone(
 ): string | null {
   const date = new Date(isoValue);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(date.getTime())
+  ) {
     return null;
   }
 
   const formatter =
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: timezone,
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    });
+    new Intl.DateTimeFormat(
+      "en-GB",
+      {
+        timeZone: timezone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }
+    );
 
   const parts =
     formatter.formatToParts(date);
 
   const hour = parts.find(
-    (part) => part.type === "hour"
+    (part) =>
+      part.type === "hour"
   )?.value;
 
   const minute = parts.find(
-    (part) => part.type === "minute"
+    (part) =>
+      part.type === "minute"
   )?.value;
 
   if (!hour || !minute) {
@@ -125,14 +134,18 @@ function createDisplaySlots(
   rows: AvailableSlotRow[],
   timezone: string
 ): DisplaySlot[] {
-  const sortedRows = [...rows].sort(
+  const sortedRows = [
+    ...rows,
+  ].sort(
     (first, second) => {
       const timeComparison =
         first.startsAt.localeCompare(
           second.startsAt
         );
 
-      if (timeComparison !== 0) {
+      if (
+        timeComparison !== 0
+      ) {
         return timeComparison;
       }
 
@@ -142,16 +155,23 @@ function createDisplaySlots(
     }
   );
 
-  const usedTimes = new Set<string>();
-  const result: DisplaySlot[] = [];
+  const usedTimes =
+    new Set<string>();
+
+  const result: DisplaySlot[] =
+    [];
 
   for (const row of sortedRows) {
-    const time = formatTimeInTimezone(
-      row.startsAt,
-      timezone
-    );
+    const time =
+      formatTimeInTimezone(
+        row.startsAt,
+        timezone
+      );
 
-    if (!time || usedTimes.has(time)) {
+    if (
+      !time ||
+      usedTimes.has(time)
+    ) {
       continue;
     }
 
@@ -159,7 +179,7 @@ function createDisplaySlots(
 
     result.push({
       time,
-      employeeBackendId:
+      employeeId:
         row.employeeId,
       employeeName:
         row.employeeName,
@@ -181,7 +201,14 @@ export default function TimeStep({
   selectedTime,
   onSelectTime,
 }: TimeStepProps) {
-  const [availability, setAvailability] =
+  const {
+    business,
+  } = useCatalogData();
+
+  const [
+    availability,
+    setAvailability,
+  ] =
     useState<AvailabilityState>({
       requestKey: null,
       status: "idle",
@@ -195,43 +222,28 @@ export default function TimeStep({
         selectedEmployeePreference
     );
 
-  const backendServiceId =
-    selectedServiceId
-      ? getBackendServiceId(
-          selectedServiceId
-        )
-      : null;
-
-  const backendEmployeeId =
+  const employeeId =
     selectedEmployeePreference &&
-    selectedEmployeePreference !== "any"
-      ? getBackendEmployeeId(
-          selectedEmployeePreference
-        )
+    selectedEmployeePreference !==
+      "any"
+      ? selectedEmployeePreference
       : null;
-
-  const hasInvalidEmployeeMapping =
-    Boolean(
-      selectedEmployeePreference &&
-        selectedEmployeePreference !==
-          "any" &&
-        !backendEmployeeId
-    );
 
   const requestKey =
     hasRequiredSelection &&
-    backendServiceId &&
-    selectedDate &&
-    !hasInvalidEmployeeMapping
+    selectedServiceId &&
+    selectedDate
       ? [
-          backendServiceId,
+          selectedServiceId,
           selectedDate,
-          backendEmployeeId ?? "any",
+          employeeId ?? "any",
         ].join(":")
       : null;
 
   useEffect(() => {
-    if (!hasRequiredSelection) {
+    if (
+      !hasRequiredSelection
+    ) {
       setAvailability({
         requestKey: null,
         status: "idle",
@@ -243,7 +255,7 @@ export default function TimeStep({
 
     if (
       !requestKey ||
-      !backendServiceId ||
+      !selectedServiceId ||
       !selectedDate
     ) {
       setAvailability({
@@ -265,9 +277,11 @@ export default function TimeStep({
     });
 
     async function loadAvailability(
-      serviceId: string,
-      date: string,
-      employeeId: string | null,
+      serviceIdForRequest: string,
+      dateForRequest: string,
+      employeeIdForRequest:
+        | string
+        | null,
       activeRequestKey: string,
       signal: AbortSignal
     ) {
@@ -276,33 +290,36 @@ export default function TimeStep({
           new URLSearchParams([
             [
               "businessSlug",
-              DEFAULT_BUSINESS_SLUG,
+              business.slug,
             ],
             [
               "serviceId",
-              serviceId,
+              serviceIdForRequest,
             ],
             [
               "date",
-              date,
+              dateForRequest,
             ],
           ]);
 
-        if (employeeId) {
+        if (
+          employeeIdForRequest
+        ) {
           searchParams.set(
             "employeeId",
-            employeeId
+            employeeIdForRequest
           );
         }
 
-        const response = await fetch(
-          `/api/availability?${searchParams.toString()}`,
-          {
-            method: "GET",
-            cache: "no-store",
-            signal,
-          }
-        );
+        const response =
+          await fetch(
+            `/api/availability?${searchParams.toString()}`,
+            {
+              method: "GET",
+              cache: "no-store",
+              signal,
+            }
+          );
 
         const payload =
           (await response.json()) as AvailabilityResponse;
@@ -316,13 +333,16 @@ export default function TimeStep({
               ? "Availability request failed."
               : payload.message;
 
-          throw new Error(message);
+          throw new Error(
+            message
+          );
         }
 
         const slots =
           createDisplaySlots(
             payload.slots,
-            payload.business.timezone
+            payload.business
+              .timezone
           );
 
         setAvailability({
@@ -333,8 +353,10 @@ export default function TimeStep({
         });
       } catch (error) {
         if (
-          error instanceof DOMException &&
-          error.name === "AbortError"
+          error instanceof
+            DOMException &&
+          error.name ===
+            "AbortError"
         ) {
           return;
         }
@@ -354,9 +376,9 @@ export default function TimeStep({
     }
 
     void loadAvailability(
-      backendServiceId,
+      selectedServiceId,
       selectedDate,
-      backendEmployeeId,
+      employeeId,
       requestKey,
       abortController.signal
     );
@@ -365,14 +387,17 @@ export default function TimeStep({
       abortController.abort();
     };
   }, [
-    backendEmployeeId,
-    backendServiceId,
+    business.slug,
+    employeeId,
     hasRequiredSelection,
     requestKey,
     selectedDate,
+    selectedServiceId,
   ]);
 
-  if (!hasRequiredSelection) {
+  if (
+    !hasRequiredSelection
+  ) {
     return (
       <EmptyState
         title={
@@ -392,8 +417,10 @@ export default function TimeStep({
   const isLoading =
     availability.requestKey !==
       requestKey ||
-    availability.status === "idle" ||
-    availability.status === "loading";
+    availability.status ===
+      "idle" ||
+    availability.status ===
+      "loading";
 
   if (isLoading) {
     return (
@@ -423,7 +450,8 @@ export default function TimeStep({
 
           <span>
             {t(
-              translations.common.loading,
+              translations.common
+                .loading,
               locale
             )}
           </span>
@@ -433,30 +461,16 @@ export default function TimeStep({
   }
 
   if (
-    availability.status === "error"
+    availability.status ===
+    "error" ||
+    availability.slots.length ===
+      0
   ) {
     return (
       <EmptyState
         title={
-          translations.common.noTimes
-        }
-        description={
           translations.common
-            .noTimesDescription
-        }
-        icon={Clock}
-        locale={locale}
-      />
-    );
-  }
-
-  if (
-    availability.slots.length === 0
-  ) {
-    return (
-      <EmptyState
-        title={
-          translations.common.noTimes
+            .noTimes
         }
         description={
           translations.common
@@ -472,7 +486,8 @@ export default function TimeStep({
     <div className="space-y-6">
       <SectionHeader
         title={
-          translations.booking.selectTime
+          translations.booking
+            .selectTime
         }
         subtitle={
           translations.booking
@@ -486,7 +501,8 @@ export default function TimeStep({
         {availability.slots.map(
           (slot) => {
             const isSelected =
-              selectedTime === slot.time;
+              selectedTime ===
+              slot.time;
 
             return (
               <button
@@ -495,7 +511,7 @@ export default function TimeStep({
                 onClick={() =>
                   onSelectTime(
                     slot.time,
-                    slot.employeeBackendId,
+                    slot.employeeId,
                     slot.startsAt
                   )
                 }
@@ -503,7 +519,8 @@ export default function TimeStep({
                   isSelected
                 }
                 aria-label={`${t(
-                  translations.common.time,
+                  translations.common
+                    .time,
                   locale
                 )} ${slot.time}`}
                 className={`rounded-2xl border-2 py-3 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none ${

@@ -11,22 +11,16 @@ import {
   LoaderCircle,
 } from "lucide-react";
 
-import {
-  DEFAULT_BUSINESS_SLUG,
-  getBackendServiceId,
-} from "@/lib/backendIds";
-import { bookingConfig } from "@/lib/config";
-import {
-  employees,
-  services,
-} from "@/lib/mockData";
+import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
   translations,
 } from "@/lib/translations";
 import type {
   BookingDraft,
+  Employee,
   Locale,
+  Service,
 } from "@/lib/types";
 
 import BookingProgress from "./BookingProgress";
@@ -60,6 +54,7 @@ type SubmitStatus =
 
 type CreateBookingSuccessResponse = {
   ok: true;
+
   booking: {
     id: string;
     referenceCode: string;
@@ -96,27 +91,42 @@ const stepOrder: BookingStep[] = [
   "success",
 ];
 
-const unavailableMessages = {
+const unavailableMessages: Record<
+  Locale,
+  string
+> = {
   mk: "Терминот штотуку беше резервиран. Изберете друг слободен термин.",
   sq: "Ky orar sapo u rezervua. Zgjidhni një orar tjetër të lirë.",
   en: "That time was just booked. Please choose another available time.",
 };
 
-const genericErrorMessages = {
+const genericErrorMessages: Record<
+  Locale,
+  string
+> = {
   mk: "Резервацијата не можеше да се зачува. Обидете се повторно.",
   sq: "Rezervimi nuk mund të ruhej. Ju lutemi provoni përsëri.",
   en: "The booking could not be saved. Please try again.",
 };
 
-const submittingMessages = {
+const submittingMessages: Record<
+  Locale,
+  string
+> = {
   mk: "Се резервира...",
   sq: "Duke rezervuar...",
   en: "Booking...",
 };
 
 function createInitialDraft(
-  initialServiceId: string | null,
-  initialEmployeeId: string | null
+  initialServiceId:
+    | string
+    | null,
+  initialEmployeeId:
+    | string
+    | null,
+  services: Service[],
+  employees: Employee[]
 ): BookingDraft {
   const validService =
     initialServiceId
@@ -159,6 +169,7 @@ function createInitialDraft(
     employeePreference,
     date: null,
     time: null,
+
     customer: {
       name: "",
       phone: "",
@@ -174,140 +185,187 @@ export default function BookingFlow({
   initialEmployeeId = null,
   onDone,
 }: BookingFlowProps) {
-  const [currentStep, setCurrentStep] =
-    useState<BookingStep>("service");
+  const {
+    business,
+    booking,
+    services,
+    employees,
+  } = useCatalogData();
 
-  const [draft, setDraft] =
+  const [
+    currentStep,
+    setCurrentStep,
+  ] =
+    useState<BookingStep>(
+      "service"
+    );
+
+  const [
+    draft,
+    setDraft,
+  ] =
     useState<BookingDraft>(() =>
       createInitialDraft(
         initialServiceId,
-        initialEmployeeId
+        initialEmployeeId,
+        services,
+        employees
       )
     );
 
   const [
-    resolvedEmployeeBackendId,
-    setResolvedEmployeeBackendId,
-  ] = useState<string | null>(null);
+    resolvedEmployeeId,
+    setResolvedEmployeeId,
+  ] =
+    useState<string | null>(
+      null
+    );
 
   const [
     selectedStartsAt,
     setSelectedStartsAt,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null
+    );
 
   const [
     submitStatus,
     setSubmitStatus,
-  ] = useState<SubmitStatus>("idle");
+  ] =
+    useState<SubmitStatus>(
+      "idle"
+    );
 
   const [
     submitError,
     setSubmitError,
-  ] = useState<string | null>(null);
+  ] =
+    useState<string | null>(
+      null
+    );
 
   const currentStepIndex =
-    stepOrder.indexOf(currentStep);
+    stepOrder.indexOf(
+      currentStep
+    );
 
-  const progressSteps = useMemo(
-    () => [
-      {
-        id: "service",
-        label:
-          translations.booking
-            .selectService,
-      },
-      {
-        id: "employee",
-        label:
-          translations.booking
-            .selectEmployee,
-      },
-      {
-        id: "date",
-        label:
-          translations.booking
-            .selectDate,
-      },
-      {
-        id: "time",
-        label:
-          translations.booking
-            .selectTime,
-      },
-      {
-        id: "customer",
-        label:
-          translations.booking
-            .yourInfo,
-      },
-      {
-        id: "summary",
-        label:
-          translations.booking
-            .summary,
-      },
-    ],
-    []
-  );
+  const progressSteps =
+    useMemo(
+      () => [
+        {
+          id: "service",
+          label:
+            translations.booking
+              .selectService,
+        },
+        {
+          id: "employee",
+          label:
+            translations.booking
+              .selectEmployee,
+        },
+        {
+          id: "date",
+          label:
+            translations.booking
+              .selectDate,
+        },
+        {
+          id: "time",
+          label:
+            translations.booking
+              .selectTime,
+        },
+        {
+          id: "customer",
+          label:
+            translations.booking
+              .yourInfo,
+        },
+        {
+          id: "summary",
+          label:
+            translations.booking
+              .summary,
+        },
+      ],
+      []
+    );
 
-  const resetResolvedTime = () => {
-    setResolvedEmployeeBackendId(null);
-    setSelectedStartsAt(null);
-    setSubmitError(null);
-  };
+  const resetResolvedTime =
+    () => {
+      setResolvedEmployeeId(
+        null
+      );
+
+      setSelectedStartsAt(
+        null
+      );
+
+      setSubmitError(null);
+    };
 
   const handleSelectService = (
     serviceId: string
   ) => {
     resetResolvedTime();
 
-    setDraft((previousDraft) => {
-      const nextDraft: BookingDraft = {
-        ...previousDraft,
-        serviceId,
-        date: null,
-        time: null,
-      };
-
-      if (
-        previousDraft.employeePreference &&
-        previousDraft.employeePreference !==
-          "any"
-      ) {
-        const employee = employees.find(
-          (item) =>
-            item.id ===
-            previousDraft.employeePreference
-        );
+    setDraft(
+      (previousDraft) => {
+        const nextDraft: BookingDraft =
+          {
+            ...previousDraft,
+            serviceId,
+            date: null,
+            time: null,
+          };
 
         if (
-          !employee ||
-          !employee.isActive ||
-          !employee.serviceIds.includes(
-            serviceId
-          )
+          previousDraft.employeePreference &&
+          previousDraft.employeePreference !==
+            "any"
         ) {
-          nextDraft.employeePreference =
-            null;
-        }
-      }
+          const employee =
+            employees.find(
+              (item) =>
+                item.id ===
+                previousDraft.employeePreference
+            );
 
-      return nextDraft;
-    });
+          if (
+            !employee ||
+            !employee.isActive ||
+            !employee.serviceIds.includes(
+              serviceId
+            )
+          ) {
+            nextDraft.employeePreference =
+              null;
+          }
+        }
+
+        return nextDraft;
+      }
+    );
   };
 
   const handleSelectEmployee = (
-    preference: "any" | string
+    preference:
+      | "any"
+      | string
   ) => {
     resetResolvedTime();
 
-    setDraft((previousDraft) => ({
-      ...previousDraft,
-      employeePreference:
-        preference,
-      date: null,
-      time: null,
-    }));
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+        employeePreference:
+          preference,
+        date: null,
+        time: null,
+      })
+    );
   };
 
   const handleSelectDate = (
@@ -315,47 +373,55 @@ export default function BookingFlow({
   ) => {
     resetResolvedTime();
 
-    setDraft((previousDraft) => ({
-      ...previousDraft,
-      date,
-      time: null,
-    }));
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+        date,
+        time: null,
+      })
+    );
   };
 
   const handleSelectTime = (
     time: string,
-    employeeBackendId: string,
+    employeeId: string,
     startsAt: string
   ) => {
     setSubmitError(null);
 
-    setResolvedEmployeeBackendId(
-      employeeBackendId
+    setResolvedEmployeeId(
+      employeeId
     );
 
     setSelectedStartsAt(
       startsAt
     );
 
-    setDraft((previousDraft) => ({
-      ...previousDraft,
-      time,
-    }));
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+        time,
+      })
+    );
   };
 
   const handleCustomerChange = (
-    field: keyof BookingDraft["customer"],
+    field:
+      keyof BookingDraft["customer"],
     value: string
   ) => {
     setSubmitError(null);
 
-    setDraft((previousDraft) => ({
-      ...previousDraft,
-      customer: {
-        ...previousDraft.customer,
-        [field]: value,
-      },
-    }));
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+
+        customer: {
+          ...previousDraft.customer,
+          [field]: value,
+        },
+      })
+    );
   };
 
   const handleChangeStep = (
@@ -370,120 +436,128 @@ export default function BookingFlow({
     setCurrentStep(step);
   };
 
-  const canGoNext = useMemo(() => {
-    switch (currentStep) {
-      case "service":
-        return Boolean(
-          draft.serviceId &&
-            services.some(
-              (service) =>
-                service.id ===
-                  draft.serviceId &&
-                service.isActive
-            )
-        );
-
-      case "employee": {
-        if (
-          draft.employeePreference ===
-          "any"
-        ) {
-          return bookingConfig
-            .allowAnyEmployee;
-        }
-
-        if (
-          !draft.employeePreference ||
-          !draft.serviceId
-        ) {
-          return false;
-        }
-
-        const employee =
-          employees.find(
-            (item) =>
-              item.id ===
-              draft.employeePreference
+  const canGoNext =
+    useMemo(() => {
+      switch (currentStep) {
+        case "service":
+          return Boolean(
+            draft.serviceId &&
+              services.some(
+                (service) =>
+                  service.id ===
+                    draft.serviceId &&
+                  service.isActive
+              )
           );
 
-        return Boolean(
-          employee?.isActive &&
-            employee.serviceIds.includes(
-              draft.serviceId
-            )
-        );
-      }
+        case "employee": {
+          if (
+            draft.employeePreference ===
+            "any"
+          ) {
+            return booking
+              .allowAnyEmployee;
+          }
 
-      case "date":
-        return draft.date !== null;
+          if (
+            !draft.employeePreference ||
+            !draft.serviceId
+          ) {
+            return false;
+          }
 
-      case "time":
-        return Boolean(
-          draft.time &&
-            selectedStartsAt &&
-            resolvedEmployeeBackendId
-        );
+          const employee =
+            employees.find(
+              (item) =>
+                item.id ===
+                draft.employeePreference
+            );
 
-      case "customer": {
-        const {
-          name,
-          phone,
-          email,
-        } = draft.customer;
-
-        if (!name.trim()) {
-          return false;
+          return Boolean(
+            employee?.isActive &&
+              employee.serviceIds.includes(
+                draft.serviceId
+              )
+          );
         }
 
-        if (
-          bookingConfig.requirePhone &&
-          !phone.trim()
-        ) {
-          return false;
-        }
+        case "date":
+          return (
+            draft.date !== null
+          );
 
-        if (
-          bookingConfig.requireEmail &&
-          !email.trim()
-        ) {
-          return false;
-        }
-
-        return true;
-      }
-
-      case "summary":
-        return Boolean(
-          draft.serviceId &&
-            draft.employeePreference &&
-            draft.date &&
+        case "time":
+          return Boolean(
             draft.time &&
-            selectedStartsAt &&
-            resolvedEmployeeBackendId &&
-            draft.customer.name.trim() &&
-            (
-              draft.customer.phone.trim() ||
-              draft.customer.email.trim()
-            ) &&
-            (
-              !bookingConfig.requirePhone ||
-              draft.customer.phone.trim()
-            ) &&
-            (
-              !bookingConfig.requireEmail ||
-              draft.customer.email.trim()
-            )
-        );
+              selectedStartsAt &&
+              resolvedEmployeeId
+          );
 
-      default:
-        return false;
-    }
-  }, [
-    currentStep,
-    draft,
-    resolvedEmployeeBackendId,
-    selectedStartsAt,
-  ]);
+        case "customer": {
+          const {
+            name,
+            phone,
+            email,
+          } = draft.customer;
+
+          if (!name.trim()) {
+            return false;
+          }
+
+          if (
+            booking.requirePhone &&
+            !phone.trim()
+          ) {
+            return false;
+          }
+
+          if (
+            booking.requireEmail &&
+            !email.trim()
+          ) {
+            return false;
+          }
+
+          return true;
+        }
+
+        case "summary":
+          return Boolean(
+            draft.serviceId &&
+              draft.employeePreference &&
+              draft.date &&
+              draft.time &&
+              selectedStartsAt &&
+              resolvedEmployeeId &&
+              draft.customer.name.trim() &&
+              (
+                draft.customer.phone.trim() ||
+                draft.customer.email.trim()
+              ) &&
+              (
+                !booking.requirePhone ||
+                draft.customer.phone.trim()
+              ) &&
+              (
+                !booking.requireEmail ||
+                draft.customer.email.trim()
+              )
+          );
+
+        default:
+          return false;
+      }
+    }, [
+      booking.allowAnyEmployee,
+      booking.requireEmail,
+      booking.requirePhone,
+      currentStep,
+      draft,
+      employees,
+      resolvedEmployeeId,
+      selectedStartsAt,
+      services,
+    ]);
 
   const handleNext = () => {
     if (!canGoNext) {
@@ -493,7 +567,9 @@ export default function BookingFlow({
     setSubmitError(null);
 
     const currentIndex =
-      stepOrder.indexOf(currentStep);
+      stepOrder.indexOf(
+        currentStep
+      );
 
     if (
       currentIndex <
@@ -511,7 +587,9 @@ export default function BookingFlow({
     setSubmitError(null);
 
     const currentIndex =
-      stepOrder.indexOf(currentStep);
+      stepOrder.indexOf(
+        currentStep
+      );
 
     if (currentIndex > 0) {
       setCurrentStep(
@@ -532,16 +610,9 @@ export default function BookingFlow({
         return;
       }
 
-      const backendServiceId =
-        draft.serviceId
-          ? getBackendServiceId(
-              draft.serviceId
-            )
-          : null;
-
       if (
-        !backendServiceId ||
-        !resolvedEmployeeBackendId ||
+        !draft.serviceId ||
+        !resolvedEmployeeId ||
         !selectedStartsAt
       ) {
         setSubmitError(
@@ -573,33 +644,39 @@ export default function BookingFlow({
 
               cache: "no-store",
 
-              body: JSON.stringify({
-                businessSlug:
-                  DEFAULT_BUSINESS_SLUG,
+              body: JSON.stringify(
+                {
+                  businessSlug:
+                    business.slug,
 
-                serviceId:
-                  backendServiceId,
+                  serviceId:
+                    draft.serviceId,
 
-                employeeId:
-                  resolvedEmployeeBackendId,
+                  employeeId:
+                    resolvedEmployeeId,
 
-                startsAt:
-                  selectedStartsAt,
+                  startsAt:
+                    selectedStartsAt,
 
-                customer: {
-                  name:
-                    draft.customer.name,
+                  customer: {
+                    name:
+                      draft.customer
+                        .name,
 
-                  phone:
-                    draft.customer.phone,
+                    phone:
+                      draft.customer
+                        .phone,
 
-                  email:
-                    draft.customer.email,
+                    email:
+                      draft.customer
+                        .email,
 
-                  note:
-                    draft.customer.note,
-                },
-              }),
+                    note:
+                      draft.customer
+                        .note,
+                  },
+                }
+              ),
             }
           );
 
@@ -616,11 +693,12 @@ export default function BookingFlow({
               : payload.code;
 
           if (
-            response.status === 409 ||
+            response.status ===
+              409 ||
             errorCode ===
               "SLOT_UNAVAILABLE"
           ) {
-            setResolvedEmployeeBackendId(
+            setResolvedEmployeeId(
               null
             );
 
@@ -794,7 +872,9 @@ export default function BookingFlow({
         "success" && (
         <div className="shrink-0 border-b border-[var(--brand-border)] px-4 py-3 sm:px-6 sm:py-4">
           <BookingProgress
-            steps={progressSteps}
+            steps={
+              progressSteps
+            }
             currentStepIndex={
               currentStepIndex
             }
@@ -821,7 +901,8 @@ export default function BookingFlow({
           )}
 
           <div className="flex items-center justify-between gap-3">
-            {currentStepIndex > 0 ? (
+            {currentStepIndex >
+            0 ? (
               <button
                 type="button"
                 onClick={

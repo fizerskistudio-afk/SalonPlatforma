@@ -1,59 +1,235 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { Locale } from "@/lib/types";
-import { businessConfig } from "@/lib/config";
-import { t, translations } from "@/lib/translations";
-import DesktopLanding from "./desktop/DesktopLanding";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  LoaderCircle,
+  RefreshCw,
+  Smartphone,
+} from "lucide-react";
+
+import {
+  CatalogProvider,
+  useCatalog,
+} from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  Locale,
+} from "@/lib/types";
+
 import DesktopBookingModal from "./desktop/DesktopBookingModal";
+import DesktopLanding from "./desktop/DesktopLanding";
 import MobileAppShell from "./mobile/MobileAppShell";
 import MobileBookingModal from "./mobile/MobileBookingModal";
-import { Smartphone } from "lucide-react";
 
-type ViewPreference = "auto" | "desktop" | "mobile";
+type ViewPreference =
+  | "auto"
+  | "desktop"
+  | "mobile";
 
-const STORAGE_KEY = "salon-platform-view-preference";
+const STORAGE_KEY =
+  "salon-platform-view-preference";
 
-/**
- * Glavni UI state container.
- * Upravlja locale, view preference, booking state i responsive prikazom.
- * Izbegava hydration mismatch korišćenjem CSS klasa za initial render.
- */
-export default function SalonPlatform() {
-  const [locale, setLocale] = useState<Locale>(businessConfig.defaultLocale);
-  const [viewPreference, setViewPreference] = useState<ViewPreference>("auto");
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [initialServiceId, setInitialServiceId] = useState<string | null>(null);
-  const [initialEmployeeId, setInitialEmployeeId] = useState<string | null>(null);
+const loadingMessages: Record<
+  Locale,
+  string
+> = {
+  mk: "Се вчитува салонот...",
+  sq: "Duke ngarkuar sallonin...",
+  en: "Loading salon...",
+};
 
-  // Read from localStorage
+const catalogErrorMessages: Record<
+  Locale,
+  string
+> = {
+  mk: "Податоците за салонот не можеа да се вчитаат.",
+  sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
+  en: "The salon data could not be loaded.",
+};
+
+const retryMessages: Record<
+  Locale,
+  string
+> = {
+  mk: "Обиди се повторно",
+  sq: "Provo përsëri",
+  en: "Try again",
+};
+
+function CatalogLoadingScreen({
+  locale,
+}: {
+  locale: Locale;
+}) {
+  return (
+    <main
+      className="flex min-h-[100dvh] items-center justify-center bg-[var(--brand-background)] px-6 text-[var(--brand-text)]"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex flex-col items-center gap-4 text-center">
+        <LoaderCircle
+          className="h-8 w-8 animate-spin text-[var(--brand-primary)] motion-reduce:animate-none"
+          aria-hidden="true"
+        />
+
+        <p className="text-sm text-[var(--brand-muted)]">
+          {loadingMessages[locale]}
+        </p>
+      </div>
+    </main>
+  );
+}
+
+function CatalogErrorScreen({
+  locale,
+  error,
+  onRetry,
+}: {
+  locale: Locale;
+  error: string | null;
+  onRetry: () => void;
+}) {
+  return (
+    <main className="flex min-h-[100dvh] items-center justify-center bg-[var(--brand-background)] px-6 text-[var(--brand-text)]">
+      <div className="w-full max-w-md rounded-3xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-8 text-center shadow-xl">
+        <h1 className="font-display mb-3 text-2xl font-semibold">
+          {catalogErrorMessages[locale]}
+        </h1>
+
+        {error && (
+          <p className="mb-6 break-words text-sm text-[var(--brand-muted)]">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={onRetry}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-background)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none"
+        >
+          <RefreshCw
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+
+          {retryMessages[locale]}
+        </button>
+      </div>
+    </main>
+  );
+}
+
+function SalonPlatformContent() {
+  const {
+    catalog,
+    status,
+    error,
+    reload,
+  } = useCatalog();
+
+  const [
+    locale,
+    setLocale,
+  ] = useState<Locale>("mk");
+
+  const [
+    viewPreference,
+    setViewPreference,
+  ] =
+    useState<ViewPreference>("auto");
+
+  const [
+    isMobileViewport,
+    setIsMobileViewport,
+  ] = useState(false);
+
+  const [
+    isBookingOpen,
+    setIsBookingOpen,
+  ] = useState(false);
+
+  const [
+    initialServiceId,
+    setInitialServiceId,
+  ] = useState<string | null>(null);
+
+  const [
+    initialEmployeeId,
+    setInitialEmployeeId,
+  ] = useState<string | null>(null);
+
+  const localeInitializedRef =
+    useRef(false);
+
+  useEffect(() => {
+    if (
+      !catalog ||
+      localeInitializedRef.current
+    ) {
+      return;
+    }
+
+    localeInitializedRef.current =
+      true;
+
+    setLocale(
+      catalog.business.defaultLocale
+    );
+  }, [catalog]);
+
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "desktop" || stored === "mobile") {
+      const stored =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
+
+      if (
+        stored === "desktop" ||
+        stored === "mobile"
+      ) {
         setViewPreference(stored);
       }
-    } catch (e) {
-      // localStorage nije dostupan
+    } catch {
+      // localStorage nije dostupan.
     }
   }, []);
 
-  // Track viewport for modal selection
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-    
+    const mediaQuery =
+      window.matchMedia(
+        "(max-width: 767px)"
+      );
+
     const updateViewport = () => {
-      setIsMobileViewport(mediaQuery.matches);
+      setIsMobileViewport(
+        mediaQuery.matches
+      );
     };
 
     updateViewport();
-    mediaQuery.addEventListener("change", updateViewport);
-    
-    return () => mediaQuery.removeEventListener("change", updateViewport);
+
+    mediaQuery.addEventListener(
+      "change",
+      updateViewport
+    );
+
+    return () => {
+      mediaQuery.removeEventListener(
+        "change",
+        updateViewport
+      );
+    };
   }, []);
 
-  // Izračunaj efektivni prikaz
   const effectiveView: ViewPreference =
     viewPreference === "auto"
       ? isMobileViewport
@@ -61,20 +237,23 @@ export default function SalonPlatform() {
         : "desktop"
       : viewPreference;
 
-  // Handlers
   const openBooking = () => {
     setInitialServiceId(null);
     setInitialEmployeeId(null);
     setIsBookingOpen(true);
   };
 
-  const openBookingWithService = (serviceId: string) => {
+  const openBookingWithService = (
+    serviceId: string
+  ) => {
     setInitialServiceId(serviceId);
     setInitialEmployeeId(null);
     setIsBookingOpen(true);
   };
 
-  const openBookingWithEmployee = (employeeId: string) => {
+  const openBookingWithEmployee = (
+    employeeId: string
+  ) => {
     setInitialEmployeeId(employeeId);
     setInitialServiceId(null);
     setIsBookingOpen(true);
@@ -86,25 +265,53 @@ export default function SalonPlatform() {
 
   const switchToDesktop = () => {
     setViewPreference("desktop");
+
     try {
-      localStorage.setItem(STORAGE_KEY, "desktop");
-    } catch (e) {
-      // localStorage nije dostupan
+      localStorage.setItem(
+        STORAGE_KEY,
+        "desktop"
+      );
+    } catch {
+      // localStorage nije dostupan.
     }
   };
 
   const switchToMobile = () => {
     setViewPreference("mobile");
+
     try {
-      localStorage.setItem(STORAGE_KEY, "mobile");
-    } catch (e) {
-      // localStorage nije dostupan
+      localStorage.setItem(
+        STORAGE_KEY,
+        "mobile"
+      );
+    } catch {
+      // localStorage nije dostupan.
     }
   };
 
+  if (
+    status === "loading" ||
+    !catalog
+  ) {
+    if (status === "error") {
+      return (
+        <CatalogErrorScreen
+          locale={locale}
+          error={error}
+          onRetry={reload}
+        />
+      );
+    }
+
+    return (
+      <CatalogLoadingScreen
+        locale={locale}
+      />
+    );
+  }
+
   return (
     <>
-      {/* Auto mode - oba prikaza sa CSS kontrolom */}
       {viewPreference === "auto" && (
         <>
           <div className="md:hidden">
@@ -112,79 +319,120 @@ export default function SalonPlatform() {
               locale={locale}
               onLocaleChange={setLocale}
               onBook={openBooking}
-              onBookService={openBookingWithService}
-              onBookEmployee={openBookingWithEmployee}
-              onSwitchToDesktop={switchToDesktop}
+              onBookService={
+                openBookingWithService
+              }
+              onBookEmployee={
+                openBookingWithEmployee
+              }
+              onSwitchToDesktop={
+                switchToDesktop
+              }
             />
           </div>
+
           <div className="hidden md:block">
             <DesktopLanding
               locale={locale}
               onLocaleChange={setLocale}
               onBook={openBooking}
-              onBookService={openBookingWithService}
-              onBookEmployee={openBookingWithEmployee}
+              onBookService={
+                openBookingWithService
+              }
+              onBookEmployee={
+                openBookingWithEmployee
+              }
             />
           </div>
         </>
       )}
 
-      {/* Mobile preference */}
       {viewPreference === "mobile" && (
         <MobileAppShell
           locale={locale}
           onLocaleChange={setLocale}
           onBook={openBooking}
-          onBookService={openBookingWithService}
-          onBookEmployee={openBookingWithEmployee}
-          onSwitchToDesktop={switchToDesktop}
+          onBookService={
+            openBookingWithService
+          }
+          onBookEmployee={
+            openBookingWithEmployee
+          }
+          onSwitchToDesktop={
+            switchToDesktop
+          }
         />
       )}
 
-      {/* Desktop preference */}
       {viewPreference === "desktop" && (
         <>
           <DesktopLanding
             locale={locale}
             onLocaleChange={setLocale}
             onBook={openBooking}
-            onBookService={openBookingWithService}
-            onBookEmployee={openBookingWithEmployee}
+            onBookService={
+              openBookingWithService
+            }
+            onBookEmployee={
+              openBookingWithEmployee
+            }
           />
 
-          {/* Dugme za povratak na mobile view */}
           <button
             type="button"
             onClick={switchToMobile}
-            className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-[var(--brand-surface)] border border-[var(--brand-border)] flex items-center justify-center text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-[var(--brand-background)] transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] md:hidden shadow-lg"
+            className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--brand-border)] bg-[var(--brand-surface)] text-[var(--brand-primary)] shadow-lg transition-colors hover:bg-[var(--brand-primary)] hover:text-[var(--brand-background)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none md:hidden"
             style={{
-              marginBottom: "env(safe-area-inset-bottom)",
+              marginBottom:
+                "env(safe-area-inset-bottom)",
             }}
-            aria-label={t(translations.common.mobileNavigation, locale)}
+            aria-label={t(
+              translations.common
+                .mobileNavigation,
+              locale
+            )}
           >
-            <Smartphone className="w-5 h-5" aria-hidden="true" />
+            <Smartphone
+              className="h-5 w-5"
+              aria-hidden="true"
+            />
           </button>
         </>
       )}
 
-      {/* Booking modal - samo jedan aktivan */}
       {effectiveView === "mobile" ? (
         <MobileBookingModal
           isOpen={isBookingOpen}
           locale={locale}
-          initialServiceId={initialServiceId}
-          initialEmployeeId={initialEmployeeId}
+          initialServiceId={
+            initialServiceId
+          }
+          initialEmployeeId={
+            initialEmployeeId
+          }
           onClose={closeBooking}
         />
       ) : (
         <DesktopBookingModal
           isOpen={isBookingOpen}
           locale={locale}
-          initialServiceId={initialServiceId}
-          initialEmployeeId={initialEmployeeId}
+          initialServiceId={
+            initialServiceId
+          }
+          initialEmployeeId={
+            initialEmployeeId
+          }
           onClose={closeBooking}
         />
       )}
     </>
+  );
+}
+
+export default function SalonPlatform() {
+  return (
+    <CatalogProvider>
+      <SalonPlatformContent />
+    </CatalogProvider>
   );
 }
