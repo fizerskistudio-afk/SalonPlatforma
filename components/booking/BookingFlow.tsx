@@ -1,25 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useMemo,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
 } from "lucide-react";
 
-import type {
-  BookingDraft,
-  Locale,
-} from "@/lib/types";
+import { bookingConfig } from "@/lib/config";
 import {
   employees,
   services,
 } from "@/lib/mockData";
-import { bookingConfig } from "@/lib/config";
 import {
   t,
   translations,
 } from "@/lib/translations";
+import type {
+  BookingDraft,
+  Locale,
+} from "@/lib/types";
 
 import BookingProgress from "./BookingProgress";
 import BookingSummary from "./BookingSummary";
@@ -46,11 +49,6 @@ type BookingStep =
   | "summary"
   | "success";
 
-type EditableBookingStep = Exclude<
-  BookingStep,
-  "summary" | "success"
->;
-
 const stepOrder: BookingStep[] = [
   "service",
   "employee",
@@ -61,159 +59,48 @@ const stepOrder: BookingStep[] = [
   "success",
 ];
 
-const progressSteps = [
-  {
-    id: "service",
-    label: translations.booking.selectService,
-  },
-  {
-    id: "employee",
-    label: translations.booking.selectEmployee,
-  },
-  {
-    id: "date",
-    label: translations.booking.selectDate,
-  },
-  {
-    id: "time",
-    label: translations.booking.selectTime,
-  },
-  {
-    id: "customer",
-    label: translations.booking.yourInfo,
-  },
-  {
-    id: "summary",
-    label: translations.booking.summary,
-  },
-];
-
-function isActiveService(
-  serviceId: string | null
-): boolean {
-  if (!serviceId) {
-    return false;
-  }
-
-  return services.some(
-    (service) =>
-      service.id === serviceId &&
-      service.isActive
-  );
-}
-
-function isValidEmployeePreference(
-  preference: BookingDraft["employeePreference"],
-  serviceId: string | null
-): boolean {
-  if (!serviceId) {
-    return false;
-  }
-
-  if (preference === "any") {
-    return bookingConfig.allowAnyEmployee;
-  }
-
-  if (!preference) {
-    return false;
-  }
-
-  return employees.some(
-    (employee) =>
-      employee.id === preference &&
-      employee.isActive &&
-      employee.serviceIds.includes(serviceId)
-  );
-}
-
-function isCustomerValid(
-  customer: BookingDraft["customer"]
-): boolean {
-  if (!customer.name.trim()) {
-    return false;
-  }
-
-  if (
-    bookingConfig.requirePhone &&
-    !customer.phone.trim()
-  ) {
-    return false;
-  }
-
-  if (
-    bookingConfig.requireEmail &&
-    !customer.email.trim()
-  ) {
-    return false;
-  }
-
-  return true;
-}
-
-function isDraftComplete(
-  draft: BookingDraft
-): boolean {
-  return (
-    isActiveService(draft.serviceId) &&
-    isValidEmployeePreference(
-      draft.employeePreference,
-      draft.serviceId
-    ) &&
-    Boolean(draft.date?.trim()) &&
-    Boolean(draft.time?.trim()) &&
-    isCustomerValid(draft.customer)
-  );
-}
-
 function createInitialDraft(
   initialServiceId: string | null,
   initialEmployeeId: string | null
 ): BookingDraft {
-  const initialService = initialServiceId
-    ? services.find(
-        (service) =>
-          service.id === initialServiceId &&
-          service.isActive
-      )
-    : undefined;
+  const validService =
+    initialServiceId
+      ? services.find(
+          (service) =>
+            service.id ===
+              initialServiceId &&
+            service.isActive
+        )
+      : undefined;
 
-  const validServiceId =
-    initialService?.id ?? null;
+  const validEmployee =
+    initialEmployeeId
+      ? employees.find(
+          (employee) =>
+            employee.id ===
+              initialEmployeeId &&
+            employee.isActive
+        )
+      : undefined;
 
-  let employeePreference: BookingDraft["employeePreference"] =
-    null;
+  const serviceId =
+    validService?.id ?? null;
+
+  let employeePreference =
+    validEmployee?.id ?? null;
 
   if (
-    initialEmployeeId === "any" &&
-    bookingConfig.allowAnyEmployee
+    serviceId &&
+    validEmployee &&
+    !validEmployee.serviceIds.includes(
+      serviceId
+    )
   ) {
-    employeePreference = "any";
-  } else if (initialEmployeeId) {
-    const initialEmployee = employees.find(
-      (employee) =>
-        employee.id === initialEmployeeId &&
-        employee.isActive
-    );
-
-    const employeeSupportsService =
-      !validServiceId ||
-      Boolean(
-        initialEmployee?.serviceIds.includes(
-          validServiceId
-        )
-      );
-
-    if (
-      initialEmployee &&
-      employeeSupportsService
-    ) {
-      employeePreference =
-        initialEmployee.id;
-    }
+    employeePreference = null;
   }
 
   return {
-    serviceId: validServiceId,
+    serviceId,
     employeePreference,
     date: null,
     time: null,
@@ -243,12 +130,57 @@ export default function BookingFlow({
       )
     );
 
+  const [
+    resolvedEmployeeBackendId,
+    setResolvedEmployeeBackendId,
+  ] = useState<string | null>(null);
+
   const currentStepIndex =
     stepOrder.indexOf(currentStep);
+
+  const progressSteps = useMemo(
+    () => [
+      {
+        id: "service",
+        label:
+          translations.booking
+            .selectService,
+      },
+      {
+        id: "employee",
+        label:
+          translations.booking
+            .selectEmployee,
+      },
+      {
+        id: "date",
+        label:
+          translations.booking.selectDate,
+      },
+      {
+        id: "time",
+        label:
+          translations.booking.selectTime,
+      },
+      {
+        id: "customer",
+        label:
+          translations.booking.yourInfo,
+      },
+      {
+        id: "summary",
+        label:
+          translations.booking.summary,
+      },
+    ],
+    []
+  );
 
   const handleSelectService = (
     serviceId: string
   ) => {
+    setResolvedEmployeeBackendId(null);
+
     setDraft((previousDraft) => {
       const nextDraft: BookingDraft = {
         ...previousDraft,
@@ -262,22 +194,19 @@ export default function BookingFlow({
         previousDraft.employeePreference !==
           "any"
       ) {
-        const selectedEmployee =
-          employees.find(
-            (employee) =>
-              employee.id ===
-              previousDraft.employeePreference
-          );
+        const employee = employees.find(
+          (item) =>
+            item.id ===
+            previousDraft.employeePreference
+        );
 
-        const employeeIsValid =
-          Boolean(selectedEmployee?.isActive) &&
-          Boolean(
-            selectedEmployee?.serviceIds.includes(
-              serviceId
-            )
-          );
-
-        if (!employeeIsValid) {
+        if (
+          !employee ||
+          !employee.isActive ||
+          !employee.serviceIds.includes(
+            serviceId
+          )
+        ) {
           nextDraft.employeePreference =
             null;
         }
@@ -290,6 +219,8 @@ export default function BookingFlow({
   const handleSelectEmployee = (
     preference: "any" | string
   ) => {
+    setResolvedEmployeeBackendId(null);
+
     setDraft((previousDraft) => ({
       ...previousDraft,
       employeePreference: preference,
@@ -301,6 +232,8 @@ export default function BookingFlow({
   const handleSelectDate = (
     date: string
   ) => {
+    setResolvedEmployeeBackendId(null);
+
     setDraft((previousDraft) => ({
       ...previousDraft,
       date,
@@ -309,8 +242,13 @@ export default function BookingFlow({
   };
 
   const handleSelectTime = (
-    time: string
+    time: string,
+    employeeBackendId: string
   ) => {
+    setResolvedEmployeeBackendId(
+      employeeBackendId
+    );
+
     setDraft((previousDraft) => ({
       ...previousDraft,
       time,
@@ -331,69 +269,159 @@ export default function BookingFlow({
   };
 
   const handleChangeStep = (
-    step: EditableBookingStep
+    step:
+      | "service"
+      | "employee"
+      | "date"
+      | "time"
+      | "customer"
   ) => {
     setCurrentStep(step);
   };
 
-  const canGoNext = (() => {
+  const canGoNext = useMemo(() => {
     switch (currentStep) {
       case "service":
-        return isActiveService(
-          draft.serviceId
+        return Boolean(
+          draft.serviceId &&
+            services.some(
+              (service) =>
+                service.id ===
+                  draft.serviceId &&
+                service.isActive
+            )
         );
 
-      case "employee":
-        return isValidEmployeePreference(
-          draft.employeePreference,
-          draft.serviceId
+      case "employee": {
+        if (
+          draft.employeePreference ===
+          "any"
+        ) {
+          return bookingConfig
+            .allowAnyEmployee;
+        }
+
+        if (
+          !draft.employeePreference ||
+          !draft.serviceId
+        ) {
+          return false;
+        }
+
+        const employee = employees.find(
+          (item) =>
+            item.id ===
+            draft.employeePreference
         );
+
+        return Boolean(
+          employee?.isActive &&
+            employee.serviceIds.includes(
+              draft.serviceId
+            )
+        );
+      }
 
       case "date":
-        return Boolean(draft.date?.trim());
+        return draft.date !== null;
 
       case "time":
-        return Boolean(draft.time?.trim());
-
-      case "customer":
-        return isCustomerValid(
-          draft.customer
+        return Boolean(
+          draft.time &&
+            resolvedEmployeeBackendId
         );
 
-      case "summary":
-        return isDraftComplete(draft);
+      case "customer": {
+        const {
+          name,
+          phone,
+          email,
+        } = draft.customer;
 
-      case "success":
+        if (!name.trim()) {
+          return false;
+        }
+
+        if (
+          bookingConfig.requirePhone &&
+          !phone.trim()
+        ) {
+          return false;
+        }
+
+        if (
+          bookingConfig.requireEmail &&
+          !email.trim()
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+
+      case "summary":
+        return Boolean(
+          draft.serviceId &&
+            draft.employeePreference &&
+            draft.date &&
+            draft.time &&
+            resolvedEmployeeBackendId &&
+            draft.customer.name.trim() &&
+            (!bookingConfig.requirePhone ||
+              draft.customer.phone.trim()) &&
+            (!bookingConfig.requireEmail ||
+              draft.customer.email.trim())
+        );
+
+      default:
         return false;
     }
-  })();
+  }, [
+    currentStep,
+    draft,
+    resolvedEmployeeBackendId,
+  ]);
 
   const handleNext = () => {
     if (!canGoNext) {
       return;
     }
 
-    const nextStep =
-      stepOrder[currentStepIndex + 1];
+    const currentIndex =
+      stepOrder.indexOf(currentStep);
 
-    if (nextStep) {
-      setCurrentStep(nextStep);
+    if (
+      currentIndex <
+      stepOrder.length - 1
+    ) {
+      setCurrentStep(
+        stepOrder[currentIndex + 1]
+      );
     }
   };
 
   const handleBack = () => {
-    const previousStep =
-      stepOrder[currentStepIndex - 1];
+    const currentIndex =
+      stepOrder.indexOf(currentStep);
 
-    if (previousStep) {
-      setCurrentStep(previousStep);
+    if (currentIndex > 0) {
+      setCurrentStep(
+        stepOrder[currentIndex - 1]
+      );
     }
   };
 
   const handleConfirm = () => {
-    if (!isDraftComplete(draft)) {
+    if (!canGoNext) {
       return;
     }
+
+    /*
+     * U Fazi 8.8 ovde šaljemo:
+     * - draft
+     * - resolvedEmployeeBackendId
+     * ka API ruti za kreiranje rezervacije.
+     */
 
     setCurrentStep("success");
   };
@@ -434,7 +462,9 @@ export default function BookingFlow({
           <DateStep
             locale={locale}
             selectedDate={draft.date}
-            onSelectDate={handleSelectDate}
+            onSelectDate={
+              handleSelectDate
+            }
           />
         );
 
@@ -450,7 +480,9 @@ export default function BookingFlow({
               draft.employeePreference
             }
             selectedTime={draft.time}
-            onSelectTime={handleSelectTime}
+            onSelectTime={
+              handleSelectTime
+            }
           />
         );
 
@@ -484,13 +516,16 @@ export default function BookingFlow({
             onDone={onDone}
           />
         );
+
+      default:
+        return null;
     }
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       {currentStep !== "success" && (
-        <div className="shrink-0 border-b border-[var(--brand-border)] bg-[var(--brand-surface)] px-4 py-3 sm:px-6 sm:py-4">
+        <div className="shrink-0 border-b border-[var(--brand-border)] px-4 py-3 sm:px-6 sm:py-4">
           <BookingProgress
             steps={progressSteps}
             currentStepIndex={
@@ -506,64 +541,62 @@ export default function BookingFlow({
       </div>
 
       {currentStep !== "success" && (
-        <div className="shrink-0 border-t border-[var(--brand-border)] bg-[var(--brand-surface)] px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] sm:px-6 sm:py-4">
-          <div className="flex items-center justify-between gap-3">
-            {currentStepIndex > 0 ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand-border)] px-4 py-2.5 font-medium text-[var(--brand-text)] transition-colors hover:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none sm:px-5"
-              >
-                <ArrowLeft
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[var(--brand-border)] bg-[var(--brand-surface)] px-4 py-3 shadow-[0_-12px_30px_rgba(0,0,0,0.18)] sm:px-6 sm:py-4">
+          {currentStepIndex > 0 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand-border)] px-4 py-2.5 font-medium text-[var(--brand-text)] transition-colors hover:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none sm:px-5"
+            >
+              <ArrowLeft
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
 
-                {t(
-                  translations.booking.back,
-                  locale
-                )}
-              </button>
-            ) : (
-              <div aria-hidden="true" />
-            )}
+              {t(
+                translations.booking.back,
+                locale
+              )}
+            </button>
+          ) : (
+            <div />
+          )}
 
-            {currentStep === "summary" ? (
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={!canGoNext}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-surface)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none sm:px-6"
-              >
-                {t(
-                  translations.booking.confirm,
-                  locale
-                )}
+          {currentStep === "summary" ? (
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={!canGoNext}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-background)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none sm:px-6"
+            >
+              {t(
+                translations.booking.confirm,
+                locale
+              )}
 
-                <Check
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!canGoNext}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-surface)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none sm:px-6"
-              >
-                {t(
-                  translations.booking.next,
-                  locale
-                )}
+              <Check
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={!canGoNext}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-background)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none sm:px-6"
+            >
+              {t(
+                translations.booking.next,
+                locale
+              )}
 
-                <ArrowRight
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-              </button>
-            )}
-          </div>
+              <ArrowRight
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          )}
         </div>
       )}
     </div>
