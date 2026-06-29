@@ -34,7 +34,8 @@ type TimeStepProps = {
   selectedTime: string | null;
   onSelectTime: (
     time: string,
-    employeeBackendId: string
+    employeeBackendId: string,
+    startsAt: string
   ) => void;
 };
 
@@ -160,9 +161,12 @@ function createDisplaySlots(
       time,
       employeeBackendId:
         row.employeeId,
-      employeeName: row.employeeName,
-      startsAt: row.startsAt,
-      endsAt: row.endsAt,
+      employeeName:
+        row.employeeName,
+      startsAt:
+        row.startsAt,
+      endsAt:
+        row.endsAt,
     });
   }
 
@@ -274,8 +278,14 @@ export default function TimeStep({
               "businessSlug",
               DEFAULT_BUSINESS_SLUG,
             ],
-            ["serviceId", serviceId],
-            ["date", date],
+            [
+              "serviceId",
+              serviceId,
+            ],
+            [
+              "date",
+              date,
+            ],
           ]);
 
         if (employeeId) {
@@ -309,13 +319,15 @@ export default function TimeStep({
           throw new Error(message);
         }
 
-        const slots = createDisplaySlots(
-          payload.slots,
-          payload.business.timezone
-        );
+        const slots =
+          createDisplaySlots(
+            payload.slots,
+            payload.business.timezone
+          );
 
         setAvailability({
-          requestKey: activeRequestKey,
+          requestKey:
+            activeRequestKey,
           status: "success",
           slots,
         });
@@ -333,7 +345,8 @@ export default function TimeStep({
         );
 
         setAvailability({
-          requestKey: activeRequestKey,
+          requestKey:
+            activeRequestKey,
           status: "error",
           slots: [],
         });
@@ -387,7 +400,8 @@ export default function TimeStep({
       <div className="space-y-6">
         <SectionHeader
           title={
-            translations.booking.selectTime
+            translations.booking
+              .selectTime
           }
           subtitle={
             translations.booking
@@ -481,10 +495,13 @@ export default function TimeStep({
                 onClick={() =>
                   onSelectTime(
                     slot.time,
-                    slot.employeeBackendId
+                    slot.employeeBackendId,
+                    slot.startsAt
                   )
                 }
-                aria-pressed={isSelected}
+                aria-pressed={
+                  isSelected
+                }
                 aria-label={`${t(
                   translations.common.time,
                   locale
