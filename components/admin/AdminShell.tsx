@@ -74,7 +74,7 @@ const navigationItems: NavigationItem[] = [
     description: "Katalog i cene",
     href: "/admin/services",
     icon: Scissors,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Tim",
@@ -236,9 +236,7 @@ function SidebarContent({
                 href={item.href}
                 onClick={onNavigate}
                 aria-current={
-                  isActive
-                    ? "page"
-                    : undefined
+                  isActive ? "page" : undefined
                 }
                 className={`group flex items-center gap-3 rounded-2xl px-3 py-3 transition focus:outline-none focus:ring-2 focus:ring-amber-300 ${
                   isActive
@@ -305,9 +303,7 @@ function SidebarContent({
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-300 text-sm font-bold text-zinc-950">
-              {getInitials(
-                businessName
-              )}
+              {getInitials(businessName)}
             </div>
 
             <div className="min-w-0 flex-1">
@@ -316,8 +312,7 @@ function SidebarContent({
               </div>
 
               <div className="truncate text-xs text-zinc-600">
-                {email ??
-                  businessSlug}
+                {email ?? businessSlug}
               </div>
             </div>
 
@@ -345,8 +340,7 @@ export default function AdminShell({
   children,
   admin,
 }: AdminShellProps) {
-  const pathname =
-    usePathname();
+  const pathname = usePathname();
 
   const [
     mobileMenuOpen,
@@ -354,12 +348,11 @@ export default function AdminShell({
   ] = useState(false);
 
   const currentNavigationItem =
-    navigationItems.find(
-      (item) =>
-        isNavigationItemActive(
-          pathname,
-          item.href
-        )
+    navigationItems.find((item) =>
+      isNavigationItemActive(
+        pathname,
+        item.href
+      )
     );
 
   const pageTitle =
@@ -371,12 +364,8 @@ export default function AdminShell({
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/[0.07] bg-zinc-950 lg:block">
         <SidebarContent
           pathname={pathname}
-          businessName={
-            admin.business.name
-          }
-          businessSlug={
-            admin.business.slug
-          }
+          businessName={admin.business.name}
+          businessSlug={admin.business.slug}
           email={admin.email}
           role={admin.role}
         />
@@ -389,9 +378,7 @@ export default function AdminShell({
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             aria-label="Zatvori navigaciju"
             onClick={() =>
-              setMobileMenuOpen(
-                false
-              )
+              setMobileMenuOpen(false)
             }
           />
 
@@ -399,9 +386,7 @@ export default function AdminShell({
             <button
               type="button"
               onClick={() =>
-                setMobileMenuOpen(
-                  false
-                )
+                setMobileMenuOpen(false)
               }
               aria-label="Zatvori meni"
               className="absolute right-3 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.05] text-zinc-400 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -414,18 +399,12 @@ export default function AdminShell({
 
             <SidebarContent
               pathname={pathname}
-              businessName={
-                admin.business.name
-              }
-              businessSlug={
-                admin.business.slug
-              }
+              businessName={admin.business.name}
+              businessSlug={admin.business.slug}
               email={admin.email}
               role={admin.role}
               onNavigate={() =>
-                setMobileMenuOpen(
-                  false
-                )
+                setMobileMenuOpen(false)
               }
             />
           </aside>
@@ -439,9 +418,7 @@ export default function AdminShell({
               <button
                 type="button"
                 onClick={() =>
-                  setMobileMenuOpen(
-                    true
-                  )
+                  setMobileMenuOpen(true)
                 }
                 aria-label="Otvori admin meni"
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:bg-white/[0.08] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 lg:hidden"
@@ -454,10 +431,7 @@ export default function AdminShell({
 
               <div className="min-w-0">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-                  {
-                    admin.business
-                      .name
-                  }
+                  {admin.business.name}
                 </div>
 
                 <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">
@@ -492,17 +466,12 @@ export default function AdminShell({
 
                 <div>
                   <div className="text-xs font-semibold text-zinc-200">
-                    {
-                      roleLabels[
-                        admin.role
-                      ]
-                    }
+                    {roleLabels[admin.role]}
                   </div>
 
                   <div className="max-w-44 truncate text-[10px] text-zinc-600">
                     {admin.email ??
-                      admin.business
-                        .slug}
+                      admin.business.slug}
                   </div>
                 </div>
               </div>
