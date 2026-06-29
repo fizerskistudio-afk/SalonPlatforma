@@ -1,18 +1,20 @@
 "use client";
 
-import type { MouseEvent } from "react";
+import type {
+  MouseEvent,
+} from "react";
 import { Clock } from "lucide-react";
 
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
 import type {
   Locale,
   Service,
   ServicePriceType,
 } from "@/lib/types";
-import { businessConfig } from "@/lib/config";
-import {
-  t,
-  translations,
-} from "@/lib/translations";
 
 type ServiceCardBaseProps = {
   service: Service;
@@ -23,21 +25,31 @@ type ServiceCardSelectableProps =
   ServiceCardBaseProps & {
     mode: "selectable";
     isSelected: boolean;
-    onSelect: (serviceId: string) => void;
+
+    onSelect: (
+      serviceId: string
+    ) => void;
   };
 
 type ServiceCardDisplayProps =
   ServiceCardBaseProps & {
     mode: "display";
-    onBook: (serviceId: string) => void;
+
+    onBook: (
+      serviceId: string
+    ) => void;
   };
 
 type ServiceCardProps =
   | ServiceCardSelectableProps
   | ServiceCardDisplayProps;
 
-function formatAmount(value: number): string {
-  if (Number.isInteger(value)) {
+function formatAmount(
+  value: number
+): string {
+  if (
+    Number.isInteger(value)
+  ) {
     return String(value);
   }
 
@@ -51,7 +63,8 @@ function formatCurrencyAmount(
   currency: string,
   locale: Locale
 ): string {
-  const amount = formatAmount(value);
+  const amount =
+    formatAmount(value);
 
   switch (currency) {
     case "EUR":
@@ -80,17 +93,22 @@ function formatPrice(
   currency: string,
   locale: Locale
 ): string {
-  const formattedFrom = formatCurrencyAmount(
-    priceFrom,
-    currency,
-    locale
-  );
+  const formattedFrom =
+    formatCurrencyAmount(
+      priceFrom,
+      currency,
+      locale
+    );
 
-  if (priceType === "fixed") {
+  if (
+    priceType === "fixed"
+  ) {
     return formattedFrom;
   }
 
-  if (priceType === "from") {
+  if (
+    priceType === "from"
+  ) {
     const prefix = t(
       translations.priceTypes.from,
       locale
@@ -104,15 +122,17 @@ function formatPrice(
     priceTo !== undefined
   ) {
     const separator = t(
-      translations.priceTypes.range,
+      translations.priceTypes
+        .range,
       locale
     );
 
-    const formattedTo = formatCurrencyAmount(
-      priceTo,
-      currency,
-      locale
-    );
+    const formattedTo =
+      formatCurrencyAmount(
+        priceTo,
+        currency,
+        locale
+      );
 
     return `${formattedFrom} ${separator} ${formattedTo}`;
   }
@@ -123,24 +143,40 @@ function formatPrice(
 export default function ServiceCard(
   props: ServiceCardProps
 ) {
-  const { service, locale } = props;
+  const {
+    business,
+  } = useCatalogData();
+
+  const {
+    service,
+    locale,
+  } = props;
 
   const price = formatPrice(
     service.priceType,
     service.priceFrom,
     service.priceTo,
-    businessConfig.currency,
+    business.currency,
     locale
   );
 
-  if (props.mode === "selectable") {
-    const { isSelected, onSelect } = props;
+  if (
+    props.mode === "selectable"
+  ) {
+    const {
+      isSelected,
+      onSelect,
+    } = props;
 
     return (
       <button
         type="button"
-        onClick={() => onSelect(service.id)}
-        aria-pressed={isSelected}
+        onClick={() =>
+          onSelect(service.id)
+        }
+        aria-pressed={
+          isSelected
+        }
         aria-label={`${t(
           service.name,
           locale
@@ -154,7 +190,10 @@ export default function ServiceCard(
         <div className="mb-3 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="font-medium text-[var(--brand-text)] transition-colors group-hover:text-[var(--brand-primary)] motion-reduce:transition-none">
-              {t(service.name, locale)}
+              {t(
+                service.name,
+                locale
+              )}
             </h3>
 
             <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--brand-muted)]">
@@ -164,9 +203,12 @@ export default function ServiceCard(
               />
 
               <span>
-                {service.durationMinutes}{" "}
+                {
+                  service.durationMinutes
+                }{" "}
                 {t(
-                  translations.booking.minutes,
+                  translations.booking
+                    .minutes,
                   locale
                 )}
               </span>
@@ -192,7 +234,9 @@ export default function ServiceCard(
     );
   }
 
-  const { onBook } = props;
+  const {
+    onBook,
+  } = props;
 
   const handleBook = (
     event: MouseEvent<HTMLButtonElement>
@@ -206,7 +250,10 @@ export default function ServiceCard(
       <div className="mb-3 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h3 className="font-medium text-[var(--brand-text)]">
-            {t(service.name, locale)}
+            {t(
+              service.name,
+              locale
+            )}
           </h3>
 
           <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--brand-muted)]">
@@ -216,9 +263,12 @@ export default function ServiceCard(
             />
 
             <span>
-              {service.durationMinutes}{" "}
+              {
+                service.durationMinutes
+              }{" "}
               {t(
-                translations.booking.minutes,
+                translations.booking
+                  .minutes,
                 locale
               )}
             </span>
@@ -238,10 +288,16 @@ export default function ServiceCard(
         aria-label={`${t(
           translations.nav.book,
           locale
-        )} ${t(service.name, locale)}`}
+        )} ${t(
+          service.name,
+          locale
+        )}`}
         className="mt-3 w-full rounded-xl bg-[var(--brand-text)] py-2.5 text-sm font-medium text-[var(--brand-surface)] transition-colors hover:bg-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none"
       >
-        {t(translations.nav.book, locale)}
+        {t(
+          translations.nav.book,
+          locale
+        )}
       </button>
     </article>
   );

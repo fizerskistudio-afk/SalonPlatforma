@@ -2,17 +2,20 @@
 
 import { Scissors } from "lucide-react";
 
-import type { Locale } from "@/lib/types";
-import { businessConfig } from "@/lib/config";
+import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
   translations,
 } from "@/lib/translations";
+import type { Locale } from "@/lib/types";
+
 import LanguageSwitcher from "../shared/LanguageSwitcher";
 
 type HeaderProps = {
   locale: Locale;
-  onLocaleChange: (locale: Locale) => void;
+  onLocaleChange: (
+    locale: Locale
+  ) => void;
   onBook: () => void;
 };
 
@@ -47,12 +50,16 @@ export default function Header({
   onLocaleChange,
   onBook,
 }: HeaderProps) {
+  const {
+    business,
+  } = useCatalogData();
+
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-white/10 bg-black/15 backdrop-blur-sm">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-8">
         <a
           href="#home"
-          aria-label={`${businessConfig.name} - ${t(
+          aria-label={`${business.name} - ${t(
             translations.nav.home,
             locale
           )}`}
@@ -67,12 +74,12 @@ export default function Header({
 
           <div>
             <div className="font-serif text-xl font-semibold tracking-tight text-white">
-              {businessConfig.name}
+              {business.name}
             </div>
 
             <div className="-mt-0.5 hidden text-xs text-white/60 sm:block">
               {t(
-                businessConfig.tagline,
+                business.tagline,
                 locale
               )}
             </div>
@@ -82,28 +89,35 @@ export default function Header({
         <nav
           className="hidden items-center gap-8 lg:flex"
           aria-label={t(
-            translations.common.mainNavigation,
+            translations.common
+              .mainNavigation,
             locale
           )}
         >
-          {navItems.map((item) => (
-            <a
-              key={item.key}
-              href={item.href}
-              className="rounded px-2 py-1 text-sm font-medium text-white/75 transition-colors hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black motion-reduce:transition-none"
-            >
-              {t(
-                translations.nav[item.key],
-                locale
-              )}
-            </a>
-          ))}
+          {navItems.map(
+            (item) => (
+              <a
+                key={item.key}
+                href={item.href}
+                className="rounded px-2 py-1 text-sm font-medium text-white/75 transition-colors hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black motion-reduce:transition-none"
+              >
+                {t(
+                  translations.nav[
+                    item.key
+                  ],
+                  locale
+                )}
+              </a>
+            )
+          )}
         </nav>
 
         <div className="flex items-center gap-4">
           <LanguageSwitcher
             currentLocale={locale}
-            onLocaleChange={onLocaleChange}
+            onLocaleChange={
+              onLocaleChange
+            }
             variant="header"
           />
 

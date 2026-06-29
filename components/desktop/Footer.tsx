@@ -1,10 +1,13 @@
-import type { Locale } from "@/lib/types";
-import { businessConfig } from "@/lib/config";
+"use client";
+
+import { Scissors } from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
   translations,
 } from "@/lib/translations";
-import { Scissors } from "lucide-react";
+import type { Locale } from "@/lib/types";
 
 type FooterProps = {
   locale: Locale;
@@ -39,7 +42,12 @@ const navItems: {
 export default function Footer({
   locale,
 }: FooterProps) {
-  const currentYear = new Date().getFullYear();
+  const {
+    business,
+  } = useCatalogData();
+
+  const currentYear =
+    new Date().getFullYear();
 
   return (
     <footer className="bg-[var(--brand-text)] px-8 py-12 text-[var(--brand-surface)]">
@@ -55,13 +63,13 @@ export default function Footer({
 
             <div>
               <div className="font-display text-lg font-semibold">
-                {businessConfig.name}
+                {business.name}
               </div>
 
               <div className="text-xs text-[var(--brand-surface)] opacity-50">
                 © {currentYear} ·{" "}
                 {t(
-                  businessConfig.city,
+                  business.city,
                   locale
                 )}
               </div>
@@ -70,24 +78,29 @@ export default function Footer({
 
           <nav
             aria-label={t(
-              translations.common.footerNavigation,
+              translations.common
+                .footerNavigation,
               locale
             )}
           >
             <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              {navItems.map((item) => (
-                <li key={item.key}>
-                  <a
-                    href={item.href}
-                    className="rounded px-2 py-1 text-sm text-[var(--brand-surface)] opacity-70 transition-colors hover:text-[var(--brand-primary)] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-text)] motion-reduce:transition-none"
-                  >
-                    {t(
-                      translations.nav[item.key],
-                      locale
-                    )}
-                  </a>
-                </li>
-              ))}
+              {navItems.map(
+                (item) => (
+                  <li key={item.key}>
+                    <a
+                      href={item.href}
+                      className="rounded px-2 py-1 text-sm text-[var(--brand-surface)] opacity-70 transition-colors hover:text-[var(--brand-primary)] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-text)] motion-reduce:transition-none"
+                    >
+                      {t(
+                        translations.nav[
+                          item.key
+                        ],
+                        locale
+                      )}
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </nav>
 

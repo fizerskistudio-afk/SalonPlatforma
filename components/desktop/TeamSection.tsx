@@ -1,25 +1,36 @@
 "use client";
 
-import type { Locale } from "@/lib/types";
-import { employees } from "@/lib/mockData";
-import { translations } from "@/lib/translations";
-import EmployeeCard from "../shared/EmployeeCard";
-import SectionHeader from "../shared/SectionHeader";
-import EmptyState from "../shared/EmptyState";
 import { Users } from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import { translations } from "@/lib/translations";
+import type { Locale } from "@/lib/types";
+
+import EmployeeCard from "../shared/EmployeeCard";
+import EmptyState from "../shared/EmptyState";
+import SectionHeader from "../shared/SectionHeader";
 
 type TeamSectionProps = {
   locale: Locale;
-  onBookEmployee: (employeeId: string) => void;
+
+  onBookEmployee: (
+    employeeId: string
+  ) => void;
 };
 
 export default function TeamSection({
   locale,
   onBookEmployee,
 }: TeamSectionProps) {
-  const activeEmployees = employees.filter(
-    (employee) => employee.isActive
-  );
+  const {
+    employees,
+  } = useCatalogData();
+
+  const activeEmployees =
+    employees.filter(
+      (employee) =>
+        employee.isActive
+    );
 
   return (
     <section
@@ -28,26 +39,42 @@ export default function TeamSection({
     >
       <div className="mx-auto max-w-7xl">
         <SectionHeader
-          title={translations.sections.teamTitle}
-          subtitle={translations.sections.teamSub}
+          title={
+            translations.sections
+              .teamTitle
+          }
+          subtitle={
+            translations.sections
+              .teamSub
+          }
           locale={locale}
         />
 
-        {activeEmployees.length > 0 ? (
+        {activeEmployees.length >
+        0 ? (
           <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-            {activeEmployees.map((employee) => (
-              <EmployeeCard
-                key={employee.id}
-                employee={employee}
-                locale={locale}
-                mode="display"
-                onBookWith={onBookEmployee}
-              />
-            ))}
+            {activeEmployees.map(
+              (employee) => (
+                <EmployeeCard
+                  key={employee.id}
+                  employee={
+                    employee
+                  }
+                  locale={locale}
+                  mode="display"
+                  onBookWith={
+                    onBookEmployee
+                  }
+                />
+              )
+            )}
           </div>
         ) : (
           <EmptyState
-            title={translations.common.noEmployees}
+            title={
+              translations.common
+                .noEmployees
+            }
             description={
               translations.common
                 .noEmployeesDescription

@@ -1,21 +1,31 @@
 "use client";
 
-import type { BookingDraft, Locale } from "@/lib/types";
-import { bookingConfig } from "@/lib/config";
-import { t, translations } from "@/lib/translations";
 import {
   Mail,
   Phone as PhoneIcon,
   StickyNote,
   User,
 } from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  BookingDraft,
+  Locale,
+} from "@/lib/types";
+
 import SectionHeader from "../shared/SectionHeader";
 
-type CustomerField = keyof BookingDraft["customer"];
+type CustomerField =
+  keyof BookingDraft["customer"];
 
 type CustomerStepProps = {
   locale: Locale;
   customer: BookingDraft["customer"];
+
   onCustomerChange: (
     field: CustomerField,
     value: string
@@ -28,17 +38,24 @@ export default function CustomerStep({
   onCustomerChange,
 }: CustomerStepProps) {
   const {
+    booking,
+  } = useCatalogData();
+
+  const {
     requirePhone,
     requireEmail,
     allowNotes,
-  } = bookingConfig;
+  } = booking;
 
   return (
     <div className="space-y-6">
       <SectionHeader
-        title={translations.booking.yourInfo}
+        title={
+          translations.booking.yourInfo
+        }
         subtitle={
-          translations.booking.yourInfoDescription
+          translations.booking
+            .yourInfoDescription
         }
         locale={locale}
         align="left"
@@ -51,7 +68,8 @@ export default function CustomerStep({
             className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
           >
             {t(
-              translations.booking.fullName,
+              translations.booking
+                .fullName,
               locale
             )}
 
@@ -83,7 +101,8 @@ export default function CustomerStep({
               required
               aria-required="true"
               placeholder={t(
-                translations.customer.namePlaceholder,
+                translations.customer
+                  .namePlaceholder,
                 locale
               )}
               className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3.5 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
@@ -96,7 +115,10 @@ export default function CustomerStep({
             htmlFor="customer-phone"
             className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
           >
-            {t(translations.booking.phone, locale)}
+            {t(
+              translations.booking.phone,
+              locale
+            )}
 
             {requirePhone && (
               <span
@@ -129,7 +151,8 @@ export default function CustomerStep({
               required={requirePhone}
               aria-required={requirePhone}
               placeholder={t(
-                translations.customer.phonePlaceholder,
+                translations.customer
+                  .phonePlaceholder,
                 locale
               )}
               className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3.5 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
@@ -142,7 +165,10 @@ export default function CustomerStep({
             htmlFor="customer-email"
             className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
           >
-            {t(translations.booking.email, locale)}
+            {t(
+              translations.booking.email,
+              locale
+            )}
 
             {requireEmail && (
               <span
@@ -175,7 +201,8 @@ export default function CustomerStep({
               required={requireEmail}
               aria-required={requireEmail}
               placeholder={t(
-                translations.customer.emailPlaceholder,
+                translations.customer
+                  .emailPlaceholder,
                 locale
               )}
               className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3.5 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
@@ -189,7 +216,10 @@ export default function CustomerStep({
               htmlFor="customer-note"
               className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
             >
-              {t(translations.booking.note, locale)}
+              {t(
+                translations.booking.note,
+                locale
+              )}
             </label>
 
             <div className="relative">
@@ -209,7 +239,8 @@ export default function CustomerStep({
                 }
                 rows={3}
                 placeholder={t(
-                  translations.customer.notePlaceholder,
+                  translations.customer
+                    .notePlaceholder,
                   locale
                 )}
                 className="w-full resize-none rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"

@@ -1,8 +1,12 @@
 "use client";
 
-import { Calendar, Monitor, Scissors } from "lucide-react";
+import {
+  Calendar,
+  Monitor,
+  Scissors,
+} from "lucide-react";
 
-import { businessConfig } from "@/lib/config";
+import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
   translations,
@@ -13,7 +17,11 @@ import LanguageSwitcher from "../shared/LanguageSwitcher";
 
 type MobileHeaderProps = {
   locale: Locale;
-  onLocaleChange: (locale: Locale) => void;
+
+  onLocaleChange: (
+    locale: Locale
+  ) => void;
+
   onBook: () => void;
   onSwitchToDesktop: () => void;
 };
@@ -24,6 +32,10 @@ export default function MobileHeader({
   onBook,
   onSwitchToDesktop,
 }: MobileHeaderProps) {
+  const {
+    business,
+  } = useCatalogData();
+
   return (
     <header
       className="fixed inset-x-0 top-0 z-40 border-b border-[var(--brand-text)]/10 bg-[var(--brand-background)]/65 backdrop-blur-md"
@@ -46,7 +58,7 @@ export default function MobileHeader({
 
           <div className="min-w-0">
             <div className="font-display truncate text-sm font-semibold leading-tight text-[var(--brand-text)]">
-              {businessConfig.name}
+              {business.name}
             </div>
           </div>
         </div>
@@ -64,7 +76,8 @@ export default function MobileHeader({
             type="button"
             onClick={onBook}
             aria-label={t(
-              translations.hero.bookNow,
+              translations.hero
+                .bookNow,
               locale
             )}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--brand-primary)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none"
@@ -77,7 +90,9 @@ export default function MobileHeader({
 
           <button
             type="button"
-            onClick={onSwitchToDesktop}
+            onClick={
+              onSwitchToDesktop
+            }
             aria-label={t(
               translations.common
                 .openFullWebsite,
