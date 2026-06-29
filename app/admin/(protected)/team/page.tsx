@@ -1,4 +1,5 @@
 import AdminTeamView from "@/components/admin/AdminTeamView";
+import EmployeeServiceManagement from "@/components/admin/team/EmployeeServiceManagement";
 import TeamManagementActions from "@/components/admin/team/TeamManagementActions";
 import { getAdminTeam } from "@/lib/admin/team";
 
@@ -11,6 +12,13 @@ export default async function AdminTeamPage() {
     <>
       <TeamManagementActions
         employees={result.employees}
+      />
+
+      <EmployeeServiceManagement
+        employees={result.employees}
+        catalogServices={
+          result.catalogServices
+        }
       />
 
       <AdminTeamView

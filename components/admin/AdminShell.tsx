@@ -78,10 +78,10 @@ const navigationItems: NavigationItem[] = [
   },
   {
     label: "Tim",
-    description: "Zaposleni i ovlašćenja",
+    description: "Zaposleni i njihove usluge",
     href: "/admin/team",
     icon: UserRoundCog,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Raspored",
