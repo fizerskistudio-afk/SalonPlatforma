@@ -52,23 +52,24 @@ type SubmitStatus =
   | "idle"
   | "submitting";
 
+type CreatedBooking = {
+  id: string;
+  referenceCode: string;
+  status: string;
+  businessId: string;
+  serviceId: string;
+  employeeId: string;
+  customerId: string;
+  startsAt: string;
+  endsAt: string;
+  durationMinutes: number;
+  priceAmount: number;
+  currency: string;
+};
+
 type CreateBookingSuccessResponse = {
   ok: true;
-
-  booking: {
-    id: string;
-    referenceCode: string;
-    status: string;
-    businessId: string;
-    serviceId: string;
-    employeeId: string;
-    customerId: string;
-    startsAt: string;
-    endsAt: string;
-    durationMinutes: number;
-    priceAmount: number;
-    currency: string;
-  };
+  booking: CreatedBooking;
 };
 
 type CreateBookingErrorResponse = {
@@ -230,6 +231,14 @@ export default function BookingFlow({
     );
 
   const [
+    createdBooking,
+    setCreatedBooking,
+  ] =
+    useState<CreatedBooking | null>(
+      null
+    );
+
+  const [
     submitStatus,
     setSubmitStatus,
   ] =
@@ -303,6 +312,7 @@ export default function BookingFlow({
         null
       );
 
+      setCreatedBooking(null);
       setSubmitError(null);
     };
 
@@ -388,6 +398,7 @@ export default function BookingFlow({
     startsAt: string
   ) => {
     setSubmitError(null);
+    setCreatedBooking(null);
 
     setResolvedEmployeeId(
       employeeId
@@ -500,7 +511,9 @@ export default function BookingFlow({
             email,
           } = draft.customer;
 
-          if (!name.trim()) {
+          if (
+            name.trim().length < 2
+          ) {
             return false;
           }
 
@@ -518,7 +531,10 @@ export default function BookingFlow({
             return false;
           }
 
-          return true;
+          return Boolean(
+            phone.trim() ||
+              email.trim()
+          );
         }
 
         case "summary":
@@ -529,7 +545,8 @@ export default function BookingFlow({
               draft.time &&
               selectedStartsAt &&
               resolvedEmployeeId &&
-              draft.customer.name.trim() &&
+              draft.customer.name
+                .trim().length >= 2 &&
               (
                 draft.customer.phone.trim() ||
                 draft.customer.email.trim()
@@ -672,8 +689,10 @@ export default function BookingFlow({
                         .email,
 
                     note:
-                      draft.customer
-                        .note,
+                      booking.allowNotes
+                        ? draft.customer
+                            .note
+                        : "",
                   },
                 }
               ),
@@ -736,6 +755,10 @@ export default function BookingFlow({
 
           return;
         }
+
+        setCreatedBooking(
+          payload.booking
+        );
 
         setCurrentStep(
           "success"
@@ -853,6 +876,9 @@ export default function BookingFlow({
           <SuccessStep
             locale={locale}
             draft={draft}
+            booking={
+              createdBooking
+            }
             onDone={onDone}
           />
         );

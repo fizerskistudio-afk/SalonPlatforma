@@ -1,0 +1,3651 @@
+===== BOOKING FLOW ===== 
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  LoaderCircle,
+} from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  BookingDraft,
+  Employee,
+  Locale,
+  Service,
+} from "@/lib/types";
+
+import BookingProgress from "./BookingProgress";
+import BookingSummary from "./BookingSummary";
+import CustomerStep from "./CustomerStep";
+import DateStep from "./DateStep";
+import EmployeeStep from "./EmployeeStep";
+import ServiceStep from "./ServiceStep";
+import SuccessStep from "./SuccessStep";
+import TimeStep from "./TimeStep";
+
+type BookingFlowProps = {
+  locale: Locale;
+  initialServiceId?: string | null;
+  initialEmployeeId?: string | null;
+  onDone: () => void;
+};
+
+type BookingStep =
+  | "service"
+  | "employee"
+  | "date"
+  | "time"
+  | "customer"
+  | "summary"
+  | "success";
+
+type SubmitStatus =
+  | "idle"
+  | "submitting";
+
+type CreateBookingSuccessResponse = {
+  ok: true;
+
+  booking: {
+    id: string;
+    referenceCode: string;
+    status: string;
+    businessId: string;
+    serviceId: string;
+    employeeId: string;
+    customerId: string;
+    startsAt: string;
+    endsAt: string;
+    durationMinutes: number;
+    priceAmount: number;
+    currency: string;
+  };
+};
+
+type CreateBookingErrorResponse = {
+  ok: false;
+  message: string;
+  code: string;
+};
+
+type CreateBookingResponse =
+  | CreateBookingSuccessResponse
+  | CreateBookingErrorResponse;
+
+const stepOrder: BookingStep[] = [
+  "service",
+  "employee",
+  "date",
+  "time",
+  "customer",
+  "summary",
+  "success",
+];
+
+const unavailableMessages: Record<
+  Locale,
+  string
+> = {
+  mk: "Терминот штотуку беше резервиран. Изберете друг слободен термин.",
+  sq: "Ky orar sapo u rezervua. Zgjidhni një orar tjetër të lirë.",
+  en: "That time was just booked. Please choose another available time.",
+};
+
+const genericErrorMessages: Record<
+  Locale,
+  string
+> = {
+  mk: "Резервацијата не можеше да се зачува. Обидете се повторно.",
+  sq: "Rezervimi nuk mund të ruhej. Ju lutemi provoni përsëri.",
+  en: "The booking could not be saved. Please try again.",
+};
+
+const submittingMessages: Record<
+  Locale,
+  string
+> = {
+  mk: "Се резервира...",
+  sq: "Duke rezervuar...",
+  en: "Booking...",
+};
+
+function createInitialDraft(
+  initialServiceId:
+    | string
+    | null,
+  initialEmployeeId:
+    | string
+    | null,
+  services: Service[],
+  employees: Employee[]
+): BookingDraft {
+  const validService =
+    initialServiceId
+      ? services.find(
+          (service) =>
+            service.id ===
+              initialServiceId &&
+            service.isActive
+        )
+      : undefined;
+
+  const validEmployee =
+    initialEmployeeId
+      ? employees.find(
+          (employee) =>
+            employee.id ===
+              initialEmployeeId &&
+            employee.isActive
+        )
+      : undefined;
+
+  const serviceId =
+    validService?.id ?? null;
+
+  let employeePreference =
+    validEmployee?.id ?? null;
+
+  if (
+    serviceId &&
+    validEmployee &&
+    !validEmployee.serviceIds.includes(
+      serviceId
+    )
+  ) {
+    employeePreference = null;
+  }
+
+  return {
+    serviceId,
+    employeePreference,
+    date: null,
+    time: null,
+
+    customer: {
+      name: "",
+      phone: "",
+      email: "",
+      note: "",
+    },
+  };
+}
+
+export default function BookingFlow({
+  locale,
+  initialServiceId = null,
+  initialEmployeeId = null,
+  onDone,
+}: BookingFlowProps) {
+  const {
+    business,
+    booking,
+    services,
+    employees,
+  } = useCatalogData();
+
+  const [
+    currentStep,
+    setCurrentStep,
+  ] =
+    useState<BookingStep>(
+      "service"
+    );
+
+  const [
+    draft,
+    setDraft,
+  ] =
+    useState<BookingDraft>(() =>
+      createInitialDraft(
+        initialServiceId,
+        initialEmployeeId,
+        services,
+        employees
+      )
+    );
+
+  const [
+    resolvedEmployeeId,
+    setResolvedEmployeeId,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const [
+    selectedStartsAt,
+    setSelectedStartsAt,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const [
+    submitStatus,
+    setSubmitStatus,
+  ] =
+    useState<SubmitStatus>(
+      "idle"
+    );
+
+  const [
+    submitError,
+    setSubmitError,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const currentStepIndex =
+    stepOrder.indexOf(
+      currentStep
+    );
+
+  const progressSteps =
+    useMemo(
+      () => [
+        {
+          id: "service",
+          label:
+            translations.booking
+              .selectService,
+        },
+        {
+          id: "employee",
+          label:
+            translations.booking
+              .selectEmployee,
+        },
+        {
+          id: "date",
+          label:
+            translations.booking
+              .selectDate,
+        },
+        {
+          id: "time",
+          label:
+            translations.booking
+              .selectTime,
+        },
+        {
+          id: "customer",
+          label:
+            translations.booking
+              .yourInfo,
+        },
+        {
+          id: "summary",
+          label:
+            translations.booking
+              .summary,
+        },
+      ],
+      []
+    );
+
+  const resetResolvedTime =
+    () => {
+      setResolvedEmployeeId(
+        null
+      );
+
+      setSelectedStartsAt(
+        null
+      );
+
+      setSubmitError(null);
+    };
+
+  const handleSelectService = (
+    serviceId: string
+  ) => {
+    resetResolvedTime();
+
+    setDraft(
+      (previousDraft) => {
+        const nextDraft: BookingDraft =
+          {
+            ...previousDraft,
+            serviceId,
+            date: null,
+            time: null,
+          };
+
+        if (
+          previousDraft.employeePreference &&
+          previousDraft.employeePreference !==
+            "any"
+        ) {
+          const employee =
+            employees.find(
+              (item) =>
+                item.id ===
+                previousDraft.employeePreference
+            );
+
+          if (
+            !employee ||
+            !employee.isActive ||
+            !employee.serviceIds.includes(
+              serviceId
+            )
+          ) {
+            nextDraft.employeePreference =
+              null;
+          }
+        }
+
+        return nextDraft;
+      }
+    );
+  };
+
+  const handleSelectEmployee = (
+    preference:
+      | "any"
+      | string
+  ) => {
+    resetResolvedTime();
+
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+        employeePreference:
+          preference,
+        date: null,
+        time: null,
+      })
+    );
+  };
+
+  const handleSelectDate = (
+    date: string
+  ) => {
+    resetResolvedTime();
+
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+        date,
+        time: null,
+      })
+    );
+  };
+
+  const handleSelectTime = (
+    time: string,
+    employeeId: string,
+    startsAt: string
+  ) => {
+    setSubmitError(null);
+
+    setResolvedEmployeeId(
+      employeeId
+    );
+
+    setSelectedStartsAt(
+      startsAt
+    );
+
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+        time,
+      })
+    );
+  };
+
+  const handleCustomerChange = (
+    field:
+      keyof BookingDraft["customer"],
+    value: string
+  ) => {
+    setSubmitError(null);
+
+    setDraft(
+      (previousDraft) => ({
+        ...previousDraft,
+
+        customer: {
+          ...previousDraft.customer,
+          [field]: value,
+        },
+      })
+    );
+  };
+
+  const handleChangeStep = (
+    step:
+      | "service"
+      | "employee"
+      | "date"
+      | "time"
+      | "customer"
+  ) => {
+    setSubmitError(null);
+    setCurrentStep(step);
+  };
+
+  const canGoNext =
+    useMemo(() => {
+      switch (currentStep) {
+        case "service":
+          return Boolean(
+            draft.serviceId &&
+              services.some(
+                (service) =>
+                  service.id ===
+                    draft.serviceId &&
+                  service.isActive
+              )
+          );
+
+        case "employee": {
+          if (
+            draft.employeePreference ===
+            "any"
+          ) {
+            return booking
+              .allowAnyEmployee;
+          }
+
+          if (
+            !draft.employeePreference ||
+            !draft.serviceId
+          ) {
+            return false;
+          }
+
+          const employee =
+            employees.find(
+              (item) =>
+                item.id ===
+                draft.employeePreference
+            );
+
+          return Boolean(
+            employee?.isActive &&
+              employee.serviceIds.includes(
+                draft.serviceId
+              )
+          );
+        }
+
+        case "date":
+          return (
+            draft.date !== null
+          );
+
+        case "time":
+          return Boolean(
+            draft.time &&
+              selectedStartsAt &&
+              resolvedEmployeeId
+          );
+
+        case "customer": {
+          const {
+            name,
+            phone,
+            email,
+          } = draft.customer;
+
+          if (!name.trim()) {
+            return false;
+          }
+
+          if (
+            booking.requirePhone &&
+            !phone.trim()
+          ) {
+            return false;
+          }
+
+          if (
+            booking.requireEmail &&
+            !email.trim()
+          ) {
+            return false;
+          }
+
+          return true;
+        }
+
+        case "summary":
+          return Boolean(
+            draft.serviceId &&
+              draft.employeePreference &&
+              draft.date &&
+              draft.time &&
+              selectedStartsAt &&
+              resolvedEmployeeId &&
+              draft.customer.name.trim() &&
+              (
+                draft.customer.phone.trim() ||
+                draft.customer.email.trim()
+              ) &&
+              (
+                !booking.requirePhone ||
+                draft.customer.phone.trim()
+              ) &&
+              (
+                !booking.requireEmail ||
+                draft.customer.email.trim()
+              )
+          );
+
+        default:
+          return false;
+      }
+    }, [
+      booking.allowAnyEmployee,
+      booking.requireEmail,
+      booking.requirePhone,
+      currentStep,
+      draft,
+      employees,
+      resolvedEmployeeId,
+      selectedStartsAt,
+      services,
+    ]);
+
+  const handleNext = () => {
+    if (!canGoNext) {
+      return;
+    }
+
+    setSubmitError(null);
+
+    const currentIndex =
+      stepOrder.indexOf(
+        currentStep
+      );
+
+    if (
+      currentIndex <
+      stepOrder.length - 1
+    ) {
+      setCurrentStep(
+        stepOrder[
+          currentIndex + 1
+        ]
+      );
+    }
+  };
+
+  const handleBack = () => {
+    setSubmitError(null);
+
+    const currentIndex =
+      stepOrder.indexOf(
+        currentStep
+      );
+
+    if (currentIndex > 0) {
+      setCurrentStep(
+        stepOrder[
+          currentIndex - 1
+        ]
+      );
+    }
+  };
+
+  const handleConfirm =
+    async () => {
+      if (
+        !canGoNext ||
+        submitStatus ===
+          "submitting"
+      ) {
+        return;
+      }
+
+      if (
+        !draft.serviceId ||
+        !resolvedEmployeeId ||
+        !selectedStartsAt
+      ) {
+        setSubmitError(
+          genericErrorMessages[
+            locale
+          ]
+        );
+
+        return;
+      }
+
+      setSubmitStatus(
+        "submitting"
+      );
+
+      setSubmitError(null);
+
+      try {
+        const response =
+          await fetch(
+            "/api/bookings",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              cache: "no-store",
+
+              body: JSON.stringify(
+                {
+                  businessSlug:
+                    business.slug,
+
+                  serviceId:
+                    draft.serviceId,
+
+                  employeeId:
+                    resolvedEmployeeId,
+
+                  startsAt:
+                    selectedStartsAt,
+
+                  customer: {
+                    name:
+                      draft.customer
+                        .name,
+
+                    phone:
+                      draft.customer
+                        .phone,
+
+                    email:
+                      draft.customer
+                        .email,
+
+                    note:
+                      draft.customer
+                        .note,
+                  },
+                }
+              ),
+            }
+          );
+
+        const payload =
+          (await response.json()) as CreateBookingResponse;
+
+        if (
+          !response.ok ||
+          !payload.ok
+        ) {
+          const errorCode =
+            payload.ok
+              ? "UNKNOWN"
+              : payload.code;
+
+          if (
+            response.status ===
+              409 ||
+            errorCode ===
+              "SLOT_UNAVAILABLE"
+          ) {
+            setResolvedEmployeeId(
+              null
+            );
+
+            setSelectedStartsAt(
+              null
+            );
+
+            setDraft(
+              (
+                previousDraft
+              ) => ({
+                ...previousDraft,
+                time: null,
+              })
+            );
+
+            setSubmitError(
+              unavailableMessages[
+                locale
+              ]
+            );
+
+            setCurrentStep(
+              "time"
+            );
+
+            return;
+          }
+
+          setSubmitError(
+            genericErrorMessages[
+              locale
+            ]
+          );
+
+          return;
+        }
+
+        setCurrentStep(
+          "success"
+        );
+      } catch (error) {
+        console.error(
+          "Failed to create booking:",
+          error
+        );
+
+        setSubmitError(
+          genericErrorMessages[
+            locale
+          ]
+        );
+      } finally {
+        setSubmitStatus(
+          "idle"
+        );
+      }
+    };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case "service":
+        return (
+          <ServiceStep
+            locale={locale}
+            selectedServiceId={
+              draft.serviceId
+            }
+            onSelectService={
+              handleSelectService
+            }
+          />
+        );
+
+      case "employee":
+        return (
+          <EmployeeStep
+            locale={locale}
+            selectedServiceId={
+              draft.serviceId
+            }
+            selectedEmployeePreference={
+              draft.employeePreference
+            }
+            onSelectEmployeePreference={
+              handleSelectEmployee
+            }
+          />
+        );
+
+      case "date":
+        return (
+          <DateStep
+            locale={locale}
+            selectedDate={
+              draft.date
+            }
+            onSelectDate={
+              handleSelectDate
+            }
+          />
+        );
+
+      case "time":
+        return (
+          <TimeStep
+            locale={locale}
+            selectedServiceId={
+              draft.serviceId
+            }
+            selectedDate={
+              draft.date
+            }
+            selectedEmployeePreference={
+              draft.employeePreference
+            }
+            selectedTime={
+              draft.time
+            }
+            onSelectTime={
+              handleSelectTime
+            }
+          />
+        );
+
+      case "customer":
+        return (
+          <CustomerStep
+            locale={locale}
+            customer={
+              draft.customer
+            }
+            onCustomerChange={
+              handleCustomerChange
+            }
+          />
+        );
+
+      case "summary":
+        return (
+          <BookingSummary
+            locale={locale}
+            draft={draft}
+            onChangeStep={
+              handleChangeStep
+            }
+          />
+        );
+
+      case "success":
+        return (
+          <SuccessStep
+            locale={locale}
+            draft={draft}
+            onDone={onDone}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const isSubmitting =
+    submitStatus ===
+    "submitting";
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      {currentStep !==
+        "success" && (
+        <div className="shrink-0 border-b border-[var(--brand-border)] px-4 py-3 sm:px-6 sm:py-4">
+          <BookingProgress
+            steps={
+              progressSteps
+            }
+            currentStepIndex={
+              currentStepIndex
+            }
+            locale={locale}
+          />
+        </div>
+      )}
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-8">
+        {renderStep()}
+      </div>
+
+      {currentStep !==
+        "success" && (
+        <div className="shrink-0 border-t border-[var(--brand-border)] bg-[var(--brand-surface)] px-4 py-3 shadow-[0_-12px_30px_rgba(0,0,0,0.18)] sm:px-6 sm:py-4">
+          {submitError && (
+            <p
+              role="alert"
+              aria-live="assertive"
+              className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+            >
+              {submitError}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between gap-3">
+            {currentStepIndex >
+            0 ? (
+              <button
+                type="button"
+                onClick={
+                  handleBack
+                }
+                disabled={
+                  isSubmitting
+                }
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand-border)] px-4 py-2.5 font-medium text-[var(--brand-text)] transition-colors hover:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none sm:px-5"
+              >
+                <ArrowLeft
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+
+                {t(
+                  translations.booking
+                    .back,
+                  locale
+                )}
+              </button>
+            ) : (
+              <div />
+            )}
+
+            {currentStep ===
+            "summary" ? (
+              <button
+                type="button"
+                onClick={
+                  handleConfirm
+                }
+                disabled={
+                  !canGoNext ||
+                  isSubmitting
+                }
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-background)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none sm:px-6"
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoaderCircle
+                      className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                      aria-hidden="true"
+                    />
+
+                    {
+                      submittingMessages[
+                        locale
+                      ]
+                    }
+                  </>
+                ) : (
+                  <>
+                    {t(
+                      translations.booking
+                        .confirm,
+                      locale
+                    )}
+
+                    <Check
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    />
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={
+                  handleNext
+                }
+                disabled={
+                  !canGoNext ||
+                  isSubmitting
+                }
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 py-2.5 font-medium text-[var(--brand-background)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none sm:px-6"
+              >
+                {t(
+                  translations.booking
+                    .next,
+                  locale
+                )}
+
+                <ArrowRight
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+} 
+===== CUSTOMER STEP ===== 
+"use client";
+
+import {
+  Mail,
+  Phone as PhoneIcon,
+  StickyNote,
+  User,
+} from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  BookingDraft,
+  Locale,
+} from "@/lib/types";
+
+import SectionHeader from "../shared/SectionHeader";
+
+type CustomerField =
+  keyof BookingDraft["customer"];
+
+type CustomerStepProps = {
+  locale: Locale;
+  customer: BookingDraft["customer"];
+
+  onCustomerChange: (
+    field: CustomerField,
+    value: string
+  ) => void;
+};
+
+export default function CustomerStep({
+  locale,
+  customer,
+  onCustomerChange,
+}: CustomerStepProps) {
+  const {
+    booking,
+  } = useCatalogData();
+
+  const {
+    requirePhone,
+    requireEmail,
+    allowNotes,
+  } = booking;
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title={
+          translations.booking.yourInfo
+        }
+        subtitle={
+          translations.booking
+            .yourInfoDescription
+        }
+        locale={locale}
+        align="left"
+      />
+
+      <div className="space-y-5">
+        <div>
+          <label
+            htmlFor="customer-name"
+            className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
+          >
+            {t(
+              translations.booking
+                .fullName,
+              locale
+            )}
+
+            <span
+              className="ml-1 text-[var(--brand-primary)]"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <div className="relative">
+            <User
+              className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--brand-muted)]"
+              aria-hidden="true"
+            />
+
+            <input
+              id="customer-name"
+              type="text"
+              value={customer.name}
+              onChange={(event) =>
+                onCustomerChange(
+                  "name",
+                  event.target.value
+                )
+              }
+              autoComplete="name"
+              required
+              aria-required="true"
+              placeholder={t(
+                translations.customer
+                  .namePlaceholder,
+                locale
+              )}
+              className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3.5 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="customer-phone"
+            className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
+          >
+            {t(
+              translations.booking.phone,
+              locale
+            )}
+
+            {requirePhone && (
+              <span
+                className="ml-1 text-[var(--brand-primary)]"
+                aria-hidden="true"
+              >
+                *
+              </span>
+            )}
+          </label>
+
+          <div className="relative">
+            <PhoneIcon
+              className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--brand-muted)]"
+              aria-hidden="true"
+            />
+
+            <input
+              id="customer-phone"
+              type="tel"
+              inputMode="tel"
+              value={customer.phone}
+              onChange={(event) =>
+                onCustomerChange(
+                  "phone",
+                  event.target.value
+                )
+              }
+              autoComplete="tel"
+              required={requirePhone}
+              aria-required={requirePhone}
+              placeholder={t(
+                translations.customer
+                  .phonePlaceholder,
+                locale
+              )}
+              className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3.5 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="customer-email"
+            className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
+          >
+            {t(
+              translations.booking.email,
+              locale
+            )}
+
+            {requireEmail && (
+              <span
+                className="ml-1 text-[var(--brand-primary)]"
+                aria-hidden="true"
+              >
+                *
+              </span>
+            )}
+          </label>
+
+          <div className="relative">
+            <Mail
+              className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--brand-muted)]"
+              aria-hidden="true"
+            />
+
+            <input
+              id="customer-email"
+              type="email"
+              inputMode="email"
+              value={customer.email}
+              onChange={(event) =>
+                onCustomerChange(
+                  "email",
+                  event.target.value
+                )
+              }
+              autoComplete="email"
+              required={requireEmail}
+              aria-required={requireEmail}
+              placeholder={t(
+                translations.customer
+                  .emailPlaceholder,
+                locale
+              )}
+              className="w-full rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3.5 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
+            />
+          </div>
+        </div>
+
+        {allowNotes && (
+          <div>
+            <label
+              htmlFor="customer-note"
+              className="mb-2 block text-sm font-medium text-[var(--brand-text)]"
+            >
+              {t(
+                translations.booking.note,
+                locale
+              )}
+            </label>
+
+            <div className="relative">
+              <StickyNote
+                className="absolute left-4 top-4 h-4 w-4 text-[var(--brand-muted)]"
+                aria-hidden="true"
+              />
+
+              <textarea
+                id="customer-note"
+                value={customer.note}
+                onChange={(event) =>
+                  onCustomerChange(
+                    "note",
+                    event.target.value
+                  )
+                }
+                rows={3}
+                placeholder={t(
+                  translations.customer
+                    .notePlaceholder,
+                  locale
+                )}
+                className="w-full resize-none rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] py-3 pl-11 pr-4 text-[var(--brand-text)] transition-colors placeholder:text-[var(--brand-muted)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20 motion-reduce:transition-none"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+} 
+===== EMPLOYEE STEP ===== 
+"use client";
+
+import { Users } from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type { Locale } from "@/lib/types";
+
+import EmptyState from "../shared/EmptyState";
+import EmployeeCard from "../shared/EmployeeCard";
+import SectionHeader from "../shared/SectionHeader";
+
+type EmployeeStepProps = {
+  locale: Locale;
+  selectedServiceId:
+    | string
+    | null;
+  selectedEmployeePreference:
+    | "any"
+    | string
+    | null;
+  onSelectEmployeePreference: (
+    preference: "any" | string
+  ) => void;
+};
+
+export default function EmployeeStep({
+  locale,
+  selectedServiceId,
+  selectedEmployeePreference,
+  onSelectEmployeePreference,
+}: EmployeeStepProps) {
+  const {
+    employees,
+    booking,
+  } = useCatalogData();
+
+  if (!selectedServiceId) {
+    return (
+      <EmptyState
+        title={
+          translations.booking
+            .selectServiceFirst
+        }
+        description={
+          translations.booking
+            .selectServiceFirstDescription
+        }
+        icon={Users}
+        locale={locale}
+      />
+    );
+  }
+
+  const availableEmployees =
+    employees.filter(
+      (employee) =>
+        employee.isActive &&
+        employee.serviceIds.includes(
+          selectedServiceId
+        )
+    );
+
+  if (
+    availableEmployees.length === 0
+  ) {
+    return (
+      <EmptyState
+        title={
+          translations.common
+            .noEmployees
+        }
+        description={
+          translations.common
+            .noEmployeesForService
+        }
+        icon={Users}
+        locale={locale}
+      />
+    );
+  }
+
+  const isAnySelected =
+    selectedEmployeePreference ===
+    "any";
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title={
+          translations.booking
+            .selectEmployee
+        }
+        subtitle={
+          translations.sections.teamSub
+        }
+        locale={locale}
+        align="left"
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {booking.allowAnyEmployee && (
+          <button
+            type="button"
+            onClick={() =>
+              onSelectEmployeePreference(
+                "any"
+              )
+            }
+            className={`group relative w-full rounded-3xl border-2 bg-[var(--brand-surface)] p-6 text-left transition-all focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none ${
+              isAnySelected
+                ? "border-[var(--brand-primary)] shadow-lg"
+                : "border-[var(--brand-border)] hover:border-[var(--brand-primary)] hover:shadow-md"
+            }`}
+            aria-pressed={
+              isAnySelected
+            }
+          >
+            <span className="flex items-center gap-4">
+              <span
+                className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)]"
+                aria-hidden="true"
+              >
+                <Users className="h-8 w-8 text-[var(--brand-surface)]" />
+              </span>
+
+              <span className="flex-1">
+                <span className="font-display mb-1 block text-lg font-semibold text-[var(--brand-text)]">
+                  {t(
+                    translations.booking
+                      .any,
+                    locale
+                  )}
+                </span>
+
+                <span className="block text-sm text-[var(--brand-muted)]">
+                  {t(
+                    translations.booking
+                      .anyAvailable,
+                    locale
+                  )}
+                </span>
+              </span>
+
+              {isAnySelected && (
+                <span
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--brand-primary)] font-bold text-[var(--brand-surface)]"
+                  aria-hidden="true"
+                >
+                  ✓
+                </span>
+              )}
+            </span>
+          </button>
+        )}
+
+        {availableEmployees.map(
+          (employee) => (
+            <EmployeeCard
+              key={employee.id}
+              employee={employee}
+              locale={locale}
+              mode="selectable"
+              isSelected={
+                selectedEmployeePreference ===
+                employee.id
+              }
+              onSelect={
+                onSelectEmployeePreference
+              }
+            />
+          )
+        )}
+      </div>
+    </div>
+  );
+} 
+===== SUCCESS STEP ===== 
+"use client";
+
+import {
+  Calendar,
+  Clock,
+  PartyPopper,
+  Scissors,
+} from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  BookingDraft,
+  Locale,
+} from "@/lib/types";
+
+type SuccessStepProps = {
+  locale: Locale;
+  draft: BookingDraft;
+  onDone: () => void;
+};
+
+const intlLocaleMap: Record<
+  Locale,
+  string
+> = {
+  mk: "mk-MK",
+  sq: "sq-MK",
+  en: "en-GB",
+};
+
+function formatDisplayDate(
+  dateString: string | null,
+  locale: Locale
+): string | null {
+  if (!dateString) {
+    return null;
+  }
+
+  const parts =
+    dateString.split("-");
+
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const [
+    yearString,
+    monthString,
+    dayString,
+  ] = parts;
+
+  const year = Number.parseInt(
+    yearString,
+    10
+  );
+
+  const month = Number.parseInt(
+    monthString,
+    10
+  );
+
+  const day = Number.parseInt(
+    dayString,
+    10
+  );
+
+  if (
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    return null;
+  }
+
+  const date = new Date(
+    year,
+    month - 1,
+    day
+  );
+
+  return date.toLocaleDateString(
+    intlLocaleMap[locale],
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+  );
+}
+
+export default function SuccessStep({
+  locale,
+  draft,
+  onDone,
+}: SuccessStepProps) {
+  const {
+    services,
+  } = useCatalogData();
+
+  const service =
+    draft.serviceId
+      ? services.find(
+          (item) =>
+            item.id ===
+              draft.serviceId &&
+            item.isActive
+        ) ?? null
+      : null;
+
+  const formattedDate =
+    formatDisplayDate(
+      draft.date,
+      locale
+    );
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center px-4 py-12 text-center"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="relative mb-6">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] animate-pulse motion-reduce:animate-none">
+          <PartyPopper
+            className="h-12 w-12 text-[var(--brand-surface)]"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+
+      <h2 className="font-display mb-3 text-3xl font-semibold text-[var(--brand-text)]">
+        {t(
+          translations.booking
+            .success,
+          locale
+        )}
+      </h2>
+
+      <p className="mb-8 max-w-sm leading-relaxed text-[var(--brand-muted)]">
+        {t(
+          translations.booking
+            .successMsg,
+          locale
+        )}
+      </p>
+
+      <div className="mb-8 w-full max-w-sm rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-5">
+        <div className="space-y-3">
+          {service && (
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--brand-secondary)]">
+                <Scissors
+                  className="h-5 w-5 text-[var(--brand-primary)]"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="flex-1 text-left">
+                <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                  {t(
+                    translations.common
+                      .service,
+                    locale
+                  )}
+                </div>
+
+                <div className="text-sm font-medium text-[var(--brand-text)]">
+                  {t(
+                    service.name,
+                    locale
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {formattedDate && (
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--brand-secondary)]">
+                <Calendar
+                  className="h-5 w-5 text-[var(--brand-primary)]"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="flex-1 text-left">
+                <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                  {t(
+                    translations.common
+                      .date,
+                    locale
+                  )}
+                </div>
+
+                <div className="text-sm font-medium text-[var(--brand-text)]">
+                  {formattedDate}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {draft.time && (
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--brand-secondary)]">
+                <Clock
+                  className="h-5 w-5 text-[var(--brand-primary)]"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="flex-1 text-left">
+                <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                  {t(
+                    translations.common
+                      .time,
+                    locale
+                  )}
+                </div>
+
+                <div className="text-sm font-medium text-[var(--brand-text)]">
+                  {draft.time}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onDone}
+        className="w-full max-w-sm rounded-2xl bg-[var(--brand-primary)] py-4 font-semibold text-[var(--brand-surface)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none"
+      >
+        {t(
+          translations.booking.done,
+          locale
+        )}
+      </button>
+    </div>
+  );
+} 
+===== BOOKING SUMMARY ===== 
+"use client";
+
+import {
+  Clock,
+  Edit2,
+  Mail,
+  Phone as PhoneIcon,
+  StickyNote,
+  User,
+} from "lucide-react";
+
+import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+  translations,
+} from "@/lib/translations";
+import type {
+  BookingDraft,
+  Locale,
+  ServicePriceType,
+} from "@/lib/types";
+
+type BookingSummaryProps = {
+  locale: Locale;
+  draft: BookingDraft;
+
+  onChangeStep?: (
+    step:
+      | "service"
+      | "employee"
+      | "date"
+      | "time"
+      | "customer"
+  ) => void;
+};
+
+const intlLocaleMap: Record<
+  Locale,
+  string
+> = {
+  mk: "mk-MK",
+  sq: "sq-MK",
+  en: "en-GB",
+};
+
+function formatDisplayDate(
+  dateString: string | null,
+  locale: Locale,
+  notSelectedLabel: string
+): string {
+  if (!dateString) {
+    return notSelectedLabel;
+  }
+
+  const parts =
+    dateString.split("-");
+
+  if (parts.length !== 3) {
+    return notSelectedLabel;
+  }
+
+  const [
+    yearString,
+    monthString,
+    dayString,
+  ] = parts;
+
+  const year = Number.parseInt(
+    yearString,
+    10
+  );
+
+  const month = Number.parseInt(
+    monthString,
+    10
+  );
+
+  const day = Number.parseInt(
+    dayString,
+    10
+  );
+
+  if (
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    return notSelectedLabel;
+  }
+
+  const date = new Date(
+    year,
+    month - 1,
+    day
+  );
+
+  return date.toLocaleDateString(
+    intlLocaleMap[locale],
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+  );
+}
+
+function formatPrice(
+  priceType: ServicePriceType,
+  priceFrom: number,
+  priceTo: number | undefined,
+  currency: string,
+  locale: Locale
+): string {
+  const formatter =
+    new Intl.NumberFormat(
+      intlLocaleMap[locale],
+      {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }
+    );
+
+  if (
+    priceType === "fixed"
+  ) {
+    return formatter.format(
+      priceFrom
+    );
+  }
+
+  if (
+    priceType === "from"
+  ) {
+    return `${t(
+      translations.priceTypes.from,
+      locale
+    )} ${formatter.format(
+      priceFrom
+    )}`;
+  }
+
+  if (
+    priceType === "range" &&
+    priceTo !== undefined
+  ) {
+    return `${formatter.format(
+      priceFrom
+    )} ${t(
+      translations.priceTypes.range,
+      locale
+    )} ${formatter.format(
+      priceTo
+    )}`;
+  }
+
+  return formatter.format(
+    priceFrom
+  );
+}
+
+export default function BookingSummary({
+  locale,
+  draft,
+  onChangeStep,
+}: BookingSummaryProps) {
+  const {
+    business,
+    services,
+    employees,
+  } = useCatalogData();
+
+  const notSelectedLabel = t(
+    translations.common.notSelected,
+    locale
+  );
+
+  const service =
+    draft.serviceId
+      ? services.find(
+          (item) =>
+            item.id ===
+              draft.serviceId &&
+            item.isActive
+        ) ?? null
+      : null;
+
+  const employee =
+    draft.employeePreference &&
+    draft.employeePreference !==
+      "any"
+      ? employees.find(
+          (item) =>
+            item.id ===
+              draft.employeePreference &&
+            item.isActive
+        ) ?? null
+      : null;
+
+  const employeeDisplay =
+    draft.employeePreference ===
+    "any"
+      ? t(
+          translations.booking
+            .anyAvailable,
+          locale
+        )
+      : employee
+        ? employee.name
+        : notSelectedLabel;
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-display mb-4 text-lg font-semibold text-[var(--brand-text)]">
+        {t(
+          translations.booking
+            .summary,
+          locale
+        )}
+      </h3>
+
+      <div className="space-y-3">
+        <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
+          <div className="flex-1">
+            <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+              {t(
+                translations.common
+                  .service,
+                locale
+              )}
+            </div>
+
+            <div className="font-medium text-[var(--brand-text)]">
+              {service
+                ? t(
+                    service.name,
+                    locale
+                  )
+                : notSelectedLabel}
+            </div>
+
+            {service && (
+              <div className="mt-1 flex items-center gap-2 text-sm text-[var(--brand-muted)]">
+                <Clock
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
+
+                <span>
+                  {
+                    service.durationMinutes
+                  }{" "}
+                  {t(
+                    translations.booking
+                      .minutes,
+                    locale
+                  )}
+                </span>
+
+                <span aria-hidden="true">
+                  ·
+                </span>
+
+                <span className="font-semibold text-[var(--brand-primary)]">
+                  {formatPrice(
+                    service.priceType,
+                    service.priceFrom,
+                    service.priceTo,
+                    business.currency,
+                    locale
+                  )}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {onChangeStep && (
+            <button
+              type="button"
+              onClick={() =>
+                onChangeStep(
+                  "service"
+                )
+              }
+              className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .service,
+                locale
+              )}`}
+            >
+              <Edit2
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
+          <div className="flex-1">
+            <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+              {t(
+                translations.common
+                  .stylist,
+                locale
+              )}
+            </div>
+
+            <div className="font-medium text-[var(--brand-text)]">
+              {employeeDisplay}
+            </div>
+          </div>
+
+          {onChangeStep && (
+            <button
+              type="button"
+              onClick={() =>
+                onChangeStep(
+                  "employee"
+                )
+              }
+              className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .stylist,
+                locale
+              )}`}
+            >
+              <Edit2
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
+          <div className="flex-1">
+            <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+              {t(
+                translations.common
+                  .date,
+                locale
+              )}
+            </div>
+
+            <div className="font-medium text-[var(--brand-text)]">
+              {formatDisplayDate(
+                draft.date,
+                locale,
+                notSelectedLabel
+              )}
+            </div>
+          </div>
+
+          {onChangeStep && (
+            <button
+              type="button"
+              onClick={() =>
+                onChangeStep("date")
+              }
+              className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .date,
+                locale
+              )}`}
+            >
+              <Edit2
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-start justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
+          <div className="flex-1">
+            <div className="mb-1 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+              {t(
+                translations.common
+                  .time,
+                locale
+              )}
+            </div>
+
+            <div className="font-medium text-[var(--brand-text)]">
+              {draft.time ||
+                notSelectedLabel}
+            </div>
+          </div>
+
+          {onChangeStep && (
+            <button
+              type="button"
+              onClick={() =>
+                onChangeStep("time")
+              }
+              className="ml-3 rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
+              aria-label={`${t(
+                translations.booking
+                  .change,
+                locale
+              )} ${t(
+                translations.common
+                  .time,
+                locale
+              )}`}
+            >
+              <Edit2
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </button>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
+          <div className="mb-3 flex items-start justify-between">
+            <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+              {t(
+                translations.booking
+                  .yourInfo,
+                locale
+              )}
+            </div>
+
+            {onChangeStep && (
+              <button
+                type="button"
+                onClick={() =>
+                  onChangeStep(
+                    "customer"
+                  )
+                }
+                className="rounded-lg p-2 text-[var(--brand-muted)] transition-colors hover:bg-[var(--brand-secondary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
+                aria-label={`${t(
+                  translations.booking
+                    .change,
+                  locale
+                )} ${t(
+                  translations.booking
+                    .yourInfo,
+                  locale
+                )}`}
+              >
+                <Edit2
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <User
+                className="h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
+                aria-hidden="true"
+              />
+
+              <span className="text-[var(--brand-text)]">
+                {draft.customer.name ||
+                  notSelectedLabel}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm">
+              <PhoneIcon
+                className="h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
+                aria-hidden="true"
+              />
+
+              <span className="text-[var(--brand-text)]">
+                {draft.customer.phone ||
+                  notSelectedLabel}
+              </span>
+            </div>
+
+            {draft.customer.email && (
+              <div className="flex items-center gap-2 text-sm">
+                <Mail
+                  className="h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
+                  aria-hidden="true"
+                />
+
+                <span className="text-[var(--brand-text)]">
+                  {
+                    draft.customer
+                      .email
+                  }
+                </span>
+              </div>
+            )}
+
+            {draft.customer.note && (
+              <div className="flex items-start gap-2 border-t border-[var(--brand-border)] pt-2 text-sm">
+                <StickyNote
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
+                  aria-hidden="true"
+                />
+
+                <span className="italic text-[var(--brand-muted)]">
+                  {
+                    draft.customer
+                      .note
+                  }
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 
+===== CATALOG API ===== 
+import {
+  type NextRequest,
+  NextResponse,
+} from "next/server";
+
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const DEFAULT_BUSINESS_SLUG =
+  "lumiere-studio";
+
+const SLUG_PATTERN =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const SUPPORTED_LOCALES = [
+  "mk",
+  "sq",
+  "en",
+] as const;
+
+type Locale =
+  (typeof SUPPORTED_LOCALES)[number];
+
+type LocalizedText = Record<
+  Locale,
+  string
+>;
+
+type ServiceCategoryIcon =
+  | "scissors"
+  | "palette"
+  | "sparkles"
+  | "heart"
+  | "hand";
+
+type ServicePriceType =
+  | "fixed"
+  | "from"
+  | "range";
+
+type BusinessRow = {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: unknown;
+  description: unknown;
+  address: unknown;
+  city: unknown;
+  country: unknown;
+  phone: string | null;
+  email: string | null;
+  instagram_handle: string | null;
+  instagram_url: string | null;
+  hero_image_url: string | null;
+  logo_url: string | null;
+  default_locale: string;
+  currency: string;
+  timezone: string;
+};
+
+type BookingSettingsRow = {
+  slot_interval_minutes: number;
+  booking_window_days: number;
+  min_advance_minutes: number;
+  allow_any_employee: boolean;
+  require_email: boolean;
+  require_phone: boolean;
+  allow_notes: boolean;
+  auto_confirm: boolean;
+};
+
+type ServiceCategoryRow = {
+  id: string;
+  slug: string;
+  name: unknown;
+  description: unknown;
+  icon_key: string | null;
+  sort_order: number;
+  is_active: boolean;
+};
+
+type ServiceRow = {
+  id: string;
+  category_id: string;
+  slug: string;
+  name: unknown;
+  description: unknown;
+  duration_minutes: number;
+  price_type: string;
+  price_from: number | string;
+  price_to: number | string | null;
+  sort_order: number;
+  is_active: boolean;
+};
+
+type EmployeeRow = {
+  id: string;
+  slug: string;
+  name: string;
+  title: unknown;
+  bio: unknown;
+  image_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+};
+
+type EmployeeServiceRow = {
+  employee_id: string;
+  service_id: string;
+  custom_duration_minutes:
+    | number
+    | null;
+  custom_price_from:
+    | number
+    | string
+    | null;
+  is_active: boolean;
+};
+
+type WorkingHoursRow = {
+  day_of_week: number;
+  open_time: string | null;
+  close_time: string | null;
+  is_closed: boolean;
+};
+
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function toLocalizedText(
+  value: unknown
+): LocalizedText {
+  if (!isRecord(value)) {
+    return {
+      mk: "",
+      sq: "",
+      en: "",
+    };
+  }
+
+  return {
+    mk:
+      typeof value.mk === "string"
+        ? value.mk
+        : "",
+
+    sq:
+      typeof value.sq === "string"
+        ? value.sq
+        : "",
+
+    en:
+      typeof value.en === "string"
+        ? value.en
+        : "",
+  };
+}
+
+function toLocale(
+  value: string
+): Locale {
+  return SUPPORTED_LOCALES.includes(
+    value as Locale
+  )
+    ? (value as Locale)
+    : "mk";
+}
+
+function toCategoryIcon(
+  value: string | null
+): ServiceCategoryIcon {
+  switch (value) {
+    case "palette":
+    case "sparkles":
+    case "heart":
+    case "hand":
+    case "scissors":
+      return value;
+
+    default:
+      return "scissors";
+  }
+}
+
+function toPriceType(
+  value: string
+): ServicePriceType {
+  switch (value) {
+    case "from":
+    case "range":
+    case "fixed":
+      return value;
+
+    default:
+      return "fixed";
+  }
+}
+
+function toNumber(
+  value: number | string
+): number {
+  const parsedValue =
+    typeof value === "number"
+      ? value
+      : Number(value);
+
+  return Number.isFinite(parsedValue)
+    ? parsedValue
+    : 0;
+}
+
+function errorResponse(
+  status: number,
+  message: string,
+  code: string
+) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message,
+      code,
+    },
+    {
+      status,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  );
+}
+
+export async function GET(
+  request: NextRequest
+) {
+  try {
+    const businessSlug =
+      request.nextUrl.searchParams.get(
+        "businessSlug"
+      ) ?? DEFAULT_BUSINESS_SLUG;
+
+    if (
+      !SLUG_PATTERN.test(
+        businessSlug
+      )
+    ) {
+      return errorResponse(
+        400,
+        "Invalid business slug.",
+        "INVALID_BUSINESS_SLUG"
+      );
+    }
+
+    const supabase =
+      createAdminClient();
+
+    const {
+      data: businessData,
+      error: businessError,
+    } = await supabase
+      .from("businesses")
+      .select(
+        "id, slug, name, tagline, description, address, city, country, phone, email, instagram_handle, instagram_url, hero_image_url, logo_url, default_locale, currency, timezone"
+      )
+      .eq("slug", businessSlug)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (businessError) {
+      console.error(
+        "Failed to load catalog business:",
+        businessError
+      );
+
+      return errorResponse(
+        500,
+        "Failed to load business.",
+        "BUSINESS_QUERY_FAILED"
+      );
+    }
+
+    if (!businessData) {
+      return errorResponse(
+        404,
+        "Active business was not found.",
+        "BUSINESS_NOT_FOUND"
+      );
+    }
+
+    const business =
+      businessData as unknown as BusinessRow;
+
+    const [
+      settingsResult,
+      categoriesResult,
+      servicesResult,
+      employeesResult,
+      employeeServicesResult,
+      workingHoursResult,
+    ] = await Promise.all([
+      supabase
+        .from("booking_settings")
+        .select(
+          "slot_interval_minutes, booking_window_days, min_advance_minutes, allow_any_employee, require_email, require_phone, allow_notes, auto_confirm"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .maybeSingle(),
+
+      supabase
+        .from("service_categories")
+        .select(
+          "id, slug, name, description, icon_key, sort_order, is_active"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .eq("is_active", true)
+        .order("sort_order", {
+          ascending: true,
+        }),
+
+      supabase
+        .from("services")
+        .select(
+          "id, category_id, slug, name, description, duration_minutes, price_type, price_from, price_to, sort_order, is_active"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .eq("is_active", true)
+        .order("sort_order", {
+          ascending: true,
+        }),
+
+      supabase
+        .from("employees")
+        .select(
+          "id, slug, name, title, bio, image_url, sort_order, is_active"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .eq("is_active", true)
+        .order("sort_order", {
+          ascending: true,
+        }),
+
+      supabase
+        .from("employee_services")
+        .select(
+          "employee_id, service_id, custom_duration_minutes, custom_price_from, is_active"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .eq("is_active", true),
+
+      supabase
+        .from("working_hours")
+        .select(
+          "day_of_week, open_time, close_time, is_closed"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .is("employee_id", null)
+        .order("day_of_week", {
+          ascending: true,
+        }),
+    ]);
+
+    const queryErrors = [
+      settingsResult.error,
+      categoriesResult.error,
+      servicesResult.error,
+      employeesResult.error,
+      employeeServicesResult.error,
+      workingHoursResult.error,
+    ].filter(Boolean);
+
+    if (queryErrors.length > 0) {
+      console.error(
+        "Failed to load catalog:",
+        queryErrors
+      );
+
+      return errorResponse(
+        500,
+        "Failed to load catalog.",
+        "CATALOG_QUERY_FAILED"
+      );
+    }
+
+    if (!settingsResult.data) {
+      return errorResponse(
+        500,
+        "Booking settings were not found.",
+        "BOOKING_SETTINGS_NOT_FOUND"
+      );
+    }
+
+    const settings =
+      settingsResult.data as unknown as BookingSettingsRow;
+
+    const categoryRows =
+      (categoriesResult.data ??
+        []) as unknown as ServiceCategoryRow[];
+
+    const serviceRows =
+      (servicesResult.data ??
+        []) as unknown as ServiceRow[];
+
+    const employeeRows =
+      (employeesResult.data ??
+        []) as unknown as EmployeeRow[];
+
+    const employeeServiceRows =
+      (employeeServicesResult.data ??
+        []) as unknown as EmployeeServiceRow[];
+
+    const workingHourRows =
+      (workingHoursResult.data ??
+        []) as unknown as WorkingHoursRow[];
+
+    const serviceIdsByEmployee =
+      new Map<string, string[]>();
+
+    for (
+      const relation of
+      employeeServiceRows
+    ) {
+      const currentServiceIds =
+        serviceIdsByEmployee.get(
+          relation.employee_id
+        ) ?? [];
+
+      currentServiceIds.push(
+        relation.service_id
+      );
+
+      serviceIdsByEmployee.set(
+        relation.employee_id,
+        currentServiceIds
+      );
+    }
+
+    const categories =
+      categoryRows.map(
+        (category) => ({
+          id: category.id,
+          slug: category.slug,
+
+          icon: toCategoryIcon(
+            category.icon_key
+          ),
+
+          name: toLocalizedText(
+            category.name
+          ),
+
+          description:
+            toLocalizedText(
+              category.description
+            ),
+
+          sortOrder:
+            category.sort_order,
+
+          isActive:
+            category.is_active,
+        })
+      );
+
+    const services =
+      serviceRows.map(
+        (service) => {
+          const priceTo =
+            service.price_to === null
+              ? undefined
+              : toNumber(
+                  service.price_to
+                );
+
+          return {
+            id: service.id,
+
+            categoryId:
+              service.category_id,
+
+            slug: service.slug,
+
+            name: toLocalizedText(
+              service.name
+            ),
+
+            description:
+              toLocalizedText(
+                service.description
+              ),
+
+            durationMinutes:
+              service.duration_minutes,
+
+            priceType:
+              toPriceType(
+                service.price_type
+              ),
+
+            priceFrom:
+              toNumber(
+                service.price_from
+              ),
+
+            ...(priceTo === undefined
+              ? {}
+              : {
+                  priceTo,
+                }),
+
+            sortOrder:
+              service.sort_order,
+
+            isActive:
+              service.is_active,
+          };
+        }
+      );
+
+    const employees =
+      employeeRows.map(
+        (employee) => ({
+          id: employee.id,
+          slug: employee.slug,
+          name: employee.name,
+
+          role: toLocalizedText(
+            employee.title
+          ),
+
+          bio: toLocalizedText(
+            employee.bio
+          ),
+
+          image:
+            employee.image_url ?? "",
+
+          serviceIds:
+            serviceIdsByEmployee.get(
+              employee.id
+            ) ?? [],
+
+          sortOrder:
+            employee.sort_order,
+
+          isActive:
+            employee.is_active,
+        })
+      );
+
+    const workingHours =
+      workingHourRows.map(
+        (hours) => ({
+          dayOfWeek:
+            hours.day_of_week,
+
+          openTime:
+            hours.open_time,
+
+          closeTime:
+            hours.close_time,
+
+          isClosed:
+            hours.is_closed,
+        })
+      );
+
+    const catalog = {
+      business: {
+        id: business.id,
+        slug: business.slug,
+        name: business.name,
+
+        tagline:
+          toLocalizedText(
+            business.tagline
+          ),
+
+        description:
+          toLocalizedText(
+            business.description
+          ),
+
+        phone:
+          business.phone ?? "",
+
+        email:
+          business.email ?? "",
+
+        address:
+          toLocalizedText(
+            business.address
+          ),
+
+        city:
+          toLocalizedText(
+            business.city
+          ),
+
+        country:
+          toLocalizedText(
+            business.country
+          ),
+
+        instagramHandle:
+          business.instagram_handle ??
+          "",
+
+        instagramUrl:
+          business.instagram_url ?? "",
+
+        heroImageUrl:
+          business.hero_image_url ??
+          "",
+
+        logoUrl:
+          business.logo_url ?? "",
+
+        defaultLocale:
+          toLocale(
+            business.default_locale
+          ),
+
+        supportedLocales: [
+          ...SUPPORTED_LOCALES,
+        ],
+
+        currency:
+          business.currency.trim(),
+
+        timezone:
+          business.timezone,
+
+        workingHours,
+      },
+
+      booking: {
+        slotIntervalMinutes:
+          settings.slot_interval_minutes,
+
+        bookingWindowDays:
+          settings.booking_window_days,
+
+        minimumAdvanceMinutes:
+          settings.min_advance_minutes,
+
+        allowAnyEmployee:
+          settings.allow_any_employee,
+
+        requireEmail:
+          settings.require_email,
+
+        requirePhone:
+          settings.require_phone,
+
+        allowNotes:
+          settings.allow_notes,
+
+        autoConfirm:
+          settings.auto_confirm,
+      },
+
+      categories,
+      services,
+      employees,
+    };
+
+    return NextResponse.json(
+      {
+        ok: true,
+        source: "supabase",
+        catalog,
+
+        counts: {
+          categories:
+            categories.length,
+
+          services:
+            services.length,
+
+          employees:
+            employees.length,
+
+          employeeServices:
+            employeeServiceRows.length,
+
+          workingHours:
+            workingHours.length,
+        },
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "no-store, max-age=0",
+        },
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Unexpected catalog error:",
+      error
+    );
+
+    return errorResponse(
+      500,
+      "Unexpected catalog error.",
+      "UNKNOWN_CATALOG_ERROR"
+    );
+  }
+} 
+===== AVAILABILITY API ===== 
+import {
+  type NextRequest,
+  NextResponse,
+} from "next/server";
+
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const DEFAULT_BUSINESS_SLUG =
+  "lumiere-studio";
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const SLUG_PATTERN =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+type AvailableSlotRow = {
+  employee_id: string;
+  employee_name: string;
+  starts_at: string;
+  ends_at: string;
+};
+
+function isValidDateString(
+  value: string
+): boolean {
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(value)
+  ) {
+    return false;
+  }
+
+  const [year, month, day] = value
+    .split("-")
+    .map(Number);
+
+  const parsedDate = new Date(
+    Date.UTC(year, month - 1, day)
+  );
+
+  return (
+    parsedDate.getUTCFullYear() === year &&
+    parsedDate.getUTCMonth() ===
+      month - 1 &&
+    parsedDate.getUTCDate() === day
+  );
+}
+
+function validationError(
+  message: string
+) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message,
+    },
+    {
+      status: 400,
+    }
+  );
+}
+
+export async function GET(
+  request: NextRequest
+) {
+  try {
+    const searchParams =
+      request.nextUrl.searchParams;
+
+    const businessSlug =
+      searchParams.get("businessSlug") ??
+      DEFAULT_BUSINESS_SLUG;
+
+    const serviceId =
+      searchParams.get("serviceId");
+
+    const date = searchParams.get("date");
+
+    const employeeId =
+      searchParams.get("employeeId");
+
+    if (
+      !SLUG_PATTERN.test(businessSlug)
+    ) {
+      return validationError(
+        "Invalid businessSlug."
+      );
+    }
+
+    if (!serviceId) {
+      return validationError(
+        "Missing serviceId."
+      );
+    }
+
+    if (
+      !UUID_PATTERN.test(serviceId)
+    ) {
+      return validationError(
+        "Invalid serviceId."
+      );
+    }
+
+    if (!date) {
+      return validationError(
+        "Missing date."
+      );
+    }
+
+    if (!isValidDateString(date)) {
+      return validationError(
+        "Invalid date. Use YYYY-MM-DD."
+      );
+    }
+
+    if (
+      employeeId &&
+      !UUID_PATTERN.test(employeeId)
+    ) {
+      return validationError(
+        "Invalid employeeId."
+      );
+    }
+
+    const supabase =
+      createAdminClient();
+
+    const {
+      data: business,
+      error: businessError,
+    } = await supabase
+      .from("businesses")
+      .select("id, slug, timezone")
+      .eq("slug", businessSlug)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (businessError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Failed to load business.",
+          error:
+            businessError.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (!business) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Active business was not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase.rpc(
+      "get_available_slots",
+      {
+        p_business_id: business.id,
+        p_service_id: serviceId,
+        p_date: date,
+        p_employee_id:
+          employeeId ?? null,
+      }
+    );
+
+    if (error) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Failed to calculate available slots.",
+          error: error.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    const rows =
+      (data ?? []) as AvailableSlotRow[];
+
+    const slots = rows.map((row) => ({
+      employeeId: row.employee_id,
+      employeeName:
+        row.employee_name,
+      startsAt: row.starts_at,
+      endsAt: row.ends_at,
+    }));
+
+    return NextResponse.json({
+      ok: true,
+      business: {
+        id: business.id,
+        slug: business.slug,
+        timezone:
+          business.timezone,
+      },
+      request: {
+        serviceId,
+        date,
+        employeeId:
+          employeeId ?? null,
+      },
+      count: slots.length,
+      slots,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unknown availability error.";
+
+    return NextResponse.json(
+      {
+        ok: false,
+        message,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+} 
+===== BOOKINGS API ===== 
+import {
+  type NextRequest,
+  NextResponse,
+} from "next/server";
+
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const DEFAULT_BUSINESS_SLUG =
+  "lumiere-studio";
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const SLUG_PATTERN =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const EMAIL_PATTERN =
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type JsonRecord = Record<
+  string,
+  unknown
+>;
+
+type BookingResult = {
+  id: string;
+  referenceCode: string;
+  status: string;
+  businessId: string;
+  serviceId: string;
+  employeeId: string;
+  customerId: string;
+  startsAt: string;
+  endsAt: string;
+  durationMinutes: number;
+  priceAmount: number;
+  currency: string;
+};
+
+function isJsonRecord(
+  value: unknown
+): value is JsonRecord {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function errorResponse(
+  status: number,
+  message: string,
+  code: string
+) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message,
+      code,
+    },
+    {
+      status,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  );
+}
+
+function optionalTrimmedString(
+  value: unknown
+): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  return trimmed.length > 0
+    ? trimmed
+    : null;
+}
+
+export async function POST(
+  request: NextRequest
+) {
+  try {
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse(
+        400,
+        "Invalid JSON request body.",
+        "INVALID_JSON"
+      );
+    }
+
+    if (!isJsonRecord(body)) {
+      return errorResponse(
+        400,
+        "Invalid booking request.",
+        "INVALID_REQUEST"
+      );
+    }
+
+    const businessSlug =
+      optionalTrimmedString(
+        body.businessSlug
+      ) ?? DEFAULT_BUSINESS_SLUG;
+
+    const serviceId =
+      optionalTrimmedString(
+        body.serviceId
+      );
+
+    const employeeId =
+      optionalTrimmedString(
+        body.employeeId
+      );
+
+    const startsAt =
+      optionalTrimmedString(
+        body.startsAt
+      );
+
+    const customer =
+      isJsonRecord(body.customer)
+        ? body.customer
+        : null;
+
+    const customerName =
+      customer
+        ? optionalTrimmedString(
+            customer.name
+          )
+        : null;
+
+    const customerPhone =
+      customer
+        ? optionalTrimmedString(
+            customer.phone
+          )
+        : null;
+
+    const customerEmail =
+      customer
+        ? optionalTrimmedString(
+            customer.email
+          )?.toLowerCase() ?? null
+        : null;
+
+    const customerNote =
+      customer
+        ? optionalTrimmedString(
+            customer.note
+          )
+        : null;
+
+    if (
+      !SLUG_PATTERN.test(
+        businessSlug
+      )
+    ) {
+      return errorResponse(
+        400,
+        "Invalid business slug.",
+        "INVALID_BUSINESS_SLUG"
+      );
+    }
+
+    if (
+      !serviceId ||
+      !UUID_PATTERN.test(serviceId)
+    ) {
+      return errorResponse(
+        400,
+        "Invalid service ID.",
+        "INVALID_SERVICE_ID"
+      );
+    }
+
+    if (
+      !employeeId ||
+      !UUID_PATTERN.test(employeeId)
+    ) {
+      return errorResponse(
+        400,
+        "Invalid employee ID.",
+        "INVALID_EMPLOYEE_ID"
+      );
+    }
+
+    if (
+      !startsAt ||
+      Number.isNaN(
+        Date.parse(startsAt)
+      )
+    ) {
+      return errorResponse(
+        400,
+        "Invalid booking start time.",
+        "INVALID_START_TIME"
+      );
+    }
+
+    if (
+      !customerName ||
+      customerName.length < 2 ||
+      customerName.length > 120
+    ) {
+      return errorResponse(
+        400,
+        "Invalid customer name.",
+        "INVALID_CUSTOMER_NAME"
+      );
+    }
+
+    if (
+      !customerPhone &&
+      !customerEmail
+    ) {
+      return errorResponse(
+        400,
+        "Phone or email is required.",
+        "CUSTOMER_CONTACT_REQUIRED"
+      );
+    }
+
+    if (
+      customerPhone &&
+      (
+        customerPhone.length > 40 ||
+        customerPhone.replace(
+          /\D/g,
+          ""
+        ).length < 6
+      )
+    ) {
+      return errorResponse(
+        400,
+        "Invalid customer phone.",
+        "INVALID_CUSTOMER_PHONE"
+      );
+    }
+
+    if (
+      customerEmail &&
+      (
+        customerEmail.length > 254 ||
+        !EMAIL_PATTERN.test(
+          customerEmail
+        )
+      )
+    ) {
+      return errorResponse(
+        400,
+        "Invalid customer email.",
+        "INVALID_CUSTOMER_EMAIL"
+      );
+    }
+
+    if (
+      customerNote &&
+      customerNote.length > 2000
+    ) {
+      return errorResponse(
+        400,
+        "Customer note is too long.",
+        "CUSTOMER_NOTE_TOO_LONG"
+      );
+    }
+
+    const supabase =
+      createAdminClient();
+
+    const {
+      data: business,
+      error: businessError,
+    } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("slug", businessSlug)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (businessError) {
+      console.error(
+        "Failed to load business:",
+        businessError
+      );
+
+      return errorResponse(
+        500,
+        "Failed to load business.",
+        "BUSINESS_QUERY_FAILED"
+      );
+    }
+
+    if (!business) {
+      return errorResponse(
+        404,
+        "Active business was not found.",
+        "BUSINESS_NOT_FOUND"
+      );
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase.rpc(
+      "create_public_booking",
+      {
+        p_business_id:
+          business.id,
+
+        p_service_id:
+          serviceId,
+
+        p_employee_id:
+          employeeId,
+
+        p_starts_at:
+          new Date(
+            startsAt
+          ).toISOString(),
+
+        p_customer_name:
+          customerName,
+
+        p_customer_phone:
+          customerPhone,
+
+        p_customer_email:
+          customerEmail,
+
+        p_customer_note:
+          customerNote,
+      }
+    );
+
+    if (error) {
+      const databaseMessage = [
+        error.message,
+        error.details,
+        error.hint,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toUpperCase();
+
+      console.error(
+        "Failed to create booking:",
+        error
+      );
+
+      if (
+        databaseMessage.includes(
+          "SLOT_UNAVAILABLE"
+        ) ||
+        error.code === "23P01"
+      ) {
+        return errorResponse(
+          409,
+          "The selected time is no longer available.",
+          "SLOT_UNAVAILABLE"
+        );
+      }
+
+      if (
+        databaseMessage.includes(
+          "INVALID_BUSINESS"
+        )
+      ) {
+        return errorResponse(
+          404,
+          "Active business was not found.",
+          "BUSINESS_NOT_FOUND"
+        );
+      }
+
+      if (
+        databaseMessage.includes(
+          "INVALID_"
+        ) ||
+        databaseMessage.includes(
+          "CUSTOMER_"
+        )
+      ) {
+        return errorResponse(
+          400,
+          "Invalid booking information.",
+          "INVALID_BOOKING_DATA"
+        );
+      }
+
+      return errorResponse(
+        500,
+        "Failed to create booking.",
+        "BOOKING_CREATE_FAILED"
+      );
+    }
+
+    if (
+      !data ||
+      !isJsonRecord(data)
+    ) {
+      return errorResponse(
+        500,
+        "Booking was created but no result was returned.",
+        "INVALID_BOOKING_RESULT"
+      );
+    }
+
+    const booking =
+      data as BookingResult;
+
+    return NextResponse.json(
+      {
+        ok: true,
+        booking,
+      },
+      {
+        status: 201,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Unexpected booking error:",
+      error
+    );
+
+    return errorResponse(
+      500,
+      "Unexpected booking error.",
+      "UNKNOWN_BOOKING_ERROR"
+    );
+  }
+}
