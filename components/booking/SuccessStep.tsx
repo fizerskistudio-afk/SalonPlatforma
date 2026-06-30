@@ -4,9 +4,12 @@ import {
   Calendar,
   Clock,
   Clock3,
+  Coins,
   Hash,
   PartyPopper,
   Scissors,
+  Timer,
+  UserRound,
 } from "lucide-react";
 
 import { useCatalogData } from "@/lib/catalogContext";
@@ -26,10 +29,22 @@ type SuccessStepProps = {
   booking: {
     referenceCode: string;
     status: string;
+    serviceId: string;
+    employeeId: string;
+    startsAt: string;
+    endsAt: string;
+    durationMinutes: number;
+    priceAmount: number;
+    currency: string;
   } | null;
 
   onDone: () => void;
 };
+
+type LocalizedText = Record<
+  Locale,
+  string
+>;
 
 const intlLocaleMap: Record<
   Locale,
@@ -40,70 +55,63 @@ const intlLocaleMap: Record<
   en: "en-GB",
 };
 
-const confirmedTitles: Record<
-  Locale,
-  string
-> = {
+const confirmedTitles: LocalizedText = {
   mk: "Резервацијата е потврдена!",
   sq: "Rezervimi u konfirmua!",
   en: "Booking confirmed!",
 };
 
-const confirmedMessages: Record<
-  Locale,
-  string
-> = {
+const confirmedMessages: LocalizedText = {
   mk: "Вашиот термин е успешно потврден. Со нетрпение ве очекуваме.",
   sq: "Orari juaj u konfirmua me sukses. Me kënaqësi ju presim.",
   en: "Your appointment is confirmed. We look forward to seeing you.",
 };
 
-const pendingTitles: Record<
-  Locale,
-  string
-> = {
+const pendingTitles: LocalizedText = {
   mk: "Резервацијата е примена",
   sq: "Rezervimi u pranua",
   en: "Booking received",
 };
 
-const pendingMessages: Record<
-  Locale,
-  string
-> = {
+const pendingMessages: LocalizedText = {
   mk: "Вашиот термин е зачуван и чека потврда од салонот. Салонот ќе ве контактира наскоро.",
   sq: "Orari juaj u ruajt dhe pret konfirmimin e sallonit. Salloni do t’ju kontaktojë së shpejti.",
   en: "Your appointment is reserved and awaiting confirmation from the salon. The salon will contact you shortly.",
 };
 
-const referenceLabels: Record<
-  Locale,
-  string
-> = {
+const referenceLabels: LocalizedText = {
   mk: "Број на резервација",
   sq: "Numri i rezervimit",
   en: "Booking reference",
 };
 
-const confirmedStatusLabels: Record<
-  Locale,
-  string
-> = {
-  mk: "Потврдена",
-  sq: "Konfirmuar",
-  en: "Confirmed",
+const confirmedStatusLabels: LocalizedText =
+  {
+    mk: "Потврдена",
+    sq: "Konfirmuar",
+    en: "Confirmed",
+  };
+
+const pendingStatusLabels: LocalizedText =
+  {
+    mk: "Чека потврда",
+    sq: "Në pritje",
+    en: "Awaiting confirmation",
+  };
+
+const durationLabels: LocalizedText = {
+  mk: "Времетраење",
+  sq: "Kohëzgjatja",
+  en: "Duration",
 };
 
-const pendingStatusLabels: Record<
-  Locale,
-  string
-> = {
-  mk: "Чека потврда",
-  sq: "Në pritje",
-  en: "Awaiting confirmation",
+const priceLabels: LocalizedText = {
+  mk: "Цена",
+  sq: "Çmimi",
+  en: "Price",
 };
 
-function formatDisplayDate(
+function formatDraftDate(
   dateString: string | null,
   locale: Locale
 ): string | null {
@@ -142,11 +150,7 @@ function formatDisplayDate(
   if (
     Number.isNaN(year) ||
     Number.isNaN(month) ||
-    Number.isNaN(day) ||
-    month < 1 ||
-    month > 12 ||
-    day < 1 ||
-    day > 31
+    Number.isNaN(day)
   ) {
     return null;
   }
@@ -168,6 +172,73 @@ function formatDisplayDate(
   );
 }
 
+function formatSavedDateTime(
+  startsAt: string,
+  locale: Locale,
+  timezone: string
+): {
+  date: string;
+  time: string;
+} | null {
+  const date =
+    new Date(startsAt);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return null;
+  }
+
+  try {
+    return {
+      date: new Intl.DateTimeFormat(
+        intlLocaleMap[locale],
+        {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          timeZone: timezone,
+        }
+      ).format(date),
+
+      time: new Intl.DateTimeFormat(
+        intlLocaleMap[locale],
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: timezone,
+        }
+      ).format(date),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function formatPrice(
+  amount: number,
+  currency: string,
+  locale: Locale
+): string {
+  try {
+    return new Intl.NumberFormat(
+      intlLocaleMap[locale],
+      {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }
+    ).format(amount);
+  } catch {
+    return `${amount} ${currency}`;
+  }
+}
+
 export default function SuccessStep({
   locale,
   draft,
@@ -175,24 +246,52 @@ export default function SuccessStep({
   onDone,
 }: SuccessStepProps) {
   const {
+    business,
     services,
+    employees,
   } = useCatalogData();
 
-  const service =
-    draft.serviceId
-      ? services.find(
-          (item) =>
-            item.id ===
-              draft.serviceId &&
-            item.isActive
-        ) ?? null
+  const serviceId =
+    booking?.serviceId ??
+    draft.serviceId;
+
+  const employeeId =
+    booking?.employeeId ??
+    null;
+
+  const service = serviceId
+    ? services.find(
+        (item) =>
+          item.id === serviceId
+      ) ?? null
+    : null;
+
+  const employee = employeeId
+    ? employees.find(
+        (item) =>
+          item.id === employeeId
+      ) ?? null
+    : null;
+
+  const savedDateTime =
+    booking
+      ? formatSavedDateTime(
+          booking.startsAt,
+          locale,
+          business.timezone
+        )
       : null;
 
   const formattedDate =
-    formatDisplayDate(
+    savedDateTime?.date ??
+    formatDraftDate(
       draft.date,
       locale
     );
+
+  const formattedTime =
+    savedDateTime?.time ??
+    draft.time;
 
   const isPending =
     booking?.status ===
@@ -209,6 +308,15 @@ export default function SuccessStep({
   const statusLabel = isPending
     ? pendingStatusLabels[locale]
     : confirmedStatusLabels[locale];
+
+  const formattedPrice =
+    booking
+      ? formatPrice(
+          booking.priceAmount,
+          booking.currency,
+          locale
+        )
+      : null;
 
   return (
     <div
@@ -256,7 +364,7 @@ export default function SuccessStep({
         {message}
       </p>
 
-      <div className="mb-8 w-full max-w-sm rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-5">
+      <div className="mb-8 w-full max-w-md rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-5">
         <div className="space-y-3">
           {booking?.referenceCode && (
             <div className="flex items-center gap-3 rounded-xl bg-[var(--brand-secondary)] p-3">
@@ -267,7 +375,7 @@ export default function SuccessStep({
                 />
               </div>
 
-              <div className="flex-1 text-left">
+              <div className="min-w-0 flex-1 text-left">
                 <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                   {
                     referenceLabels[
@@ -294,7 +402,7 @@ export default function SuccessStep({
                 />
               </div>
 
-              <div className="flex-1 text-left">
+              <div className="min-w-0 flex-1 text-left">
                 <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                   {t(
                     translations.common
@@ -313,6 +421,31 @@ export default function SuccessStep({
             </div>
           )}
 
+          {employee && (
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--brand-secondary)]">
+                <UserRound
+                  className="h-5 w-5 text-[var(--brand-primary)]"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="min-w-0 flex-1 text-left">
+                <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                  {t(
+                    translations.common
+                      .stylist,
+                    locale
+                  )}
+                </div>
+
+                <div className="text-sm font-medium text-[var(--brand-text)]">
+                  {employee.name}
+                </div>
+              </div>
+            </div>
+          )}
+
           {formattedDate && (
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--brand-secondary)]">
@@ -322,7 +455,7 @@ export default function SuccessStep({
                 />
               </div>
 
-              <div className="flex-1 text-left">
+              <div className="min-w-0 flex-1 text-left">
                 <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                   {t(
                     translations.common
@@ -338,7 +471,7 @@ export default function SuccessStep({
             </div>
           )}
 
-          {draft.time && (
+          {formattedTime && (
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--brand-secondary)]">
                 <Clock
@@ -347,7 +480,7 @@ export default function SuccessStep({
                 />
               </div>
 
-              <div className="flex-1 text-left">
+              <div className="min-w-0 flex-1 text-left">
                 <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                   {t(
                     translations.common
@@ -357,7 +490,60 @@ export default function SuccessStep({
                 </div>
 
                 <div className="text-sm font-medium text-[var(--brand-text)]">
-                  {draft.time}
+                  {formattedTime}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {booking && (
+            <div className="grid gap-3 border-t border-[var(--brand-border)] pt-3 sm:grid-cols-2">
+              <div className="flex items-center gap-3 rounded-xl bg-[var(--brand-secondary)] p-3">
+                <Timer
+                  className="h-5 w-5 flex-shrink-0 text-[var(--brand-primary)]"
+                  aria-hidden="true"
+                />
+
+                <div className="min-w-0 text-left">
+                  <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                    {
+                      durationLabels[
+                        locale
+                      ]
+                    }
+                  </div>
+
+                  <div className="mt-0.5 text-sm font-semibold text-[var(--brand-text)]">
+                    {
+                      booking.durationMinutes
+                    }{" "}
+                    {t(
+                      translations.booking
+                        .minutes,
+                      locale
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-xl bg-[var(--brand-secondary)] p-3">
+                <Coins
+                  className="h-5 w-5 flex-shrink-0 text-[var(--brand-primary)]"
+                  aria-hidden="true"
+                />
+
+                <div className="min-w-0 text-left">
+                  <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                    {
+                      priceLabels[
+                        locale
+                      ]
+                    }
+                  </div>
+
+                  <div className="mt-0.5 text-sm font-semibold text-[var(--brand-text)]">
+                    {formattedPrice}
+                  </div>
                 </div>
               </div>
             </div>
@@ -368,7 +554,7 @@ export default function SuccessStep({
       <button
         type="button"
         onClick={onDone}
-        className="w-full max-w-sm rounded-2xl bg-[var(--brand-primary)] py-4 font-semibold text-[var(--brand-surface)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none"
+        className="w-full max-w-md rounded-2xl bg-[var(--brand-primary)] py-4 font-semibold text-[var(--brand-surface)] transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none"
       >
         {t(
           translations.booking.done,
