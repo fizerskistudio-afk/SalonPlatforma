@@ -88,7 +88,7 @@ const navigationItems: NavigationItem[] = [
     description: "Radno vreme i odsustva",
     href: "/admin/schedule",
     icon: CalendarClock,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Podešavanja",
