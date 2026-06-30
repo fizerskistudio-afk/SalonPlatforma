@@ -11,6 +11,9 @@ import {
   LoaderCircle,
 } from "lucide-react";
 
+import {
+  isBookingCustomerValid,
+} from "@/lib/bookingValidation";
 import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
@@ -377,6 +380,30 @@ export default function BookingFlow({
       null
     );
 
+  const customerIsValid =
+    useMemo(
+      () =>
+        isBookingCustomerValid(
+          draft.customer,
+          {
+            requirePhone:
+              booking.requirePhone,
+
+            requireEmail:
+              booking.requireEmail,
+
+            allowNotes:
+              booking.allowNotes,
+          }
+        ),
+      [
+        booking.allowNotes,
+        booking.requireEmail,
+        booking.requirePhone,
+        draft.customer,
+      ]
+    );
+
   const currentStepIndex =
     stepOrder.indexOf(
       currentStep
@@ -627,38 +654,8 @@ export default function BookingFlow({
               resolvedEmployeeId
           );
 
-        case "customer": {
-          const {
-            name,
-            phone,
-            email,
-          } = draft.customer;
-
-          if (
-            name.trim().length < 2
-          ) {
-            return false;
-          }
-
-          if (
-            booking.requirePhone &&
-            !phone.trim()
-          ) {
-            return false;
-          }
-
-          if (
-            booking.requireEmail &&
-            !email.trim()
-          ) {
-            return false;
-          }
-
-          return Boolean(
-            phone.trim() ||
-              email.trim()
-          );
-        }
+        case "customer":
+          return customerIsValid;
 
         case "summary":
           return Boolean(
@@ -668,20 +665,7 @@ export default function BookingFlow({
               draft.time &&
               selectedStartsAt &&
               resolvedEmployeeId &&
-              draft.customer.name
-                .trim().length >= 2 &&
-              (
-                draft.customer.phone.trim() ||
-                draft.customer.email.trim()
-              ) &&
-              (
-                !booking.requirePhone ||
-                draft.customer.phone.trim()
-              ) &&
-              (
-                !booking.requireEmail ||
-                draft.customer.email.trim()
-              )
+              customerIsValid
           );
 
         default:
@@ -689,10 +673,12 @@ export default function BookingFlow({
       }
     }, [
       booking.allowAnyEmployee,
-      booking.requireEmail,
-      booking.requirePhone,
       currentStep,
-      draft,
+      customerIsValid,
+      draft.date,
+      draft.employeePreference,
+      draft.serviceId,
+      draft.time,
       employees,
       resolvedEmployeeId,
       selectedStartsAt,
