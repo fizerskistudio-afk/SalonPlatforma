@@ -1096,6 +1096,9 @@ export default function BookingFlow({
           <BookingSummary
             locale={locale}
             draft={draft}
+            resolvedEmployeeId={
+              resolvedEmployeeId
+            }
             onChangeStep={
               handleChangeStep
             }

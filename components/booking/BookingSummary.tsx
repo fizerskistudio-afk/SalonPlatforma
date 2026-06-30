@@ -23,6 +23,7 @@ import type {
 type BookingSummaryProps = {
   locale: Locale;
   draft: BookingDraft;
+  resolvedEmployeeId: string | null;
 
   onChangeStep?: (
     step:
@@ -34,6 +35,11 @@ type BookingSummaryProps = {
   ) => void;
 };
 
+type LocalizedText = Record<
+  Locale,
+  string
+>;
+
 const intlLocaleMap: Record<
   Locale,
   string
@@ -42,6 +48,20 @@ const intlLocaleMap: Record<
   sq: "sq-MK",
   en: "en-GB",
 };
+
+const automaticallyAssignedLabels: LocalizedText =
+  {
+    mk: "Автоматски избран",
+    sq: "Zgjedhur automatikisht",
+    en: "Automatically assigned",
+  };
+
+const contactLabels: LocalizedText =
+  {
+    mk: "Контакт податоци",
+    sq: "Të dhënat e kontaktit",
+    en: "Contact details",
+  };
 
 function formatDisplayDate(
   dateString: string | null,
@@ -168,6 +188,7 @@ function formatPrice(
 export default function BookingSummary({
   locale,
   draft,
+  resolvedEmployeeId,
   onChangeStep,
 }: BookingSummaryProps) {
   const {
@@ -191,7 +212,7 @@ export default function BookingSummary({
         ) ?? null
       : null;
 
-  const employee =
+  const selectedEmployee =
     draft.employeePreference &&
     draft.employeePreference !==
       "any"
@@ -203,17 +224,46 @@ export default function BookingSummary({
         ) ?? null
       : null;
 
-  const employeeDisplay =
+  const resolvedEmployee =
+    resolvedEmployeeId
+      ? employees.find(
+          (item) =>
+            item.id ===
+              resolvedEmployeeId &&
+            item.isActive
+        ) ?? null
+      : null;
+
+  const wasAutomaticallyAssigned =
     draft.employeePreference ===
-    "any"
-      ? t(
-          translations.booking
-            .anyAvailable,
-          locale
-        )
-      : employee
-        ? employee.name
-        : notSelectedLabel;
+      "any" &&
+    resolvedEmployee !== null;
+
+  const employeeDisplay =
+    wasAutomaticallyAssigned
+      ? resolvedEmployee.name
+      : selectedEmployee
+        ? selectedEmployee.name
+        : draft.employeePreference ===
+            "any"
+          ? t(
+              translations.booking
+                .anyAvailable,
+              locale
+            )
+          : notSelectedLabel;
+
+  const hasPhone =
+    draft.customer.phone.trim()
+      .length > 0;
+
+  const hasEmail =
+    draft.customer.email.trim()
+      .length > 0;
+
+  const hasNote =
+    draft.customer.note.trim()
+      .length > 0;
 
   return (
     <div className="space-y-4">
@@ -246,7 +296,7 @@ export default function BookingSummary({
             </div>
 
             {service && (
-              <div className="mt-1 flex items-center gap-2 text-sm text-[var(--brand-muted)]">
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--brand-muted)]">
                 <Clock
                   className="h-3.5 w-3.5"
                   aria-hidden="true"
@@ -320,6 +370,16 @@ export default function BookingSummary({
             <div className="font-medium text-[var(--brand-text)]">
               {employeeDisplay}
             </div>
+
+            {wasAutomaticallyAssigned && (
+              <div className="mt-1 inline-flex rounded-full border border-[var(--brand-border)] bg-[var(--brand-secondary)] px-2.5 py-1 text-xs text-[var(--brand-muted)]">
+                {
+                  automaticallyAssignedLabels[
+                    locale
+                  ]
+                }
+              </div>
+            )}
           </div>
 
           {onChangeStep && (
@@ -436,11 +496,24 @@ export default function BookingSummary({
 
         <div className="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-3">
           <div className="mb-3 flex items-start justify-between">
-            <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
-              {t(
-                translations.booking
-                  .yourInfo,
-                locale
+            <div>
+              <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
+                {t(
+                  translations.booking
+                    .yourInfo,
+                  locale
+                )}
+              </div>
+
+              {(hasPhone ||
+                hasEmail) && (
+                <div className="mt-1 text-xs text-[var(--brand-muted)]">
+                  {
+                    contactLabels[
+                      locale
+                    ]
+                  }
+                </div>
               )}
             </div>
 
@@ -484,26 +557,30 @@ export default function BookingSummary({
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <PhoneIcon
-                className="h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
-                aria-hidden="true"
-              />
+            {hasPhone && (
+              <div className="flex items-center gap-2 text-sm">
+                <PhoneIcon
+                  className="h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
+                  aria-hidden="true"
+                />
 
-              <span className="text-[var(--brand-text)]">
-                {draft.customer.phone ||
-                  notSelectedLabel}
-              </span>
-            </div>
+                <span className="break-all text-[var(--brand-text)]">
+                  {
+                    draft.customer
+                      .phone
+                  }
+                </span>
+              </div>
+            )}
 
-            {draft.customer.email && (
+            {hasEmail && (
               <div className="flex items-center gap-2 text-sm">
                 <Mail
                   className="h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
                   aria-hidden="true"
                 />
 
-                <span className="text-[var(--brand-text)]">
+                <span className="break-all text-[var(--brand-text)]">
                   {
                     draft.customer
                       .email
@@ -512,14 +589,14 @@ export default function BookingSummary({
               </div>
             )}
 
-            {draft.customer.note && (
-              <div className="flex items-start gap-2 border-t border-[var(--brand-border)] pt-2 text-sm">
+            {hasNote && (
+              <div className="flex items-start gap-2 border-t border-[var(--brand-border)] pt-3 text-sm">
                 <StickyNote
                   className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--brand-muted)]"
                   aria-hidden="true"
                 />
 
-                <span className="italic text-[var(--brand-muted)]">
+                <span className="whitespace-pre-wrap break-words italic text-[var(--brand-muted)]">
                   {
                     draft.customer
                       .note
