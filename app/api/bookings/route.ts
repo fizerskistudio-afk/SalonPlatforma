@@ -20,6 +20,24 @@ const SLUG_PATTERN =
 const EMAIL_PATTERN =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const DATABASE_ERROR_CODES = [
+  "SLOT_UNAVAILABLE",
+  "INVALID_BUSINESS",
+  "INVALID_SERVICE",
+  "INVALID_EMPLOYEE",
+  "INVALID_START_TIME",
+  "INVALID_CUSTOMER_NAME",
+  "CUSTOMER_PHONE_REQUIRED",
+  "CUSTOMER_EMAIL_REQUIRED",
+  "CUSTOMER_CONTACT_REQUIRED",
+  "INVALID_CUSTOMER_PHONE",
+  "INVALID_CUSTOMER_EMAIL",
+  "CUSTOMER_NOTE_TOO_LONG",
+] as const;
+
+type DatabaseErrorCode =
+  (typeof DATABASE_ERROR_CODES)[number];
+
 type JsonRecord = Record<
   string,
   unknown
@@ -38,6 +56,13 @@ type BookingResult = {
   durationMinutes: number;
   priceAmount: number;
   currency: string;
+};
+
+type DatabaseErrorPayload = {
+  message?: string | null;
+  details?: string | null;
+  hint?: string | null;
+  code?: string | null;
 };
 
 function isJsonRecord(
@@ -84,6 +109,132 @@ function optionalTrimmedString(
     : null;
 }
 
+function extractDatabaseErrorCode(
+  error: DatabaseErrorPayload
+): DatabaseErrorCode | null {
+  const databaseMessage = [
+    error.message,
+    error.details,
+    error.hint,
+  ]
+    .filter(
+      (
+        value
+      ): value is string =>
+        typeof value === "string"
+    )
+    .join(" ")
+    .toUpperCase();
+
+  for (
+    const code of DATABASE_ERROR_CODES
+  ) {
+    if (
+      databaseMessage.includes(code)
+    ) {
+      return code;
+    }
+  }
+
+  if (
+    error.code === "23P01"
+  ) {
+    return "SLOT_UNAVAILABLE";
+  }
+
+  return null;
+}
+
+function databaseErrorResponse(
+  code: DatabaseErrorCode
+) {
+  switch (code) {
+    case "SLOT_UNAVAILABLE":
+      return errorResponse(
+        409,
+        "The selected time is no longer available.",
+        code
+      );
+
+    case "INVALID_BUSINESS":
+      return errorResponse(
+        404,
+        "Active business was not found.",
+        code
+      );
+
+    case "INVALID_SERVICE":
+      return errorResponse(
+        400,
+        "The selected service is invalid.",
+        code
+      );
+
+    case "INVALID_EMPLOYEE":
+      return errorResponse(
+        400,
+        "The selected employee is invalid.",
+        code
+      );
+
+    case "INVALID_START_TIME":
+      return errorResponse(
+        400,
+        "The selected booking time is invalid.",
+        code
+      );
+
+    case "INVALID_CUSTOMER_NAME":
+      return errorResponse(
+        400,
+        "Customer name is invalid.",
+        code
+      );
+
+    case "CUSTOMER_PHONE_REQUIRED":
+      return errorResponse(
+        400,
+        "Customer phone is required.",
+        code
+      );
+
+    case "CUSTOMER_EMAIL_REQUIRED":
+      return errorResponse(
+        400,
+        "Customer email is required.",
+        code
+      );
+
+    case "CUSTOMER_CONTACT_REQUIRED":
+      return errorResponse(
+        400,
+        "Customer phone or email is required.",
+        code
+      );
+
+    case "INVALID_CUSTOMER_PHONE":
+      return errorResponse(
+        400,
+        "Customer phone is invalid.",
+        code
+      );
+
+    case "INVALID_CUSTOMER_EMAIL":
+      return errorResponse(
+        400,
+        "Customer email is invalid.",
+        code
+      );
+
+    case "CUSTOMER_NOTE_TOO_LONG":
+      return errorResponse(
+        400,
+        "Customer note is too long.",
+        code
+      );
+  }
+}
+
 export async function POST(
   request: NextRequest
 ) {
@@ -91,7 +242,8 @@ export async function POST(
     let body: unknown;
 
     try {
-      body = await request.json();
+      body =
+        await request.json();
     } catch {
       return errorResponse(
         400,
@@ -111,7 +263,8 @@ export async function POST(
     const businessSlug =
       optionalTrimmedString(
         body.businessSlug
-      ) ?? DEFAULT_BUSINESS_SLUG;
+      ) ??
+      DEFAULT_BUSINESS_SLUG;
 
     const serviceId =
       optionalTrimmedString(
@@ -129,7 +282,9 @@ export async function POST(
       );
 
     const customer =
-      isJsonRecord(body.customer)
+      isJsonRecord(
+        body.customer
+      )
         ? body.customer
         : null;
 
@@ -151,7 +306,8 @@ export async function POST(
       customer
         ? optionalTrimmedString(
             customer.email
-          )?.toLowerCase() ?? null
+          )?.toLowerCase() ??
+          null
         : null;
 
     const customerNote =
@@ -175,7 +331,9 @@ export async function POST(
 
     if (
       !serviceId ||
-      !UUID_PATTERN.test(serviceId)
+      !UUID_PATTERN.test(
+        serviceId
+      )
     ) {
       return errorResponse(
         400,
@@ -186,7 +344,9 @@ export async function POST(
 
     if (
       !employeeId ||
-      !UUID_PATTERN.test(employeeId)
+      !UUID_PATTERN.test(
+        employeeId
+      )
     ) {
       return errorResponse(
         400,
@@ -234,7 +394,8 @@ export async function POST(
     if (
       customerPhone &&
       (
-        customerPhone.length > 40 ||
+        customerPhone.length >
+          40 ||
         customerPhone.replace(
           /\D/g,
           ""
@@ -251,7 +412,8 @@ export async function POST(
     if (
       customerEmail &&
       (
-        customerEmail.length > 254 ||
+        customerEmail.length >
+          254 ||
         !EMAIL_PATTERN.test(
           customerEmail
         )
@@ -266,7 +428,8 @@ export async function POST(
 
     if (
       customerNote &&
-      customerNote.length > 2000
+      customerNote.length >
+        2000
     ) {
       return errorResponse(
         400,
@@ -284,7 +447,10 @@ export async function POST(
     } = await supabase
       .from("businesses")
       .select("id")
-      .eq("slug", businessSlug)
+      .eq(
+        "slug",
+        businessSlug
+      )
       .eq("is_active", true)
       .maybeSingle();
 
@@ -344,57 +510,21 @@ export async function POST(
     );
 
     if (error) {
-      const databaseMessage = [
-        error.message,
-        error.details,
-        error.hint,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toUpperCase();
-
       console.error(
         "Failed to create booking:",
         error
       );
 
-      if (
-        databaseMessage.includes(
-          "SLOT_UNAVAILABLE"
-        ) ||
-        error.code === "23P01"
-      ) {
-        return errorResponse(
-          409,
-          "The selected time is no longer available.",
-          "SLOT_UNAVAILABLE"
+      const databaseErrorCode =
+        extractDatabaseErrorCode(
+          error
         );
-      }
 
       if (
-        databaseMessage.includes(
-          "INVALID_BUSINESS"
-        )
+        databaseErrorCode
       ) {
-        return errorResponse(
-          404,
-          "Active business was not found.",
-          "BUSINESS_NOT_FOUND"
-        );
-      }
-
-      if (
-        databaseMessage.includes(
-          "INVALID_"
-        ) ||
-        databaseMessage.includes(
-          "CUSTOMER_"
-        )
-      ) {
-        return errorResponse(
-          400,
-          "Invalid booking information.",
-          "INVALID_BOOKING_DATA"
+        return databaseErrorResponse(
+          databaseErrorCode
         );
       }
 
@@ -427,7 +557,8 @@ export async function POST(
       {
         status: 201,
         headers: {
-          "Cache-Control": "no-store",
+          "Cache-Control":
+            "no-store",
         },
       }
     );

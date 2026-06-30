@@ -82,6 +82,11 @@ type CreateBookingResponse =
   | CreateBookingSuccessResponse
   | CreateBookingErrorResponse;
 
+type LocalizedErrorMessage = Record<
+  Locale,
+  string
+>;
+
 const stepOrder: BookingStep[] = [
   "service",
   "employee",
@@ -92,32 +97,150 @@ const stepOrder: BookingStep[] = [
   "success",
 ];
 
-const unavailableMessages: Record<
-  Locale,
-  string
+const unavailableMessages: LocalizedErrorMessage =
+  {
+    mk: "Терминот штотуку беше резервиран. Изберете друг слободен термин.",
+    sq: "Ky orar sapo u rezervua. Zgjidhni një orar tjetër të lirë.",
+    en: "That time was just booked. Please choose another available time.",
+  };
+
+const genericErrorMessages: LocalizedErrorMessage =
+  {
+    mk: "Резервацијата не можеше да се зачува. Обидете се повторно.",
+    sq: "Rezervimi nuk mund të ruhej. Ju lutemi provoni përsëri.",
+    en: "The booking could not be saved. Please try again.",
+  };
+
+const submittingMessages: LocalizedErrorMessage =
+  {
+    mk: "Се резервира...",
+    sq: "Duke rezervuar...",
+    en: "Booking...",
+  };
+
+const bookingErrorMessages: Record<
+  string,
+  LocalizedErrorMessage
 > = {
-  mk: "Терминот штотуку беше резервиран. Изберете друг слободен термин.",
-  sq: "Ky orar sapo u rezervua. Zgjidhni një orar tjetër të lirë.",
-  en: "That time was just booked. Please choose another available time.",
+  INVALID_CUSTOMER_NAME: {
+    mk: "Внесете име и презиме со најмалку 2 знаци.",
+    sq: "Shkruani emrin dhe mbiemrin me të paktën 2 karaktere.",
+    en: "Enter a name with at least 2 characters.",
+  },
+
+  CUSTOMER_PHONE_REQUIRED: {
+    mk: "Телефонскиот број е задолжителен.",
+    sq: "Numri i telefonit është i detyrueshëm.",
+    en: "A phone number is required.",
+  },
+
+  CUSTOMER_EMAIL_REQUIRED: {
+    mk: "Електронската адреса е задолжителна.",
+    sq: "Adresa e emailit është e detyrueshme.",
+    en: "An email address is required.",
+  },
+
+  CUSTOMER_CONTACT_REQUIRED: {
+    mk: "Внесете телефонски број или електронска адреса.",
+    sq: "Shkruani një numër telefoni ose adresë emaili.",
+    en: "Enter a phone number or email address.",
+  },
+
+  INVALID_CUSTOMER_PHONE: {
+    mk: "Телефонскиот број не е валиден. Внесете најмалку 6 цифри.",
+    sq: "Numri i telefonit nuk është i vlefshëm. Shkruani të paktën 6 shifra.",
+    en: "The phone number is invalid. Enter at least 6 digits.",
+  },
+
+  INVALID_CUSTOMER_EMAIL: {
+    mk: "Електронската адреса не е валидна.",
+    sq: "Adresa e emailit nuk është e vlefshme.",
+    en: "The email address is invalid.",
+  },
+
+  CUSTOMER_NOTE_TOO_LONG: {
+    mk: "Забелешката е предолга. Максимумот е 2000 знаци.",
+    sq: "Shënimi është shumë i gjatë. Maksimumi është 2000 karaktere.",
+    en: "The note is too long. The maximum is 2,000 characters.",
+  },
+
+  INVALID_SERVICE_ID: {
+    mk: "Избраната услуга повеќе не е достапна. Изберете друга услуга.",
+    sq: "Shërbimi i zgjedhur nuk është më i disponueshëm. Zgjidhni një shërbim tjetër.",
+    en: "The selected service is no longer available. Choose another service.",
+  },
+
+  INVALID_SERVICE: {
+    mk: "Избраната услуга повеќе не е достапна. Изберете друга услуга.",
+    sq: "Shërbimi i zgjedhur nuk është më i disponueshëm. Zgjidhni një shërbim tjetër.",
+    en: "The selected service is no longer available. Choose another service.",
+  },
+
+  INVALID_EMPLOYEE_ID: {
+    mk: "Избраниот вработен повеќе не е достапен. Изберете друг вработен.",
+    sq: "Punonjësi i zgjedhur nuk është më i disponueshëm. Zgjidhni një punonjës tjetër.",
+    en: "The selected employee is no longer available. Choose another employee.",
+  },
+
+  INVALID_EMPLOYEE: {
+    mk: "Избраниот вработен повеќе не е достапен. Изберете друг вработен.",
+    sq: "Punonjësi i zgjedhur nuk është më i disponueshëm. Zgjidhni një punonjës tjetër.",
+    en: "The selected employee is no longer available. Choose another employee.",
+  },
+
+  INVALID_START_TIME: {
+    mk: "Избраниот термин не е валиден. Изберете друг термин.",
+    sq: "Orari i zgjedhur nuk është i vlefshëm. Zgjidhni një orar tjetër.",
+    en: "The selected time is invalid. Choose another time.",
+  },
+
+  BUSINESS_NOT_FOUND: {
+    mk: "Салонот моментално не е достапен за онлајн резервации.",
+    sq: "Salloni aktualisht nuk është i disponueshëm për rezervime online.",
+    en: "The salon is currently unavailable for online bookings.",
+  },
+
+  INVALID_BUSINESS: {
+    mk: "Салонот моментално не е достапен за онлајн резервации.",
+    sq: "Salloni aktualisht nuk është i disponueshëm për rezervime online.",
+    en: "The salon is currently unavailable for online bookings.",
+  },
 };
 
-const genericErrorMessages: Record<
-  Locale,
-  string
-> = {
-  mk: "Резервацијата не можеше да се зачува. Обидете се повторно.",
-  sq: "Rezervimi nuk mund të ruhej. Ju lutemi provoni përsëri.",
-  en: "The booking could not be saved. Please try again.",
-};
+const customerErrorCodes =
+  new Set([
+    "INVALID_CUSTOMER_NAME",
+    "CUSTOMER_PHONE_REQUIRED",
+    "CUSTOMER_EMAIL_REQUIRED",
+    "CUSTOMER_CONTACT_REQUIRED",
+    "INVALID_CUSTOMER_PHONE",
+    "INVALID_CUSTOMER_EMAIL",
+    "CUSTOMER_NOTE_TOO_LONG",
+  ]);
 
-const submittingMessages: Record<
-  Locale,
-  string
-> = {
-  mk: "Се резервира...",
-  sq: "Duke rezervuar...",
-  en: "Booking...",
-};
+const serviceErrorCodes =
+  new Set([
+    "INVALID_SERVICE_ID",
+    "INVALID_SERVICE",
+  ]);
+
+const employeeErrorCodes =
+  new Set([
+    "INVALID_EMPLOYEE_ID",
+    "INVALID_EMPLOYEE",
+  ]);
+
+function getBookingErrorMessage(
+  code: string,
+  locale: Locale
+): string {
+  return (
+    bookingErrorMessages[code]?.[
+      locale
+    ] ??
+    genericErrorMessages[locale]
+  );
+}
 
 function createInitialDraft(
   initialServiceId:
@@ -747,10 +870,132 @@ export default function BookingFlow({
             return;
           }
 
+          if (
+            customerErrorCodes.has(
+              errorCode
+            )
+          ) {
+            setSubmitError(
+              getBookingErrorMessage(
+                errorCode,
+                locale
+              )
+            );
+
+            setCurrentStep(
+              "customer"
+            );
+
+            return;
+          }
+
+          if (
+            serviceErrorCodes.has(
+              errorCode
+            )
+          ) {
+            setDraft(
+              (
+                previousDraft
+              ) => ({
+                ...previousDraft,
+                serviceId: null,
+                employeePreference:
+                  null,
+                date: null,
+                time: null,
+              })
+            );
+
+            resetResolvedTime();
+
+            setSubmitError(
+              getBookingErrorMessage(
+                errorCode,
+                locale
+              )
+            );
+
+            setCurrentStep(
+              "service"
+            );
+
+            return;
+          }
+
+          if (
+            employeeErrorCodes.has(
+              errorCode
+            )
+          ) {
+            setDraft(
+              (
+                previousDraft
+              ) => ({
+                ...previousDraft,
+                employeePreference:
+                  null,
+                date: null,
+                time: null,
+              })
+            );
+
+            resetResolvedTime();
+
+            setSubmitError(
+              getBookingErrorMessage(
+                errorCode,
+                locale
+              )
+            );
+
+            setCurrentStep(
+              "employee"
+            );
+
+            return;
+          }
+
+          if (
+            errorCode ===
+            "INVALID_START_TIME"
+          ) {
+            setResolvedEmployeeId(
+              null
+            );
+
+            setSelectedStartsAt(
+              null
+            );
+
+            setDraft(
+              (
+                previousDraft
+              ) => ({
+                ...previousDraft,
+                time: null,
+              })
+            );
+
+            setSubmitError(
+              getBookingErrorMessage(
+                errorCode,
+                locale
+              )
+            );
+
+            setCurrentStep(
+              "time"
+            );
+
+            return;
+          }
+
           setSubmitError(
-            genericErrorMessages[
+            getBookingErrorMessage(
+              errorCode,
               locale
-            ]
+            )
           );
 
           return;
