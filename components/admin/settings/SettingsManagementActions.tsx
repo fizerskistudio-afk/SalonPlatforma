@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  ChangeEvent,
   CSSProperties,
   FormEvent,
   ReactNode,
@@ -33,6 +34,8 @@ import {
   Settings2,
   ShieldCheck,
   Sparkles,
+  Trash2,
+  UploadCloud,
   UserRoundCheck,
   X,
 } from "lucide-react";
@@ -45,6 +48,7 @@ import type {
   AdminDefaultLocale,
   AdminSettingsResult,
 } from "@/lib/admin/settings";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import type {
   ThemeColors,
 } from "@/lib/types";
@@ -99,8 +103,49 @@ type ThemePreset = {
   colors: ThemeColors;
 };
 
+type AssetType =
+  | "hero"
+  | "logo";
+
+type AssetBusyState = Record<
+  AssetType,
+  boolean
+>;
+
+type SignedUploadResponse = {
+  ok: true;
+  bucket: string;
+  path: string;
+  token: string;
+  publicUrl: string;
+};
+
+type AssetSaveResponse = {
+  ok: true;
+  assetType: AssetType;
+  path?: string;
+  url?: string;
+  message: string;
+};
+
+type AssetErrorResponse = {
+  ok: false;
+  message: string;
+  code?: string;
+};
+
 const HEX_COLOR_PATTERN =
   /^#[0-9A-Fa-f]{6}$/;
+
+const MAX_ASSET_FILE_BYTES =
+  8 * 1024 * 1024;
+
+const allowedAssetContentTypes =
+  new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ]);
 
 const LUMIERE_THEME: ThemeColors = {
   primary: "#D6B98C",
@@ -541,6 +586,22 @@ export default function SettingsManagementActions({
     );
 
   const [
+    assetBusy,
+    setAssetBusy,
+  ] = useState<AssetBusyState>({
+    hero: false,
+    logo: false,
+  });
+
+  const [
+    assetMessage,
+    setAssetMessage,
+  ] =
+    useState<ActionMessage | null>(
+      null
+    );
+
+  const [
     themeColors,
     setThemeColors,
   ] = useState<ThemeColors>({
@@ -817,6 +878,297 @@ export default function SettingsManagementActions({
     Object.values(
       themeColors
     ).every(isValidHexColor);
+
+  const setAssetBusyState = (
+    assetType: AssetType,
+    busy: boolean
+  ) => {
+    setAssetBusy(
+      (current) => ({
+        ...current,
+        [assetType]: busy,
+      })
+    );
+  };
+
+  const uploadAsset = async (
+    assetType: AssetType,
+    file: File
+  ) => {
+    if (
+      !allowedAssetContentTypes.has(
+        file.type
+      )
+    ) {
+      setAssetMessage({
+        type: "error",
+        text: "Dozvoljeni su JPG, PNG i WebP fajlovi.",
+      });
+
+      return;
+    }
+
+    if (
+      file.size <= 0 ||
+      file.size >
+        MAX_ASSET_FILE_BYTES
+    ) {
+      setAssetMessage({
+        type: "error",
+        text: "Fotografija mora biti manja od 8 MB.",
+      });
+
+      return;
+    }
+
+    if (assetBusy[assetType]) {
+      return;
+    }
+
+    setAssetMessage(null);
+    setAssetBusyState(
+      assetType,
+      true
+    );
+
+    try {
+      const signedResponse =
+        await fetch(
+          "/api/admin/assets/upload-url",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              assetType,
+              contentType:
+                file.type,
+              size: file.size,
+            }),
+          }
+        );
+
+      const signedPayload =
+        (await signedResponse.json()) as
+          | SignedUploadResponse
+          | AssetErrorResponse;
+
+      if (!signedPayload.ok) {
+        throw new Error(
+          signedPayload.message
+        );
+      }
+
+      if (!signedResponse.ok) {
+        throw new Error(
+          "Upload trenutno nije moguće pokrenuti."
+        );
+      }
+
+      const supabase =
+        createBrowserClient();
+
+      const {
+        error: uploadError,
+      } = await supabase.storage
+        .from(
+          signedPayload.bucket
+        )
+        .uploadToSignedUrl(
+          signedPayload.path,
+          signedPayload.token,
+          file,
+          {
+            cacheControl: "3600",
+            contentType:
+              file.type,
+          }
+        );
+
+      if (uploadError) {
+        throw new Error(
+          uploadError.message ||
+            "Fotografija nije uploadovana."
+        );
+      }
+
+      const saveResponse =
+        await fetch(
+          "/api/admin/assets",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              assetType,
+              path:
+                signedPayload.path,
+            }),
+          }
+        );
+
+      const savePayload =
+        (await saveResponse.json()) as
+          | AssetSaveResponse
+          | AssetErrorResponse;
+
+      if (!savePayload.ok) {
+        throw new Error(
+          savePayload.message
+        );
+      }
+
+      if (
+        !saveResponse.ok ||
+        !savePayload.url
+      ) {
+        throw new Error(
+          "Fotografija je uploadovana, ali nije sačuvana u salonu."
+        );
+      }
+
+      if (assetType === "hero") {
+        setHeroImageUrl(
+          savePayload.url
+        );
+      } else {
+        setLogoUrl(
+          savePayload.url
+        );
+      }
+
+      setAssetMessage({
+        type: "success",
+        text: savePayload.message,
+      });
+
+      router.refresh();
+    } catch (error) {
+      setAssetMessage({
+        type: "error",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Došlo je do greške prilikom uploada fotografije.",
+      });
+    } finally {
+      setAssetBusyState(
+        assetType,
+        false
+      );
+    }
+  };
+
+  const handleAssetFileChange = (
+    assetType: AssetType,
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file =
+      event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    void uploadAsset(
+      assetType,
+      file
+    );
+  };
+
+  const removeAsset = async (
+    assetType: AssetType
+  ) => {
+    if (assetBusy[assetType]) {
+      return;
+    }
+
+    const label =
+      assetType === "hero"
+        ? "hero fotografiju"
+        : "logo";
+
+    const confirmed =
+      window.confirm(
+        `Da li želiš da ukloniš ${label}?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setAssetMessage(null);
+    setAssetBusyState(
+      assetType,
+      true
+    );
+
+    try {
+      const response =
+        await fetch(
+          "/api/admin/assets",
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              assetType,
+            }),
+          }
+        );
+
+      const payload =
+        (await response.json()) as
+          | AssetSaveResponse
+          | AssetErrorResponse;
+
+      if (!payload.ok) {
+        throw new Error(
+          payload.message
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          "Fotografija trenutno nije moguće ukloniti."
+        );
+      }
+
+      if (assetType === "hero") {
+        setHeroImageUrl("");
+      } else {
+        setLogoUrl("");
+      }
+
+      setAssetMessage({
+        type: "success",
+        text: payload.message,
+      });
+
+      router.refresh();
+    } catch (error) {
+      setAssetMessage({
+        type: "error",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Došlo je do greške prilikom uklanjanja fotografije.",
+      });
+    } finally {
+      setAssetBusyState(
+        assetType,
+        false
+      );
+    }
+  };
 
   const handleBusinessSubmit = (
     event: FormEvent<HTMLFormElement>
@@ -1373,57 +1725,265 @@ export default function SettingsManagementActions({
                 Vizuelni identitet
               </div>
 
-              <div className="mt-5 space-y-4">
-                <label className="block">
-                  <FieldLabel
-                    title="Hero fotografija"
-                    description="Direktan HTTP ili HTTPS link do velike naslovne fotografije."
-                  />
+              <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+                Upload ide direktno u zaštićenu putanju ovog salona. Dozvoljeni su JPG, PNG i WebP fajlovi do 8 MB.
+              </p>
 
-                  <input
-                    type="url"
-                    maxLength={2000}
-                    value={heroImageUrl}
-                    onChange={(event) =>
-                      setHeroImageUrl(
-                        event.target.value
-                      )
-                    }
-                    placeholder="https://..."
-                    className="mt-3 h-11 w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-4 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
-                  />
-                </label>
+              {assetMessage && (
+                <div
+                  className={`mt-4 flex items-start gap-3 rounded-2xl border p-4 text-sm ${
+                    assetMessage.type ===
+                    "success"
+                      ? "border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-200"
+                      : "border-red-400/20 bg-red-400/[0.06] text-red-200"
+                  }`}
+                >
+                  {assetMessage.type ===
+                  "success" ? (
+                    <CheckCircle2
+                      className="mt-0.5 h-5 w-5 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <AlertCircle
+                      className="mt-0.5 h-5 w-5 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  )}
 
-                <label className="block">
-                  <FieldLabel
-                    title="Logo"
-                    description="Direktan HTTP ili HTTPS link do logotipa."
-                  />
+                  <span className="leading-relaxed">
+                    {assetMessage.text}
+                  </span>
+                </div>
+              )}
 
-                  <input
-                    type="url"
-                    maxLength={2000}
-                    value={logoUrl}
-                    onChange={(event) =>
-                      setLogoUrl(
-                        event.target.value
-                      )
-                    }
-                    placeholder="https://..."
-                    className="mt-3 h-11 w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-4 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
-                  />
-                </label>
+              <div className="mt-5 grid gap-4 xl:grid-cols-2">
+                <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950/60">
+                  <div className="flex flex-col justify-between gap-3 border-b border-white/[0.07] p-4 sm:flex-row sm:items-start">
+                    <FieldLabel
+                      title="Hero fotografija"
+                      description="Preporuka: horizontalna fotografija najmanje 1600 × 900 px."
+                    />
 
-                {heroImageUrl && (
-                  <div
-                    className="min-h-40 rounded-2xl border border-white/[0.08] bg-cover bg-center"
-                    style={{
-                      backgroundImage: `linear-gradient(to top, rgba(9,9,11,0.8), rgba(9,9,11,0.05)), url(${JSON.stringify(
-                        heroImageUrl
-                      )})`,
-                    }}
-                  />
-                )}
+                    <label
+                      className={`inline-flex min-h-10 flex-shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-zinc-950 transition hover:bg-zinc-200 ${
+                        assetBusy.hero
+                          ? "pointer-events-none opacity-60"
+                          : "cursor-pointer"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        disabled={
+                          assetBusy.hero
+                        }
+                        onChange={(event) =>
+                          handleAssetFileChange(
+                            "hero",
+                            event
+                          )
+                        }
+                        className="sr-only"
+                      />
+
+                      {assetBusy.hero ? (
+                        <LoaderCircle
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <UploadCloud
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      {assetBusy.hero
+                        ? "Upload..."
+                        : heroImageUrl
+                          ? "Zameni"
+                          : "Upload"}
+                    </label>
+                  </div>
+
+                  {heroImageUrl ? (
+                    <div className="p-4">
+                      <div
+                        className="min-h-52 rounded-2xl border border-white/[0.08] bg-cover bg-center"
+                        style={{
+                          backgroundImage: `linear-gradient(to top, rgba(9,9,11,0.8), rgba(9,9,11,0.05)), url(${JSON.stringify(
+                            heroImageUrl
+                          )})`,
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        disabled={
+                          assetBusy.hero
+                        }
+                        onClick={() =>
+                          void removeAsset(
+                            "hero"
+                          )
+                        }
+                        className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-2 text-xs font-semibold text-red-300 transition hover:border-red-400/35 hover:bg-red-400/[0.1] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Trash2
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+
+                        Ukloni hero
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex min-h-52 flex-col items-center justify-center p-6 text-center">
+                      <ImageIcon
+                        className="h-8 w-8 text-zinc-800"
+                        aria-hidden="true"
+                      />
+
+                      <div className="mt-3 text-sm font-medium text-zinc-500">
+                        Hero fotografija nije postavljena
+                      </div>
+                    </div>
+                  )}
+
+                  <label className="block border-t border-white/[0.07] p-4">
+                    <FieldLabel
+                      title="Ili unesi URL"
+                      description="Rezervna opcija za fotografiju sa spoljnog hostinga."
+                    />
+
+                    <input
+                      type="url"
+                      maxLength={2000}
+                      value={heroImageUrl}
+                      onChange={(event) =>
+                        setHeroImageUrl(
+                          event.target.value
+                        )
+                      }
+                      placeholder="https://..."
+                      className="mt-3 h-11 w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-4 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
+                    />
+                  </label>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950/60">
+                  <div className="flex flex-col justify-between gap-3 border-b border-white/[0.07] p-4 sm:flex-row sm:items-start">
+                    <FieldLabel
+                      title="Logo"
+                      description="Preporuka: PNG ili WebP sa providnom pozadinom, najmanje 512 × 512 px."
+                    />
+
+                    <label
+                      className={`inline-flex min-h-10 flex-shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-zinc-950 transition hover:bg-zinc-200 ${
+                        assetBusy.logo
+                          ? "pointer-events-none opacity-60"
+                          : "cursor-pointer"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        disabled={
+                          assetBusy.logo
+                        }
+                        onChange={(event) =>
+                          handleAssetFileChange(
+                            "logo",
+                            event
+                          )
+                        }
+                        className="sr-only"
+                      />
+
+                      {assetBusy.logo ? (
+                        <LoaderCircle
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <UploadCloud
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      {assetBusy.logo
+                        ? "Upload..."
+                        : logoUrl
+                          ? "Zameni"
+                          : "Upload"}
+                    </label>
+                  </div>
+
+                  {logoUrl ? (
+                    <div className="p-4">
+                      <div className="flex min-h-52 items-center justify-center rounded-2xl border border-white/[0.08] bg-[linear-gradient(45deg,#18181b_25%,transparent_25%),linear-gradient(-45deg,#18181b_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#18181b_75%),linear-gradient(-45deg,transparent_75%,#18181b_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0px] p-6">
+                        <img
+                          src={logoUrl}
+                          alt="Pregled logotipa"
+                          className="max-h-36 max-w-full object-contain"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={
+                          assetBusy.logo
+                        }
+                        onClick={() =>
+                          void removeAsset(
+                            "logo"
+                          )
+                        }
+                        className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-red-400/20 bg-red-400/[0.06] px-4 py-2 text-xs font-semibold text-red-300 transition hover:border-red-400/35 hover:bg-red-400/[0.1] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Trash2
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+
+                        Ukloni logo
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex min-h-52 flex-col items-center justify-center p-6 text-center">
+                      <ImageIcon
+                        className="h-8 w-8 text-zinc-800"
+                        aria-hidden="true"
+                      />
+
+                      <div className="mt-3 text-sm font-medium text-zinc-500">
+                        Logo nije postavljen
+                      </div>
+                    </div>
+                  )}
+
+                  <label className="block border-t border-white/[0.07] p-4">
+                    <FieldLabel
+                      title="Ili unesi URL"
+                      description="Rezervna opcija za logo sa spoljnog hostinga."
+                    />
+
+                    <input
+                      type="url"
+                      maxLength={2000}
+                      value={logoUrl}
+                      onChange={(event) =>
+                        setLogoUrl(
+                          event.target.value
+                        )
+                      }
+                      placeholder="https://..."
+                      className="mt-3 h-11 w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-4 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </section>
