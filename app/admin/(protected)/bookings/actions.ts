@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireAdmin } from "@/lib/auth/admin";
 import type {
   BookingStatus,
 } from "@/lib/admin/bookings";
+import { requireAdmin } from "@/lib/auth/admin";
+import {
+  syncBookingToGoogleCalendar,
+} from "@/lib/google-calendar/sync";
 import { createClient } from "@/lib/supabase/server";
 
 export type BookingActionResult = {
@@ -80,6 +83,60 @@ function refreshBookingPages() {
   revalidatePath(
     "/admin/bookings"
   );
+}
+
+async function synchronizeBookingSafely(
+  bookingId: string
+): Promise<boolean> {
+  try {
+    const syncResult =
+      await syncBookingToGoogleCalendar(
+        bookingId
+      );
+
+    if (!syncResult.ok) {
+      console.error(
+        "Booking update succeeded, but Google Calendar synchronization failed:",
+        {
+          bookingId,
+          action:
+            syncResult.action,
+          message:
+            syncResult.message,
+        }
+      );
+
+      return false;
+    }
+
+    console.info(
+      "Booking synchronized with Google Calendar after admin update:",
+      {
+        bookingId,
+        action:
+          syncResult.action,
+        eventId:
+          syncResult.eventId ??
+          null,
+      }
+    );
+
+    return true;
+  } catch (error) {
+    /*
+     * Google Calendar greška nikada ne sme
+     * da poništi uspešnu promenu rezervacije.
+     */
+    console.error(
+      "Unexpected Google Calendar synchronization error after admin update:",
+      {
+        bookingId,
+        error,
+      }
+    );
+
+    return false;
+  }
 }
 
 export async function updateBookingStatusAction(
@@ -247,7 +304,35 @@ export async function updateBookingStatusAction(
   const updatedBooking =
     updatedBookingData as unknown as BookingStatusRow;
 
+  let calendarSyncSucceeded =
+    true;
+
+  /*
+   * pending → confirmed:
+   * kreira Google događaj.
+   *
+   * confirmed/pending → cancelled:
+   * briše događaj ili beleži da događaj nije postojao.
+   */
+  if (
+    updatedBooking.status ===
+      "confirmed" ||
+    updatedBooking.status ===
+      "cancelled"
+  ) {
+    calendarSyncSucceeded =
+      await synchronizeBookingSafely(
+        updatedBooking.id
+      );
+  }
+
   refreshBookingPages();
+
+  const successMessage =
+    updatedBooking.status ===
+    "cancelled"
+      ? "Rezervacija je otkazana."
+      : "Status rezervacije je uspešno promenjen.";
 
   return {
     ok: true,
@@ -257,10 +342,9 @@ export async function updateBookingStatusAction(
       updatedBooking.status,
 
     message:
-      input.nextStatus ===
-      "cancelled"
-        ? "Rezervacija je otkazana."
-        : "Status rezervacije je uspešno promenjen.",
+      calendarSyncSucceeded
+        ? successMessage
+        : `${successMessage} Google Calendar trenutno nije sinhronizovan.`,
   };
 }
 
@@ -333,6 +417,23 @@ export async function updateBookingInternalNoteAction(
   const updatedBooking =
     updatedBookingData as unknown as BookingStatusRow;
 
+  let calendarSyncSucceeded =
+    true;
+
+  /*
+   * Kod confirmed rezervacije sync servis
+   * ažurira opis postojećeg Google događaja.
+   */
+  if (
+    updatedBooking.status ===
+    "confirmed"
+  ) {
+    calendarSyncSucceeded =
+      await synchronizeBookingSafely(
+        updatedBooking.id
+      );
+  }
+
   refreshBookingPages();
 
   return {
@@ -341,7 +442,10 @@ export async function updateBookingInternalNoteAction(
       updatedBooking.id,
     status:
       updatedBooking.status,
+
     message:
-      "Interna napomena je sačuvana.",
+      calendarSyncSucceeded
+        ? "Interna napomena je sačuvana."
+        : "Interna napomena je sačuvana, ali Google Calendar trenutno nije sinhronizovan.",
   };
 }
