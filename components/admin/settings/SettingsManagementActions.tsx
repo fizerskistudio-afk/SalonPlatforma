@@ -45,11 +45,16 @@ import {
   saveBusinessSettingsAction,
 } from "@/app/admin/(protected)/settings/actions";
 import type {
-  AdminDefaultLocale,
+  AdminContentLocale,
   AdminSettingsResult,
 } from "@/lib/admin/settings";
+import {
+  LOCALE_CODES,
+  LOCALE_REGISTRY,
+} from "@/lib/i18n/locales";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import type {
+  LocalizedText,
   ThemeColors,
 } from "@/lib/types";
 
@@ -62,11 +67,10 @@ type ActionMessage = {
   text: string;
 };
 
-type LocalizedTextState = {
-  mk: string;
-  sq: string;
-  en: string;
-};
+type LocalizedTextState = Record<
+  AdminContentLocale,
+  string
+>;
 
 type LocaleFieldName =
   | "tagline"
@@ -292,27 +296,69 @@ function createBrandPreviewStyle(
   };
 }
 
-const localeOptions: Array<{
-  value: AdminDefaultLocale;
-  label: string;
-  shortLabel: string;
-}> = [
-  {
-    value: "mk",
-    label: "Makedonski",
-    shortLabel: "MK",
-  },
-  {
-    value: "sq",
-    label: "Albanski",
-    shortLabel: "SQ",
-  },
-  {
-    value: "en",
-    label: "Engleski",
-    shortLabel: "EN",
-  },
-];
+const localeOptions =
+  LOCALE_CODES.map(
+    (value) => {
+      const locale =
+        LOCALE_REGISTRY[value];
+
+      return {
+        value,
+        label: locale.adminName,
+        nativeName:
+          locale.nativeName,
+        shortLabel:
+          locale.shortName,
+        uiTranslationReady:
+          locale.uiTranslationReady,
+      };
+    }
+  );
+
+function createLocalizedTextState(
+  value: LocalizedText
+): LocalizedTextState {
+  return Object.fromEntries(
+    LOCALE_CODES.map(
+      (locale) => [
+        locale,
+        value[locale] ?? "",
+      ]
+    )
+  ) as LocalizedTextState;
+}
+
+function createLocaleFieldValues(
+  business:
+    AdminSettingsResult["business"]
+): LocaleFieldValues {
+  return {
+    tagline:
+      createLocalizedTextState(
+        business.tagline
+      ),
+
+    description:
+      createLocalizedTextState(
+        business.description
+      ),
+
+    address:
+      createLocalizedTextState(
+        business.address
+      ),
+
+    city:
+      createLocalizedTextState(
+        business.city
+      ),
+
+    country:
+      createLocalizedTextState(
+        business.country
+      ),
+  };
+}
 
 function SettingsMessage({
   message,
@@ -519,8 +565,9 @@ export default function SettingsManagementActions({
     activeLocale,
     setActiveLocale,
   ] =
-    useState<AdminDefaultLocale>(
-      data.business.defaultLocale
+    useState<AdminContentLocale>(
+      data.business
+        .defaultContentLocale
     );
 
   const [
@@ -537,9 +584,19 @@ export default function SettingsManagementActions({
     defaultLocale,
     setDefaultLocale,
   ] =
-    useState<AdminDefaultLocale>(
-      data.business.defaultLocale
+    useState<AdminContentLocale>(
+      data.business
+        .defaultContentLocale
     );
+
+  const [
+    supportedLocales,
+    setSupportedLocales,
+  ] = useState<
+    AdminContentLocale[]
+  >(
+    data.business.supportedLocales
+  );
 
   const [
     currency,
@@ -611,37 +668,11 @@ export default function SettingsManagementActions({
   const [
     localizedFields,
     setLocalizedFields,
-  ] = useState<LocaleFieldValues>({
-    tagline: {
-      mk: data.business.tagline.mk,
-      sq: data.business.tagline.sq,
-      en: data.business.tagline.en,
-    },
-
-    description: {
-      mk: data.business.description.mk,
-      sq: data.business.description.sq,
-      en: data.business.description.en,
-    },
-
-    address: {
-      mk: data.business.address.mk,
-      sq: data.business.address.sq,
-      en: data.business.address.en,
-    },
-
-    city: {
-      mk: data.business.city.mk,
-      sq: data.business.city.sq,
-      en: data.business.city.en,
-    },
-
-    country: {
-      mk: data.business.country.mk,
-      sq: data.business.country.sq,
-      en: data.business.country.en,
-    },
-  });
+  ] = useState<LocaleFieldValues>(
+    createLocaleFieldValues(
+      data.business
+    )
+  );
 
   const [
     slotIntervalMinutes,
@@ -715,7 +746,17 @@ export default function SettingsManagementActions({
     );
 
     setDefaultLocale(
-      data.business.defaultLocale
+      data.business
+        .defaultContentLocale
+    );
+
+    setActiveLocale(
+      data.business
+        .defaultContentLocale
+    );
+
+    setSupportedLocales(
+      data.business.supportedLocales
     );
 
     setCurrency(
@@ -755,42 +796,11 @@ export default function SettingsManagementActions({
       ...data.business.theme,
     });
 
-    setLocalizedFields({
-      tagline: {
-        mk: data.business.tagline.mk,
-        sq: data.business.tagline.sq,
-        en: data.business.tagline.en,
-      },
-
-      description: {
-        mk:
-          data.business.description.mk,
-
-        sq:
-          data.business.description.sq,
-
-        en:
-          data.business.description.en,
-      },
-
-      address: {
-        mk: data.business.address.mk,
-        sq: data.business.address.sq,
-        en: data.business.address.en,
-      },
-
-      city: {
-        mk: data.business.city.mk,
-        sq: data.business.city.sq,
-        en: data.business.city.en,
-      },
-
-      country: {
-        mk: data.business.country.mk,
-        sq: data.business.country.sq,
-        en: data.business.country.en,
-      },
-    });
+    setLocalizedFields(
+      createLocaleFieldValues(
+        data.business
+      )
+    );
 
     setSlotIntervalMinutes(
       String(
@@ -839,7 +849,7 @@ export default function SettingsManagementActions({
 
   const updateLocalizedField = (
     field: LocaleFieldName,
-    locale: AdminDefaultLocale,
+    locale: AdminContentLocale,
     value: string
   ) => {
     setLocalizedFields(
@@ -852,6 +862,82 @@ export default function SettingsManagementActions({
         },
       })
     );
+  };
+
+  const toggleSupportedLocale = (
+    locale: AdminContentLocale
+  ) => {
+    const isActive =
+      supportedLocales.includes(
+        locale
+      );
+
+    if (isActive) {
+      if (
+        supportedLocales.length === 1
+      ) {
+        setBusinessMessage({
+          type: "error",
+          text: "Salon mora imati najmanje jedan aktivan jezik.",
+        });
+
+        return;
+      }
+
+      const nextLocales =
+        supportedLocales.filter(
+          (currentLocale) =>
+            currentLocale !== locale
+        );
+
+      const fallbackLocale =
+        nextLocales[0] ?? "en";
+
+      const nextDefaultLocale =
+        defaultLocale === locale
+          ? fallbackLocale
+          : defaultLocale;
+
+      setSupportedLocales(
+        nextLocales
+      );
+
+      if (
+        defaultLocale === locale
+      ) {
+        setDefaultLocale(
+          nextDefaultLocale
+        );
+      }
+
+      if (
+        activeLocale === locale
+      ) {
+        setActiveLocale(
+          nextDefaultLocale
+        );
+      }
+
+      return;
+    }
+
+    if (
+      supportedLocales.length >= 20
+    ) {
+      setBusinessMessage({
+        type: "error",
+        text: "Jedan salon može imati najviše 20 aktivnih jezika.",
+      });
+
+      return;
+    }
+
+    setSupportedLocales([
+      ...supportedLocales,
+      locale,
+    ]);
+
+    setActiveLocale(locale);
   };
 
   const updateThemeColor = (
@@ -1226,6 +1312,7 @@ export default function SettingsManagementActions({
                 theme: themeColors,
 
                 defaultLocale,
+                supportedLocales,
                 currency,
                 timezone,
               }
@@ -1449,27 +1536,34 @@ export default function SettingsManagementActions({
                 </p>
               </div>
 
-              <div className="flex rounded-xl border border-white/[0.08] bg-zinc-950 p-1">
-                {localeOptions.map(
-                  (locale) => (
-                    <button
-                      key={locale.value}
-                      type="button"
-                      onClick={() =>
-                        setActiveLocale(
-                          locale.value
-                        )
-                      }
-                      className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
-                        activeLocale ===
-                        locale.value
-                          ? "bg-amber-300 text-zinc-950"
-                          : "text-zinc-500 hover:text-white"
-                      }`}
-                    >
-                      {locale.shortLabel}
-                    </button>
-                  )
+              <div className="flex max-w-full flex-wrap gap-1 rounded-xl border border-white/[0.08] bg-zinc-950 p-1">
+                {supportedLocales.map(
+                  (locale) => {
+                    const option =
+                      LOCALE_REGISTRY[
+                        locale
+                      ];
+
+                    return (
+                      <button
+                        key={locale}
+                        type="button"
+                        onClick={() =>
+                          setActiveLocale(
+                            locale
+                          )
+                        }
+                        className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
+                          activeLocale ===
+                          locale
+                            ? "bg-amber-300 text-zinc-950"
+                            : "text-zinc-500 hover:text-white"
+                        }`}
+                      >
+                        {option.shortName}
+                      </button>
+                    );
+                  }
                 )}
               </div>
             </div>
@@ -1479,11 +1573,9 @@ export default function SettingsManagementActions({
                 Trenutno uređuješ:{" "}
                 <strong className="text-blue-100">
                   {
-                    localeOptions.find(
-                      (locale) =>
-                        locale.value ===
-                        activeLocale
-                    )?.label
+                    LOCALE_REGISTRY[
+                      activeLocale
+                    ].adminName
                   }
                 </strong>
               </div>
@@ -2339,6 +2431,106 @@ export default function SettingsManagementActions({
               Lokalizacija
             </div>
 
+            <div className="mt-5 rounded-2xl border border-white/[0.07] bg-zinc-950/70 p-4">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                <div>
+                  <FieldLabel
+                    title="Aktivni jezici sajta"
+                    description="Izaberi jezike na kojima salon unosi i prikazuje svoj sadržaj."
+                  />
+                </div>
+
+                <span className="rounded-full border border-white/[0.08] bg-black/20 px-3 py-1 text-xs font-semibold text-zinc-500">
+                  {supportedLocales.length}
+                  /20 aktivno
+                </span>
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {localeOptions.map(
+                  (locale) => {
+                    const isActive =
+                      supportedLocales.includes(
+                        locale.value
+                      );
+
+                    const isDefault =
+                      defaultLocale ===
+                      locale.value;
+
+                    return (
+                      <button
+                        key={locale.value}
+                        type="button"
+                        aria-pressed={
+                          isActive
+                        }
+                        onClick={() =>
+                          toggleSupportedLocale(
+                            locale.value
+                          )
+                        }
+                        className={`flex min-h-16 items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
+                          isActive
+                            ? "border-amber-300/30 bg-amber-300/[0.08]"
+                            : "border-white/[0.07] bg-black/20 hover:border-white/15"
+                        }`}
+                      >
+                        <span className="min-w-0">
+                          <span
+                            className={`block truncate text-sm font-semibold ${
+                              isActive
+                                ? "text-amber-100"
+                                : "text-zinc-400"
+                            }`}
+                          >
+                            {
+                              locale.nativeName
+                            }
+                          </span>
+
+                          <span className="mt-0.5 block truncate text-[11px] text-zinc-600">
+                            {locale.label}
+                          </span>
+                        </span>
+
+                        <span className="flex flex-shrink-0 flex-col items-end gap-1">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                              isActive
+                                ? "bg-amber-300 text-zinc-950"
+                                : "bg-white/[0.05] text-zinc-600"
+                            }`}
+                          >
+                            {
+                              locale.shortLabel
+                            }
+                          </span>
+
+                          {isDefault && (
+                            <span className="text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
+                              glavni
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+
+              <div className="mt-4 flex items-start gap-2 rounded-xl border border-blue-400/10 bg-blue-400/[0.04] p-3">
+                <Info
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-300"
+                  aria-hidden="true"
+                />
+
+                <p className="text-xs leading-relaxed text-blue-100/55">
+                  MK, SQ i EN trenutno imaju kompletan prevod sistemskih dugmadi i booking poruka. Ostali jezici su spremni za sadržaj salona; sistemske prevode povezujemo u sledećem koraku.
+                </p>
+              </div>
+            </div>
+
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               <label>
                 <FieldLabel
@@ -2351,18 +2543,22 @@ export default function SettingsManagementActions({
                   onChange={(event) =>
                     setDefaultLocale(
                       event.target
-                        .value as AdminDefaultLocale
+                        .value as AdminContentLocale
                     )
                   }
                   className="mt-3 h-11 w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-4 text-sm text-zinc-300 outline-none focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
                 >
-                  {localeOptions.map(
+                  {supportedLocales.map(
                     (locale) => (
                       <option
-                        key={locale.value}
-                        value={locale.value}
+                        key={locale}
+                        value={locale}
                       >
-                        {locale.label}
+                        {
+                          LOCALE_REGISTRY[
+                            locale
+                          ].adminName
+                        }
                       </option>
                     )
                   )}

@@ -3,7 +3,15 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import {
+  LOCALE_CODES,
+  isLocaleCode,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
 import { createClient } from "@/lib/supabase/server";
+import type {
+  LocalizedText,
+} from "@/lib/types";
 
 export type SettingsActionResult = {
   ok: boolean;
@@ -11,11 +19,10 @@ export type SettingsActionResult = {
   entityId?: string;
 };
 
-export type SettingsLocalizedTextInput = {
-  mk: string;
-  sq: string;
-  en: string;
-};
+export type SettingsLocalizedTextInput =
+  Partial<
+    Record<LocaleCode, string>
+  >;
 
 export type SettingsThemeInput = {
   primary: string;
@@ -49,7 +56,8 @@ export type SaveBusinessSettingsInput = {
 
   theme: SettingsThemeInput;
 
-  defaultLocale: "mk" | "sq" | "en";
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
   currency: string;
   timezone: string;
 };
@@ -92,20 +100,40 @@ function normalizeOptionalText(
 
 function normalizeLocalizedText(
   value: SettingsLocalizedTextInput
-): SettingsLocalizedTextInput {
-  return {
-    mk: value.mk.trim(),
-    sq: value.sq.trim(),
-    en: value.en.trim(),
-  };
+): LocalizedText {
+  const normalized:
+    LocalizedText = {
+      mk: "",
+      sq: "",
+      en: "",
+    };
+
+  for (
+    const locale of
+    LOCALE_CODES
+  ) {
+    const translatedValue =
+      value[locale];
+
+    if (
+      typeof translatedValue ===
+      "string"
+    ) {
+      normalized[locale] =
+        translatedValue.trim();
+    }
+  }
+
+  return normalized;
 }
 
 function localizedTextExceedsLength(
-  value: SettingsLocalizedTextInput,
+  value: LocalizedText,
   maximumLength: number
 ): boolean {
   return Object.values(value).some(
     (text) =>
+      typeof text === "string" &&
       text.length > maximumLength
   );
 }
@@ -163,14 +191,37 @@ function isValidTimezone(
   }
 }
 
-function isValidDefaultLocale(
-  value: string
-): value is "mk" | "sq" | "en" {
-  return (
-    value === "mk" ||
-    value === "sq" ||
-    value === "en"
-  );
+function normalizeSupportedLocales(
+  value: unknown
+): LocaleCode[] | null {
+  if (
+    !Array.isArray(value) ||
+    value.length < 1 ||
+    value.length > 20
+  ) {
+    return null;
+  }
+
+  if (!value.every(isLocaleCode)) {
+    return null;
+  }
+
+  const locales =
+    value as LocaleCode[];
+
+  const uniqueLocales =
+    Array.from(
+      new Set(locales)
+    );
+
+  if (
+    uniqueLocales.length !==
+    locales.length
+  ) {
+    return null;
+  }
+
+  return uniqueLocales;
 }
 
 function isIntegerWithinRange(
@@ -471,15 +522,31 @@ export async function saveBusinessSettingsAction(
   const theme =
     normalizeTheme(input.theme);
 
+  const supportedLocales =
+    normalizeSupportedLocales(
+      input.supportedLocales
+    );
+
+  if (!supportedLocales) {
+    return {
+      ok: false,
+      message:
+        "Izaberi između 1 i 20 važećih jezika bez duplikata.",
+    };
+  }
+
   if (
-    !isValidDefaultLocale(
+    !isLocaleCode(
+      input.defaultLocale
+    ) ||
+    !supportedLocales.includes(
       input.defaultLocale
     )
   ) {
     return {
       ok: false,
       message:
-        "Podrazumevani jezik nije ispravan.",
+        "Podrazumevani jezik mora biti jedan od aktivnih jezika.",
     };
   }
 
@@ -597,6 +664,9 @@ export async function saveBusinessSettingsAction(
       default_locale:
         input.defaultLocale,
 
+      supported_locales:
+        supportedLocales,
+
       currency,
       timezone,
 
@@ -627,7 +697,7 @@ export async function saveBusinessSettingsAction(
     ok: true,
     entityId: business.id,
     message:
-      "Podaci salona i Brand Kit su uspešno sačuvani.",
+      "Podaci salona, jezici i Brand Kit su uspešno sačuvani.",
   };
 }
 

@@ -1,6 +1,11 @@
 import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import {
+  isLocaleCode,
+  normalizeLocaleList,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   LocalizedText,
@@ -11,6 +16,9 @@ export type AdminDefaultLocale =
   | "mk"
   | "sq"
   | "en";
+
+export type AdminContentLocale =
+  LocaleCode;
 
 export type AdminBusinessSettings = {
   id: string;
@@ -36,7 +44,21 @@ export type AdminBusinessSettings = {
 
   theme: ThemeColors;
 
+  /**
+   * Privremeni UI fallback koji koriste stariji
+   * admin prikazi dok se migracija ne završi.
+   */
   defaultLocale: AdminDefaultLocale;
+
+  /**
+   * Pravi podrazumevani jezik sadržaja salona.
+   */
+  defaultContentLocale:
+    AdminContentLocale;
+
+  supportedLocales:
+    AdminContentLocale[];
+
   currency: string;
   timezone: string;
 
@@ -122,6 +144,7 @@ type BusinessDatabaseRow = {
   brand_border: string;
 
   default_locale: string;
+  supported_locales: unknown;
   currency: string;
   timezone: string;
 
@@ -181,16 +204,19 @@ type GoogleCalendarConnectionDatabaseRow = {
 function normalizeLocalizedText(
   value: unknown
 ): LocalizedText {
+  const normalized:
+    LocalizedText = {
+      mk: "",
+      sq: "",
+      en: "",
+    };
+
   if (
     typeof value !== "object" ||
     value === null ||
     Array.isArray(value)
   ) {
-    return {
-      mk: "",
-      sq: "",
-      en: "",
-    };
+    return normalized;
   }
 
   const record =
@@ -199,39 +225,85 @@ function normalizeLocalizedText(
       unknown
     >;
 
-  return {
-    mk:
-      typeof record.mk ===
-      "string"
-        ? record.mk
-        : "",
+  for (
+    const locale of
+    Object.keys(record)
+  ) {
+    if (!isLocaleCode(locale)) {
+      continue;
+    }
 
-    sq:
-      typeof record.sq ===
-      "string"
-        ? record.sq
-        : "",
+    const translatedValue =
+      record[locale];
 
-    en:
-      typeof record.en ===
+    if (
+      typeof translatedValue ===
       "string"
-        ? record.en
-        : "",
-  };
+    ) {
+      normalized[locale] =
+        translatedValue;
+    }
+  }
+
+  return normalized;
+}
+
+function normalizeContentLocale(
+  value: string
+): AdminContentLocale {
+  return isLocaleCode(value)
+    ? value
+    : "en";
+}
+
+function normalizeSupportedLocales(
+  value: unknown,
+  fallback:
+    AdminContentLocale
+): AdminContentLocale[] {
+  const values =
+    Array.isArray(value)
+      ? value
+      : [];
+
+  const locales =
+    normalizeLocaleList(
+      values,
+      fallback
+    );
+
+  if (!locales.includes(fallback)) {
+    locales.unshift(fallback);
+  }
+
+  return locales.slice(0, 20);
 }
 
 function normalizeDefaultLocale(
-  value: string
+  defaultContentLocale:
+    AdminContentLocale,
+  supportedLocales:
+    readonly AdminContentLocale[]
 ): AdminDefaultLocale {
   if (
-    value === "mk" ||
-    value === "sq" ||
-    value === "en"
+    defaultContentLocale === "mk" ||
+    defaultContentLocale === "sq" ||
+    defaultContentLocale === "en"
   ) {
-    return value;
+    return defaultContentLocale;
   }
 
-  return "mk";
+  const firstUiLocale =
+    supportedLocales.find(
+      (
+        locale
+      ): locale is AdminDefaultLocale =>
+        locale === "mk" ||
+        locale === "sq" ||
+        locale === "en"
+    );
+
+  return firstUiLocale ?? "en";
 }
 
 function normalizeCurrency(
@@ -298,6 +370,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
           brand_muted,
           brand_border,
           default_locale,
+          supported_locales,
           currency,
           timezone,
           is_active,
@@ -399,6 +472,17 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
           .data as unknown as GoogleCalendarConnectionDatabaseRow
       : null;
 
+  const defaultContentLocale =
+    normalizeContentLocale(
+      businessRow.default_locale
+    );
+
+  const supportedLocales =
+    normalizeSupportedLocales(
+      businessRow.supported_locales,
+      defaultContentLocale
+    );
+
   const business: AdminBusinessSettings = {
     id: businessRow.id,
 
@@ -479,9 +563,13 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
 
     defaultLocale:
       normalizeDefaultLocale(
-        businessRow
-          .default_locale
+        defaultContentLocale,
+        supportedLocales
       ),
+
+    defaultContentLocale,
+
+    supportedLocales,
 
     currency:
       normalizeCurrency(
