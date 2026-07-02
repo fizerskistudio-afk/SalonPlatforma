@@ -58,9 +58,26 @@ export type AdminBookingSettings = {
   updatedAt: string;
 };
 
+export type AdminGoogleCalendarSettings = {
+  connected: boolean;
+  isActive: boolean;
+
+  accountEmail: string | null;
+
+  calendarId: string | null;
+  calendarName: string | null;
+
+  connectedAt: string | null;
+  lastSyncedAt: string | null;
+
+  lastError: string | null;
+};
+
 export type AdminSettingsResult = {
   business: AdminBusinessSettings;
   booking: AdminBookingSettings;
+
+  googleCalendar: AdminGoogleCalendarSettings;
 
   summary: {
     bookingWindowHours: number;
@@ -118,6 +135,36 @@ type BookingSettingsDatabaseRow = {
   updated_at: string;
 };
 
+type GoogleCalendarConnectionDatabaseRow = {
+  business_id: string;
+
+  google_account_email:
+    | string
+    | null;
+
+  calendar_id:
+    | string
+    | null;
+
+  calendar_name:
+    | string
+    | null;
+
+  is_active: boolean;
+
+  connected_at:
+    | string
+    | null;
+
+  last_synced_at:
+    | string
+    | null;
+
+  last_error:
+    | string
+    | null;
+};
+
 function normalizeLocalizedText(
   value: unknown
 ): LocalizedText {
@@ -134,21 +181,27 @@ function normalizeLocalizedText(
   }
 
   const record =
-    value as Record<string, unknown>;
+    value as Record<
+      string,
+      unknown
+    >;
 
   return {
     mk:
-      typeof record.mk === "string"
+      typeof record.mk ===
+      "string"
         ? record.mk
         : "",
 
     sq:
-      typeof record.sq === "string"
+      typeof record.sq ===
+      "string"
         ? record.sq
         : "",
 
     en:
-      typeof record.en === "string"
+      typeof record.en ===
+      "string"
         ? record.en
         : "",
   };
@@ -171,7 +224,9 @@ function normalizeDefaultLocale(
 function normalizeCurrency(
   value: string
 ): string {
-  return value.trim().toUpperCase();
+  return value
+    .trim()
+    .toUpperCase();
 }
 
 function calculateEstimatedDailySlotStarts(
@@ -180,7 +235,9 @@ function calculateEstimatedDailySlotStarts(
   const assumedWorkingMinutes =
     8 * 60;
 
-  if (slotIntervalMinutes <= 0) {
+  if (
+    slotIntervalMinutes <= 0
+  ) {
     return 0;
   }
 
@@ -191,7 +248,8 @@ function calculateEstimatedDailySlotStarts(
 }
 
 export async function getAdminSettings(): Promise<AdminSettingsResult> {
-  const admin = await requireAdmin();
+  const admin =
+    await requireAdmin();
 
   const supabase =
     createAdminClient();
@@ -199,6 +257,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
   const [
     businessResult,
     bookingSettingsResult,
+    googleCalendarResult,
   ] = await Promise.all([
     supabase
       .from("businesses")
@@ -226,11 +285,16 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
           updated_at
         `
       )
-      .eq("id", admin.business.id)
+      .eq(
+        "id",
+        admin.business.id
+      )
       .single(),
 
     supabase
-      .from("booking_settings")
+      .from(
+        "booking_settings"
+      )
       .select(
         `
           business_id,
@@ -251,6 +315,28 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
         admin.business.id
       )
       .single(),
+
+    supabase
+      .from(
+        "google_calendar_connections"
+      )
+      .select(
+        `
+          business_id,
+          google_account_email,
+          calendar_id,
+          calendar_name,
+          is_active,
+          connected_at,
+          last_synced_at,
+          last_error
+        `
+      )
+      .eq(
+        "business_id",
+        admin.business.id
+      )
+      .maybeSingle(),
   ]);
 
   if (
@@ -271,17 +357,36 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
     );
   }
 
+  if (
+    googleCalendarResult.error
+  ) {
+    throw new Error(
+      "Nije moguće učitati Google Calendar konekciju."
+    );
+  }
+
   const businessRow =
-    businessResult.data as unknown as BusinessDatabaseRow;
+    businessResult
+      .data as unknown as BusinessDatabaseRow;
 
   const bookingRow =
-    bookingSettingsResult.data as unknown as BookingSettingsDatabaseRow;
+    bookingSettingsResult
+      .data as unknown as BookingSettingsDatabaseRow;
+
+  const googleCalendarRow =
+    googleCalendarResult.data
+      ? googleCalendarResult
+          .data as unknown as GoogleCalendarConnectionDatabaseRow
+      : null;
 
   const business: AdminBusinessSettings = {
     id: businessRow.id,
 
-    slug: businessRow.slug,
-    name: businessRow.name,
+    slug:
+      businessRow.slug,
+
+    name:
+      businessRow.name,
 
     tagline:
       normalizeLocalizedText(
@@ -308,24 +413,31 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
         businessRow.country
       ),
 
-    phone: businessRow.phone,
-    email: businessRow.email,
+    phone:
+      businessRow.phone,
+
+    email:
+      businessRow.email,
 
     instagramHandle:
-      businessRow.instagram_handle,
+      businessRow
+        .instagram_handle,
 
     instagramUrl:
-      businessRow.instagram_url,
+      businessRow
+        .instagram_url,
 
     heroImageUrl:
-      businessRow.hero_image_url,
+      businessRow
+        .hero_image_url,
 
     logoUrl:
       businessRow.logo_url,
 
     defaultLocale:
       normalizeDefaultLocale(
-        businessRow.default_locale
+        businessRow
+          .default_locale
       ),
 
     currency:
@@ -351,16 +463,20 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
       bookingRow.business_id,
 
     slotIntervalMinutes:
-      bookingRow.slot_interval_minutes,
+      bookingRow
+        .slot_interval_minutes,
 
     bookingWindowDays:
-      bookingRow.booking_window_days,
+      bookingRow
+        .booking_window_days,
 
     minAdvanceMinutes:
-      bookingRow.min_advance_minutes,
+      bookingRow
+        .min_advance_minutes,
 
     allowAnyEmployee:
-      bookingRow.allow_any_employee,
+      bookingRow
+        .allow_any_employee,
 
     requireEmail:
       bookingRow.require_email,
@@ -381,16 +497,58 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
       bookingRow.updated_at,
   };
 
+  const googleCalendar: AdminGoogleCalendarSettings =
+    {
+      connected:
+        Boolean(
+          googleCalendarRow &&
+            googleCalendarRow.is_active
+        ),
+
+      isActive:
+        googleCalendarRow
+          ?.is_active ?? false,
+
+      accountEmail:
+        googleCalendarRow
+          ?.google_account_email ??
+        null,
+
+      calendarId:
+        googleCalendarRow
+          ?.calendar_id ?? null,
+
+      calendarName:
+        googleCalendarRow
+          ?.calendar_name ?? null,
+
+      connectedAt:
+        googleCalendarRow
+          ?.connected_at ?? null,
+
+      lastSyncedAt:
+        googleCalendarRow
+          ?.last_synced_at ??
+        null,
+
+      lastError:
+        googleCalendarRow
+          ?.last_error ?? null,
+    };
+
   return {
     business,
     booking,
+    googleCalendar,
 
     summary: {
       bookingWindowHours:
-        booking.bookingWindowDays * 24,
+        booking.bookingWindowDays *
+        24,
 
       minimumAdvanceHours:
-        booking.minAdvanceMinutes / 60,
+        booking.minAdvanceMinutes /
+        60,
 
       estimatedDailySlotStarts:
         calculateEstimatedDailySlotStarts(

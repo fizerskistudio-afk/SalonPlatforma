@@ -1,4 +1,5 @@
 import AdminSettingsView from "@/components/admin/AdminSettingsView";
+import GoogleCalendarSettingsCard from "@/components/admin/settings/GoogleCalendarSettingsCard";
 import SettingsManagementActions from "@/components/admin/settings/SettingsManagementActions";
 import { getAdminSettings } from "@/lib/admin/settings";
 
@@ -13,6 +14,15 @@ export default async function AdminSettingsPage() {
     <>
       <SettingsManagementActions
         data={result}
+      />
+
+      <GoogleCalendarSettingsCard
+        connection={
+          result.googleCalendar
+        }
+        timezone={
+          result.business.timezone
+        }
       />
 
       <AdminSettingsView
