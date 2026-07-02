@@ -4,7 +4,6 @@ import {
   useEffect,
   useId,
   useRef,
-  type CSSProperties,
 } from "react";
 import { X } from "lucide-react";
 
@@ -21,20 +20,6 @@ type DesktopBookingModalProps = {
   initialServiceId?: string | null;
   initialEmployeeId?: string | null;
   onClose: () => void;
-};
-
-type CSSVariables = CSSProperties & {
-  [key: `--${string}`]: string | number;
-};
-
-const modalTheme: CSSVariables = {
-  "--brand-primary": "#d6b98c",
-  "--brand-secondary": "rgba(255, 255, 255, 0.09)",
-  "--brand-background": "rgba(18, 18, 20, 0.91)",
-  "--brand-surface": "rgba(35, 35, 38, 0.88)",
-  "--brand-text": "#f7f7f7",
-  "--brand-muted": "rgba(247, 247, 247, 0.66)",
-  "--brand-border": "rgba(255, 255, 255, 0.17)",
 };
 
 export default function DesktopBookingModal({
@@ -85,7 +70,8 @@ export default function DesktopBookingModal({
     const previousOverflow =
       document.body.style.overflow;
 
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow =
+      "hidden";
 
     return () => {
       document.body.style.overflow =
@@ -133,17 +119,16 @@ export default function DesktopBookingModal({
           translations.common.close,
           locale
         )}
-        className="absolute inset-0 cursor-default bg-black/20"
+        className="absolute inset-0 cursor-default bg-black/35 backdrop-blur-sm"
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        style={modalTheme}
-        className="relative z-10 flex h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)] text-[var(--brand-text)] shadow-[0_30px_100px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:h-[min(88dvh,850px)] sm:rounded-3xl"
+        className="relative z-10 flex h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-background)]/90 text-[var(--brand-text)] shadow-[0_30px_100px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:h-[min(88dvh,850px)] sm:rounded-3xl"
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-[var(--brand-border)] bg-[var(--brand-surface)] px-4 py-3 sm:px-6 sm:py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-[var(--brand-border)] bg-[var(--brand-surface)]/90 px-4 py-3 backdrop-blur-md sm:px-6 sm:py-4">
           <h2
             id={titleId}
             className="font-display text-lg font-semibold text-[var(--brand-text)] sm:text-xl"

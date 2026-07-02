@@ -17,6 +17,16 @@ export type SettingsLocalizedTextInput = {
   en: string;
 };
 
+export type SettingsThemeInput = {
+  primary: string;
+  secondary: string;
+  background: string;
+  surface: string;
+  text: string;
+  muted: string;
+  border: string;
+};
+
 export type SaveBusinessSettingsInput = {
   name: string;
   slug: string;
@@ -36,6 +46,8 @@ export type SaveBusinessSettingsInput = {
 
   heroImageUrl?: string;
   logoUrl?: string;
+
+  theme: SettingsThemeInput;
 
   defaultLocale: "mk" | "sq" | "en";
   currency: string;
@@ -57,6 +69,9 @@ export type SaveBookingSettingsInput = {
 type IdRow = {
   id: string;
 };
+
+const HEX_COLOR_PATTERN =
+  /^#[0-9A-Fa-f]{6}$/;
 
 function normalizeText(
   value: string
@@ -168,6 +183,68 @@ function isIntegerWithinRange(
     value >= minimum &&
     value <= maximum
   );
+}
+
+function isValidThemeInput(
+  value: unknown
+): value is SettingsThemeInput {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value)
+  ) {
+    return false;
+  }
+
+  const theme =
+    value as Record<string, unknown>;
+
+  const keys: Array<
+    keyof SettingsThemeInput
+  > = [
+    "primary",
+    "secondary",
+    "background",
+    "surface",
+    "text",
+    "muted",
+    "border",
+  ];
+
+  return keys.every(
+    (key) =>
+      typeof theme[key] === "string" &&
+      HEX_COLOR_PATTERN.test(
+        theme[key] as string
+      )
+  );
+}
+
+function normalizeTheme(
+  value: SettingsThemeInput
+): SettingsThemeInput {
+  return {
+    primary:
+      value.primary.toUpperCase(),
+
+    secondary:
+      value.secondary.toUpperCase(),
+
+    background:
+      value.background.toUpperCase(),
+
+    surface:
+      value.surface.toUpperCase(),
+
+    text:
+      value.text.toUpperCase(),
+
+    muted:
+      value.muted.toUpperCase(),
+
+    border:
+      value.border.toUpperCase(),
+  };
 }
 
 function refreshSettingsPages() {
@@ -380,6 +457,21 @@ export async function saveBusinessSettingsAction(
   }
 
   if (
+    !isValidThemeInput(
+      input.theme
+    )
+  ) {
+    return {
+      ok: false,
+      message:
+        "Sve Brand Kit boje moraju biti u HEX formatu, na primer #D6B98C.",
+    };
+  }
+
+  const theme =
+    normalizeTheme(input.theme);
+
+  if (
     !isValidDefaultLocale(
       input.defaultLocale
     )
@@ -481,6 +573,27 @@ export async function saveBusinessSettingsAction(
       logo_url:
         logoUrl,
 
+      brand_primary:
+        theme.primary,
+
+      brand_secondary:
+        theme.secondary,
+
+      brand_background:
+        theme.background,
+
+      brand_surface:
+        theme.surface,
+
+      brand_text:
+        theme.text,
+
+      brand_muted:
+        theme.muted,
+
+      brand_border:
+        theme.border,
+
       default_locale:
         input.defaultLocale,
 
@@ -514,7 +627,7 @@ export async function saveBusinessSettingsAction(
     ok: true,
     entityId: business.id,
     message:
-      "Podaci salona su uspešno sačuvani.",
+      "Podaci salona i Brand Kit su uspešno sačuvani.",
   };
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  CSSProperties,
   FormEvent,
   ReactNode,
 } from "react";
@@ -25,7 +26,9 @@ import {
   Link2,
   LoaderCircle,
   Mail,
+  Palette,
   Phone,
+  RotateCcw,
   Save,
   Settings2,
   ShieldCheck,
@@ -42,6 +45,9 @@ import type {
   AdminDefaultLocale,
   AdminSettingsResult,
 } from "@/lib/admin/settings";
+import type {
+  ThemeColors,
+} from "@/lib/types";
 
 type SettingsManagementActionsProps = {
   data: AdminSettingsResult;
@@ -72,6 +78,174 @@ type LocaleFieldValues = {
   city: LocalizedTextState;
   country: LocalizedTextState;
 };
+
+type ThemeColorKey =
+  keyof ThemeColors;
+
+type BrandPreviewStyle =
+  CSSProperties & {
+    "--preview-primary": string;
+    "--preview-secondary": string;
+    "--preview-background": string;
+    "--preview-surface": string;
+    "--preview-text": string;
+    "--preview-muted": string;
+    "--preview-border": string;
+  };
+
+type ThemePreset = {
+  name: string;
+  description: string;
+  colors: ThemeColors;
+};
+
+const HEX_COLOR_PATTERN =
+  /^#[0-9A-Fa-f]{6}$/;
+
+const LUMIERE_THEME: ThemeColors = {
+  primary: "#D6B98C",
+  secondary: "#262628",
+  background: "#09090A",
+  surface: "#141416",
+  text: "#F5F5F3",
+  muted: "#A3A3A3",
+  border: "#303034",
+};
+
+const themeColorFields: Array<{
+  key: ThemeColorKey;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "primary",
+    label: "Primarna",
+    description:
+      "Glavna akcentna boja dugmadi i detalja.",
+  },
+  {
+    key: "secondary",
+    label: "Sekundarna",
+    description:
+      "Pomoćne površine, hover stanja i gradijenti.",
+  },
+  {
+    key: "background",
+    label: "Pozadina",
+    description:
+      "Osnovna pozadina celog javnog sajta.",
+  },
+  {
+    key: "surface",
+    label: "Površine",
+    description:
+      "Kartice, modal prozori i izdvojene sekcije.",
+  },
+  {
+    key: "text",
+    label: "Glavni tekst",
+    description:
+      "Naslovi i najvažniji sadržaj.",
+  },
+  {
+    key: "muted",
+    label: "Prigušeni tekst",
+    description:
+      "Opisi, pomoćni tekst i sekundarne informacije.",
+  },
+  {
+    key: "border",
+    label: "Ivice",
+    description:
+      "Linije, okviri kartica i razdvajanja.",
+  },
+];
+
+const themePresets: ThemePreset[] = [
+  {
+    name: "Lumière Gold",
+    description:
+      "Topla luksuzna zlatna paleta.",
+    colors: LUMIERE_THEME,
+  },
+  {
+    name: "Violet Studio",
+    description:
+      "Moderan ljubičasti premium izgled.",
+    colors: {
+      primary: "#C084FC",
+      secondary: "#33213F",
+      background: "#0D0912",
+      surface: "#18101F",
+      text: "#F8F3FC",
+      muted: "#B9A8C4",
+      border: "#3B2A45",
+    },
+  },
+  {
+    name: "Rose Noir",
+    description:
+      "Elegantna roze paleta na tamnoj osnovi.",
+    colors: {
+      primary: "#F29CAF",
+      secondary: "#3A252D",
+      background: "#100B0D",
+      surface: "#1B1216",
+      text: "#FFF7F8",
+      muted: "#C9AEB6",
+      border: "#4A3038",
+    },
+  },
+  {
+    name: "Emerald Spa",
+    description:
+      "Smirena zelena paleta za wellness stil.",
+    colors: {
+      primary: "#7DD3A7",
+      secondary: "#1E3B32",
+      background: "#07110E",
+      surface: "#102019",
+      text: "#F1FBF5",
+      muted: "#9DB7A8",
+      border: "#274238",
+    },
+  },
+];
+
+function isValidHexColor(
+  value: string
+): boolean {
+  return HEX_COLOR_PATTERN.test(
+    value
+  );
+}
+
+function createBrandPreviewStyle(
+  colors: ThemeColors
+): BrandPreviewStyle {
+  return {
+    "--preview-primary":
+      colors.primary,
+
+    "--preview-secondary":
+      colors.secondary,
+
+    "--preview-background":
+      colors.background,
+
+    "--preview-surface":
+      colors.surface,
+
+    "--preview-text":
+      colors.text,
+
+    "--preview-muted":
+      colors.muted,
+
+    "--preview-border":
+      colors.border,
+  };
+}
 
 const localeOptions: Array<{
   value: AdminDefaultLocale;
@@ -367,6 +541,13 @@ export default function SettingsManagementActions({
     );
 
   const [
+    themeColors,
+    setThemeColors,
+  ] = useState<ThemeColors>({
+    ...data.business.theme,
+  });
+
+  const [
     localizedFields,
     setLocalizedFields,
   ] = useState<LocaleFieldValues>({
@@ -509,6 +690,10 @@ export default function SettingsManagementActions({
       data.business.logoUrl ?? ""
     );
 
+    setThemeColors({
+      ...data.business.theme,
+    });
+
     setLocalizedFields({
       tagline: {
         mk: data.business.tagline.mk,
@@ -608,12 +793,46 @@ export default function SettingsManagementActions({
     );
   };
 
+  const updateThemeColor = (
+    key: ThemeColorKey,
+    value: string
+  ) => {
+    setThemeColors(
+      (current) => ({
+        ...current,
+        [key]: value.toUpperCase(),
+      })
+    );
+  };
+
+  const applyThemePreset = (
+    colors: ThemeColors
+  ) => {
+    setThemeColors({
+      ...colors,
+    });
+  };
+
+  const hasValidThemeColors =
+    Object.values(
+      themeColors
+    ).every(isValidHexColor);
+
   const handleBusinessSubmit = (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
     if (businessPending) {
+      return;
+    }
+
+    if (!hasValidThemeColors) {
+      setBusinessMessage({
+        type: "error",
+        text: "Sve Brand Kit boje moraju biti u HEX formatu, na primer #D6B98C.",
+      });
+
       return;
     }
 
@@ -651,6 +870,8 @@ export default function SettingsManagementActions({
 
                 heroImageUrl,
                 logoUrl,
+
+                theme: themeColors,
 
                 defaultLocale,
                 currency,
@@ -1207,6 +1428,347 @@ export default function SettingsManagementActions({
             </div>
           </section>
 
+
+          <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-black/10">
+            <div className="flex flex-col justify-between gap-4 border-b border-white/[0.07] p-5 lg:flex-row lg:items-center">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                  <Palette
+                    className="h-4 w-4"
+                    aria-hidden="true"
+                  />
+
+                  Brand Kit
+                </div>
+
+                <h4 className="mt-2 text-lg font-semibold text-white">
+                  Boje javnog sajta
+                </h4>
+
+                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-600">
+                  Izaberi gotovu paletu ili
+                  podesi svaku boju. Pregled se
+                  menja odmah, a javni sajt tek
+                  nakon čuvanja.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  applyThemePreset(
+                    LUMIERE_THEME
+                  )
+                }
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 transition hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
+              >
+                <RotateCcw
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+
+                Vrati Lumière paletu
+              </button>
+            </div>
+
+            <div className="space-y-6 p-5">
+              <div>
+                <div className="text-sm font-semibold text-white">
+                  Premium palete
+                </div>
+
+                <p className="mt-1 text-xs leading-relaxed text-zinc-600">
+                  Paleta popunjava svih sedam
+                  Brand Kit boja. Svaku možeš
+                  dodatno prilagoditi.
+                </p>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {themePresets.map(
+                    (preset) => (
+                      <button
+                        key={preset.name}
+                        type="button"
+                        onClick={() =>
+                          applyThemePreset(
+                            preset.colors
+                          )
+                        }
+                        className="group rounded-2xl border border-white/[0.08] bg-zinc-950 p-4 text-left transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.04]"
+                      >
+                        <div className="flex gap-1.5">
+                          {[
+                            preset.colors
+                              .primary,
+                            preset.colors
+                              .secondary,
+                            preset.colors
+                              .background,
+                            preset.colors
+                              .surface,
+                          ].map(
+                            (
+                              color,
+                              index
+                            ) => (
+                              <span
+                                key={`${preset.name}-${index}`}
+                                className="h-7 flex-1 rounded-lg border border-white/10"
+                                style={{
+                                  backgroundColor:
+                                    color,
+                                }}
+                              />
+                            )
+                          )}
+                        </div>
+
+                        <div className="mt-3 text-sm font-semibold text-white">
+                          {preset.name}
+                        </div>
+
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-600">
+                          {
+                            preset.description
+                          }
+                        </p>
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+                <div>
+                  <div className="mb-4">
+                    <div className="text-sm font-semibold text-white">
+                      Ručno podešavanje
+                    </div>
+
+                    <p className="mt-1 text-xs leading-relaxed text-zinc-600">
+                      Klikni kvadrat za color
+                      picker ili upiši pun HEX
+                      kod.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {themeColorFields.map(
+                      (field) => {
+                        const value =
+                          themeColors[
+                            field.key
+                          ];
+
+                        const isValid =
+                          isValidHexColor(
+                            value
+                          );
+
+                        return (
+                          <label
+                            key={field.key}
+                            className="rounded-2xl border border-white/[0.08] bg-zinc-950 p-4"
+                          >
+                            <FieldLabel
+                              title={
+                                field.label
+                              }
+                              description={
+                                field.description
+                              }
+                            />
+
+                            <div className="mt-3 flex items-center gap-3">
+                              <input
+                                type="color"
+                                value={
+                                  isValid
+                                    ? value
+                                    : LUMIERE_THEME[
+                                        field
+                                          .key
+                                      ]
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateThemeColor(
+                                    field.key,
+                                    event.target
+                                      .value
+                                  )
+                                }
+                                aria-label={`${field.label} color picker`}
+                                className="h-11 w-14 flex-shrink-0 cursor-pointer rounded-xl border border-white/[0.1] bg-transparent p-1"
+                              />
+
+                              <input
+                                type="text"
+                                required
+                                maxLength={7}
+                                pattern="#[0-9A-Fa-f]{6}"
+                                value={value}
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateThemeColor(
+                                    field.key,
+                                    event.target
+                                      .value
+                                  )
+                                }
+                                placeholder="#D6B98C"
+                                className={`h-11 min-w-0 flex-1 rounded-xl border bg-black/30 px-4 font-mono text-sm uppercase text-white outline-none ${
+                                  isValid
+                                    ? "border-white/[0.08] focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
+                                    : "border-red-400/35 focus:border-red-300 focus:ring-2 focus:ring-red-300/15"
+                                }`}
+                              />
+                            </div>
+
+                            {!isValid && (
+                              <span className="mt-2 block text-xs text-red-300/70">
+                                Format mora biti
+                                #RRGGBB.
+                              </span>
+                            )}
+                          </label>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-4">
+                    <div className="text-sm font-semibold text-white">
+                      Pregled palete
+                    </div>
+
+                    <p className="mt-1 text-xs leading-relaxed text-zinc-600">
+                      Približan prikaz hero
+                      sekcije, dugmeta i kartica.
+                    </p>
+                  </div>
+
+                  <div
+                    style={createBrandPreviewStyle(
+                      themeColors
+                    )}
+                    className="overflow-hidden rounded-3xl border border-[var(--preview-border)] bg-[var(--preview-background)] text-[var(--preview-text)] shadow-2xl"
+                  >
+                    <div className="flex items-center justify-between border-b border-[var(--preview-border)] bg-[var(--preview-surface)] px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--preview-primary)] text-sm font-bold text-[var(--preview-background)]">
+                          {(
+                            businessName
+                              .trim()
+                              .charAt(0) ||
+                            "S"
+                          ).toUpperCase()}
+                        </div>
+
+                        <div>
+                          <div className="text-sm font-semibold">
+                            {businessName ||
+                              "Naziv salona"}
+                          </div>
+
+                          <div className="text-[10px] text-[var(--preview-muted)]">
+                            Premium beauty studio
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className="rounded-full border border-[var(--preview-border)] bg-[var(--preview-secondary)] px-3 py-1 text-[10px] text-[var(--preview-muted)]">
+                        MENU
+                      </span>
+                    </div>
+
+                    <div className="relative overflow-hidden p-6">
+                      <div
+                        className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full opacity-20 blur-3xl"
+                        style={{
+                          backgroundColor:
+                            themeColors.primary,
+                        }}
+                      />
+
+                      <div className="relative">
+                        <span className="inline-flex rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 py-1 text-[10px] font-medium text-[var(--preview-muted)]">
+                          BEAUTY EXPERIENCE
+                        </span>
+
+                        <h5 className="mt-5 font-display text-3xl font-semibold leading-tight">
+                          {businessName ||
+                            "Tvoj salon"}
+                        </h5>
+
+                        <p className="mt-2 font-display text-base italic text-[var(--preview-primary)]">
+                          {localizedFields
+                            .tagline[
+                            activeLocale
+                          ] ||
+                            "Lepota u svakom detalju"}
+                        </p>
+
+                        <p className="mt-4 text-xs leading-relaxed text-[var(--preview-muted)]">
+                          Paleta se automatski
+                          primenjuje na javni
+                          sajt, booking modal,
+                          dugmad i detalje.
+                        </p>
+
+                        <button
+                          type="button"
+                          className="mt-6 w-full rounded-full bg-[var(--preview-primary)] px-5 py-3 text-sm font-semibold text-[var(--preview-background)]"
+                        >
+                          Zakaži termin
+                        </button>
+
+                        <div className="mt-5 grid grid-cols-2 gap-3">
+                          <div className="rounded-2xl border border-[var(--preview-border)] bg-[var(--preview-surface)] p-4">
+                            <div className="text-xs font-semibold">
+                              Usluge
+                            </div>
+
+                            <div className="mt-1 text-[10px] text-[var(--preview-muted)]">
+                              Šišanje, bojenje i
+                              nega
+                            </div>
+                          </div>
+
+                          <div className="rounded-2xl border border-[var(--preview-border)] bg-[var(--preview-secondary)] p-4">
+                            <div className="text-xs font-semibold text-[var(--preview-primary)]">
+                              Dostupno
+                            </div>
+
+                            <div className="mt-1 text-[10px] text-[var(--preview-muted)]">
+                              Online rezervacija
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {!hasValidThemeColors && (
+                    <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-400/[0.06] p-3 text-xs leading-relaxed text-red-200/70">
+                      <AlertCircle
+                        className="mt-0.5 h-4 w-4 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+
+                      Ispravi nevažeće HEX
+                      vrednosti pre čuvanja.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section className="rounded-2xl border border-white/[0.08] bg-black/10 p-5">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-600">
               <Globe2
@@ -1325,7 +1887,10 @@ export default function SettingsManagementActions({
           <div className="flex justify-end border-t border-white/[0.08] pt-6">
             <button
               type="submit"
-              disabled={businessPending}
+              disabled={
+                businessPending ||
+                !hasValidThemeColors
+              }
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-300 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-amber-200 disabled:cursor-wait disabled:opacity-50"
             >
               {businessPending ? (

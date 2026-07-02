@@ -58,6 +58,14 @@ type BusinessRow = {
   default_locale: string;
   currency: string;
   timezone: string;
+
+  brand_primary: string;
+  brand_secondary: string;
+  brand_background: string;
+  brand_surface: string;
+  brand_text: string;
+  brand_muted: string;
+  brand_border: string;
 };
 
 type BookingSettingsRow = {
@@ -268,7 +276,32 @@ export async function GET(
     } = await supabase
       .from("businesses")
       .select(
-        "id, slug, name, tagline, description, address, city, country, phone, email, instagram_handle, instagram_url, hero_image_url, logo_url, default_locale, currency, timezone"
+        `
+          id,
+          slug,
+          name,
+          tagline,
+          description,
+          address,
+          city,
+          country,
+          phone,
+          email,
+          instagram_handle,
+          instagram_url,
+          hero_image_url,
+          logo_url,
+          default_locale,
+          currency,
+          timezone,
+          brand_primary,
+          brand_secondary,
+          brand_background,
+          brand_surface,
+          brand_text,
+          brand_muted,
+          brand_border
+        `
       )
       .eq("slug", businessSlug)
       .eq("is_active", true)
@@ -657,6 +690,29 @@ export async function GET(
           business.timezone,
 
         workingHours,
+
+        theme: {
+          primary:
+            business.brand_primary,
+
+          secondary:
+            business.brand_secondary,
+
+          background:
+            business.brand_background,
+
+          surface:
+            business.brand_surface,
+
+          text:
+            business.brand_text,
+
+          muted:
+            business.brand_muted,
+
+          border:
+            business.brand_border,
+        },
       },
 
       booking: {

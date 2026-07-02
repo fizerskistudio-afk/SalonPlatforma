@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type CSSProperties,
   useEffect,
   useRef,
   useState,
@@ -21,6 +22,7 @@ import {
 } from "@/lib/translations";
 import type {
   Locale,
+  ThemeColors,
 } from "@/lib/types";
 
 import DesktopBookingModal from "./desktop/DesktopBookingModal";
@@ -32,6 +34,17 @@ type ViewPreference =
   | "auto"
   | "desktop"
   | "mobile";
+
+type BrandStyle =
+  CSSProperties & {
+    "--brand-primary": string;
+    "--brand-secondary": string;
+    "--brand-background": string;
+    "--brand-surface": string;
+    "--brand-text": string;
+    "--brand-muted": string;
+    "--brand-border": string;
+  };
 
 const STORAGE_KEY =
   "salon-platform-view-preference";
@@ -62,6 +75,33 @@ const retryMessages: Record<
   sq: "Provo përsëri",
   en: "Try again",
 };
+
+function createBrandStyle(
+  colors: ThemeColors
+): BrandStyle {
+  return {
+    "--brand-primary":
+      colors.primary,
+
+    "--brand-secondary":
+      colors.secondary,
+
+    "--brand-background":
+      colors.background,
+
+    "--brand-surface":
+      colors.surface,
+
+    "--brand-text":
+      colors.text,
+
+    "--brand-muted":
+      colors.muted,
+
+    "--brand-border":
+      colors.border,
+  };
+}
 
 function CatalogLoadingScreen({
   locale,
@@ -310,8 +350,16 @@ function SalonPlatformContent() {
     );
   }
 
+  const brandStyle =
+    createBrandStyle(
+      catalog.business.theme
+    );
+
   return (
-    <>
+    <div
+      className="min-h-[100dvh] bg-[var(--brand-background)] text-[var(--brand-text)]"
+      style={brandStyle}
+    >
       {viewPreference === "auto" && (
         <>
           <div className="md:hidden">
@@ -425,7 +473,7 @@ function SalonPlatformContent() {
           onClose={closeBooking}
         />
       )}
-    </>
+    </div>
   );
 }
 

@@ -68,6 +68,31 @@ export type BusinessConfig = {
 };
 
 // ============================================
+// THEME CONFIG TYPES
+// ============================================
+
+export type ThemeColors = {
+  primary: string;
+  secondary: string;
+  background: string;
+  surface: string;
+  text: string;
+  muted: string;
+  border: string;
+};
+
+export type ThemeRadius = {
+  sm: string;
+  md: string;
+  lg: string;
+};
+
+export type ThemeConfig = {
+  colors: ThemeColors;
+  radius: ThemeRadius;
+};
+
+// ============================================
 // SUPABASE CATALOG BUSINESS
 // ============================================
 
@@ -91,31 +116,8 @@ export type CatalogBusiness = {
   currency: string;
   timezone: string;
   workingHours: WorkingHours[];
-};
 
-// ============================================
-// THEME CONFIG TYPES
-// ============================================
-
-export type ThemeColors = {
-  primary: string;
-  secondary: string;
-  background: string;
-  surface: string;
-  text: string;
-  muted: string;
-  border: string;
-};
-
-export type ThemeRadius = {
-  sm: string;
-  md: string;
-  lg: string;
-};
-
-export type ThemeConfig = {
-  colors: ThemeColors;
-  radius: ThemeRadius;
+  theme: ThemeColors;
 };
 
 // ============================================

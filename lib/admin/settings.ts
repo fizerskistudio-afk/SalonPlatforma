@@ -2,7 +2,10 @@ import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { LocalizedText } from "@/lib/types";
+import type {
+  LocalizedText,
+  ThemeColors,
+} from "@/lib/types";
 
 export type AdminDefaultLocale =
   | "mk"
@@ -30,6 +33,8 @@ export type AdminBusinessSettings = {
 
   heroImageUrl: string | null;
   logoUrl: string | null;
+
+  theme: ThemeColors;
 
   defaultLocale: AdminDefaultLocale;
   currency: string;
@@ -107,6 +112,14 @@ type BusinessDatabaseRow = {
 
   hero_image_url: string | null;
   logo_url: string | null;
+
+  brand_primary: string;
+  brand_secondary: string;
+  brand_background: string;
+  brand_surface: string;
+  brand_text: string;
+  brand_muted: string;
+  brand_border: string;
 
   default_locale: string;
   currency: string;
@@ -277,6 +290,13 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
           instagram_url,
           hero_image_url,
           logo_url,
+          brand_primary,
+          brand_secondary,
+          brand_background,
+          brand_surface,
+          brand_text,
+          brand_muted,
+          brand_border,
           default_locale,
           currency,
           timezone,
@@ -433,6 +453,29 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
 
     logoUrl:
       businessRow.logo_url,
+
+    theme: {
+      primary:
+        businessRow.brand_primary,
+
+      secondary:
+        businessRow.brand_secondary,
+
+      background:
+        businessRow.brand_background,
+
+      surface:
+        businessRow.brand_surface,
+
+      text:
+        businessRow.brand_text,
+
+      muted:
+        businessRow.brand_muted,
+
+      border:
+        businessRow.brand_border,
+    },
 
     defaultLocale:
       normalizeDefaultLocale(
