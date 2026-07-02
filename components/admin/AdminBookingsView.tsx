@@ -16,6 +16,7 @@ import {
   CircleDollarSign,
   Clock3,
   FilterX,
+  LoaderCircle,
   Mail,
   Phone,
   Save,
@@ -31,6 +32,13 @@ import {
   updateBookingInternalNoteAction,
   updateBookingStatusAction,
 } from "@/app/admin/(protected)/bookings/actions";
+import {
+  getAdminRescheduleSlotsAction,
+  rescheduleAdminBookingAction,
+} from "@/app/admin/(protected)/bookings/reschedule-actions";
+import type {
+  AdminRescheduleSlot,
+} from "@/app/admin/(protected)/bookings/reschedule-actions";
 import type {
   AdminBookingListItem,
   BookingSource,
@@ -289,6 +297,30 @@ export default function AdminBookingsView({
   const [actionMessage, setActionMessage] =
     useState<ActionMessage | null>(null);
 
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] =
+    useState(false);
+
+  const [rescheduleDate, setRescheduleDate] =
+    useState("");
+
+  const [rescheduleEmployeeId, setRescheduleEmployeeId] =
+    useState("all");
+
+  const [rescheduleSlots, setRescheduleSlots] =
+    useState<AdminRescheduleSlot[]>([]);
+
+  const [selectedRescheduleSlot, setSelectedRescheduleSlot] =
+    useState<AdminRescheduleSlot | null>(null);
+
+  const [rescheduleLoading, setRescheduleLoading] =
+    useState(false);
+
+  const [rescheduleSaving, setRescheduleSaving] =
+    useState(false);
+
+  const [rescheduleMessage, setRescheduleMessage] =
+    useState<ActionMessage | null>(null);
+
   const nowTimestamp = new Date(generatedAt).getTime();
 
   const todayKey = getDateKey(generatedAt, timezone);
@@ -505,6 +537,14 @@ export default function AdminBookingsView({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (rescheduleDialogOpen) {
+          if (!rescheduleLoading && !rescheduleSaving) {
+            setRescheduleDialogOpen(false);
+          }
+
+          return;
+        }
+
         if (cancelDialogOpen) {
           setCancelDialogOpen(false);
           return;
@@ -524,7 +564,13 @@ export default function AdminBookingsView({
         handleKeyDown
       );
     };
-  }, [selectedBooking, cancelDialogOpen]);
+  }, [
+    selectedBooking,
+    cancelDialogOpen,
+    rescheduleDialogOpen,
+    rescheduleLoading,
+    rescheduleSaving,
+  ]);
 
   const hasActiveFilters =
     query.trim().length > 0 ||
@@ -548,8 +594,21 @@ export default function AdminBookingsView({
     bookings[0]?.currency ??
     "EUR";
 
+  const resetRescheduleState = () => {
+    setRescheduleDialogOpen(false);
+    setRescheduleDate("");
+    setRescheduleEmployeeId("all");
+    setRescheduleSlots([]);
+    setSelectedRescheduleSlot(null);
+    setRescheduleMessage(null);
+  };
+
   const closeBookingDetails = () => {
-    if (isPending) {
+    if (
+      isPending ||
+      rescheduleLoading ||
+      rescheduleSaving
+    ) {
       return;
     }
 
@@ -557,6 +616,7 @@ export default function AdminBookingsView({
     setCancelDialogOpen(false);
     setCancellationReason("");
     setActionMessage(null);
+    resetRescheduleState();
   };
 
   const handleStatusUpdate = (
@@ -613,6 +673,188 @@ export default function AdminBookingsView({
       }
     });
   };
+
+  const loadRescheduleSlots = async (
+    date: string
+  ) => {
+    if (!selectedBooking || !date || rescheduleLoading) {
+      return;
+    }
+
+    setRescheduleLoading(true);
+    setRescheduleMessage(null);
+    setRescheduleSlots([]);
+    setSelectedRescheduleSlot(null);
+
+    try {
+      const result =
+        await getAdminRescheduleSlotsAction({
+          bookingId: selectedBooking.id,
+          date,
+          employeeId: null,
+        });
+
+      setRescheduleMessage({
+        type: result.ok ? "success" : "error",
+        text: result.message,
+      });
+
+      if (!result.ok) {
+        setRescheduleEmployeeId("all");
+        return;
+      }
+
+      setRescheduleSlots(result.slots);
+
+      const currentEmployeeHasSlots =
+        result.slots.some(
+          (slot) =>
+            slot.employeeId ===
+            selectedBooking.employeeId
+        );
+
+      setRescheduleEmployeeId(
+        currentEmployeeHasSlots
+          ? selectedBooking.employeeId
+          : "all"
+      );
+    } catch {
+      setRescheduleMessage({
+        type: "error",
+        text: "Slobodni termini trenutno ne mogu da se učitaju.",
+      });
+    } finally {
+      setRescheduleLoading(false);
+    }
+  };
+
+  const openRescheduleDialog = () => {
+    if (
+      !selectedBooking ||
+      (selectedBooking.status !== "pending" &&
+        selectedBooking.status !== "confirmed")
+    ) {
+      return;
+    }
+
+    const currentDate =
+      getDateKey(
+        selectedBooking.startsAt,
+        timezone
+      ) || todayKey;
+
+    setRescheduleDate(currentDate);
+    setRescheduleEmployeeId(
+      selectedBooking.employeeId
+    );
+    setRescheduleSlots([]);
+    setSelectedRescheduleSlot(null);
+    setRescheduleMessage(null);
+    setActionMessage(null);
+    setRescheduleDialogOpen(true);
+
+    void loadRescheduleSlots(currentDate);
+  };
+
+  const closeRescheduleDialog = () => {
+    if (rescheduleLoading || rescheduleSaving) {
+      return;
+    }
+
+    resetRescheduleState();
+  };
+
+  const handleRescheduleSave = async () => {
+    if (
+      !selectedBooking ||
+      !selectedRescheduleSlot ||
+      rescheduleSaving
+    ) {
+      return;
+    }
+
+    setRescheduleSaving(true);
+    setRescheduleMessage(null);
+
+    try {
+      const result =
+        await rescheduleAdminBookingAction({
+          bookingId: selectedBooking.id,
+          employeeId:
+            selectedRescheduleSlot.employeeId,
+          startsAt:
+            selectedRescheduleSlot.startsAt,
+        });
+
+      if (!result.ok) {
+        setRescheduleMessage({
+          type: "error",
+          text: result.message,
+        });
+
+        return;
+      }
+
+      setActionMessage({
+        type: "success",
+        text: result.message,
+      });
+
+      resetRescheduleState();
+      router.refresh();
+    } catch {
+      setRescheduleMessage({
+        type: "error",
+        text: "Termin trenutno ne može da se promeni. Pokušaj ponovo.",
+      });
+    } finally {
+      setRescheduleSaving(false);
+    }
+  };
+
+  const rescheduleEmployees = useMemo(() => {
+    const employeeMap =
+      new Map<string, string>();
+
+    rescheduleSlots.forEach((slot) => {
+      employeeMap.set(
+        slot.employeeId,
+        slot.employeeName
+      );
+    });
+
+    return Array.from(
+      employeeMap.entries()
+    )
+      .map(([id, name]) => ({
+        id,
+        name,
+      }))
+      .sort((first, second) =>
+        first.name.localeCompare(
+          second.name
+        )
+      );
+  }, [rescheduleSlots]);
+
+  const visibleRescheduleSlots =
+    useMemo(() => {
+      if (
+        rescheduleEmployeeId ===
+        "all"
+      ) {
+        return rescheduleSlots;
+      }
+
+      return rescheduleSlots.filter(
+        (slot) =>
+          slot.employeeId ===
+          rescheduleEmployeeId
+      );
+    }, [
+      rescheduleEmployeeId,
+      rescheduleSlots,
+    ]);
 
   const internalNoteChanged =
     internalNote.trim() !==
@@ -1427,6 +1669,23 @@ export default function AdminBookingsView({
                     </div>
                   </div>
                 </div>
+
+                {(selectedBooking.status === "pending" ||
+                  selectedBooking.status === "confirmed") && (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={openRescheduleDialog}
+                    className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/[0.08] px-4 py-3 text-sm font-semibold text-amber-200 transition hover:border-amber-300/40 hover:bg-amber-300/[0.14] disabled:cursor-wait disabled:opacity-50"
+                  >
+                    <CalendarCheck2
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    />
+
+                    Promeni termin
+                  </button>
+                )}
               </section>
 
               <section className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5">
@@ -1587,6 +1846,350 @@ export default function AdminBookingsView({
               </section>
             </div>
           </aside>
+
+          {rescheduleDialogOpen && selectedBooking && (
+            <div className="absolute inset-0 z-[60] flex items-center justify-center p-4">
+              <button
+                type="button"
+                aria-label="Zatvori dijalog za promenu termina"
+                onClick={closeRescheduleDialog}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              />
+
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="reschedule-booking-title"
+                className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-amber-300/20 bg-zinc-950 p-6 shadow-2xl sm:p-7"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-300/10 text-amber-200">
+                      <CalendarCheck2
+                        className="h-5 w-5"
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <h3
+                      id="reschedule-booking-title"
+                      className="mt-5 text-xl font-semibold text-white"
+                    >
+                      Promeni termin
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                      Izaberi novi datum, zaposlenog i slobodan
+                      termin. Google Calendar će automatski
+                      ažurirati isti događaj.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={
+                      rescheduleLoading ||
+                      rescheduleSaving
+                    }
+                    onClick={closeRescheduleDialog}
+                    aria-label="Zatvori"
+                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-500 transition hover:text-white disabled:opacity-40"
+                  >
+                    <X
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                {rescheduleMessage && (
+                  <div
+                    aria-live="polite"
+                    className={`mt-5 flex items-start gap-3 rounded-2xl border p-4 ${
+                      rescheduleMessage.type === "success"
+                        ? "border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-200"
+                        : "border-red-400/20 bg-red-400/[0.07] text-red-200"
+                    }`}
+                  >
+                    {rescheduleMessage.type === "success" ? (
+                      <CheckCircle2
+                        className="mt-0.5 h-5 w-5 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <AlertCircle
+                        className="mt-0.5 h-5 w-5 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                    )}
+
+                    <span className="text-sm leading-relaxed">
+                      {rescheduleMessage.text}
+                    </span>
+                  </div>
+                )}
+
+                <div className="mt-6 grid gap-4 sm:grid-cols-[1fr_auto]">
+                  <label className="block">
+                    <span className="text-sm font-medium text-zinc-300">
+                      Novi datum
+                    </span>
+
+                    <input
+                      type="date"
+                      value={rescheduleDate}
+                      min={todayKey}
+                      disabled={
+                        rescheduleLoading ||
+                        rescheduleSaving
+                      }
+                      onChange={(event) => {
+                        setRescheduleDate(
+                          event.target.value
+                        );
+                        setRescheduleEmployeeId("all");
+                        setRescheduleSlots([]);
+                        setSelectedRescheduleSlot(null);
+                        setRescheduleMessage(null);
+                      }}
+                      className="mt-2 h-11 w-full rounded-xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none transition [color-scheme:dark] hover:border-white/15 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15 disabled:opacity-50"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    disabled={
+                      !rescheduleDate ||
+                      rescheduleLoading ||
+                      rescheduleSaving
+                    }
+                    onClick={() =>
+                      void loadRescheduleSlots(
+                        rescheduleDate
+                      )
+                    }
+                    className="mt-auto inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-semibold text-zinc-300 transition hover:bg-white/[0.09] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {rescheduleLoading ? (
+                      <LoaderCircle
+                        className="h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Search
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    )}
+
+                    {rescheduleLoading
+                      ? "Učitavanje..."
+                      : "Prikaži termine"}
+                  </button>
+                </div>
+
+                {rescheduleSlots.length > 0 && (
+                  <label className="mt-5 block">
+                    <span className="text-sm font-medium text-zinc-300">
+                      Zaposleni
+                    </span>
+
+                    <select
+                      value={rescheduleEmployeeId}
+                      disabled={rescheduleSaving}
+                      onChange={(event) => {
+                        setRescheduleEmployeeId(
+                          event.target.value
+                        );
+                        setSelectedRescheduleSlot(null);
+                      }}
+                      className="mt-2 h-11 w-full rounded-xl border border-white/[0.08] bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-white/15 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15 disabled:opacity-50"
+                    >
+                      <option value="all">
+                        Svi dostupni zaposleni
+                      </option>
+
+                      {rescheduleEmployees.map((employee) => (
+                        <option
+                          key={employee.id}
+                          value={employee.id}
+                        >
+                          {employee.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
+                <div className="mt-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-600">
+                      Slobodni termini
+                    </div>
+
+                    {visibleRescheduleSlots.length > 0 && (
+                      <div className="text-xs text-zinc-600">
+                        {visibleRescheduleSlots.length} dostupno
+                      </div>
+                    )}
+                  </div>
+
+                  {rescheduleLoading ? (
+                    <div className="mt-4 flex min-h-32 items-center justify-center rounded-2xl border border-white/[0.08] bg-black/15">
+                      <div className="flex items-center gap-3 text-sm text-zinc-500">
+                        <LoaderCircle
+                          className="h-5 w-5 animate-spin text-amber-300"
+                          aria-hidden="true"
+                        />
+
+                        Učitavanje slobodnih termina...
+                      </div>
+                    </div>
+                  ) : visibleRescheduleSlots.length > 0 ? (
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {visibleRescheduleSlots.map((slot) => {
+                        const isCurrentSlot =
+                          slot.employeeId ===
+                            selectedBooking.employeeId &&
+                          new Date(
+                            slot.startsAt
+                          ).getTime() ===
+                            new Date(
+                              selectedBooking.startsAt
+                            ).getTime();
+
+                        const isSelected =
+                          selectedRescheduleSlot?.employeeId ===
+                            slot.employeeId &&
+                          selectedRescheduleSlot?.startsAt ===
+                            slot.startsAt;
+
+                        return (
+                          <button
+                            key={`${slot.employeeId}-${slot.startsAt}`}
+                            type="button"
+                            disabled={
+                              isCurrentSlot ||
+                              rescheduleSaving
+                            }
+                            onClick={() =>
+                              setSelectedRescheduleSlot(slot)
+                            }
+                            className={`rounded-2xl border p-4 text-left transition ${
+                              isSelected
+                                ? "border-amber-300 bg-amber-300/[0.1] ring-2 ring-amber-300/10"
+                                : isCurrentSlot
+                                  ? "cursor-not-allowed border-white/[0.06] bg-white/[0.02] opacity-50"
+                                  : "border-white/[0.08] bg-white/[0.035] hover:border-white/20 hover:bg-white/[0.06]"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-base font-semibold text-white">
+                                  {formatTime(
+                                    slot.startsAt,
+                                    timezone
+                                  )}
+                                  {" – "}
+                                  {formatTime(
+                                    slot.endsAt,
+                                    timezone
+                                  )}
+                                </div>
+
+                                <div className="mt-1 text-sm text-zinc-500">
+                                  {slot.employeeName}
+                                </div>
+                              </div>
+
+                              {isSelected && (
+                                <CheckCircle2
+                                  className="h-5 w-5 flex-shrink-0 text-amber-200"
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </div>
+
+                            {isCurrentSlot && (
+                              <div className="mt-3 text-xs font-medium text-zinc-600">
+                                Trenutni termin
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-2xl border border-dashed border-white/[0.1] bg-black/10 p-6 text-center text-sm leading-relaxed text-zinc-600">
+                      Izaberi datum i učitaj slobodne termine.
+                    </div>
+                  )}
+                </div>
+
+                {selectedRescheduleSlot && (
+                  <div className="mt-6 rounded-2xl border border-amber-300/15 bg-amber-300/[0.05] p-4">
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-300/60">
+                      Novi termin
+                    </div>
+
+                    <div className="mt-3 text-sm font-semibold text-white">
+                      {formatDateTime(
+                        selectedRescheduleSlot.startsAt,
+                        timezone
+                      )}
+                    </div>
+
+                    <div className="mt-1 text-sm text-zinc-500">
+                      {selectedRescheduleSlot.employeeName}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    disabled={
+                      rescheduleLoading ||
+                      rescheduleSaving
+                    }
+                    onClick={closeRescheduleDialog}
+                    className="min-h-11 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-zinc-300 transition hover:bg-white/[0.08] disabled:opacity-40"
+                  >
+                    Odustani
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={
+                      !selectedRescheduleSlot ||
+                      rescheduleLoading ||
+                      rescheduleSaving
+                    }
+                    onClick={() =>
+                      void handleRescheduleSave()
+                    }
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {rescheduleSaving ? (
+                      <LoaderCircle
+                        className="h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <CalendarCheck2
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    )}
+
+                    {rescheduleSaving
+                      ? "Čuvanje..."
+                      : "Sačuvaj novi termin"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {cancelDialogOpen && (
             <div className="absolute inset-0 z-[60] flex items-center justify-center p-4">
