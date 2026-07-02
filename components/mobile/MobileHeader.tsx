@@ -36,6 +36,9 @@ export default function MobileHeader({
     business,
   } = useCatalogData();
 
+  const hasLogo =
+    business.logoUrl.trim().length > 0;
+
   return (
     <header
       className="fixed inset-x-0 top-0 z-40 border-b border-[var(--brand-text)]/10 bg-[var(--brand-background)]/65 backdrop-blur-md"
@@ -46,14 +49,21 @@ export default function MobileHeader({
     >
       <div className="flex items-center justify-between gap-2 px-3 py-2.5">
         <div className="flex min-w-0 flex-shrink items-center gap-2">
-          <div
-            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)]/70"
-            aria-hidden="true"
-          >
-            <Scissors
-              className="h-3.5 w-3.5 text-[var(--brand-background)]"
-              aria-hidden="true"
-            />
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)]/70">
+            {hasLogo ? (
+              <img
+                src={business.logoUrl}
+                alt={`${business.name} logo`}
+                className="h-full w-full object-contain p-1"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <Scissors
+                className="h-3.5 w-3.5 text-[var(--brand-background)]"
+                aria-hidden="true"
+              />
+            )}
           </div>
 
           <div className="min-w-0">

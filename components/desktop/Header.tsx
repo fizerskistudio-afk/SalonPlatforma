@@ -13,9 +13,11 @@ import LanguageSwitcher from "../shared/LanguageSwitcher";
 
 type HeaderProps = {
   locale: Locale;
+
   onLocaleChange: (
     locale: Locale
   ) => void;
+
   onBook: () => void;
 };
 
@@ -54,6 +56,9 @@ export default function Header({
     business,
   } = useCatalogData();
 
+  const hasLogo =
+    business.logoUrl.trim().length > 0;
+
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-white/10 bg-black/15 backdrop-blur-sm">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-8">
@@ -63,21 +68,31 @@ export default function Header({
             translations.nav.home,
             locale
           )}`}
-          className="group flex items-center gap-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black"
+          className="group flex min-w-0 items-center gap-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[var(--brand-primary)] transition-transform group-hover:scale-105 motion-reduce:transition-none">
-            <Scissors
-              className="h-5 w-5 text-black"
-              aria-hidden="true"
-            />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-[var(--brand-primary)] transition-transform group-hover:scale-105 motion-reduce:transition-none">
+            {hasLogo ? (
+              <img
+                src={business.logoUrl}
+                alt={`${business.name} logo`}
+                className="h-full w-full object-contain p-1.5"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <Scissors
+                className="h-5 w-5 text-black"
+                aria-hidden="true"
+              />
+            )}
           </div>
 
-          <div>
-            <div className="font-serif text-xl font-semibold tracking-tight text-white">
+          <div className="min-w-0">
+            <div className="truncate font-serif text-xl font-semibold tracking-tight text-white">
               {business.name}
             </div>
 
-            <div className="-mt-0.5 hidden text-xs text-white/60 sm:block">
+            <div className="-mt-0.5 hidden max-w-56 truncate text-xs text-white/60 sm:block">
               {t(
                 business.tagline,
                 locale
@@ -112,7 +127,7 @@ export default function Header({
           )}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-shrink-0 items-center gap-4">
           <LanguageSwitcher
             currentLocale={locale}
             onLocaleChange={
