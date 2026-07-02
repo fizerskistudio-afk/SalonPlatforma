@@ -3,9 +3,14 @@ import {
   NextResponse,
 } from "next/server";
 
+import {
+  syncBookingToGoogleCalendar,
+} from "@/lib/google-calendar/sync";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const dynamic = "force-dynamic";
+export const dynamic =
+  "force-dynamic";
+
 export const revalidate = 0;
 
 const DEFAULT_BUSINESS_SLUG =
@@ -89,7 +94,8 @@ function errorResponse(
     {
       status,
       headers: {
-        "Cache-Control": "no-store",
+        "Cache-Control":
+          "no-store",
       },
     }
   );
@@ -98,11 +104,15 @@ function errorResponse(
 function optionalTrimmedString(
   value: unknown
 ): string | null {
-  if (typeof value !== "string") {
+  if (
+    typeof value !==
+    "string"
+  ) {
     return null;
   }
 
-  const trimmed = value.trim();
+  const trimmed =
+    value.trim();
 
   return trimmed.length > 0
     ? trimmed
@@ -121,23 +131,28 @@ function extractDatabaseErrorCode(
       (
         value
       ): value is string =>
-        typeof value === "string"
+        typeof value ===
+        "string"
     )
     .join(" ")
     .toUpperCase();
 
   for (
-    const code of DATABASE_ERROR_CODES
+    const code of
+    DATABASE_ERROR_CODES
   ) {
     if (
-      databaseMessage.includes(code)
+      databaseMessage.includes(
+        code
+      )
     ) {
       return code;
     }
   }
 
   if (
-    error.code === "23P01"
+    error.code ===
+    "23P01"
   ) {
     return "SLOT_UNAVAILABLE";
   }
@@ -235,6 +250,71 @@ function databaseErrorResponse(
   }
 }
 
+async function synchronizeConfirmedBooking(
+  booking: BookingResult
+): Promise<void> {
+  if (
+    booking.status !==
+    "confirmed"
+  ) {
+    return;
+  }
+
+  try {
+    const syncResult =
+      await syncBookingToGoogleCalendar(
+        booking.id
+      );
+
+    if (!syncResult.ok) {
+      console.error(
+        "Booking was created, but Google Calendar synchronization failed:",
+        {
+          bookingId:
+            booking.id,
+
+          action:
+            syncResult.action,
+
+          message:
+            syncResult.message,
+        }
+      );
+
+      return;
+    }
+
+    console.info(
+      "Booking synchronized with Google Calendar:",
+      {
+        bookingId:
+          booking.id,
+
+        action:
+          syncResult.action,
+
+        eventId:
+          syncResult.eventId ??
+          null,
+      }
+    );
+  } catch (error) {
+    /*
+     * Calendar sinhronizacija nikada ne sme
+     * da poništi uspešno kreiranu rezervaciju.
+     */
+    console.error(
+      "Unexpected Google Calendar synchronization error:",
+      {
+        bookingId:
+          booking.id,
+
+        error,
+      }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest
 ) {
@@ -252,7 +332,9 @@ export async function POST(
       );
     }
 
-    if (!isJsonRecord(body)) {
+    if (
+      !isJsonRecord(body)
+    ) {
       return errorResponse(
         400,
         "Invalid booking request.",
@@ -370,8 +452,10 @@ export async function POST(
 
     if (
       !customerName ||
-      customerName.length < 2 ||
-      customerName.length > 120
+      customerName.length <
+        2 ||
+      customerName.length >
+        120
     ) {
       return errorResponse(
         400,
@@ -444,15 +528,19 @@ export async function POST(
     const {
       data: business,
       error: businessError,
-    } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq(
-        "slug",
-        businessSlug
-      )
-      .eq("is_active", true)
-      .maybeSingle();
+    } =
+      await supabase
+        .from("businesses")
+        .select("id")
+        .eq(
+          "slug",
+          businessSlug
+        )
+        .eq(
+          "is_active",
+          true
+        )
+        .maybeSingle();
 
     if (businessError) {
       console.error(
@@ -478,36 +566,37 @@ export async function POST(
     const {
       data,
       error,
-    } = await supabase.rpc(
-      "create_public_booking",
-      {
-        p_business_id:
-          business.id,
+    } =
+      await supabase.rpc(
+        "create_public_booking",
+        {
+          p_business_id:
+            business.id,
 
-        p_service_id:
-          serviceId,
+          p_service_id:
+            serviceId,
 
-        p_employee_id:
-          employeeId,
+          p_employee_id:
+            employeeId,
 
-        p_starts_at:
-          new Date(
-            startsAt
-          ).toISOString(),
+          p_starts_at:
+            new Date(
+              startsAt
+            ).toISOString(),
 
-        p_customer_name:
-          customerName,
+          p_customer_name:
+            customerName,
 
-        p_customer_phone:
-          customerPhone,
+          p_customer_phone:
+            customerPhone,
 
-        p_customer_email:
-          customerEmail,
+          p_customer_email:
+            customerEmail,
 
-        p_customer_note:
-          customerNote,
-      }
-    );
+          p_customer_note:
+            customerNote,
+        }
+      );
 
     if (error) {
       console.error(
@@ -548,6 +637,17 @@ export async function POST(
 
     const booking =
       data as BookingResult;
+
+    /*
+     * Čekamo rezultat da sinhronizacija pouzdano
+     * završi i u serverless okruženju.
+     *
+     * Greška Calendar-a se hvata unutar funkcije
+     * i ne utiče na uspešan booking odgovor.
+     */
+    await synchronizeConfirmedBooking(
+      booking
+    );
 
     return NextResponse.json(
       {
