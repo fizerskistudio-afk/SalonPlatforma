@@ -1,13 +1,50 @@
+import type {
+  LocaleCode,
+} from "@/lib/i18n/locales";
+
 // ============================================
 // LOCALE & TRANSLATIONS
 // ============================================
 
-export type Locale = "mk" | "sq" | "en";
+/**
+ * Jezici za koje je kompletan sistemski UI
+ * trenutno preveden.
+ *
+ * Ovaj tip ostaje uzak tokom bezbedne migracije.
+ */
+export type UiLocale =
+  | "mk"
+  | "sq"
+  | "en";
 
-export type LocalizedText = Record<
-  Locale,
-  string
->;
+/**
+ * Postojeći naziv ostaje kao alias da ne lomimo
+ * sve javne i booking komponente odjednom.
+ */
+export type Locale = UiLocale;
+
+/**
+ * Jezici sadržaja koje biznis može da koristi.
+ * Lista dolazi iz centralnog locale registry-ja.
+ */
+export type ContentLocale = LocaleCode;
+
+/**
+ * Prevod ne mora postojati za svaki globalno
+ * podržani jezik. Nedostajuće vrednosti rešava
+ * fallback funkcija t().
+ */
+export type LocalizedText =
+  Record<UiLocale, string> &
+  Partial<
+    Record<
+      Exclude<
+        ContentLocale,
+        UiLocale
+      >,
+      string
+    >
+  >;
 
 // ============================================
 // BUSINESS CONFIG TYPES
@@ -111,8 +148,21 @@ export type CatalogBusiness = {
   instagramUrl: string;
   heroImageUrl: string;
   logoUrl: string;
+
+  /**
+   * Privremeni UI-jezički sloj.
+   * Trenutno su kompletno prevedeni mk/sq/en.
+   */
   defaultLocale: Locale;
   supportedLocales: Locale[];
+
+  /**
+   * Pravi globalni jezički izbor biznisa.
+   * Ova polja dolaze direktno iz baze.
+   */
+  defaultContentLocale: ContentLocale;
+  supportedContentLocales: ContentLocale[];
+
   currency: string;
   timezone: string;
   workingHours: WorkingHours[];
@@ -193,18 +243,6 @@ export type Employee = {
 };
 
 // ============================================
-// COMPLETE CATALOG
-// ============================================
-
-export type CatalogData = {
-  business: CatalogBusiness;
-  booking: CatalogBookingConfig;
-  categories: ServiceCategory[];
-  services: Service[];
-  employees: Employee[];
-};
-
-// ============================================
 // CONTENT TYPES
 // ============================================
 
@@ -221,6 +259,19 @@ export type GalleryItem = {
   url: string;
   category: string;
   alt: LocalizedText;
+};
+
+// ============================================
+// COMPLETE CATALOG
+// ============================================
+
+export type CatalogData = {
+  business: CatalogBusiness;
+  booking: CatalogBookingConfig;
+  categories: ServiceCategory[];
+  services: Service[];
+  employees: Employee[];
+  gallery: GalleryItem[];
 };
 
 // ============================================

@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 
-import { gallery } from "@/lib/contentData";
+import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
   translations,
@@ -16,6 +18,10 @@ type GallerySectionProps = {
 export default function GallerySection({
   locale,
 }: GallerySectionProps) {
+  const {
+    gallery,
+  } = useCatalogData();
+
   if (gallery.length === 0) {
     return null;
   }

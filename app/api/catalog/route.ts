@@ -3,7 +3,16 @@ import {
   NextResponse,
 } from "next/server";
 
+import {
+  isLocaleCode,
+  normalizeLocaleList,
+} from "@/lib/i18n/locales";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type {
+  ContentLocale,
+  Locale,
+  LocalizedText,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,19 +23,11 @@ const DEFAULT_BUSINESS_SLUG =
 const SLUG_PATTERN =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const SUPPORTED_LOCALES = [
+const CURRENT_UI_LOCALES = [
   "mk",
   "sq",
   "en",
-] as const;
-
-type Locale =
-  (typeof SUPPORTED_LOCALES)[number];
-
-type LocalizedText = Record<
-  Locale,
-  string
->;
+] as const satisfies readonly Locale[];
 
 type ServiceCategoryIcon =
   | "scissors"
@@ -56,6 +57,9 @@ type BusinessRow = {
   hero_image_url: string | null;
   logo_url: string | null;
   default_locale: string;
+  supported_locales:
+    | string[]
+    | null;
   currency: string;
   timezone: string;
 
@@ -134,6 +138,15 @@ type WorkingHoursRow = {
   is_closed: boolean;
 };
 
+type GalleryItemRow = {
+  id: string;
+  image_url: string;
+  category: string;
+  alt: unknown;
+  sort_order: number;
+  is_active: boolean;
+};
+
 function isRecord(
   value: unknown
 ): value is Record<string, unknown> {
@@ -147,40 +160,89 @@ function isRecord(
 function toLocalizedText(
   value: unknown
 ): LocalizedText {
-  if (!isRecord(value)) {
-    return {
+  const localizedText:
+    LocalizedText = {
       mk: "",
       sq: "",
       en: "",
     };
+
+  if (!isRecord(value)) {
+    return localizedText;
   }
 
-  return {
-    mk:
-      typeof value.mk === "string"
-        ? value.mk
-        : "",
+  for (
+    const [
+      locale,
+      translatedValue,
+    ] of Object.entries(value)
+  ) {
+    if (
+      isLocaleCode(locale) &&
+      typeof translatedValue ===
+        "string"
+    ) {
+      localizedText[locale] =
+        translatedValue;
+    }
+  }
 
-    sq:
-      typeof value.sq === "string"
-        ? value.sq
-        : "",
-
-    en:
-      typeof value.en === "string"
-        ? value.en
-        : "",
-  };
+  return localizedText;
 }
 
-function toLocale(
+function toContentLocale(
   value: string
+): ContentLocale {
+  return isLocaleCode(value)
+    ? value
+    : "en";
+}
+
+function isUiLocale(
+  value: ContentLocale
+): value is Locale {
+  return (
+    value === "mk" ||
+    value === "sq" ||
+    value === "en"
+  );
+}
+
+function toUiLocales(
+  contentLocales:
+    readonly ContentLocale[]
+): Locale[] {
+  const uiLocales =
+    contentLocales.filter(
+      isUiLocale
+    );
+
+  return uiLocales.length > 0
+    ? uiLocales
+    : ["en"];
+}
+
+function toDefaultUiLocale(
+  defaultContentLocale:
+    ContentLocale,
+  supportedUiLocales:
+    readonly Locale[]
 ): Locale {
-  return SUPPORTED_LOCALES.includes(
-    value as Locale
-  )
-    ? (value as Locale)
-    : "mk";
+  if (
+    isUiLocale(
+      defaultContentLocale
+    ) &&
+    supportedUiLocales.includes(
+      defaultContentLocale
+    )
+  ) {
+    return defaultContentLocale;
+  }
+
+  return (
+    supportedUiLocales[0] ??
+    "en"
+  );
 }
 
 function toCategoryIcon(
@@ -292,6 +354,7 @@ export async function GET(
           hero_image_url,
           logo_url,
           default_locale,
+          supported_locales,
           currency,
           timezone,
           brand_primary,
@@ -331,6 +394,39 @@ export async function GET(
     const business =
       businessData as unknown as BusinessRow;
 
+    const defaultContentLocale =
+      toContentLocale(
+        business.default_locale
+      );
+
+    const supportedContentLocales =
+      normalizeLocaleList(
+        business.supported_locales ??
+          [],
+        defaultContentLocale
+      );
+
+    if (
+      !supportedContentLocales.includes(
+        defaultContentLocale
+      )
+    ) {
+      supportedContentLocales.unshift(
+        defaultContentLocale
+      );
+    }
+
+    const supportedUiLocales =
+      toUiLocales(
+        supportedContentLocales
+      );
+
+    const defaultUiLocale =
+      toDefaultUiLocale(
+        defaultContentLocale,
+        supportedUiLocales
+      );
+
     const [
       settingsResult,
       categoriesResult,
@@ -338,6 +434,7 @@ export async function GET(
       employeesResult,
       employeeServicesResult,
       workingHoursResult,
+      galleryResult,
     ] = await Promise.all([
       supabase
         .from("booking_settings")
@@ -416,6 +513,23 @@ export async function GET(
         .order("day_of_week", {
           ascending: true,
         }),
+
+      supabase
+        .from("gallery_items")
+        .select(
+          "id, image_url, category, alt, sort_order, is_active"
+        )
+        .eq(
+          "business_id",
+          business.id
+        )
+        .eq("is_active", true)
+        .order("sort_order", {
+          ascending: true,
+        })
+        .order("created_at", {
+          ascending: true,
+        }),
     ]);
 
     const queryErrors = [
@@ -425,6 +539,7 @@ export async function GET(
       employeesResult.error,
       employeeServicesResult.error,
       workingHoursResult.error,
+      galleryResult.error,
     ].filter(Boolean);
 
     if (queryErrors.length > 0) {
@@ -470,6 +585,10 @@ export async function GET(
     const workingHourRows =
       (workingHoursResult.data ??
         []) as unknown as WorkingHoursRow[];
+
+    const galleryRows =
+      (galleryResult.data ??
+        []) as unknown as GalleryItemRow[];
 
     const serviceIdsByEmployee =
       new Map<string, string[]>();
@@ -623,6 +742,18 @@ export async function GET(
         })
       );
 
+    const gallery =
+      galleryRows.map(
+        (item) => ({
+          id: item.id,
+          url: item.image_url,
+          category: item.category,
+          alt: toLocalizedText(
+            item.alt
+          ),
+        })
+      );
+
     const catalog = {
       business: {
         id: business.id,
@@ -675,13 +806,14 @@ export async function GET(
           business.logo_url ?? "",
 
         defaultLocale:
-          toLocale(
-            business.default_locale
-          ),
+          defaultUiLocale,
 
-        supportedLocales: [
-          ...SUPPORTED_LOCALES,
-        ],
+        supportedLocales:
+          supportedUiLocales,
+
+        defaultContentLocale,
+
+        supportedContentLocales,
 
         currency:
           business.currency.trim(),
@@ -744,6 +876,7 @@ export async function GET(
       categories,
       services,
       employees,
+      gallery,
     };
 
     return NextResponse.json(
@@ -767,6 +900,9 @@ export async function GET(
 
           workingHours:
             workingHours.length,
+
+          galleryItems:
+            gallery.length,
         },
       },
       {

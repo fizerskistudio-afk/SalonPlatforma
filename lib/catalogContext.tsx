@@ -42,6 +42,7 @@ type CatalogSuccessResponse = {
     employees: number;
     employeeServices: number;
     workingHours: number;
+    galleryItems: number;
   };
 };
 

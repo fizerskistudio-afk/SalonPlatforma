@@ -1,0 +1,593 @@
+app/admin/(protected)/layout.tsx:9:  children: ReactNode;
+app/admin/(protected)/services/actions.ts:18:export type LocalizedTextInput = {
+app/admin/(protected)/services/actions.ts:19:  en: string;
+app/admin/(protected)/services/actions.ts:20:  mk: string;
+app/admin/(protected)/services/actions.ts:21:  sq: string;
+app/admin/(protected)/services/actions.ts:28:  name: LocalizedTextInput;
+app/admin/(protected)/services/actions.ts:29:  description: LocalizedTextInput;
+app/admin/(protected)/services/actions.ts:42:  name: LocalizedTextInput;
+app/admin/(protected)/services/actions.ts:43:  description: LocalizedTextInput;
+app/admin/(protected)/services/actions.ts:79:function normalizeLocalizedText(
+app/admin/(protected)/services/actions.ts:80:  value: LocalizedTextInput
+app/admin/(protected)/services/actions.ts:81:): LocalizedTextInput {
+app/admin/(protected)/services/actions.ts:83:    en: normalizeText(value.en),
+app/admin/(protected)/services/actions.ts:84:    mk: normalizeText(value.mk),
+app/admin/(protected)/services/actions.ts:85:    sq: normalizeText(value.sq),
+app/admin/(protected)/services/actions.ts:90:  value: LocalizedTextInput
+app/admin/(protected)/services/actions.ts:92:  return Boolean(value.en || value.mk || value.sq);
+app/admin/(protected)/services/actions.ts:96:  value: LocalizedTextInput,
+app/admin/(protected)/services/actions.ts:152:  const name = normalizeLocalizedText(input.name);
+app/admin/(protected)/services/actions.ts:154:  const description = normalizeLocalizedText(
+app/admin/(protected)/services/actions.ts:418:  const name = normalizeLocalizedText(input.name);
+app/admin/(protected)/services/actions.ts:420:  const description = normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:14:export type SettingsLocalizedTextInput = {
+app/admin/(protected)/settings/actions.ts:15:  mk: string;
+app/admin/(protected)/settings/actions.ts:16:  sq: string;
+app/admin/(protected)/settings/actions.ts:17:  en: string;
+app/admin/(protected)/settings/actions.ts:34:  tagline: SettingsLocalizedTextInput;
+app/admin/(protected)/settings/actions.ts:35:  description: SettingsLocalizedTextInput;
+app/admin/(protected)/settings/actions.ts:37:  address: SettingsLocalizedTextInput;
+app/admin/(protected)/settings/actions.ts:38:  city: SettingsLocalizedTextInput;
+app/admin/(protected)/settings/actions.ts:39:  country: SettingsLocalizedTextInput;
+app/admin/(protected)/settings/actions.ts:52:  defaultLocale: "mk" | "sq" | "en";
+app/admin/(protected)/settings/actions.ts:93:function normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:94:  value: SettingsLocalizedTextInput
+app/admin/(protected)/settings/actions.ts:95:): SettingsLocalizedTextInput {
+app/admin/(protected)/settings/actions.ts:97:    mk: value.mk.trim(),
+app/admin/(protected)/settings/actions.ts:98:    sq: value.sq.trim(),
+app/admin/(protected)/settings/actions.ts:99:    en: value.en.trim(),
+app/admin/(protected)/settings/actions.ts:104:  value: SettingsLocalizedTextInput,
+app/admin/(protected)/settings/actions.ts:296:    normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:301:    normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:306:    normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:311:    normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:316:    normalizeLocalizedText(
+app/admin/(protected)/settings/actions.ts:476:      input.defaultLocale
+app/admin/(protected)/settings/actions.ts:598:        input.defaultLocale,
+app/admin/(protected)/team/actions.ts:14:export type TeamLocalizedTextInput = {
+app/admin/(protected)/team/actions.ts:15:  en: string;
+app/admin/(protected)/team/actions.ts:16:  mk: string;
+app/admin/(protected)/team/actions.ts:17:  sq: string;
+app/admin/(protected)/team/actions.ts:26:  title: TeamLocalizedTextInput;
+app/admin/(protected)/team/actions.ts:27:  bio: TeamLocalizedTextInput;
+app/admin/(protected)/team/actions.ts:86:function normalizeLocalizedText(
+app/admin/(protected)/team/actions.ts:87:  value: TeamLocalizedTextInput
+app/admin/(protected)/team/actions.ts:88:): TeamLocalizedTextInput {
+app/admin/(protected)/team/actions.ts:90:    en: normalizeText(value.en),
+app/admin/(protected)/team/actions.ts:91:    mk: normalizeText(value.mk),
+app/admin/(protected)/team/actions.ts:92:    sq: normalizeText(value.sq),
+app/admin/(protected)/team/actions.ts:97:  value: TeamLocalizedTextInput,
+app/admin/(protected)/team/actions.ts:203:    normalizeLocalizedText(input.title);
+app/admin/(protected)/team/actions.ts:206:    normalizeLocalizedText(input.bio);
+app/api/admin/assets/upload-url/route.ts:175:        token: data.token,
+app/api/catalog/route.ts:17:const SUPPORTED_LOCALES = [
+app/api/catalog/route.ts:23:type Locale =
+app/api/catalog/route.ts:24:  (typeof SUPPORTED_LOCALES)[number];
+app/api/catalog/route.ts:26:type LocalizedText = Record<
+app/api/catalog/route.ts:156:function toLocalizedText(
+app/api/catalog/route.ts:158:): LocalizedText {
+app/api/catalog/route.ts:161:      mk: "",
+app/api/catalog/route.ts:162:      sq: "",
+app/api/catalog/route.ts:163:      en: "",
+app/api/catalog/route.ts:168:    mk:
+app/api/catalog/route.ts:169:      typeof value.mk === "string"
+app/api/catalog/route.ts:170:        ? value.mk
+app/api/catalog/route.ts:173:    sq:
+app/api/catalog/route.ts:174:      typeof value.sq === "string"
+app/api/catalog/route.ts:175:        ? value.sq
+app/api/catalog/route.ts:178:    en:
+app/api/catalog/route.ts:179:      typeof value.en === "string"
+app/api/catalog/route.ts:180:        ? value.en
+app/api/catalog/route.ts:188:  return SUPPORTED_LOCALES.includes(
+app/api/catalog/route.ts:538:          name: toLocalizedText(
+app/api/catalog/route.ts:543:            toLocalizedText(
+app/api/catalog/route.ts:573:            name: toLocalizedText(
+app/api/catalog/route.ts:578:              toLocalizedText(
+app/api/catalog/route.ts:617:          role: toLocalizedText(
+app/api/catalog/route.ts:621:          bio: toLocalizedText(
+app/api/catalog/route.ts:664:          alt: toLocalizedText(
+app/api/catalog/route.ts:677:          toLocalizedText(
+app/api/catalog/route.ts:682:          toLocalizedText(
+app/api/catalog/route.ts:693:          toLocalizedText(
+app/api/catalog/route.ts:698:          toLocalizedText(
+app/api/catalog/route.ts:703:          toLocalizedText(
+app/api/catalog/route.ts:721:        defaultLocale:
+app/api/catalog/route.ts:726:        supportedLocales: [
+app/api/catalog/route.ts:727:          ...SUPPORTED_LOCALES,
+app/layout.tsx:23:  children: React.ReactNode;
+components/SalonPlatform.tsx:56:  mk: "Се вчитува салонот...",
+components/SalonPlatform.tsx:57:  sq: "Duke ngarkuar sallonin...",
+components/SalonPlatform.tsx:58:  en: "Loading salon...",
+components/SalonPlatform.tsx:65:  mk: "Податоците за салонот не можеа да се вчитаат.",
+components/SalonPlatform.tsx:66:  sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
+components/SalonPlatform.tsx:67:  en: "The salon data could not be loaded.",
+components/SalonPlatform.tsx:74:  mk: "Обиди се повторно",
+components/SalonPlatform.tsx:75:  sq: "Provo përsëri",
+components/SalonPlatform.tsx:76:  en: "Try again",
+components/SalonPlatform.tsx:224:      catalog.business.defaultLocale
+components/admin/AdminServicesView.tsx:83:    value.en?.trim() ||
+components/admin/AdminServicesView.tsx:84:    value.mk?.trim() ||
+components/admin/AdminServicesView.tsx:85:    value.sq?.trim() ||
+components/admin/AdminServicesView.tsx:90:function getLocalizedText(
+components/admin/AdminServicesView.tsx:1294:                        {getLocalizedText(
+components/admin/AdminServicesView.tsx:1301:                        {getLocalizedText(
+components/admin/AdminSettingsView.tsx:45:  mk: "Makedonski",
+components/admin/AdminSettingsView.tsx:46:  sq: "Albanski",
+components/admin/AdminSettingsView.tsx:47:  en: "Engleski",
+components/admin/AdminSettingsView.tsx:54:  mk: "MK",
+components/admin/AdminSettingsView.tsx:55:  sq: "SQ",
+components/admin/AdminSettingsView.tsx:56:  en: "EN",
+components/admin/AdminSettingsView.tsx:218:      business.defaultLocale
+components/admin/AdminSettingsView.tsx:224:      business.defaultLocale
+components/admin/AdminSettingsView.tsx:230:      business.defaultLocale
+components/admin/AdminSettingsView.tsx:236:      business.defaultLocale
+components/admin/AdminSettingsView.tsx:242:      business.defaultLocale
+components/admin/AdminSettingsView.tsx:289:                business.defaultLocale
+components/admin/AdminSettingsView.tsx:687:                    business.defaultLocale
+components/admin/AdminSettingsView.tsx:716:                  business.defaultLocale
+components/admin/AdminShell.tsx:29:  children: ReactNode;
+components/admin/AdminTeamView.tsx:117:    value.en?.trim() ||
+components/admin/AdminTeamView.tsx:118:    value.mk?.trim() ||
+components/admin/AdminTeamView.tsx:119:    value.sq?.trim() ||
+components/admin/AdminTeamView.tsx:124:function getLocalizedText(
+components/admin/AdminTeamView.tsx:1198:                          {getLocalizedText(
+components/admin/AdminTeamView.tsx:1206:                          {getLocalizedText(
+components/admin/services/ServiceCatalogActions.tsx:25:  type LocalizedTextInput,
+components/admin/services/ServiceCatalogActions.tsx:48:  name: LocalizedTextInput;
+components/admin/services/ServiceCatalogActions.tsx:49:  description: LocalizedTextInput;
+components/admin/services/ServiceCatalogActions.tsx:58:  name: LocalizedTextInput;
+components/admin/services/ServiceCatalogActions.tsx:59:  description: LocalizedTextInput;
+components/admin/services/ServiceCatalogActions.tsx:97:function createEmptyLocalizedText(): LocalizedTextInput {
+components/admin/services/ServiceCatalogActions.tsx:99:    mk: "",
+components/admin/services/ServiceCatalogActions.tsx:100:    sq: "",
+components/admin/services/ServiceCatalogActions.tsx:101:    en: "",
+components/admin/services/ServiceCatalogActions.tsx:105:function normalizeLocalizedText(
+components/admin/services/ServiceCatalogActions.tsx:111:): LocalizedTextInput {
+components/admin/services/ServiceCatalogActions.tsx:113:    mk: value?.mk ?? "",
+components/admin/services/ServiceCatalogActions.tsx:114:    sq: value?.sq ?? "",
+components/admin/services/ServiceCatalogActions.tsx:115:    en: value?.en ?? "",
+components/admin/services/ServiceCatalogActions.tsx:128:    value.en?.trim() ||
+components/admin/services/ServiceCatalogActions.tsx:129:    value.mk?.trim() ||
+components/admin/services/ServiceCatalogActions.tsx:130:    value.sq?.trim() ||
+components/admin/services/ServiceCatalogActions.tsx:180:    name: createEmptyLocalizedText(),
+components/admin/services/ServiceCatalogActions.tsx:181:    description: createEmptyLocalizedText(),
+components/admin/services/ServiceCatalogActions.tsx:195:    name: normalizeLocalizedText(category.name),
+components/admin/services/ServiceCatalogActions.tsx:196:    description: normalizeLocalizedText(
+components/admin/services/ServiceCatalogActions.tsx:213:    name: createEmptyLocalizedText(),
+components/admin/services/ServiceCatalogActions.tsx:214:    description: createEmptyLocalizedText(),
+components/admin/services/ServiceCatalogActions.tsx:235:    name: normalizeLocalizedText(service.name),
+components/admin/services/ServiceCatalogActions.tsx:236:    description: normalizeLocalizedText(
+components/admin/services/ServiceCatalogActions.tsx:265:  value: LocalizedTextInput
+components/admin/services/ServiceCatalogActions.tsx:268:    value.en.trim() ||
+components/admin/services/ServiceCatalogActions.tsx:269:    value.sq.trim() ||
+components/admin/services/ServiceCatalogActions.tsx:270:    value.mk.trim()
+components/admin/services/ServiceCatalogActions.tsx:284:  values: LocalizedTextInput;
+components/admin/settings/SettingsManagementActions.tsx:65:type LocalizedTextState = {
+components/admin/settings/SettingsManagementActions.tsx:66:  mk: string;
+components/admin/settings/SettingsManagementActions.tsx:67:  sq: string;
+components/admin/settings/SettingsManagementActions.tsx:68:  en: string;
+components/admin/settings/SettingsManagementActions.tsx:71:type LocaleFieldName =
+components/admin/settings/SettingsManagementActions.tsx:78:type LocaleFieldValues = {
+components/admin/settings/SettingsManagementActions.tsx:79:  tagline: LocalizedTextState;
+components/admin/settings/SettingsManagementActions.tsx:80:  description: LocalizedTextState;
+components/admin/settings/SettingsManagementActions.tsx:81:  address: LocalizedTextState;
+components/admin/settings/SettingsManagementActions.tsx:82:  city: LocalizedTextState;
+components/admin/settings/SettingsManagementActions.tsx:83:  country: LocalizedTextState;
+components/admin/settings/SettingsManagementActions.tsx:119:  token: string;
+components/admin/settings/SettingsManagementActions.tsx:523:      data.business.defaultLocale
+components/admin/settings/SettingsManagementActions.tsx:537:    defaultLocale,
+components/admin/settings/SettingsManagementActions.tsx:541:      data.business.defaultLocale
+components/admin/settings/SettingsManagementActions.tsx:616:      mk: data.business.tagline.mk,
+components/admin/settings/SettingsManagementActions.tsx:617:      sq: data.business.tagline.sq,
+components/admin/settings/SettingsManagementActions.tsx:618:      en: data.business.tagline.en,
+components/admin/settings/SettingsManagementActions.tsx:622:      mk: data.business.description.mk,
+components/admin/settings/SettingsManagementActions.tsx:623:      sq: data.business.description.sq,
+components/admin/settings/SettingsManagementActions.tsx:624:      en: data.business.description.en,
+components/admin/settings/SettingsManagementActions.tsx:628:      mk: data.business.address.mk,
+components/admin/settings/SettingsManagementActions.tsx:629:      sq: data.business.address.sq,
+components/admin/settings/SettingsManagementActions.tsx:630:      en: data.business.address.en,
+components/admin/settings/SettingsManagementActions.tsx:634:      mk: data.business.city.mk,
+components/admin/settings/SettingsManagementActions.tsx:635:      sq: data.business.city.sq,
+components/admin/settings/SettingsManagementActions.tsx:636:      en: data.business.city.en,
+components/admin/settings/SettingsManagementActions.tsx:640:      mk: data.business.country.mk,
+components/admin/settings/SettingsManagementActions.tsx:641:      sq: data.business.country.sq,
+components/admin/settings/SettingsManagementActions.tsx:642:      en: data.business.country.en,
+components/admin/settings/SettingsManagementActions.tsx:718:      data.business.defaultLocale
+components/admin/settings/SettingsManagementActions.tsx:760:        mk: data.business.tagline.mk,
+components/admin/settings/SettingsManagementActions.tsx:761:        sq: data.business.tagline.sq,
+components/admin/settings/SettingsManagementActions.tsx:762:        en: data.business.tagline.en,
+components/admin/settings/SettingsManagementActions.tsx:766:        mk:
+components/admin/settings/SettingsManagementActions.tsx:769:        sq:
+components/admin/settings/SettingsManagementActions.tsx:772:        en:
+components/admin/settings/SettingsManagementActions.tsx:777:        mk: data.business.address.mk,
+components/admin/settings/SettingsManagementActions.tsx:778:        sq: data.business.address.sq,
+components/admin/settings/SettingsManagementActions.tsx:779:        en: data.business.address.en,
+components/admin/settings/SettingsManagementActions.tsx:783:        mk: data.business.city.mk,
+components/admin/settings/SettingsManagementActions.tsx:784:        sq: data.business.city.sq,
+components/admin/settings/SettingsManagementActions.tsx:785:        en: data.business.city.en,
+components/admin/settings/SettingsManagementActions.tsx:789:        mk: data.business.country.mk,
+components/admin/settings/SettingsManagementActions.tsx:790:        sq: data.business.country.sq,
+components/admin/settings/SettingsManagementActions.tsx:791:        en: data.business.country.en,
+components/admin/settings/SettingsManagementActions.tsx:1228:                defaultLocale,
+components/admin/settings/SettingsManagementActions.tsx:2350:                  value={defaultLocale}
+components/admin/team/EmployeeServiceManagement.tsx:59:    value.en?.trim() ||
+components/admin/team/EmployeeServiceManagement.tsx:60:    value.mk?.trim() ||
+components/admin/team/EmployeeServiceManagement.tsx:61:    value.sq?.trim() ||
+components/admin/team/TeamManagementActions.tsx:29:  type TeamLocalizedTextInput,
+components/admin/team/TeamManagementActions.tsx:50:  title: TeamLocalizedTextInput;
+components/admin/team/TeamManagementActions.tsx:51:  bio: TeamLocalizedTextInput;
+components/admin/team/TeamManagementActions.tsx:83:function createEmptyLocalizedText(): TeamLocalizedTextInput {
+components/admin/team/TeamManagementActions.tsx:85:    mk: "",
+components/admin/team/TeamManagementActions.tsx:86:    sq: "",
+components/admin/team/TeamManagementActions.tsx:87:    en: "",
+components/admin/team/TeamManagementActions.tsx:91:function normalizeLocalizedText(
+components/admin/team/TeamManagementActions.tsx:97:): TeamLocalizedTextInput {
+components/admin/team/TeamManagementActions.tsx:99:    mk: value?.mk ?? "",
+components/admin/team/TeamManagementActions.tsx:100:    sq: value?.sq ?? "",
+components/admin/team/TeamManagementActions.tsx:101:    en: value?.en ?? "",
+components/admin/team/TeamManagementActions.tsx:158:    title: createEmptyLocalizedText(),
+components/admin/team/TeamManagementActions.tsx:159:    bio: createEmptyLocalizedText(),
+components/admin/team/TeamManagementActions.tsx:180:    title: normalizeLocalizedText(
+components/admin/team/TeamManagementActions.tsx:184:    bio: normalizeLocalizedText(
+components/admin/team/TeamManagementActions.tsx:218:  values: TeamLocalizedTextInput;
+components/booking/BookingFlow.tsx:105:    mk: "Терминот штотуку беше резервиран. Изберете друг слободен термин.",
+components/booking/BookingFlow.tsx:106:    sq: "Ky orar sapo u rezervua. Zgjidhni një orar tjetër të lirë.",
+components/booking/BookingFlow.tsx:107:    en: "That time was just booked. Please choose another available time.",
+components/booking/BookingFlow.tsx:112:    mk: "Резервацијата не можеше да се зачува. Обидете се повторно.",
+components/booking/BookingFlow.tsx:113:    sq: "Rezervimi nuk mund të ruhej. Ju lutemi provoni përsëri.",
+components/booking/BookingFlow.tsx:114:    en: "The booking could not be saved. Please try again.",
+components/booking/BookingFlow.tsx:119:    mk: "Се резервира...",
+components/booking/BookingFlow.tsx:120:    sq: "Duke rezervuar...",
+components/booking/BookingFlow.tsx:121:    en: "Booking...",
+components/booking/BookingFlow.tsx:129:    mk: "Внесете име и презиме со најмалку 2 знаци.",
+components/booking/BookingFlow.tsx:130:    sq: "Shkruani emrin dhe mbiemrin me të paktën 2 karaktere.",
+components/booking/BookingFlow.tsx:131:    en: "Enter a name with at least 2 characters.",
+components/booking/BookingFlow.tsx:135:    mk: "Телефонскиот број е задолжителен.",
+components/booking/BookingFlow.tsx:136:    sq: "Numri i telefonit është i detyrueshëm.",
+components/booking/BookingFlow.tsx:137:    en: "A phone number is required.",
+components/booking/BookingFlow.tsx:141:    mk: "Електронската адреса е задолжителна.",
+components/booking/BookingFlow.tsx:142:    sq: "Adresa e emailit është e detyrueshme.",
+components/booking/BookingFlow.tsx:143:    en: "An email address is required.",
+components/booking/BookingFlow.tsx:147:    mk: "Внесете телефонски број или електронска адреса.",
+components/booking/BookingFlow.tsx:148:    sq: "Shkruani një numër telefoni ose adresë emaili.",
+components/booking/BookingFlow.tsx:149:    en: "Enter a phone number or email address.",
+components/booking/BookingFlow.tsx:153:    mk: "Телефонскиот број не е валиден. Внесете најмалку 6 цифри.",
+components/booking/BookingFlow.tsx:154:    sq: "Numri i telefonit nuk është i vlefshëm. Shkruani të paktën 6 shifra.",
+components/booking/BookingFlow.tsx:155:    en: "The phone number is invalid. Enter at least 6 digits.",
+components/booking/BookingFlow.tsx:159:    mk: "Електронската адреса не е валидна.",
+components/booking/BookingFlow.tsx:160:    sq: "Adresa e emailit nuk është e vlefshme.",
+components/booking/BookingFlow.tsx:161:    en: "The email address is invalid.",
+components/booking/BookingFlow.tsx:165:    mk: "Забелешката е предолга. Максимумот е 2000 знаци.",
+components/booking/BookingFlow.tsx:166:    sq: "Shënimi është shumë i gjatë. Maksimumi është 2000 karaktere.",
+components/booking/BookingFlow.tsx:167:    en: "The note is too long. The maximum is 2,000 characters.",
+components/booking/BookingFlow.tsx:171:    mk: "Избраната услуга повеќе не е достапна. Изберете друга услуга.",
+components/booking/BookingFlow.tsx:172:    sq: "Shërbimi i zgjedhur nuk është më i disponueshëm. Zgjidhni një shërbim tjetër.",
+components/booking/BookingFlow.tsx:173:    en: "The selected service is no longer available. Choose another service.",
+components/booking/BookingFlow.tsx:177:    mk: "Избраната услуга повеќе не е достапна. Изберете друга услуга.",
+components/booking/BookingFlow.tsx:178:    sq: "Shërbimi i zgjedhur nuk është më i disponueshëm. Zgjidhni një shërbim tjetër.",
+components/booking/BookingFlow.tsx:179:    en: "The selected service is no longer available. Choose another service.",
+components/booking/BookingFlow.tsx:183:    mk: "Избраниот вработен повеќе не е достапен. Изберете друг вработен.",
+components/booking/BookingFlow.tsx:184:    sq: "Punonjësi i zgjedhur nuk është më i disponueshëm. Zgjidhni një punonjës tjetër.",
+components/booking/BookingFlow.tsx:185:    en: "The selected employee is no longer available. Choose another employee.",
+components/booking/BookingFlow.tsx:189:    mk: "Избраниот вработен повеќе не е достапен. Изберете друг вработен.",
+components/booking/BookingFlow.tsx:190:    sq: "Punonjësi i zgjedhur nuk është më i disponueshëm. Zgjidhni një punonjës tjetër.",
+components/booking/BookingFlow.tsx:191:    en: "The selected employee is no longer available. Choose another employee.",
+components/booking/BookingFlow.tsx:195:    mk: "Избраниот термин не е валиден. Изберете друг термин.",
+components/booking/BookingFlow.tsx:196:    sq: "Orari i zgjedhur nuk është i vlefshëm. Zgjidhni një orar tjetër.",
+components/booking/BookingFlow.tsx:197:    en: "The selected time is invalid. Choose another time.",
+components/booking/BookingFlow.tsx:201:    mk: "Салонот моментално не е достапен за онлајн резервации.",
+components/booking/BookingFlow.tsx:202:    sq: "Salloni aktualisht nuk është i disponueshëm për rezervime online.",
+components/booking/BookingFlow.tsx:203:    en: "The salon is currently unavailable for online bookings.",
+components/booking/BookingFlow.tsx:207:    mk: "Салонот моментално не е достапен за онлајн резервации.",
+components/booking/BookingFlow.tsx:208:    sq: "Salloni aktualisht nuk është i disponueshëm për rezervime online.",
+components/booking/BookingFlow.tsx:209:    en: "The salon is currently unavailable for online bookings.",
+components/booking/BookingProgress.tsx:3:  LocalizedText,
+components/booking/BookingProgress.tsx:10:  label: LocalizedText;
+components/booking/BookingSummary.tsx:38:type LocalizedText = Record<
+components/booking/BookingSummary.tsx:47:  mk: "mk-MK",
+components/booking/BookingSummary.tsx:48:  sq: "sq-MK",
+components/booking/BookingSummary.tsx:49:  en: "en-GB",
+components/booking/BookingSummary.tsx:52:const automaticallyAssignedLabels: LocalizedText =
+components/booking/BookingSummary.tsx:54:    mk: "Автоматски избран",
+components/booking/BookingSummary.tsx:55:    sq: "Zgjedhur automatikisht",
+components/booking/BookingSummary.tsx:56:    en: "Automatically assigned",
+components/booking/BookingSummary.tsx:59:const contactLabels: LocalizedText =
+components/booking/BookingSummary.tsx:61:    mk: "Контакт податоци",
+components/booking/BookingSummary.tsx:62:    sq: "Të dhënat e kontaktit",
+components/booking/BookingSummary.tsx:63:    en: "Contact details",
+components/booking/CustomerStep.tsx:62:    mk: "Внесете име и презиме.",
+components/booking/CustomerStep.tsx:63:    sq: "Shkruani emrin dhe mbiemrin.",
+components/booking/CustomerStep.tsx:64:    en: "Enter your full name.",
+components/booking/CustomerStep.tsx:68:    mk: "Името мора да има најмалку 2 знаци.",
+components/booking/CustomerStep.tsx:69:    sq: "Emri duhet të ketë të paktën 2 karaktere.",
+components/booking/CustomerStep.tsx:70:    en: "The name must contain at least 2 characters.",
+components/booking/CustomerStep.tsx:74:    mk: "Името може да има најмногу 120 знаци.",
+components/booking/CustomerStep.tsx:75:    sq: "Emri mund të ketë maksimumi 120 karaktere.",
+components/booking/CustomerStep.tsx:76:    en: "The name can contain at most 120 characters.",
+components/booking/CustomerStep.tsx:80:    mk: "Телефонскиот број е задолжителен.",
+components/booking/CustomerStep.tsx:81:    sq: "Numri i telefonit është i detyrueshëm.",
+components/booking/CustomerStep.tsx:82:    en: "A phone number is required.",
+components/booking/CustomerStep.tsx:86:    mk: "Внесете валиден телефонски број со најмалку 6 цифри.",
+components/booking/CustomerStep.tsx:87:    sq: "Shkruani një numër telefoni të vlefshëm me të paktën 6 shifra.",
+components/booking/CustomerStep.tsx:88:    en: "Enter a valid phone number containing at least 6 digits.",
+components/booking/CustomerStep.tsx:92:    mk: "Електронската адреса е задолжителна.",
+components/booking/CustomerStep.tsx:93:    sq: "Adresa e emailit është e detyrueshme.",
+components/booking/CustomerStep.tsx:94:    en: "An email address is required.",
+components/booking/CustomerStep.tsx:98:    mk: "Внесете валидна електронска адреса.",
+components/booking/CustomerStep.tsx:99:    sq: "Shkruani një adresë emaili të vlefshme.",
+components/booking/CustomerStep.tsx:100:    en: "Enter a valid email address.",
+components/booking/CustomerStep.tsx:104:    mk: "Внесете телефонски број или електронска адреса.",
+components/booking/CustomerStep.tsx:105:    sq: "Shkruani një numër telefoni ose adresë emaili.",
+components/booking/CustomerStep.tsx:106:    en: "Enter a phone number or email address.",
+components/booking/CustomerStep.tsx:110:    mk: "Забелешката може да има најмногу 2000 знаци.",
+components/booking/CustomerStep.tsx:111:    sq: "Shënimi mund të ketë maksimumi 2000 karaktere.",
+components/booking/CustomerStep.tsx:112:    en: "The note can contain at most 2,000 characters.",
+components/booking/CustomerStep.tsx:118:    mk: "Опционално",
+components/booking/CustomerStep.tsx:119:    sq: "Opsionale",
+components/booking/CustomerStep.tsx:120:    en: "Optional",
+components/booking/DateStep.tsx:43:  mk: "mk-MK",
+components/booking/DateStep.tsx:44:  sq: "sq-MK",
+components/booking/DateStep.tsx:45:  en: "en-GB",
+components/booking/SuccessStep.tsx:44:type LocalizedText = Record<
+components/booking/SuccessStep.tsx:53:  mk: "mk-MK",
+components/booking/SuccessStep.tsx:54:  sq: "sq-MK",
+components/booking/SuccessStep.tsx:55:  en: "en-GB",
+components/booking/SuccessStep.tsx:58:const confirmedTitles: LocalizedText = {
+components/booking/SuccessStep.tsx:59:  mk: "Резервацијата е потврдена!",
+components/booking/SuccessStep.tsx:60:  sq: "Rezervimi u konfirmua!",
+components/booking/SuccessStep.tsx:61:  en: "Booking confirmed!",
+components/booking/SuccessStep.tsx:64:const confirmedMessages: LocalizedText = {
+components/booking/SuccessStep.tsx:65:  mk: "Вашиот термин е успешно потврден. Со нетрпение ве очекуваме.",
+components/booking/SuccessStep.tsx:66:  sq: "Orari juaj u konfirmua me sukses. Me kënaqësi ju presim.",
+components/booking/SuccessStep.tsx:67:  en: "Your appointment is confirmed. We look forward to seeing you.",
+components/booking/SuccessStep.tsx:70:const pendingTitles: LocalizedText = {
+components/booking/SuccessStep.tsx:71:  mk: "Резервацијата е примена",
+components/booking/SuccessStep.tsx:72:  sq: "Rezervimi u pranua",
+components/booking/SuccessStep.tsx:73:  en: "Booking received",
+components/booking/SuccessStep.tsx:76:const pendingMessages: LocalizedText = {
+components/booking/SuccessStep.tsx:77:  mk: "Вашиот термин е зачуван и чека потврда од салонот. Салонот ќе ве контактира наскоро.",
+components/booking/SuccessStep.tsx:78:  sq: "Orari juaj u ruajt dhe pret konfirmimin e sallonit. Salloni do t’ju kontaktojë së shpejti.",
+components/booking/SuccessStep.tsx:79:  en: "Your appointment is reserved and awaiting confirmation from the salon. The salon will contact you shortly.",
+components/booking/SuccessStep.tsx:82:const referenceLabels: LocalizedText = {
+components/booking/SuccessStep.tsx:83:  mk: "Број на резервација",
+components/booking/SuccessStep.tsx:84:  sq: "Numri i rezervimit",
+components/booking/SuccessStep.tsx:85:  en: "Booking reference",
+components/booking/SuccessStep.tsx:88:const confirmedStatusLabels: LocalizedText =
+components/booking/SuccessStep.tsx:90:    mk: "Потврдена",
+components/booking/SuccessStep.tsx:91:    sq: "Konfirmuar",
+components/booking/SuccessStep.tsx:92:    en: "Confirmed",
+components/booking/SuccessStep.tsx:95:const pendingStatusLabels: LocalizedText =
+components/booking/SuccessStep.tsx:97:    mk: "Чека потврда",
+components/booking/SuccessStep.tsx:98:    sq: "Në pritje",
+components/booking/SuccessStep.tsx:99:    en: "Awaiting confirmation",
+components/booking/SuccessStep.tsx:102:const durationLabels: LocalizedText = {
+components/booking/SuccessStep.tsx:103:  mk: "Времетраење",
+components/booking/SuccessStep.tsx:104:  sq: "Kohëzgjatja",
+components/booking/SuccessStep.tsx:105:  en: "Duration",
+components/booking/SuccessStep.tsx:108:const priceLabels: LocalizedText = {
+components/booking/SuccessStep.tsx:109:  mk: "Цена",
+components/booking/SuccessStep.tsx:110:  sq: "Çmimi",
+components/booking/SuccessStep.tsx:111:  en: "Price",
+components/desktop/DesktopBookingModal.tsx:18:  isOpen: boolean;
+components/desktop/ReviewsSection.tsx:23:  mk: "mk-MK",
+components/desktop/ReviewsSection.tsx:24:  sq: "sq-MK",
+components/desktop/ReviewsSection.tsx:25:  en: "en-GB",
+components/mobile/MobileBookingModal.tsx:10:  isOpen: boolean;
+components/shared/EmptyState.tsx:5:  LocalizedText,
+components/shared/EmptyState.tsx:12:  title: LocalizedText;
+components/shared/EmptyState.tsx:13:  description: LocalizedText;
+components/shared/EmptyState.tsx:14:  actionLabel?: LocalizedText;
+components/shared/LanguageSwitcher.tsx:24:  mk: "Македонски",
+components/shared/LanguageSwitcher.tsx:25:  sq: "Shqip",
+components/shared/LanguageSwitcher.tsx:26:  en: "English",
+components/shared/LanguageSwitcher.tsx:33:  mk: "МК",
+components/shared/LanguageSwitcher.tsx:34:  sq: "SQ",
+components/shared/LanguageSwitcher.tsx:35:  en: "EN",
+components/shared/LanguageSwitcher.tsx:47:  const supportedLocales =
+components/shared/LanguageSwitcher.tsx:48:    business.supportedLocales;
+components/shared/LanguageSwitcher.tsx:74:      {supportedLocales.map(
+components/shared/SectionHeader.tsx:3:  LocalizedText,
+components/shared/SectionHeader.tsx:8:  title: LocalizedText;
+components/shared/SectionHeader.tsx:9:  subtitle?: LocalizedText;
+components/shared/SectionHeader.tsx:10:  label?: LocalizedText;
+lib/admin/bookings.ts:5:import type { LocalizedText } from "@/lib/types";
+lib/admin/bookings.ts:38:  public_token: string;
+lib/admin/bookings.ts:63:  name: LocalizedText;
+lib/admin/bookings.ts:76:  serviceName: LocalizedText | null;
+lib/admin/customers.ts:9:import type { LocalizedText } from "@/lib/types";
+lib/admin/customers.ts:51:  name: LocalizedText;
+lib/admin/customers.ts:69:  serviceName: LocalizedText | null;
+lib/admin/services.ts:5:import type { LocalizedText } from "@/lib/types";
+lib/admin/services.ts:27:  name: LocalizedText;
+lib/admin/services.ts:28:  description: LocalizedText;
+lib/admin/services.ts:41:  name: LocalizedText;
+lib/admin/services.ts:42:  description: LocalizedText;
+lib/admin/services.ts:58:  name: LocalizedText;
+lib/admin/services.ts:59:  description: LocalizedText;
+lib/admin/services.ts:77:  name: LocalizedText;
+lib/admin/services.ts:78:  description: LocalizedText;
+lib/admin/settings.ts:6:  LocalizedText,
+lib/admin/settings.ts:21:  tagline: LocalizedText;
+lib/admin/settings.ts:22:  description: LocalizedText;
+lib/admin/settings.ts:24:  address: LocalizedText;
+lib/admin/settings.ts:25:  city: LocalizedText;
+lib/admin/settings.ts:26:  country: LocalizedText;
+lib/admin/settings.ts:39:  defaultLocale: AdminDefaultLocale;
+lib/admin/settings.ts:181:function normalizeLocalizedText(
+lib/admin/settings.ts:183:): LocalizedText {
+lib/admin/settings.ts:190:      mk: "",
+lib/admin/settings.ts:191:      sq: "",
+lib/admin/settings.ts:192:      en: "",
+lib/admin/settings.ts:203:    mk:
+lib/admin/settings.ts:209:    sq:
+lib/admin/settings.ts:215:    en:
+lib/admin/settings.ts:412:      normalizeLocalizedText(
+lib/admin/settings.ts:417:      normalizeLocalizedText(
+lib/admin/settings.ts:422:      normalizeLocalizedText(
+lib/admin/settings.ts:427:      normalizeLocalizedText(
+lib/admin/settings.ts:432:      normalizeLocalizedText(
+lib/admin/settings.ts:480:    defaultLocale:
+lib/admin/team.ts:5:import type { LocalizedText } from "@/lib/types";
+lib/admin/team.ts:28:  title: LocalizedText;
+lib/admin/team.ts:29:  bio: LocalizedText;
+lib/admin/team.ts:55:  name: LocalizedText;
+lib/admin/team.ts:68:  name: LocalizedText;
+lib/admin/team.ts:78:  name: LocalizedText;
+lib/admin/team.ts:81:  categoryName: LocalizedText;
+lib/admin/team.ts:120:  title: LocalizedText;
+lib/admin/team.ts:121:  bio: LocalizedText;
+lib/catalogContext.tsx:31:  children: ReactNode;
+lib/contentData.ts:21:      mk: "Апсолутно најдобриот салон во градот! Arben точно знае што работи.",
+lib/contentData.ts:22:      sq: "Absolisht saloni më i mirë në qytet! Arben saktësisht e di çfarë bën.",
+lib/contentData.ts:23:      en: "Absolutely the best salon in town! Arben knows exactly what he's doing.",
+lib/contentData.ts:32:      mk: "Elira ми го направи најубавиот балајаж досега. Препорачувам!",
+lib/contentData.ts:33:      sq: "Elira më bëri balayage-n më të bukur deri tani. Rekomandoj!",
+lib/contentData.ts:34:      en: "Elira gave me the most beautiful balayage ever. Highly recommend!",
+lib/contentData.ts:43:      mk: "Професионална услуга, чист простор и одлична атмосфера.",
+lib/contentData.ts:44:      sq: "Shërbim profesional, ambient i pastër dhe atmosferë e shkëlqyer.",
+lib/contentData.ts:45:      en: "Professional service, clean space and great atmosphere.",
+lib/contentData.ts:54:      mk: "Секогаш излезам насмеана. Најдобриот тим!",
+lib/contentData.ts:55:      sq: "Gjithmonë dal e buzëqeshur. Ekipi më i mirë!",
+lib/contentData.ts:56:      en: "I always leave smiling. The best team!",
+lib/google-calendar/crypto.ts:16:  "salon-platform:google-calendar-token:v1",
+lib/google-calendar/crypto.ts:38:  plainToken: string
+lib/google-calendar/oauth.ts:363:  refreshToken: string
+lib/google-calendar/oauth.ts:375:    refresh_token:
+lib/google-calendar/sync.ts:137:function getLocalizedText(
+lib/google-calendar/sync.ts:389:    getLocalizedText(
+lib/google-calendar/sync.ts:395:    getLocalizedText(
+lib/google-calendar/sync.ts:501:    getLocalizedText(
+lib/supabase/admin.ts:29:        autoRefreshToken: false,
+lib/translations.ts:1:import type { Locale, LocalizedText } from "./types";
+lib/translations.ts:5: * Koristi LocalizedText tip za konzistentnost.
+lib/translations.ts:11:    home: { mk: "Дома", sq: "Kryefaqja", en: "Home" },
+lib/translations.ts:12:    services: { mk: "Услуги", sq: "Shërbimet", en: "Services" },
+lib/translations.ts:13:    team: { mk: "Тим", sq: "Ekipi", en: "Team" },
+lib/translations.ts:14:    gallery: { mk: "Галерија", sq: "Galeria", en: "Gallery" },
+lib/translations.ts:15:    reviews: { mk: "Рецензии", sq: "Vlerësime", en: "Reviews" },
+lib/translations.ts:16:    contact: { mk: "Контакт", sq: "Kontakt", en: "Contact" },
+lib/translations.ts:17:    book: { mk: "Закажи", sq: "Prenoto", en: "Book" },
+lib/translations.ts:22:    bookNow: { mk: "Закажи термин", sq: "Prenoto tani", en: "Book Now" },
+lib/translations.ts:23:    viewServices: { mk: "Погледни услуги", sq: "Shiko shërbimet", en: "View Services" },
+lib/translations.ts:24:    since: { mk: "Основано", sq: "Themeluar", en: "Est." },
+lib/translations.ts:25:    nextAvailable: { mk: "Следен слободен", sq: "I disponueshëm", en: "Next available" },
+lib/translations.ts:30:    servicesTitle: { mk: "Наши услуги", sq: "Shërbimet tona", en: "Our Services" },
+lib/translations.ts:31:    servicesSub: { mk: "Изберете од нашата понуда", sq: "Zgjidhni nga oferta jonë", en: "Choose from our offerings" },
+lib/translations.ts:32:    teamTitle: { mk: "Запознајте го тимот", sq: "Njihuni me ekipin", en: "Meet the Team" },
+lib/translations.ts:33:    teamSub: { mk: "Нашите стручњаци се тука за вас", sq: "Ekspertët tanë janë këtu për ju", en: "Our experts are here for you" },
+lib/translations.ts:34:    galleryTitle: { mk: "Галерија", sq: "Galeria", en: "Gallery" },
+lib/translations.ts:35:    gallerySub: { mk: "Погледнете ги нашите работи", sq: "Shikoni punën tonë", en: "Take a look at our work" },
+lib/translations.ts:36:    reviewsTitle: { mk: "Што велат клиентите", sq: "Çfarë thonë klientët", en: "What clients say" },
+lib/translations.ts:37:    reviewsSub: { mk: "Вистински искуства", sq: "Përvoja të vërteta", en: "Real experiences" },
+lib/translations.ts:38:    contactTitle: { mk: "Контакт", sq: "Kontakt", en: "Contact" },
+lib/translations.ts:39:    contactSub: { mk: "Дојдете нè посетете", sq: "Ejani na vizitoni", en: "Come visit us" },
+lib/translations.ts:40:    hours: { mk: "Работно време", sq: "Orari", en: "Working Hours" },
+lib/translations.ts:41:    popularServices: { mk: "Популарни услуги", sq: "Shërbimet popullore", en: "Popular Services" },
+lib/translations.ts:46:    sunday: { mk: "Недела", sq: "E Diel", en: "Sunday" },
+lib/translations.ts:47:    monday: { mk: "Понеделник", sq: "E Hënë", en: "Monday" },
+lib/translations.ts:48:    tuesday: { mk: "Вторник", sq: "E Martë", en: "Tuesday" },
+lib/translations.ts:49:    wednesday: { mk: "Среда", sq: "E Mërkurë", en: "Wednesday" },
+lib/translations.ts:50:    thursday: { mk: "Четврток", sq: "E Enjte", en: "Thursday" },
+lib/translations.ts:51:    friday: { mk: "Петок", sq: "E Premte", en: "Friday" },
+lib/translations.ts:52:    saturday: { mk: "Сабота", sq: "E Shtunë", en: "Saturday" },
+lib/translations.ts:57:    fixed: { mk: "", sq: "", en: "" }, // No prefix for fixed price
+lib/translations.ts:58:    from: { mk: "од", sq: "nga", en: "from" },
+lib/translations.ts:59:    range: { mk: "-", sq: "-", en: "-" }, // Separator between prices
+lib/translations.ts:64:    years: { mk: "години", sq: "vite", en: "years" },
+lib/translations.ts:65:    clients: { mk: "клиенти", sq: "klientë", en: "clients" },
+lib/translations.ts:66:    rating: { mk: "оцена", sq: "vlerësim", en: "rating" },
+lib/translations.ts:67:    since: { mk: "Од", sq: "Që nga", en: "Since" },
+lib/translations.ts:72:    title: { mk: "Закажи термин", sq: "Rezervo termin", en: "Book an appointment" },
+lib/translations.ts:73:    selectService: { mk: "Избери услуга", sq: "Zgjidh shërbimin", en: "Select Service" },
+lib/translations.ts:74:    selectEmployee: { mk: "Избери фризер", sq: "Zgjidh stilistin", en: "Select Stylist" },
+lib/translations.ts:75:    selectDate: { mk: "Избери датум", sq: "Zgjidh datën", en: "Select Date" },
+lib/translations.ts:76:    selectTime: { mk: "Избери термин", sq: "Zgjidh orarin", en: "Select Time" },
+lib/translations.ts:77:    yourInfo: { mk: "Твои податоци", sq: "Të dhënat e tua", en: "Your Info" },
+lib/translations.ts:78:    success: { mk: "Готово!", sq: "Sukses!", en: "Success!" },
+lib/translations.ts:79:    next: { mk: "Следно", sq: "Vazhdo", en: "Next" },
+lib/translations.ts:80:    back: { mk: "Назад", sq: "Prapa", en: "Back" },
+lib/translations.ts:81:    confirm: { mk: "Потврди", sq: "Konfirmo", en: "Confirm" },
+lib/translations.ts:82:    done: { mk: "Во ред", sq: "Në rregull", en: "Done" },
+lib/translations.ts:83:    fullName: { mk: "Целосно име", sq: "Emri i plotë", en: "Full Name" },
+lib/translations.ts:84:    phone: { mk: "Телефон", sq: "Telefoni", en: "Phone" },
+lib/translations.ts:85:    email: { mk: "Email", sq: "Email", en: "Email" },
+lib/translations.ts:86:    note: { mk: "Забелешка (опционално)", sq: "Shënim (opsionale)", en: "Note (optional)" },
+lib/translations.ts:87:    successMsg: { mk: "Твојот термин е закажан! Ќе те контактираме наскоро.", sq: "Takimi yt u rezervua! Do të të kontaktojmë së shpejti.", en: "Your appointment is booked! We'll contact you soon." },
+lib/translations.ts:88:    summary: { mk: "Резиме", sq: "Përmbledhje", en: "Summary" },
+lib/translations.ts:89:    minutes: { mk: "мин", sq: "min", en: "min" },
+lib/translations.ts:90:    any: { mk: "Било кој", sq: "Cilido", en: "Any" },
+lib/translations.ts:91:    anyAvailable: { mk: "Прв слободен", sq: "I pari i disponueshëm", en: "First available" },
+lib/translations.ts:92:    step: { mk: "Чекор", sq: "Hapi", en: "Step" },
+lib/translations.ts:93:    of: { mk: "од", sq: "nga", en: "of" },
+lib/translations.ts:94:    change: { mk: "Промени", sq: "Ndrysho", en: "Change" },
+lib/translations.ts:95:    selectServiceFirst: { mk: "Избери услуга прво", sq: "Zgjidh shërbimin fillimisht", en: "Select a service first" },
+lib/translations.ts:96:    selectServiceFirstDescription: { mk: "Мора да избереш услуга пред да избереш фризер.", sq: "Duhet të zgjedhësh një shërbim para se të zgjedhësh stilistin.", en: "You need to select a service before choosing a stylist." },
+lib/translations.ts:97:    progressLabel: { mk: "Напредок на закажувањето", sq: "Progresi i rezervimit", en: "Booking progress" },
+lib/translations.ts:98:    selectDateDescription: { mk: "Избери датум за твојот термин", sq: "Zgjidh datën për takimin tënd", en: "Select a date for your appointment" },
+lib/translations.ts:99:    selectTimeDescription: { mk: "Избери слободен термин", sq: "Zgjidh një orar të lirë", en: "Select an available time slot" },
+lib/translations.ts:100:    yourInfoDescription: { mk: "Внеси ги твоите податоци за контакт", sq: "Plotëso të dhënat e tua të kontaktit", en: "Enter your contact information" },
+lib/translations.ts:101:    noAvailableDates: { mk: "Нема достапни датуми во наредниот период", sq: "Nuk ka data të disponueshme në periodën e ardhshme", en: "No available dates in the upcoming period" },
+lib/translations.ts:102:    completePreviousSteps: { mk: "Заврши претходните чекори", sq: "Përfundo hapat e mëparshëm", en: "Complete previous steps" },
+lib/translations.ts:103:    completePreviousStepsDescription: { mk: "Избери услуга, фризер и датум за да видиш слободни термини", sq: "Zgjidh shërbimin, stilistin dhe datën për të parë oraret e lira", en: "Select a service, stylist, and date to see available times" },
+lib/translations.ts:108:    closed: { mk: "Затворено", sq: "Mbyllur", en: "Closed" },
+lib/translations.ts:109:    address: { mk: "Адреса", sq: "Adresa", en: "Address" },
+lib/translations.ts:110:    phone: { mk: "Телефон", sq: "Telefoni", en: "Phone" },
+lib/translations.ts:111:    email: { mk: "Email", sq: "Email", en: "Email" },
+lib/translations.ts:112:    instagram: { mk: "Instagram", sq: "Instagram", en: "Instagram" },
+lib/translations.ts:113:    mapPlaceholder: { mk: "Мапа", sq: "Harta", en: "Map" },
+lib/translations.ts:118:    loading: { mk: "Вчитување", sq: "Ngarkimi", en: "Loading" },
+lib/translations.ts:119:    noAppointments: { mk: "Нема термини", sq: "Nuk ka takime", en: "No appointments" },
+lib/translations.ts:120:    noEmployees: { mk: "Нема вработени", sq: "Nuk ka punonjës", en: "No available employees" },
+lib/translations.ts:121:    noTimes: { mk: "Нема слободни термини", sq: "Nuk ka orare", en: "No available times" },
+lib/translations.ts:122:    bookWith: { mk: "Закажи кај", sq: "Prenoto me", en: "Book with" },
+lib/translations.ts:123:    total: { mk: "Вкупно", sq: "Totali", en: "Total" },
+lib/translations.ts:124:    service: { mk: "Услуга", sq: "Shërbimi", en: "Service" },
+lib/translations.ts:125:    stylist: { mk: "Фризер", sq: "Stilisti", en: "Stylist" },
+lib/translations.ts:126:    date: { mk: "Датум", sq: "Data", en: "Date" },
+lib/translations.ts:127:    time: { mk: "Време", sq: "Koha", en: "Time" },
+lib/translations.ts:128:    premiumService: { mk: "Премиум услуга", sq: "Shërbim premium", en: "Premium Service" },
+lib/translations.ts:129:    languageSelector: { mk: "Избор на јазик", sq: "Përzgjedhja e gjuhës", en: "Language selector" },
+lib/translations.ts:130:    switchToLanguage: { mk: "Премини на", sq: "Kalo në", en: "Switch to" },
+lib/translations.ts:131:    selected: { mk: "избрано", sq: "zgjedhur", en: "selected" },
+lib/translations.ts:132:    noServices: { mk: "Нема услуги", sq: "Nuk ka shërbime", en: "No services" },
+lib/translations.ts:133:    noServicesDescription: { mk: "Моментално нема достапни услуги.", sq: "Nuk ka shërbime të disponueshme.", en: "No services available at the moment." },
+lib/translations.ts:134:    noEmployeesForService: { mk: "Нема вработени за оваа услуга.", sq: "Nuk ka punonjës për këtë shërbim.", en: "No employees available for this service." },
+lib/translations.ts:135:    noTimesDescription: { mk: "Нема слободни термини за избраниот датум. Пробај друг датум или услуга.", sq: "Nuk ka orare të lira për datën e zgjedhur. Provo një datë ose shërbim tjetër.", en: "No available time slots for the selected date. Try a different date or service." },
+lib/translations.ts:136:    notSelected: { mk: "Не е избрано", sq: "Nuk është zgjedhur", en: "Not selected" },
+lib/translations.ts:137:    mainNavigation: { mk: "Главна навигација", sq: "Navigimi kryesor", en: "Main navigation" },
+lib/translations.ts:138:    noEmployeesDescription: { mk: "Моментално нема достапни членови на тимот.", sq: "Aktualisht nuk ka anëtarë të ekipit në dispozicion.", en: "No team members are available at the moment." },
+lib/translations.ts:139:    allRightsReserved: { mk: "Сите права се задржани", sq: "Të gjitha të drejtat e rezervuara", en: "All rights reserved" },
+lib/translations.ts:140:    footerNavigation: { mk: "Навигација во подножјето", sq: "Navigimi i fundit të faqes", en: "Footer navigation" },
+lib/translations.ts:141:    close: { mk: "Затвори", sq: "Mbyll", en: "Close" },
+lib/translations.ts:142:    openFullWebsite: { mk: "Отвори веб верзија", sq: "Hap versionin e plotë", en: "Open full website" },
+lib/translations.ts:143:    mobileNavigation: { mk: "Мобилна навигација", sq: "Navigimi mobil", en: "Mobile navigation" },
+lib/translations.ts:148:    namePlaceholder: { mk: "Внеси го твоето име", sq: "Shkruaj emrin tënd", en: "Enter your name" },
+lib/translations.ts:149:    phonePlaceholder: { mk: "+389 70 000 000", sq: "+389 70 000 000", en: "+389 70 000 000" },
+lib/translations.ts:150:    emailPlaceholder: { mk: "email@primer.com", sq: "email@shembull.com", en: "email@example.com" },
+lib/translations.ts:151:    notePlaceholder: { mk: "Додај забелешка (опционално)", sq: "Shto një shënim (opsionale)", en: "Add a note (optional)" },
+lib/translations.ts:158:export function t(text: LocalizedText, locale: Locale): string {
+lib/translations.ts:166:  const dayMap: Record<number, LocalizedText> = {
+lib/types.ts:5:export type Locale = "mk" | "sq" | "en";
+lib/types.ts:7:export type LocalizedText = Record<
+lib/types.ts:50:  tagline: LocalizedText;
+lib/types.ts:51:  description: LocalizedText;
+lib/types.ts:54:  address: LocalizedText;
+lib/types.ts:55:  city: LocalizedText;
+lib/types.ts:56:  country: LocalizedText;
+lib/types.ts:60:  defaultLocale: Locale;
+lib/types.ts:61:  supportedLocales: Locale[];
+lib/types.ts:103:  tagline: LocalizedText;
+lib/types.ts:104:  description: LocalizedText;
+lib/types.ts:107:  address: LocalizedText;
+lib/types.ts:108:  city: LocalizedText;
+lib/types.ts:109:  country: LocalizedText;
+lib/types.ts:114:  defaultLocale: Locale;
+lib/types.ts:115:  supportedLocales: Locale[];
+lib/types.ts:157:  name: LocalizedText;
+lib/types.ts:158:  description?: LocalizedText;
+lib/types.ts:172:  name: LocalizedText;
+lib/types.ts:173:  description?: LocalizedText;
+lib/types.ts:186:  role: LocalizedText;
+lib/types.ts:188:  bio: LocalizedText;
+lib/types.ts:203:  text: LocalizedText;
+lib/types.ts:211:  alt: LocalizedText;

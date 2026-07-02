@@ -2,10 +2,15 @@
 
 import { useCatalogData } from "@/lib/catalogContext";
 import {
+  getLocaleDefinition,
+} from "@/lib/i18n/locales";
+import {
   t,
   translations,
 } from "@/lib/translations";
-import type { Locale } from "@/lib/types";
+import type {
+  Locale,
+} from "@/lib/types";
 
 type LanguageSwitcherProps = {
   currentLocale: Locale;
@@ -15,24 +20,6 @@ type LanguageSwitcherProps = {
   ) => void;
 
   variant?: "header" | "footer";
-};
-
-const localeFullNames: Record<
-  Locale,
-  string
-> = {
-  mk: "Македонски",
-  sq: "Shqip",
-  en: "English",
-};
-
-const localeShortNames: Record<
-  Locale,
-  string
-> = {
-  mk: "МК",
-  sq: "SQ",
-  en: "EN",
 };
 
 export default function LanguageSwitcher({
@@ -73,12 +60,17 @@ export default function LanguageSwitcher({
     >
       {supportedLocales.map(
         (locale) => {
+          const localeDefinition =
+            getLocaleDefinition(
+              locale
+            );
+
           const isActive =
             currentLocale === locale;
 
           const ariaLabel =
             isActive
-              ? `${localeFullNames[locale]} (${t(
+              ? `${localeDefinition.nativeName} (${t(
                   translations.common
                     .selected,
                   currentLocale
@@ -87,7 +79,7 @@ export default function LanguageSwitcher({
                   translations.common
                     .switchToLanguage,
                   currentLocale
-                )} ${localeFullNames[locale]}`;
+                )} ${localeDefinition.nativeName}`;
 
           return (
             <button
@@ -109,9 +101,8 @@ export default function LanguageSwitcher({
               }
             >
               {
-                localeShortNames[
-                  locale
-                ]
+                localeDefinition
+                  .shortName
               }
             </button>
           );

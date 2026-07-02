@@ -1,8 +1,16 @@
-import type { Locale, LocalizedText } from "./types";
+import type {
+  ContentLocale,
+  Locale,
+  LocalizedText,
+} from "./types";
 
 /**
- * Svi tekstovi u aplikaciji moraju biti prevedeni za mk, sq, en.
- * Koristi LocalizedText tip za konzistentnost.
+ * Sistemski UI je trenutno kompletno preveden
+ * na mk, sq i en.
+ *
+ * Sadržaj biznisa može koristiti sve jezike iz
+ * centralnog locale registry-ja. Funkcija t()
+ * zato uvek koristi bezbedan fallback.
  */
 
 export const translations = {
@@ -54,9 +62,9 @@ export const translations = {
 
   // Price Types
   priceTypes: {
-    fixed: { mk: "", sq: "", en: "" }, // No prefix for fixed price
+    fixed: { mk: "", sq: "", en: "" },
     from: { mk: "од", sq: "nga", en: "from" },
-    range: { mk: "-", sq: "-", en: "-" }, // Separator between prices
+    range: { mk: "-", sq: "-", en: "-" },
   },
 
   // Stats
@@ -153,17 +161,83 @@ export const translations = {
 };
 
 /**
- * Helper funkcija za pristup prevodima
+ * Vraća prvi postojeći prevod ovim redosledom:
+ *
+ * 1. traženi jezik
+ * 2. podrazumevani jezik biznisa
+ * 3. engleski
+ * 4. makedonski
+ * 5. albanski
+ * 6. prva postojeća neprazna vrednost
  */
-export function t(text: LocalizedText, locale: Locale): string {
-  return text[locale];
+export function t(
+  text: LocalizedText,
+  locale: ContentLocale,
+  fallbackLocale: ContentLocale = "en"
+): string {
+  const preferredLocales: ContentLocale[] = [
+    locale,
+    fallbackLocale,
+    "en",
+    "mk",
+    "sq",
+  ];
+
+  const visited =
+    new Set<ContentLocale>();
+
+  for (
+    const candidateLocale of
+    preferredLocales
+  ) {
+    if (
+      visited.has(candidateLocale)
+    ) {
+      continue;
+    }
+
+    visited.add(candidateLocale);
+
+    const value =
+      text[candidateLocale];
+
+    if (
+      typeof value === "string" &&
+      value.trim().length > 0
+    ) {
+      return value;
+    }
+  }
+
+  for (
+    const value of
+    Object.values(text)
+  ) {
+    if (
+      typeof value === "string" &&
+      value.trim().length > 0
+    ) {
+      return value;
+    }
+  }
+
+  return "";
 }
 
 /**
- * Helper za dan u nedelji
+ * Helper za dan u nedelji.
+ *
+ * Locale ostaje UiLocale dok ne prevedemo ceo
+ * sistemski booking UI na dodatne jezike.
  */
-export function getDayTranslation(dayOfWeek: number, locale: Locale): string {
-  const dayMap: Record<number, LocalizedText> = {
+export function getDayTranslation(
+  dayOfWeek: number,
+  locale: Locale
+): string {
+  const dayMap: Record<
+    number,
+    LocalizedText
+  > = {
     0: translations.days.sunday,
     1: translations.days.monday,
     2: translations.days.tuesday,
@@ -172,5 +246,11 @@ export function getDayTranslation(dayOfWeek: number, locale: Locale): string {
     5: translations.days.friday,
     6: translations.days.saturday,
   };
-  return t(dayMap[dayOfWeek], locale);
+
+  const dayTranslation =
+    dayMap[dayOfWeek];
+
+  return dayTranslation
+    ? t(dayTranslation, locale)
+    : "";
 }
