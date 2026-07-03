@@ -10,8 +10,8 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   ContentLocale,
-  Locale,
   LocalizedText,
+  UiLocale,
 } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -22,12 +22,6 @@ const DEFAULT_BUSINESS_SLUG =
 
 const SLUG_PATTERN =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-const CURRENT_UI_LOCALES = [
-  "mk",
-  "sq",
-  "en",
-] as const satisfies readonly Locale[];
 
 type ServiceCategoryIcon =
   | "scissors"
@@ -200,7 +194,7 @@ function toContentLocale(
 
 function isUiLocale(
   value: ContentLocale
-): value is Locale {
+): value is UiLocale {
   return (
     value === "mk" ||
     value === "sq" ||
@@ -211,7 +205,7 @@ function isUiLocale(
 function toUiLocales(
   contentLocales:
     readonly ContentLocale[]
-): Locale[] {
+): UiLocale[] {
   const uiLocales =
     contentLocales.filter(
       isUiLocale
@@ -226,8 +220,8 @@ function toDefaultUiLocale(
   defaultContentLocale:
     ContentLocale,
   supportedUiLocales:
-    readonly Locale[]
-): Locale {
+    readonly UiLocale[]
+): UiLocale {
   if (
     isUiLocale(
       defaultContentLocale

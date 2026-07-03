@@ -17,11 +17,16 @@ import {
   useCatalog,
 } from "@/lib/catalogContext";
 import {
+  getLocaleDirection,
+  isLocaleCode,
+} from "@/lib/i18n/locales";
+import {
   t,
   translations,
 } from "@/lib/translations";
 import type {
   Locale,
+  LocalizedText,
   ThemeColors,
 } from "@/lib/types";
 
@@ -46,31 +51,26 @@ type BrandStyle =
     "--brand-border": string;
   };
 
-const STORAGE_KEY =
+const VIEW_STORAGE_KEY =
   "salon-platform-view-preference";
 
-const loadingMessages: Record<
-  Locale,
-  string
-> = {
+const LOCALE_STORAGE_PREFIX =
+  "salon-platform-locale";
+
+const loadingMessages: LocalizedText = {
   mk: "Се вчитува салонот...",
   sq: "Duke ngarkuar sallonin...",
   en: "Loading salon...",
 };
 
-const catalogErrorMessages: Record<
-  Locale,
-  string
-> = {
-  mk: "Податоците за салонот не можеа да се вчитаат.",
-  sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
-  en: "The salon data could not be loaded.",
-};
+const catalogErrorMessages:
+  LocalizedText = {
+    mk: "Податоците за салонот не можеа да се вчитаат.",
+    sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
+    en: "The salon data could not be loaded.",
+  };
 
-const retryMessages: Record<
-  Locale,
-  string
-> = {
+const retryMessages: LocalizedText = {
   mk: "Обиди се повторно",
   sq: "Provo përsëri",
   en: "Try again",
@@ -103,6 +103,12 @@ function createBrandStyle(
   };
 }
 
+function getLocaleStorageKey(
+  businessSlug: string
+): string {
+  return `${LOCALE_STORAGE_PREFIX}:${businessSlug}`;
+}
+
 function CatalogLoadingScreen({
   locale,
 }: {
@@ -121,7 +127,10 @@ function CatalogLoadingScreen({
         />
 
         <p className="text-sm text-[var(--brand-muted)]">
-          {loadingMessages[locale]}
+          {t(
+            loadingMessages,
+            locale
+          )}
         </p>
       </div>
     </main>
@@ -141,7 +150,10 @@ function CatalogErrorScreen({
     <main className="flex min-h-[100dvh] items-center justify-center bg-[var(--brand-background)] px-6 text-[var(--brand-text)]">
       <div className="w-full max-w-md rounded-3xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-8 text-center shadow-xl">
         <h1 className="font-display mb-3 text-2xl font-semibold">
-          {catalogErrorMessages[locale]}
+          {t(
+            catalogErrorMessages,
+            locale
+          )}
         </h1>
 
         {error && (
@@ -160,7 +172,10 @@ function CatalogErrorScreen({
             aria-hidden="true"
           />
 
-          {retryMessages[locale]}
+          {t(
+            retryMessages,
+            locale
+          )}
         </button>
       </div>
     </main>
@@ -220,16 +235,72 @@ function SalonPlatformContent() {
     localeInitializedRef.current =
       true;
 
-    setLocale(
-      catalog.business.defaultLocale
-    );
+    const {
+      business,
+    } = catalog;
+
+    let initialLocale: Locale =
+      business.defaultContentLocale;
+
+    try {
+      const storedLocale =
+        localStorage.getItem(
+          getLocaleStorageKey(
+            business.slug
+          )
+        );
+
+      if (
+        isLocaleCode(
+          storedLocale
+        ) &&
+        business.supportedContentLocales.includes(
+          storedLocale
+        )
+      ) {
+        initialLocale =
+          storedLocale;
+      }
+    } catch {
+      // localStorage nije dostupan.
+    }
+
+    setLocale(initialLocale);
   }, [catalog]);
+
+  useEffect(() => {
+    if (
+      !catalog ||
+      !isLocaleCode(locale)
+    ) {
+      return;
+    }
+
+    if (
+      !catalog.business.supportedContentLocales.includes(
+        locale
+      )
+    ) {
+      return;
+    }
+
+    document.documentElement.lang =
+      locale;
+
+    document.documentElement.dir =
+      getLocaleDirection(
+        locale
+      );
+  }, [
+    catalog,
+    locale,
+  ]);
 
   useEffect(() => {
     try {
       const stored =
         localStorage.getItem(
-          STORAGE_KEY
+          VIEW_STORAGE_KEY
         );
 
       if (
@@ -277,6 +348,33 @@ function SalonPlatformContent() {
         : "desktop"
       : viewPreference;
 
+  const handleLocaleChange = (
+    nextLocale: Locale
+  ) => {
+    if (
+      !catalog ||
+      !isLocaleCode(nextLocale) ||
+      !catalog.business.supportedContentLocales.includes(
+        nextLocale
+      )
+    ) {
+      return;
+    }
+
+    setLocale(nextLocale);
+
+    try {
+      localStorage.setItem(
+        getLocaleStorageKey(
+          catalog.business.slug
+        ),
+        nextLocale
+      );
+    } catch {
+      // localStorage nije dostupan.
+    }
+  };
+
   const openBooking = () => {
     setInitialServiceId(null);
     setInitialEmployeeId(null);
@@ -308,7 +406,7 @@ function SalonPlatformContent() {
 
     try {
       localStorage.setItem(
-        STORAGE_KEY,
+        VIEW_STORAGE_KEY,
         "desktop"
       );
     } catch {
@@ -321,7 +419,7 @@ function SalonPlatformContent() {
 
     try {
       localStorage.setItem(
-        STORAGE_KEY,
+        VIEW_STORAGE_KEY,
         "mobile"
       );
     } catch {
@@ -355,17 +453,26 @@ function SalonPlatformContent() {
       catalog.business.theme
     );
 
+  const direction =
+    isLocaleCode(locale)
+      ? getLocaleDirection(locale)
+      : "ltr";
+
   return (
     <div
       className="min-h-[100dvh] bg-[var(--brand-background)] text-[var(--brand-text)]"
       style={brandStyle}
+      lang={locale}
+      dir={direction}
     >
       {viewPreference === "auto" && (
         <>
           <div className="md:hidden">
             <MobileAppShell
               locale={locale}
-              onLocaleChange={setLocale}
+              onLocaleChange={
+                handleLocaleChange
+              }
               onBook={openBooking}
               onBookService={
                 openBookingWithService
@@ -382,7 +489,9 @@ function SalonPlatformContent() {
           <div className="hidden md:block">
             <DesktopLanding
               locale={locale}
-              onLocaleChange={setLocale}
+              onLocaleChange={
+                handleLocaleChange
+              }
               onBook={openBooking}
               onBookService={
                 openBookingWithService
@@ -398,7 +507,9 @@ function SalonPlatformContent() {
       {viewPreference === "mobile" && (
         <MobileAppShell
           locale={locale}
-          onLocaleChange={setLocale}
+          onLocaleChange={
+            handleLocaleChange
+          }
           onBook={openBooking}
           onBookService={
             openBookingWithService
@@ -416,7 +527,9 @@ function SalonPlatformContent() {
         <>
           <DesktopLanding
             locale={locale}
-            onLocaleChange={setLocale}
+            onLocaleChange={
+              handleLocaleChange
+            }
             onBook={openBooking}
             onBookService={
               openBookingWithService

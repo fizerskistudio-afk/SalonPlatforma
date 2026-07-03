@@ -3,6 +3,7 @@
 import { useCatalogData } from "@/lib/catalogContext";
 import {
   getLocaleDefinition,
+  isLocaleCode,
 } from "@/lib/i18n/locales";
 import {
   t,
@@ -32,7 +33,95 @@ export default function LanguageSwitcher({
   } = useCatalogData();
 
   const supportedLocales =
-    business.supportedLocales;
+    business.supportedContentLocales;
+
+  if (
+    supportedLocales.length <= 1
+  ) {
+    return null;
+  }
+
+  const label = t(
+    translations.common
+      .languageSelector,
+    currentLocale
+  );
+
+  const useCompactSelect =
+    supportedLocales.length > 3;
+
+  const selectedLocale =
+    isLocaleCode(currentLocale) &&
+    supportedLocales.includes(
+      currentLocale
+    )
+      ? currentLocale
+      : supportedLocales[0];
+
+  const handleSelectChange = (
+    value: string
+  ) => {
+    if (
+      isLocaleCode(value) &&
+      supportedLocales.includes(value)
+    ) {
+      onLocaleChange(value);
+    }
+  };
+
+  if (useCompactSelect) {
+    return (
+      <label
+        className={
+          variant === "header"
+            ? "relative inline-flex items-center"
+            : "inline-flex items-center"
+        }
+      >
+        <span className="sr-only">
+          {label}
+        </span>
+
+        <select
+          value={selectedLocale}
+          onChange={(event) =>
+            handleSelectChange(
+              event.target.value
+            )
+          }
+          className="min-h-9 cursor-pointer appearance-none rounded-full border border-[var(--brand-border)] bg-[var(--brand-surface)] py-1.5 pl-3 pr-8 text-xs font-semibold text-[var(--brand-text)] outline-none transition-colors hover:border-[var(--brand-primary)] focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/25"
+          aria-label={label}
+        >
+          {supportedLocales.map(
+            (locale) => {
+              const definition =
+                getLocaleDefinition(
+                  locale
+                );
+
+              return (
+                <option
+                  key={locale}
+                  value={locale}
+                >
+                  {
+                    definition.nativeName
+                  }
+                </option>
+              );
+            }
+          )}
+        </select>
+
+        <span
+          className="pointer-events-none absolute right-3 text-[10px] text-[var(--brand-muted)]"
+          aria-hidden="true"
+        >
+          ▼
+        </span>
+      </label>
+    );
+  }
 
   const baseStyles =
     variant === "header"
@@ -52,11 +141,7 @@ export default function LanguageSwitcher({
     <div
       className={baseStyles}
       role="group"
-      aria-label={t(
-        translations.common
-          .languageSelector,
-        currentLocale
-      )}
+      aria-label={label}
     >
       {supportedLocales.map(
         (locale) => {

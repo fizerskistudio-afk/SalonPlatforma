@@ -1,5 +1,7 @@
+import {
+  isLocaleCode,
+} from "@/lib/i18n/locales";
 import type {
-  ContentLocale,
   Locale,
   LocalizedText,
 } from "./types";
@@ -161,6 +163,25 @@ export const translations = {
 };
 
 /**
+ * Bezbedno čita prevod samo kada locale postoji
+ * u centralnom registry-ju.
+ */
+function getLocalizedValue(
+  text: LocalizedText,
+  locale: Locale
+): string | undefined {
+  if (!isLocaleCode(locale)) {
+    return undefined;
+  }
+
+  const value = text[locale];
+
+  return typeof value === "string"
+    ? value
+    : undefined;
+}
+
+/**
  * Vraća prvi postojeći prevod ovim redosledom:
  *
  * 1. traženi jezik
@@ -169,13 +190,18 @@ export const translations = {
  * 4. makedonski
  * 5. albanski
  * 6. prva postojeća neprazna vrednost
+ *
+ * Sistemski UI trenutno ima pune prevode za
+ * mk/sq/en. Za ostale jezike koristi engleski
+ * fallback, dok poslovni sadržaj može odmah da
+ * koristi svaki aktivni jezik.
  */
 export function t(
   text: LocalizedText,
-  locale: ContentLocale,
-  fallbackLocale: ContentLocale = "en"
+  locale: Locale,
+  fallbackLocale: Locale = "en"
 ): string {
-  const preferredLocales: ContentLocale[] = [
+  const preferredLocales: Locale[] = [
     locale,
     fallbackLocale,
     "en",
@@ -184,7 +210,7 @@ export function t(
   ];
 
   const visited =
-    new Set<ContentLocale>();
+    new Set<string>();
 
   for (
     const candidateLocale of
@@ -199,10 +225,13 @@ export function t(
     visited.add(candidateLocale);
 
     const value =
-      text[candidateLocale];
+      getLocalizedValue(
+        text,
+        candidateLocale
+      );
 
     if (
-      typeof value === "string" &&
+      value &&
       value.trim().length > 0
     ) {
       return value;
@@ -227,8 +256,9 @@ export function t(
 /**
  * Helper za dan u nedelji.
  *
- * Locale ostaje UiLocale dok ne prevedemo ceo
- * sistemski booking UI na dodatne jezike.
+ * Dok ne dodamo kompletne sistemske prevode za
+ * svaki jezik, nazivi dana koriste isti fallback
+ * sistem kao ostatak UI-ja.
  */
 export function getDayTranslation(
   dayOfWeek: number,

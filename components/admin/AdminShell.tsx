@@ -10,6 +10,7 @@ import {
   CalendarDays,
   ChevronRight,
   ExternalLink,
+  Images,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -81,6 +82,13 @@ const navigationItems: NavigationItem[] = [
     description: "Zaposleni i njihove usluge",
     href: "/admin/team",
     icon: UserRoundCog,
+    enabled: true,
+  },
+  {
+    label: "Galerija",
+    description: "Fotografije javnog sajta",
+    href: "/admin/gallery",
+    icon: Images,
     enabled: true,
   },
   {

@@ -1,0 +1,85 @@
+components/SalonPlatform.tsx:109:  locale: Locale;
+components/SalonPlatform.tsx:136:  locale: Locale;
+components/SalonPlatform.tsx:180:    setLocale,
+components/SalonPlatform.tsx:181:  ] = useState<Locale>("mk");
+components/SalonPlatform.tsx:223:    setLocale(
+components/SalonPlatform.tsx:368:              onLocaleChange={setLocale}
+components/SalonPlatform.tsx:385:              onLocaleChange={setLocale}
+components/SalonPlatform.tsx:401:          onLocaleChange={setLocale}
+components/SalonPlatform.tsx:419:            onLocaleChange={setLocale}
+components/admin/settings/SettingsManagementActions.tsx:671:  ] = useState<LocaleFieldValues>(
+components/admin/settings/SettingsManagementActions.tsx:889:          (currentLocale) =>
+components/admin/settings/SettingsManagementActions.tsx:890:            currentLocale !== locale
+components/booking/BookingFlow.tsx:39:  locale: Locale;
+components/booking/BookingFlow.tsx:238:  locale: Locale
+components/booking/BookingProgress.tsx:16:  locale: Locale;
+components/booking/BookingSummary.tsx:24:  locale: Locale;
+components/booking/BookingSummary.tsx:68:  locale: Locale,
+components/booking/BookingSummary.tsx:137:  locale: Locale
+components/booking/CustomerStep.tsx:36:  locale: Locale;
+components/booking/DateStep.tsx:19:  locale: Locale;
+components/booking/EmployeeStep.tsx:17:  locale: Locale;
+components/booking/ServiceStep.tsx:22:  locale: Locale;
+components/booking/SuccessStep.tsx:26:  locale: Locale;
+components/booking/SuccessStep.tsx:116:  locale: Locale
+components/booking/SuccessStep.tsx:177:  locale: Locale,
+components/booking/SuccessStep.tsx:225:  locale: Locale
+components/booking/TimeStep.tsx:23:  locale: Locale;
+components/desktop/ContactSection.tsx:22:  locale: Locale;
+components/desktop/DesktopBookingModal.tsx:19:  locale: Locale;
+components/desktop/DesktopLanding.tsx:14:  locale: Locale;
+components/desktop/DesktopLanding.tsx:15:  onLocaleChange: (locale: Locale) => void;
+components/desktop/DesktopLanding.tsx:23:  onLocaleChange,
+components/desktop/DesktopLanding.tsx:32:        onLocaleChange={onLocaleChange}
+components/desktop/Footer.tsx:13:  locale: Locale;
+components/desktop/GallerySection.tsx:15:  locale: Locale;
+components/desktop/Header.tsx:15:  locale: Locale;
+components/desktop/Header.tsx:17:  onLocaleChange: (
+components/desktop/Header.tsx:18:    locale: Locale
+components/desktop/Header.tsx:52:  onLocaleChange,
+components/desktop/Header.tsx:132:            currentLocale={locale}
+components/desktop/Header.tsx:133:            onLocaleChange={
+components/desktop/Header.tsx:134:              onLocaleChange
+components/desktop/Hero.tsx:17:  locale: Locale;
+components/desktop/ReviewsSection.tsx:16:  locale: Locale;
+components/desktop/ReviewsSection.tsx:69:  locale: Locale
+components/desktop/ReviewsSection.tsx:90:  locale: Locale
+components/desktop/ServicesSection.tsx:32:  locale: Locale;
+components/desktop/TeamSection.tsx:14:  locale: Locale;
+components/mobile/BottomNav.tsx:23:  locale: Locale;
+components/mobile/MobileAppShell.tsx:13:  locale: Locale;
+components/mobile/MobileAppShell.tsx:14:  onLocaleChange: (locale: Locale) => void;
+components/mobile/MobileAppShell.tsx:27:  onLocaleChange,
+components/mobile/MobileAppShell.tsx:79:        onLocaleChange={onLocaleChange}
+components/mobile/MobileBookingModal.tsx:11:  locale: Locale;
+components/mobile/MobileContact.tsx:22:  locale: Locale;
+components/mobile/MobileHeader.tsx:19:  locale: Locale;
+components/mobile/MobileHeader.tsx:21:  onLocaleChange: (
+components/mobile/MobileHeader.tsx:22:    locale: Locale
+components/mobile/MobileHeader.tsx:31:  onLocaleChange,
+components/mobile/MobileHeader.tsx:78:            currentLocale={locale}
+components/mobile/MobileHeader.tsx:79:            onLocaleChange={
+components/mobile/MobileHeader.tsx:80:              onLocaleChange
+components/mobile/MobileHome.tsx:14:  locale: Locale;
+components/mobile/MobileServices.tsx:27:  locale: Locale;
+components/mobile/MobileTeam.tsx:14:  locale: Locale;
+components/shared/EmployeeCard.tsx:18:  locale: Locale;
+components/shared/EmptyState.tsx:17:  locale: Locale;
+components/shared/LanguageSwitcher.tsx:16:  currentLocale: Locale;
+components/shared/LanguageSwitcher.tsx:18:  onLocaleChange: (
+components/shared/LanguageSwitcher.tsx:19:    locale: Locale
+components/shared/LanguageSwitcher.tsx:26:  currentLocale,
+components/shared/LanguageSwitcher.tsx:27:  onLocaleChange,
+components/shared/LanguageSwitcher.tsx:58:        currentLocale
+components/shared/LanguageSwitcher.tsx:69:            currentLocale === locale;
+components/shared/LanguageSwitcher.tsx:76:                  currentLocale
+components/shared/LanguageSwitcher.tsx:81:                  currentLocale
+components/shared/LanguageSwitcher.tsx:89:                onLocaleChange(
+components/shared/SectionHeader.tsx:11:  locale: Locale;
+components/shared/ServiceCard.tsx:21:  locale: Locale;
+components/shared/ServiceCard.tsx:64:  locale: Locale
+components/shared/ServiceCard.tsx:94:  locale: Locale
+lib/i18n/locales.ts:343:  locale: LocaleCode
+lib/i18n/locales.ts:349:  locale: LocaleCode
+lib/i18n/locales.ts:356:  locale: LocaleCode
+lib/translations.ts:235:  locale: Locale

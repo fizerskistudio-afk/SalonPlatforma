@@ -18,10 +18,14 @@ export type UiLocale =
   | "en";
 
 /**
- * Postojeći naziv ostaje kao alias da ne lomimo
- * sve javne i booking komponente odjednom.
+ * Javni runtime prosleđuje locale kroz mnogo
+ * postojećih komponenti. Vrednosti se validiraju
+ * na ulazu preko centralnog locale registry-ja.
+ *
+ * Ovaj kompatibilni alias omogućava postepenu
+ * migraciju bez menjanja svih komponenti odjednom.
  */
-export type Locale = UiLocale;
+export type Locale = string;
 
 /**
  * Jezici sadržaja koje biznis može da koristi.
@@ -94,8 +98,8 @@ export type BusinessConfig = {
   countryCode: string;
   instagramHandle: string;
   instagramUrl: string;
-  defaultLocale: Locale;
-  supportedLocales: Locale[];
+  defaultLocale: UiLocale;
+  supportedLocales: UiLocale[];
   currency: string;
   timezone: string;
   workingHours: WorkingHours[];
@@ -153,8 +157,8 @@ export type CatalogBusiness = {
    * Privremeni UI-jezički sloj.
    * Trenutno su kompletno prevedeni mk/sq/en.
    */
-  defaultLocale: Locale;
-  supportedLocales: Locale[];
+  defaultLocale: UiLocale;
+  supportedLocales: UiLocale[];
 
   /**
    * Pravi globalni jezički izbor biznisa.
