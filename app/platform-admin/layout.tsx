@@ -10,11 +10,12 @@ import Link from "next/link";
 
 import {
   ExternalLink,
-  LayoutDashboard,
   Scissors,
   Settings2,
   ShieldCheck,
 } from "lucide-react";
+
+import PlatformAdminNavigation from "@/components/platform-admin/PlatformAdminNavigation";
 
 import {
   requirePlatformAdmin,
@@ -31,17 +32,6 @@ export const metadata:
 type PlatformAdminLayoutProps = {
   children: ReactNode;
 };
-
-const navigationItems = [
-  {
-    href:
-      "/platform-admin",
-    label:
-      "Pregled platforme",
-    icon:
-      LayoutDashboard,
-  },
-] as const;
 
 export default async function PlatformAdminLayout({
   children,
@@ -127,84 +117,44 @@ export default async function PlatformAdminLayout({
             </div>
           </div>
 
-          <nav
+          <PlatformAdminNavigation />
+
+          <Link
+            href="/admin"
             className="
-              mt-8
-              space-y-2
+              mt-2
+              flex
+              items-center
+              justify-between
+              rounded-xl
+              px-4
+              py-3
+              text-sm
+              font-medium
+              text-zinc-400
+              transition
+              hover:bg-white/5
+              hover:text-white
             "
           >
-            {navigationItems.map(
-              (item) => {
-                const Icon =
-                  item.icon;
-
-                return (
-                  <Link
-                    key={
-                      item.href
-                    }
-                    href={
-                      item.href
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      rounded-xl
-                      bg-white
-                      px-4
-                      py-3
-                      text-sm
-                      font-semibold
-                      text-zinc-950
-                    "
-                  >
-                    <Icon
-                      size={18}
-                    />
-
-                    {item.label}
-                  </Link>
-                );
-              }
-            )}
-
-            <Link
-              href="/admin"
+            <span
               className="
                 flex
                 items-center
-                justify-between
-                rounded-xl
-                px-4
-                py-3
-                text-sm
-                font-medium
-                text-zinc-400
-                transition
-                hover:bg-white/5
-                hover:text-white
+                gap-3
               "
             >
-              <span
-                className="
-                  flex
-                  items-center
-                  gap-3
-                "
-              >
-                <Scissors
-                  size={18}
-                />
-
-                Salon admin
-              </span>
-
-              <ExternalLink
-                size={15}
+              <Scissors
+                size={18}
               />
-            </Link>
-          </nav>
+
+              Salon admin
+            </span>
+
+            <ExternalLink
+              size={15}
+            />
+          </Link>
 
           <div
             className="
@@ -244,9 +194,7 @@ export default async function PlatformAdminLayout({
                 text-zinc-300
               "
             >
-              {
-                platformAdmin.email
-              }
+              {platformAdmin.email}
             </p>
           </div>
         </div>
