@@ -9,6 +9,10 @@ import {
   type LocaleCode,
 } from "@/lib/i18n/locales";
 import { createClient } from "@/lib/supabase/server";
+import {
+  isTemplateKey,
+  type TemplateKey,
+} from "@/lib/templates/registry";
 import type {
   LocalizedText,
 } from "@/lib/types";
@@ -55,6 +59,8 @@ export type SaveBusinessSettingsInput = {
   logoUrl?: string;
 
   theme: SettingsThemeInput;
+
+  templateKey: TemplateKey;
 
   defaultLocale: LocaleCode;
   supportedLocales: LocaleCode[];
@@ -522,6 +528,18 @@ export async function saveBusinessSettingsAction(
   const theme =
     normalizeTheme(input.theme);
 
+  if (
+    !isTemplateKey(
+      input.templateKey
+    )
+  ) {
+    return {
+      ok: false,
+      message:
+        "Izabrani website template nije dostupan.",
+    };
+  }
+
   const supportedLocales =
     normalizeSupportedLocales(
       input.supportedLocales
@@ -660,6 +678,9 @@ export async function saveBusinessSettingsAction(
 
       brand_border:
         theme.border,
+
+      template_key:
+        input.templateKey,
 
       default_locale:
         input.defaultLocale,

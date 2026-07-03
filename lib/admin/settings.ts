@@ -7,6 +7,12 @@ import {
   type LocaleCode,
 } from "@/lib/i18n/locales";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  normalizeTemplateConfig,
+  resolveTemplateKey,
+  type TemplateConfig,
+  type TemplateKey,
+} from "@/lib/templates/registry";
 import type {
   LocalizedText,
   ThemeColors,
@@ -43,6 +49,9 @@ export type AdminBusinessSettings = {
   logoUrl: string | null;
 
   theme: ThemeColors;
+
+  templateKey: TemplateKey;
+  templateConfig: TemplateConfig;
 
   /**
    * Privremeni UI fallback koji koriste stariji
@@ -142,6 +151,9 @@ type BusinessDatabaseRow = {
   brand_text: string;
   brand_muted: string;
   brand_border: string;
+
+  template_key: string | null;
+  template_config: unknown;
 
   default_locale: string;
   supported_locales: unknown;
@@ -369,6 +381,8 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
           brand_text,
           brand_muted,
           brand_border,
+          template_key,
+          template_config,
           default_locale,
           supported_locales,
           currency,
@@ -560,6 +574,16 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
       border:
         businessRow.brand_border,
     },
+
+    templateKey:
+      resolveTemplateKey(
+        businessRow.template_key
+      ),
+
+    templateConfig:
+      normalizeTemplateConfig(
+        businessRow.template_config
+      ),
 
     defaultLocale:
       normalizeDefaultLocale(

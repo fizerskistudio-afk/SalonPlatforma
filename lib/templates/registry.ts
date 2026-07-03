@@ -1,5 +1,6 @@
 export const TEMPLATE_KEYS = [
   "hair-luxury",
+  "hair-editorial",
 ] as const;
 
 export type TemplateKey =
@@ -52,7 +53,7 @@ export const TEMPLATE_REGISTRY:
     key: "hair-luxury",
     name: "Hair Luxury",
     description:
-      "Premium hair and beauty presentation with separate desktop landing and mobile app experience.",
+      "Luksuzni hair i beauty dizajn sa odvojenim desktop landing prikazom i mobilnim app iskustvom.",
     niche:
       "Hair salon / beauty studio",
     version: 1,
@@ -74,6 +75,33 @@ export const TEMPLATE_REGISTRY:
     supportsBooking: true,
     supportsGallery: true,
     supportsReviews: true,
+  },
+
+  "hair-editorial": {
+    key: "hair-editorial",
+    name: "Hair Editorial",
+    description:
+      "Čist editorial dizajn sa velikom fotografijom, tipografskim sekcijama i modernim mobilnim app prikazom.",
+    niche:
+      "Premium hair / creative studio",
+    version: 1,
+
+    viewports: [
+      "desktop",
+      "mobile",
+    ],
+
+    sections: [
+      "hero",
+      "services",
+      "team",
+      "gallery",
+      "contact",
+    ],
+
+    supportsBooking: true,
+    supportsGallery: true,
+    supportsReviews: false,
   },
 };
 

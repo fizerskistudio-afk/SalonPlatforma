@@ -9,6 +9,8 @@ import {
   type TemplateViewport,
 } from "@/lib/templates/registry";
 
+import HairEditorialDesktopTemplate from "./hair-editorial/HairEditorialDesktopTemplate";
+import HairEditorialMobileTemplate from "./hair-editorial/HairEditorialMobileTemplate";
 import HairLuxuryDesktopTemplate from "./hair-luxury/HairLuxuryDesktopTemplate";
 import HairLuxuryMobileTemplate from "./hair-luxury/HairLuxuryMobileTemplate";
 import type {
@@ -57,6 +59,21 @@ export default function TemplateRenderer({
     React.ReactNode;
 
   switch (resolvedKey) {
+    case "hair-editorial":
+      content =
+        viewport ===
+        "mobile" ? (
+          <HairEditorialMobileTemplate
+            {...templateProps}
+          />
+        ) : (
+          <HairEditorialDesktopTemplate
+            {...templateProps}
+          />
+        );
+
+      break;
+
     case "hair-luxury":
     default:
       content =

@@ -53,6 +53,11 @@ import {
   LOCALE_REGISTRY,
 } from "@/lib/i18n/locales";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import {
+  TEMPLATE_KEYS,
+  TEMPLATE_REGISTRY,
+  type TemplateKey,
+} from "@/lib/templates/registry";
 import type {
   LocalizedText,
   ThemeColors,
@@ -581,6 +586,13 @@ export default function SettingsManagementActions({
   ] = useState(data.business.slug);
 
   const [
+    templateKey,
+    setTemplateKey,
+  ] = useState<TemplateKey>(
+    data.business.templateKey
+  );
+
+  const [
     defaultLocale,
     setDefaultLocale,
   ] =
@@ -743,6 +755,10 @@ export default function SettingsManagementActions({
 
     setBusinessSlug(
       data.business.slug
+    );
+
+    setTemplateKey(
+      data.business.templateKey
     );
 
     setDefaultLocale(
@@ -1311,6 +1327,8 @@ export default function SettingsManagementActions({
 
                 theme: themeColors,
 
+                templateKey,
+
                 defaultLocale,
                 supportedLocales,
                 currency,
@@ -1515,6 +1533,190 @@ export default function SettingsManagementActions({
                 />
               </div>
             </label>
+          </section>
+
+
+          <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+            <div className="flex flex-col justify-between gap-4 border-b border-white/[0.07] p-5 lg:flex-row lg:items-center">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                  <Sparkles
+                    className="h-4 w-4"
+                    aria-hidden="true"
+                  />
+
+                  Website template
+                </div>
+
+                <h3 className="mt-2 text-lg font-semibold text-white">
+                  Izgled javnog sajta
+                </h3>
+
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600">
+                  Izaberi dizajn salona. Usluge,
+                  zaposleni, galerija, booking i
+                  admin podaci ostaju isti kada
+                  promeniš template.
+                </p>
+              </div>
+
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-3 py-1.5 text-xs font-medium text-emerald-300">
+                <CheckCircle2
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
+
+                {
+                  TEMPLATE_REGISTRY[
+                    templateKey
+                  ].name
+                }
+              </div>
+            </div>
+
+            <div className="grid gap-4 p-5 lg:grid-cols-2">
+              {TEMPLATE_KEYS.map(
+                (key) => {
+                  const template =
+                    TEMPLATE_REGISTRY[key];
+
+                  const selected =
+                    templateKey === key;
+
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      disabled={
+                        businessPending
+                      }
+                      onClick={() =>
+                        setTemplateKey(
+                          key
+                        )
+                      }
+                      aria-pressed={
+                        selected
+                      }
+                      className={`group overflow-hidden rounded-3xl border text-left transition focus:outline-none focus:ring-2 focus:ring-amber-300/40 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none ${
+                        selected
+                          ? "border-amber-300/45 bg-amber-300/[0.06] shadow-[0_20px_70px_rgba(217,180,113,0.08)]"
+                          : "border-white/[0.08] bg-black/10 hover:border-white/[0.16] hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <div className="relative aspect-[16/9] overflow-hidden border-b border-white/[0.07] bg-[#09090A]">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(214,185,140,0.20),transparent_34%)]" />
+
+                        <div className="absolute inset-x-4 top-4 flex h-8 items-center justify-between rounded-full border border-white/10 bg-[#141416]/95 px-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="h-2 w-2 rounded-full bg-[#D6B98C]" />
+                            <span className="h-1.5 w-12 rounded-full bg-white/20" />
+                          </div>
+
+                          <div className="flex gap-1">
+                            <span className="h-1.5 w-5 rounded-full bg-white/10" />
+                            <span className="h-1.5 w-5 rounded-full bg-white/10" />
+                            <span className="h-1.5 w-5 rounded-full bg-white/10" />
+                          </div>
+                        </div>
+
+                        <div className="absolute bottom-5 left-5 right-[42%]">
+                          <span className="block h-2 w-16 rounded-full bg-[#D6B98C]/70" />
+                          <span className="mt-3 block h-4 w-full rounded-full bg-white/85" />
+                          <span className="mt-2 block h-4 w-4/5 rounded-full bg-white/85" />
+                          <span className="mt-3 block h-2 w-3/4 rounded-full bg-white/20" />
+                          <span className="mt-5 block h-8 w-24 rounded-full bg-[#D6B98C]" />
+                        </div>
+
+                        <div className="absolute bottom-4 right-5 top-16 w-[33%] rounded-t-[2.2rem] border border-white/10 bg-gradient-to-b from-[#2B2724] to-[#141416] shadow-2xl">
+                          <div className="mx-auto mt-3 h-1 w-8 rounded-full bg-white/15" />
+                          <div className="mx-3 mt-4 h-12 rounded-xl border border-[#D6B98C]/20 bg-[#D6B98C]/10" />
+                          <div className="mx-3 mt-2 grid grid-cols-2 gap-1.5">
+                            <span className="h-7 rounded-lg bg-white/[0.06]" />
+                            <span className="h-7 rounded-lg bg-white/[0.06]" />
+                          </div>
+                        </div>
+
+                        {selected && (
+                          <span className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400 text-zinc-950 shadow-lg">
+                            <CheckCircle2
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-5">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <h4 className="text-base font-semibold text-white">
+                              {
+                                template.name
+                              }
+                            </h4>
+
+                            <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-amber-200/60">
+                              {
+                                template.niche
+                              }
+                            </p>
+                          </div>
+
+                          <span
+                            className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${
+                              selected
+                                ? "bg-emerald-400/10 text-emerald-300"
+                                : "bg-white/[0.05] text-zinc-600"
+                            }`}
+                          >
+                            {selected
+                              ? "Izabran"
+                              : "Izaberi"}
+                          </span>
+                        </div>
+
+                        <p className="mt-4 text-sm leading-relaxed text-zinc-600">
+                          {
+                            template.description
+                          }
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <span className="rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] text-zinc-500">
+                            Desktop + mobile
+                          </span>
+
+                          {template.supportsBooking && (
+                            <span className="rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] text-zinc-500">
+                              Booking
+                            </span>
+                          )}
+
+                          {template.supportsGallery && (
+                            <span className="rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] text-zinc-500">
+                              Galerija
+                            </span>
+                          )}
+
+                          {template.supportsReviews && (
+                            <span className="rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] text-zinc-500">
+                              Recenzije
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+
+            <div className="border-t border-white/[0.07] bg-black/10 px-5 py-4 text-xs leading-relaxed text-zinc-600">
+              Promena postaje aktivna kada na
+              dnu sekcije sačuvaš podatke
+              salona.
+            </div>
           </section>
 
           <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]">
