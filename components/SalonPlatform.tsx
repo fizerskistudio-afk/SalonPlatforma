@@ -16,10 +16,17 @@ import {
   CatalogProvider,
   useCatalog,
 } from "@/lib/catalogContext";
+import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
 import {
   getLocaleDirection,
   isLocaleCode,
 } from "@/lib/i18n/locales";
+import {
+  EMPTY_TEMPLATE_CONFIG,
+  DEFAULT_TEMPLATE_KEY,
+  type TemplateConfig,
+  type TemplateKey,
+} from "@/lib/templates/registry";
 import {
   t,
   translations,
@@ -31,14 +38,24 @@ import type {
 } from "@/lib/types";
 
 import DesktopBookingModal from "./desktop/DesktopBookingModal";
-import DesktopLanding from "./desktop/DesktopLanding";
-import MobileAppShell from "./mobile/MobileAppShell";
 import MobileBookingModal from "./mobile/MobileBookingModal";
+import TemplateRenderer from "./templates/TemplateRenderer";
 
 type ViewPreference =
   | "auto"
   | "desktop"
   | "mobile";
+
+type SalonPlatformProps = {
+  businessSlug?: string;
+  templateKey?: TemplateKey;
+  templateConfig?: TemplateConfig;
+};
+
+type SalonPlatformContentProps = {
+  templateKey: TemplateKey;
+  templateConfig: TemplateConfig;
+};
 
 type BrandStyle =
   CSSProperties & {
@@ -182,7 +199,10 @@ function CatalogErrorScreen({
   );
 }
 
-function SalonPlatformContent() {
+function SalonPlatformContent({
+  templateKey,
+  templateConfig,
+}: SalonPlatformContentProps) {
   const {
     catalog,
     status,
@@ -458,85 +478,84 @@ function SalonPlatformContent() {
       ? getLocaleDirection(locale)
       : "ltr";
 
+  const templateProps = {
+    locale,
+    onLocaleChange:
+      handleLocaleChange,
+    onBook:
+      openBooking,
+    onBookService:
+      openBookingWithService,
+    onBookEmployee:
+      openBookingWithEmployee,
+    onSwitchToDesktop:
+      switchToDesktop,
+  };
+
   return (
     <div
       className="min-h-[100dvh] bg-[var(--brand-background)] text-[var(--brand-text)]"
       style={brandStyle}
       lang={locale}
       dir={direction}
+      data-active-template={
+        templateKey
+      }
     >
       {viewPreference === "auto" && (
         <>
           <div className="md:hidden">
-            <MobileAppShell
-              locale={locale}
-              onLocaleChange={
-                handleLocaleChange
+            <TemplateRenderer
+              templateKey={
+                templateKey
               }
-              onBook={openBooking}
-              onBookService={
-                openBookingWithService
+              templateConfig={
+                templateConfig
               }
-              onBookEmployee={
-                openBookingWithEmployee
-              }
-              onSwitchToDesktop={
-                switchToDesktop
-              }
+              viewport="mobile"
+              {...templateProps}
             />
           </div>
 
           <div className="hidden md:block">
-            <DesktopLanding
-              locale={locale}
-              onLocaleChange={
-                handleLocaleChange
+            <TemplateRenderer
+              templateKey={
+                templateKey
               }
-              onBook={openBooking}
-              onBookService={
-                openBookingWithService
+              templateConfig={
+                templateConfig
               }
-              onBookEmployee={
-                openBookingWithEmployee
-              }
+              viewport="desktop"
+              {...templateProps}
             />
           </div>
         </>
       )}
 
       {viewPreference === "mobile" && (
-        <MobileAppShell
-          locale={locale}
-          onLocaleChange={
-            handleLocaleChange
+        <TemplateRenderer
+          templateKey={
+            templateKey
           }
-          onBook={openBooking}
-          onBookService={
-            openBookingWithService
+          templateConfig={
+            templateConfig
           }
-          onBookEmployee={
-            openBookingWithEmployee
-          }
-          onSwitchToDesktop={
-            switchToDesktop
-          }
+          viewport="mobile"
+          {...templateProps}
         />
       )}
 
       {viewPreference === "desktop" && (
         <>
-          <DesktopLanding
-            locale={locale}
-            onLocaleChange={
-              handleLocaleChange
+          <TemplateRenderer
+            templateKey={
+              templateKey
             }
-            onBook={openBooking}
-            onBookService={
-              openBookingWithService
+            templateConfig={
+              templateConfig
             }
-            onBookEmployee={
-              openBookingWithEmployee
-            }
+            viewport="desktop"
+            {...templateProps}
           />
 
           <button
@@ -590,10 +609,28 @@ function SalonPlatformContent() {
   );
 }
 
-export default function SalonPlatform() {
+export default function SalonPlatform({
+  businessSlug =
+    DEFAULT_BUSINESS_SLUG,
+  templateKey =
+    DEFAULT_TEMPLATE_KEY,
+  templateConfig =
+    EMPTY_TEMPLATE_CONFIG,
+}: SalonPlatformProps) {
   return (
-    <CatalogProvider>
-      <SalonPlatformContent />
+    <CatalogProvider
+      businessSlug={
+        businessSlug
+      }
+    >
+      <SalonPlatformContent
+        templateKey={
+          templateKey
+        }
+        templateConfig={
+          templateConfig
+        }
+      />
     </CatalogProvider>
   );
 }
