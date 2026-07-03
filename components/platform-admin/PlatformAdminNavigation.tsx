@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+
 import {
   usePathname,
 } from "next/navigation";
 
 import {
   Boxes,
+  Building2,
   LayoutDashboard,
   PlusCircle,
 } from "lucide-react";
@@ -19,6 +21,18 @@ const navigationItems = [
       "Pregled platforme",
     icon:
       LayoutDashboard,
+    includeChildren:
+      false,
+  },
+  {
+    href:
+      "/platform-admin/businesses",
+    label:
+      "Saloni",
+    icon:
+      Building2,
+    includeChildren:
+      false,
   },
   {
     href:
@@ -27,6 +41,8 @@ const navigationItems = [
       "Novi salon",
     icon:
       PlusCircle,
+    includeChildren:
+      true,
   },
   {
     href:
@@ -35,6 +51,8 @@ const navigationItems = [
       "Business preseti",
     icon:
       Boxes,
+    includeChildren:
+      true,
   },
 ] as const;
 
@@ -55,13 +73,14 @@ export default function PlatformAdminNavigation() {
             item.icon;
 
           const isActive =
-            item.href ===
-              "/platform-admin"
-              ? pathname ===
-                item.href
-              : pathname.startsWith(
-                  item.href
-                );
+            pathname ===
+              item.href ||
+            (
+              item.includeChildren &&
+              pathname.startsWith(
+                `${item.href}/`
+              )
+            );
 
           return (
             <Link
