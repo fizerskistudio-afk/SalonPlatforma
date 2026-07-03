@@ -3,6 +3,7 @@ import {
   NextResponse,
 } from "next/server";
 
+import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
 import {
   isLocaleCode,
   normalizeLocaleList,
@@ -16,9 +17,6 @@ import type {
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-const DEFAULT_BUSINESS_SLUG =
-  "lumiere-studio";
 
 const SLUG_PATTERN =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

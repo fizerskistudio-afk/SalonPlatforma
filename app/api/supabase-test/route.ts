@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,10 @@ export async function GET() {
             "timezone",
           ].join(",")
         )
-        .eq("slug", "lumiere-studio")
+        .eq(
+          "slug",
+          DEFAULT_BUSINESS_SLUG
+        )
         .single(),
 
       supabase

@@ -8,12 +8,12 @@ import {
   useState,
 } from "react";
 
+import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
 import type {
   CatalogData,
 } from "@/lib/types";
 
-export const DEFAULT_BUSINESS_SLUG =
-  "lumiere-studio";
+export { DEFAULT_BUSINESS_SLUG };
 
 type CatalogStatus =
   | "loading"
