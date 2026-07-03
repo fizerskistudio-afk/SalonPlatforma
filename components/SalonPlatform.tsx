@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import {
   LoaderCircle,
@@ -46,6 +47,9 @@ type ViewPreference =
   | "desktop"
   | "mobile";
 
+type ResolvedViewport =
+  Exclude<ViewPreference, "auto">;
+
 type SalonPlatformProps = {
   businessSlug?: string;
   templateKey?: TemplateKey;
@@ -70,6 +74,9 @@ type BrandStyle =
 
 const VIEW_STORAGE_KEY =
   "salon-platform-view-preference";
+
+const MOBILE_MEDIA_QUERY =
+  "(max-width: 767px)";
 
 const LOCALE_STORAGE_PREFIX =
   "salon-platform-locale";
@@ -124,6 +131,37 @@ function getLocaleStorageKey(
   businessSlug: string
 ): string {
   return `${LOCALE_STORAGE_PREFIX}:${businessSlug}`;
+}
+
+function subscribeToMobileViewport(
+  onStoreChange: () => void
+): () => void {
+  const mediaQuery =
+    window.matchMedia(
+      MOBILE_MEDIA_QUERY
+    );
+
+  mediaQuery.addEventListener(
+    "change",
+    onStoreChange
+  );
+
+  return () => {
+    mediaQuery.removeEventListener(
+      "change",
+      onStoreChange
+    );
+  };
+}
+
+function getMobileViewportSnapshot(): boolean {
+  return window.matchMedia(
+    MOBILE_MEDIA_QUERY
+  ).matches;
+}
+
+function getServerMobileViewportSnapshot(): boolean {
+  return false;
 }
 
 function CatalogLoadingScreen({
@@ -221,10 +259,12 @@ function SalonPlatformContent({
   ] =
     useState<ViewPreference>("auto");
 
-  const [
-    isMobileViewport,
-    setIsMobileViewport,
-  ] = useState(false);
+  const isMobileViewport =
+    useSyncExternalStore(
+      subscribeToMobileViewport,
+      getMobileViewportSnapshot,
+      getServerMobileViewportSnapshot
+    );
 
   const [
     isBookingOpen,
@@ -334,34 +374,7 @@ function SalonPlatformContent({
     }
   }, []);
 
-  useEffect(() => {
-    const mediaQuery =
-      window.matchMedia(
-        "(max-width: 767px)"
-      );
-
-    const updateViewport = () => {
-      setIsMobileViewport(
-        mediaQuery.matches
-      );
-    };
-
-    updateViewport();
-
-    mediaQuery.addEventListener(
-      "change",
-      updateViewport
-    );
-
-    return () => {
-      mediaQuery.removeEventListener(
-        "change",
-        updateViewport
-      );
-    };
-  }, []);
-
-  const effectiveView: ViewPreference =
+  const effectiveView: ResolvedViewport =
     viewPreference === "auto"
       ? isMobileViewport
         ? "mobile"
@@ -502,62 +515,19 @@ function SalonPlatformContent({
         templateKey
       }
     >
-      {viewPreference === "auto" && (
-        <>
-          <div className="md:hidden">
-            <TemplateRenderer
-              templateKey={
-                templateKey
-              }
-              templateConfig={
-                templateConfig
-              }
-              viewport="mobile"
-              {...templateProps}
-            />
-          </div>
-
-          <div className="hidden md:block">
-            <TemplateRenderer
-              templateKey={
-                templateKey
-              }
-              templateConfig={
-                templateConfig
-              }
-              viewport="desktop"
-              {...templateProps}
-            />
-          </div>
-        </>
-      )}
-
-      {viewPreference === "mobile" && (
-        <TemplateRenderer
-          templateKey={
-            templateKey
-          }
-          templateConfig={
-            templateConfig
-          }
-          viewport="mobile"
-          {...templateProps}
-        />
-      )}
+      <TemplateRenderer
+        templateKey={
+          templateKey
+        }
+        templateConfig={
+          templateConfig
+        }
+        viewport={effectiveView}
+        {...templateProps}
+      />
 
       {viewPreference === "desktop" && (
         <>
-          <TemplateRenderer
-            templateKey={
-              templateKey
-            }
-            templateConfig={
-              templateConfig
-            }
-            viewport="desktop"
-            {...templateProps}
-          />
-
           <button
             type="button"
             onClick={switchToMobile}

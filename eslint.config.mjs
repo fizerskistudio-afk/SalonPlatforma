@@ -2,25 +2,36 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
-const eslintConfig = defineConfig([
+const nextConfig = [
   ...nextVitals,
   ...nextTs,
+].map((config) => {
+  if (
+    config.rules &&
+    "react-hooks/set-state-in-effect" in config.rules
+  ) {
+    return {
+      ...config,
+      rules: {
+        ...config.rules,
 
-  {
-    rules: {
-      /*
-       * React 19.2 prijavljuje sinhroni setState unutar efekata kao
-       * performance problem. Projekat trenutno ima više postojećih obrazaca
-       * za hidrataciju localStorage vrednosti i sinhronizaciju admin formi sa
-       * izabranim zapisom.
-       *
-       * Pravilo privremeno ostaje uključeno kao upozorenje, umesto kao error,
-       * kako bismo mogli bezbedno da refaktorišemo svaki obrazac pojedinačno
-       * bez blokiranja lint/build provere.
-       */
-      "react-hooks/set-state-in-effect": "warn",
-    },
-  },
+        /*
+         * React 19.2 prijavljuje sinhroni setState unutar efekata kao
+         * performance problem.
+         *
+         * Pravilo privremeno ostaje uključeno kao upozorenje, umesto kao
+         * error, dok postojeće obrasce refaktorišemo pojedinačno.
+         */
+        "react-hooks/set-state-in-effect": "warn",
+      },
+    };
+  }
+
+  return config;
+});
+
+const eslintConfig = defineConfig([
+  ...nextConfig,
 
   globalIgnores([
     ".next/**",
