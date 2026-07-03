@@ -8,6 +8,7 @@ import {
 import {
   Boxes,
   LayoutDashboard,
+  PlusCircle,
 } from "lucide-react";
 
 const navigationItems = [
@@ -18,6 +19,14 @@ const navigationItems = [
       "Pregled platforme",
     icon:
       LayoutDashboard,
+  },
+  {
+    href:
+      "/platform-admin/businesses/new",
+    label:
+      "Novi salon",
+    icon:
+      PlusCircle,
   },
   {
     href:
