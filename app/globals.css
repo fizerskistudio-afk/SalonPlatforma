@@ -123,3 +123,158 @@ img {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   BRANDED APP / ROUTE LOADING SCREEN
+   ============================================ */
+
+.app-loading-screen {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+  background:
+    radial-gradient(
+      circle at 50% 38%,
+      color-mix(
+        in srgb,
+        var(--brand-primary) 14%,
+        transparent
+      ),
+      transparent 34%
+    ),
+    var(--brand-background);
+  color: var(--brand-text);
+}
+
+.app-loading-glow {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: min(72vw, 420px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background:
+    color-mix(
+      in srgb,
+      var(--brand-primary) 10%,
+      transparent
+    );
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.app-loading-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.app-loading-logo-shell {
+  display: grid;
+  width: 112px;
+  height: 112px;
+  place-items: center;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--brand-primary) 38%,
+      transparent
+    );
+  border-radius: 30px;
+  background:
+    color-mix(
+      in srgb,
+      var(--brand-surface) 92%,
+      transparent
+    );
+  box-shadow:
+    0 24px 70px
+      rgba(0, 0, 0, 0.42),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06);
+  animation:
+    app-loading-float
+    2.4s
+    ease-in-out
+    infinite;
+}
+
+.app-loading-logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+}
+
+.app-loading-name {
+  margin: 22px 0 0;
+  font-family:
+    var(--font-playfair);
+  font-size:
+    clamp(1.45rem, 5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.app-loading-dots {
+  display: flex;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.app-loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background:
+    var(--brand-primary);
+  animation:
+    app-loading-dot
+    1.15s
+    ease-in-out
+    infinite;
+}
+
+.app-loading-dots span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.app-loading-dots span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes app-loading-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes app-loading-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.28;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
