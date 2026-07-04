@@ -5,10 +5,13 @@ import {
   useState,
 } from "react";
 
+import Link from "next/link";
+
 import {
   Check,
   Copy,
   ExternalLink,
+  Pencil,
 } from "lucide-react";
 
 type BusinessPublicLinkActionsProps = {
@@ -56,6 +59,21 @@ function copyWithFallback(
   return copied;
 }
 
+function getBusinessSlug(
+  publicPath: string
+): string {
+  const segments =
+    publicPath
+      .split("/")
+      .filter(
+        Boolean
+      );
+
+  return segments[
+    segments.length - 1
+  ] ?? "";
+}
+
 export default function BusinessPublicLinkActions({
   publicPath,
   isActive,
@@ -76,6 +94,16 @@ export default function BusinessPublicLinkActions({
     >(
       null
     );
+
+  const businessSlug =
+    getBusinessSlug(
+      publicPath
+    );
+
+  const editPath =
+    businessSlug
+      ? `/platform-admin/businesses/${businessSlug}/edit`
+      : "/platform-admin/businesses";
 
   const handleCopy =
     async () => {
@@ -147,70 +175,90 @@ export default function BusinessPublicLinkActions({
         );
     };
 
-  if (!isActive) {
-    return (
+  return (
+    <div
+      className="flex w-full max-w-md flex-col gap-3 xl:w-auto"
+    >
       <div
-        className="
-          flex
-          w-full
-          max-w-md
-          flex-col
-          gap-3
-          xl:w-auto
-        "
+        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
       >
-        <div
-          className="
-            rounded-2xl
-            border
-            border-white/10
-            bg-white/[0.03]
-            px-4
-            py-3
-          "
+        <p
+          className="text-xs uppercase tracking-wider text-zinc-600"
         >
-          <p
-            className="
-              text-xs
-              uppercase
-              tracking-wider
-              text-zinc-600
-            "
-          >
-            Javni booking link
-          </p>
+          Javni booking link
+        </p>
 
-          <p
-            className="
-              mt-1
-              break-all
-              text-sm
-              text-zinc-500
-            "
+        <p
+          className={`mt-1 break-all text-sm ${
+            isActive
+              ? "text-zinc-300"
+              : "text-zinc-500"
+          }`}
+        >
+          {publicPath}
+        </p>
+      </div>
+
+      <Link
+        href={
+          editPath
+        }
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-300/20 bg-amber-300/10 px-4 py-2.5 text-sm font-semibold text-amber-200 transition hover:border-amber-300/35 hover:bg-amber-300/15 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+      >
+        <Pencil
+          size={17}
+        />
+
+        Uredi osnovne podatke
+      </Link>
+
+      {isActive ? (
+        <div
+          className="grid gap-3 sm:grid-cols-2"
+        >
+          <button
+            type="button"
+            onClick={
+              handleCopy
+            }
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
           >
-            {publicPath}
-          </p>
+            {copied ? (
+              <Check
+                size={17}
+                className="text-emerald-300"
+              />
+            ) : (
+              <Copy
+                size={17}
+              />
+            )}
+
+            {copied
+              ? "Kopirano"
+              : "Kopiraj link"}
+          </button>
+
+          <a
+            href={
+              publicPath
+            }
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-950"
+          >
+            <ExternalLink
+              size={17}
+            />
+
+            Otvori profil
+          </a>
         </div>
-
+      ) : (
         <button
           type="button"
           disabled
-          className="
-            inline-flex
-            min-h-11
-            cursor-not-allowed
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            border
-            border-white/10
-            px-4
-            py-2.5
-            text-sm
-            font-semibold
-            text-zinc-600
-          "
+          className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-600"
         >
           <ExternalLink
             size={17}
@@ -218,143 +266,7 @@ export default function BusinessPublicLinkActions({
 
           Profil nije aktivan
         </button>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="
-        flex
-        w-full
-        max-w-md
-        flex-col
-        gap-3
-        xl:w-auto
-      "
-    >
-      <div
-        className="
-          rounded-2xl
-          border
-          border-white/10
-          bg-white/[0.03]
-          px-4
-          py-3
-        "
-      >
-        <p
-          className="
-            text-xs
-            uppercase
-            tracking-wider
-            text-zinc-600
-          "
-        >
-          Javni booking link
-        </p>
-
-        <p
-          className="
-            mt-1
-            break-all
-            text-sm
-            text-zinc-300
-          "
-        >
-          {publicPath}
-        </p>
-      </div>
-
-      <div
-        className="
-          grid
-          gap-3
-          sm:grid-cols-2
-        "
-      >
-        <button
-          type="button"
-          onClick={
-            handleCopy
-          }
-          className="
-            inline-flex
-            min-h-11
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            border
-            border-white/10
-            px-4
-            py-2.5
-            text-sm
-            font-semibold
-            text-zinc-300
-            transition
-            hover:border-white/20
-            hover:text-white
-            focus:outline-none
-            focus:ring-2
-            focus:ring-amber-300
-            focus:ring-offset-2
-            focus:ring-offset-zinc-950
-          "
-        >
-          {copied ? (
-            <Check
-              size={17}
-              className="
-                text-emerald-300
-              "
-            />
-          ) : (
-            <Copy
-              size={17}
-            />
-          )}
-
-          {copied
-            ? "Kopirano"
-            : "Kopiraj link"}
-        </button>
-
-        <a
-          href={
-            publicPath
-          }
-          target="_blank"
-          rel="noreferrer"
-          className="
-            inline-flex
-            min-h-11
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            bg-white
-            px-4
-            py-2.5
-            text-sm
-            font-semibold
-            text-zinc-950
-            transition
-            hover:bg-zinc-200
-            focus:outline-none
-            focus:ring-2
-            focus:ring-white
-            focus:ring-offset-2
-            focus:ring-offset-zinc-950
-          "
-        >
-          <ExternalLink
-            size={17}
-          />
-
-          Otvori profil
-        </a>
-      </div>
+      )}
     </div>
   );
 }
