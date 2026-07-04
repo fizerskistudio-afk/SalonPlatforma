@@ -9,6 +9,7 @@ import {
 
 import {
   ArrowLeft,
+  CalendarClock,
   CheckCircle2,
   CircleOff,
   Mail,
@@ -388,18 +389,35 @@ export default async function BusinessEmployeesPage({
                   <div
                     className="border-t border-white/10 bg-zinc-950/30 p-4 md:px-6"
                   >
-                    <Link
-                      href={
-                        `/platform-admin/businesses/${business.slug}/employees/${employee.slug}/edit`
-                      }
-                      className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white"
+                    <div
+                      className="grid gap-3 sm:grid-cols-2"
                     >
-                      <Pencil
-                        size={16}
-                      />
+                      <Link
+                        href={
+                          `/platform-admin/businesses/${business.slug}/employees/${employee.slug}/schedule`
+                        }
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white"
+                      >
+                        <CalendarClock
+                          size={16}
+                        />
 
-                      Uredi zaposlenog
-                    </Link>
+                        Radno vreme
+                      </Link>
+
+                      <Link
+                        href={
+                          `/platform-admin/businesses/${business.slug}/employees/${employee.slug}/edit`
+                        }
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white"
+                      >
+                        <Pencil
+                          size={16}
+                        />
+
+                        Uredi zaposlenog
+                      </Link>
+                    </div>
                   </div>
                 </article>
               );
