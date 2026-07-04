@@ -12,6 +12,7 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Images,
   Pencil,
   Tags,
   UsersRound,
@@ -138,10 +139,17 @@ export default function BusinessPublicLinkActions({
       className:
         "border-indigo-300/20 bg-indigo-300/10 text-indigo-200 hover:border-indigo-300/35 hover:bg-indigo-300/15 focus:ring-indigo-300",
     },
+    {
+      href: `${businessBasePath}/branding`,
+      label: "Branding",
+      icon: Images,
+      className:
+        "border-fuchsia-300/20 bg-fuchsia-300/10 text-fuchsia-200 hover:border-fuchsia-300/35 hover:bg-fuchsia-300/15 focus:ring-fuchsia-300",
+    },
   ] as const;
 
   return (
-    <div className="flex w-full max-w-5xl flex-col gap-3 xl:w-auto">
+    <div className="flex w-full max-w-6xl flex-col gap-3 xl:w-auto">
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
         <p className="text-xs uppercase tracking-wider text-zinc-600">
           Javni booking link
@@ -157,7 +165,7 @@ export default function BusinessPublicLinkActions({
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         {managementLinks.map((item) => {
           const Icon = item.icon;
           return (
