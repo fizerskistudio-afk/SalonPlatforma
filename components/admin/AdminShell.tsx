@@ -16,6 +16,7 @@ import {
   Menu,
   Scissors,
   Settings,
+  ShieldCheck,
   UserRoundCog,
   UsersRound,
   X,
@@ -28,11 +29,9 @@ type AdminRole = "owner" | "manager";
 
 type AdminShellProps = {
   children: ReactNode;
-
   admin: {
     email: string | null;
     role: AdminRole;
-
     business: {
       name: string;
       slug: string;
@@ -99,6 +98,13 @@ const navigationItems: NavigationItem[] = [
     enabled: true,
   },
   {
+    label: "Članovi",
+    description: "Korisnici, pristup i uloge",
+    href: "/admin/members",
+    icon: ShieldCheck,
+    enabled: true,
+  },
+  {
     label: "Podešavanja",
     description: "Salon i booking pravila",
     href: "/admin/settings",
@@ -107,10 +113,7 @@ const navigationItems: NavigationItem[] = [
   },
 ];
 
-const roleLabels: Record<
-  AdminRole,
-  string
-> = {
+const roleLabels: Record<AdminRole, string> = {
   owner: "Vlasnik",
   manager: "Menadžer",
 };
@@ -188,7 +191,6 @@ function SidebarContent({
             <div className="truncate font-semibold text-white">
               {businessName}
             </div>
-
             <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
               Salon administration
             </div>
@@ -208,7 +210,6 @@ function SidebarContent({
           {navigationItems.map(
             (item) => {
               const Icon = item.icon;
-
               const isActive =
                 isNavigationItemActive(
                   pathname,
@@ -234,16 +235,12 @@ function SidebarContent({
                         <span className="truncate text-sm font-medium text-zinc-400">
                           {item.label}
                         </span>
-
                         <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-zinc-600">
                           Uskoro
                         </span>
                       </div>
-
                       <div className="mt-0.5 truncate text-xs text-zinc-700">
-                        {
-                          item.description
-                        }
+                        {item.description}
                       </div>
                     </div>
                   </div>
@@ -283,7 +280,6 @@ function SidebarContent({
                     <div className="truncate text-sm font-semibold">
                       {item.label}
                     </div>
-
                     <div
                       className={`mt-0.5 truncate text-xs ${
                         isActive
@@ -310,7 +306,7 @@ function SidebarContent({
 
       <div className="border-t border-white/[0.07] p-3">
         <a
-          href="/"
+          href={`/salon/${businessSlug}`}
           target="_blank"
           rel="noreferrer"
           className="mb-3 flex items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 text-sm text-zinc-400 transition hover:border-white/15 hover:bg-white/[0.05] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -318,7 +314,6 @@ function SidebarContent({
           <span>
             Otvori javni sajt
           </span>
-
           <ExternalLink
             className="h-4 w-4"
             aria-hidden="true"
@@ -337,7 +332,6 @@ function SidebarContent({
               <div className="truncate text-sm font-semibold text-white">
                 {roleLabels[role]}
               </div>
-
               <div className="truncate text-xs text-zinc-600">
                 {email ??
                   businessSlug}
@@ -370,8 +364,7 @@ export default function AdminShell({
   children,
   admin,
 }: AdminShellProps) {
-  const pathname =
-    usePathname();
+  const pathname = usePathname();
 
   const [
     mobileMenuOpen,
@@ -444,9 +437,7 @@ export default function AdminShell({
               email={admin.email}
               role={admin.role}
               onNavigate={() =>
-                setMobileMenuOpen(
-                  false
-                )
+                setMobileMenuOpen(false)
               }
             />
           </aside>
@@ -460,9 +451,7 @@ export default function AdminShell({
               <button
                 type="button"
                 onClick={() =>
-                  setMobileMenuOpen(
-                    true
-                  )
+                  setMobileMenuOpen(true)
                 }
                 aria-label="Otvori admin meni"
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:bg-white/[0.08] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 lg:hidden"
@@ -475,12 +464,8 @@ export default function AdminShell({
 
               <div className="min-w-0">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-                  {
-                    admin.business
-                      .name
-                  }
+                  {admin.business.name}
                 </div>
-
                 <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">
                   {pageTitle}
                 </h1>
@@ -497,7 +482,6 @@ export default function AdminShell({
                   className="h-4 w-4"
                   aria-hidden="true"
                 />
-
                 <span
                   className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-amber-300"
                   aria-hidden="true"
@@ -513,17 +497,13 @@ export default function AdminShell({
 
                 <div>
                   <div className="text-xs font-semibold text-zinc-200">
-                    {
-                      roleLabels[
-                        admin.role
-                      ]
-                    }
+                    {roleLabels[
+                      admin.role
+                    ]}
                   </div>
-
                   <div className="max-w-44 truncate text-[10px] text-zinc-600">
                     {admin.email ??
-                      admin.business
-                        .slug}
+                      admin.business.slug}
                   </div>
                 </div>
               </div>
