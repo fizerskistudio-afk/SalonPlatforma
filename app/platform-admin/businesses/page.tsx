@@ -698,7 +698,12 @@ function BusinessCard({
                 font-semibold
               "
             >
-              {business.name}
+              <Link
+  href={`/platform-admin/businesses/${business.slug}`}
+  className="transition hover:text-amber-200"
+>
+  {business.name}
+</Link>
             </h4>
 
             <StatusBadge
