@@ -41,45 +41,56 @@ type SuccessStepProps = {
   onDone: () => void;
 };
 
-type LocalizedText = Record<
-  Locale,
-  string
->;
+type LocalizedText =
+  Partial<
+    Record<Locale, string>
+  > & {
+    "sr-Latn": string;
+    mk: string;
+    sq: string;
+    en: string;
+  };
 
 const intlLocaleMap: Record<
   Locale,
   string
 > = {
+  "sr-Latn": "sr-Latn-RS",
   mk: "mk-MK",
   sq: "sq-MK",
   en: "en-GB",
 };
 
 const confirmedTitles: LocalizedText = {
+  "sr-Latn": "Rezervacija je potvrđena!",
   mk: "Резервацијата е потврдена!",
   sq: "Rezervimi u konfirmua!",
   en: "Booking confirmed!",
 };
 
 const confirmedMessages: LocalizedText = {
+  "sr-Latn": "Tvoj termin je uspešno potvrđen. Radujemo se tvom dolasku.",
   mk: "Вашиот термин е успешно потврден. Со нетрпение ве очекуваме.",
   sq: "Orari juaj u konfirmua me sukses. Me kënaqësi ju presim.",
   en: "Your appointment is confirmed. We look forward to seeing you.",
 };
 
 const pendingTitles: LocalizedText = {
+  "sr-Latn": "Rezervacija je primljena",
   mk: "Резервацијата е примена",
   sq: "Rezervimi u pranua",
   en: "Booking received",
 };
 
 const pendingMessages: LocalizedText = {
+  "sr-Latn": "Tvoj termin je sačuvan i čeka potvrdu salona. Salon će te uskoro kontaktirati.",
   mk: "Вашиот термин е зачуван и чека потврда од салонот. Салонот ќе ве контактира наскоро.",
   sq: "Orari juaj u ruajt dhe pret konfirmimin e sallonit. Salloni do t’ju kontaktojë së shpejti.",
   en: "Your appointment is reserved and awaiting confirmation from the salon. The salon will contact you shortly.",
 };
 
 const referenceLabels: LocalizedText = {
+  "sr-Latn": "Broj rezervacije",
   mk: "Број на резервација",
   sq: "Numri i rezervimit",
   en: "Booking reference",
@@ -87,6 +98,7 @@ const referenceLabels: LocalizedText = {
 
 const confirmedStatusLabels: LocalizedText =
   {
+    "sr-Latn": "Potvrđena",
     mk: "Потврдена",
     sq: "Konfirmuar",
     en: "Confirmed",
@@ -94,22 +106,48 @@ const confirmedStatusLabels: LocalizedText =
 
 const pendingStatusLabels: LocalizedText =
   {
+    "sr-Latn": "Čeka potvrdu",
     mk: "Чека потврда",
     sq: "Në pritje",
     en: "Awaiting confirmation",
   };
 
 const durationLabels: LocalizedText = {
+  "sr-Latn": "Trajanje",
   mk: "Времетраење",
   sq: "Kohëzgjatja",
   en: "Duration",
 };
 
 const priceLabels: LocalizedText = {
+  "sr-Latn": "Cena",
   mk: "Цена",
   sq: "Çmimi",
   en: "Price",
 };
+
+function resolveIntlLocale(
+  locale: Locale
+): string {
+  return (
+    intlLocaleMap[String(locale)] ??
+    locale ??
+    "en-GB"
+  );
+}
+
+function getLocalizedLabel(
+  text: LocalizedText,
+  locale: Locale
+): string {
+  return (
+    text[locale] ??
+    text.en ??
+    text["sr-Latn"] ??
+    text.mk ??
+    text.sq
+  );
+}
 
 function formatDraftDate(
   dateString: string | null,
@@ -162,7 +200,7 @@ function formatDraftDate(
   );
 
   return date.toLocaleDateString(
-    intlLocaleMap[locale],
+    resolveIntlLocale(locale),
     {
       weekday: "long",
       year: "numeric",
@@ -194,7 +232,7 @@ function formatSavedDateTime(
   try {
     return {
       date: new Intl.DateTimeFormat(
-        intlLocaleMap[locale],
+        resolveIntlLocale(locale),
         {
           weekday: "long",
           year: "numeric",
@@ -205,7 +243,7 @@ function formatSavedDateTime(
       ).format(date),
 
       time: new Intl.DateTimeFormat(
-        intlLocaleMap[locale],
+        resolveIntlLocale(locale),
         {
           hour: "2-digit",
           minute: "2-digit",
@@ -226,7 +264,7 @@ function formatPrice(
 ): string {
   try {
     return new Intl.NumberFormat(
-      intlLocaleMap[locale],
+      resolveIntlLocale(locale),
       {
         style: "currency",
         currency,
@@ -298,16 +336,16 @@ export default function SuccessStep({
     "pending";
 
   const title = isPending
-    ? pendingTitles[locale]
-    : confirmedTitles[locale];
+    ? getLocalizedLabel(pendingTitles, locale)
+    : getLocalizedLabel(confirmedTitles, locale);
 
   const message = isPending
-    ? pendingMessages[locale]
-    : confirmedMessages[locale];
+    ? getLocalizedLabel(pendingMessages, locale)
+    : getLocalizedLabel(confirmedMessages, locale);
 
   const statusLabel = isPending
-    ? pendingStatusLabels[locale]
-    : confirmedStatusLabels[locale];
+    ? getLocalizedLabel(pendingStatusLabels, locale)
+    : getLocalizedLabel(confirmedStatusLabels, locale);
 
   const formattedPrice =
     booking
@@ -378,9 +416,7 @@ export default function SuccessStep({
               <div className="min-w-0 flex-1 text-left">
                 <div className="mb-0.5 text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                   {
-                    referenceLabels[
-                      locale
-                    ]
+                    getLocalizedLabel(referenceLabels, locale)
                   }
                 </div>
 
@@ -507,9 +543,7 @@ export default function SuccessStep({
                 <div className="min-w-0 text-left">
                   <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                     {
-                      durationLabels[
-                        locale
-                      ]
+                      getLocalizedLabel(durationLabels, locale)
                     }
                   </div>
 
@@ -535,9 +569,7 @@ export default function SuccessStep({
                 <div className="min-w-0 text-left">
                   <div className="text-xs uppercase tracking-wider text-[var(--brand-muted)]">
                     {
-                      priceLabels[
-                        locale
-                      ]
+                      getLocalizedLabel(priceLabels, locale)
                     }
                   </div>
 

@@ -35,15 +35,21 @@ type BookingSummaryProps = {
   ) => void;
 };
 
-type LocalizedText = Record<
-  Locale,
-  string
->;
+type LocalizedText =
+  Partial<
+    Record<Locale, string>
+  > & {
+    "sr-Latn": string;
+    mk: string;
+    sq: string;
+    en: string;
+  };
 
 const intlLocaleMap: Record<
   Locale,
   string
 > = {
+  "sr-Latn": "sr-Latn-RS",
   mk: "mk-MK",
   sq: "sq-MK",
   en: "en-GB",
@@ -51,6 +57,7 @@ const intlLocaleMap: Record<
 
 const automaticallyAssignedLabels: LocalizedText =
   {
+    "sr-Latn": "Automatski izabran",
     mk: "Автоматски избран",
     sq: "Zgjedhur automatikisht",
     en: "Automatically assigned",
@@ -58,10 +65,34 @@ const automaticallyAssignedLabels: LocalizedText =
 
 const contactLabels: LocalizedText =
   {
+    "sr-Latn": "Kontakt podaci",
     mk: "Контакт податоци",
     sq: "Të dhënat e kontaktit",
     en: "Contact details",
   };
+
+function resolveIntlLocale(
+  locale: Locale
+): string {
+  return (
+    intlLocaleMap[String(locale)] ??
+    locale ??
+    "en-GB"
+  );
+}
+
+function getLocalizedLabel(
+  text: LocalizedText,
+  locale: Locale
+): string {
+  return (
+    text[locale] ??
+    text.en ??
+    text["sr-Latn"] ??
+    text.mk ??
+    text.sq
+  );
+}
 
 function formatDisplayDate(
   dateString: string | null,
@@ -119,7 +150,7 @@ function formatDisplayDate(
   );
 
   return date.toLocaleDateString(
-    intlLocaleMap[locale],
+    resolveIntlLocale(locale),
     {
       weekday: "long",
       year: "numeric",
@@ -138,7 +169,7 @@ function formatPrice(
 ): string {
   const formatter =
     new Intl.NumberFormat(
-      intlLocaleMap[locale],
+      resolveIntlLocale(locale),
       {
         style: "currency",
         currency,
@@ -374,9 +405,7 @@ export default function BookingSummary({
             {wasAutomaticallyAssigned && (
               <div className="mt-1 inline-flex rounded-full border border-[var(--brand-border)] bg-[var(--brand-secondary)] px-2.5 py-1 text-xs text-[var(--brand-muted)]">
                 {
-                  automaticallyAssignedLabels[
-                    locale
-                  ]
+                  getLocalizedLabel(automaticallyAssignedLabels, locale)
                 }
               </div>
             )}
@@ -509,9 +538,7 @@ export default function BookingSummary({
                 hasEmail) && (
                 <div className="mt-1 text-xs text-[var(--brand-muted)]">
                   {
-                    contactLabels[
-                      locale
-                    ]
+                    getLocalizedLabel(contactLabels, locale)
                   }
                 </div>
               )}

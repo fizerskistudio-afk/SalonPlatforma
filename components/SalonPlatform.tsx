@@ -52,11 +52,13 @@ type ResolvedViewport =
 
 type SalonPlatformProps = {
   businessSlug?: string;
+  initialLocale?: Locale;
   templateKey?: TemplateKey;
   templateConfig?: TemplateConfig;
 };
 
 type SalonPlatformContentProps = {
+  initialLocale: Locale;
   templateKey: TemplateKey;
   templateConfig: TemplateConfig;
 };
@@ -82,6 +84,7 @@ const LOCALE_STORAGE_PREFIX =
   "salon-platform-locale";
 
 const loadingMessages: LocalizedText = {
+  "sr-Latn": "Učitavanje salona...",
   mk: "Се вчитува салонот...",
   sq: "Duke ngarkuar sallonin...",
   en: "Loading salon...",
@@ -89,12 +92,14 @@ const loadingMessages: LocalizedText = {
 
 const catalogErrorMessages:
   LocalizedText = {
+    "sr-Latn": "Podaci salona nisu mogli da se učitaju.",
     mk: "Податоците за салонот не можеа да се вчитаат.",
     sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
     en: "The salon data could not be loaded.",
   };
 
 const retryMessages: LocalizedText = {
+  "sr-Latn": "Pokušaj ponovo",
   mk: "Обиди се повторно",
   sq: "Provo përsëri",
   en: "Try again",
@@ -211,7 +216,8 @@ function CatalogErrorScreen({
           )}
         </h1>
 
-        {error && (
+        {process.env.NODE_ENV === "development" &&
+        error && (
           <p className="mb-6 break-words text-sm text-[var(--brand-muted)]">
             {error}
           </p>
@@ -238,6 +244,7 @@ function CatalogErrorScreen({
 }
 
 function SalonPlatformContent({
+  initialLocale,
   templateKey,
   templateConfig,
 }: SalonPlatformContentProps) {
@@ -251,7 +258,7 @@ function SalonPlatformContent({
   const [
     locale,
     setLocale,
-  ] = useState<Locale>("mk");
+  ] = useState<Locale>(initialLocale);
 
   const [
     viewPreference,
@@ -582,6 +589,8 @@ function SalonPlatformContent({
 export default function SalonPlatform({
   businessSlug =
     DEFAULT_BUSINESS_SLUG,
+  initialLocale =
+    "mk",
   templateKey =
     DEFAULT_TEMPLATE_KEY,
   templateConfig =
@@ -594,6 +603,9 @@ export default function SalonPlatform({
       }
     >
       <SalonPlatformContent
+        initialLocale={
+          initialLocale
+        }
         templateKey={
           templateKey
         }

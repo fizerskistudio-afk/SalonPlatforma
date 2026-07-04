@@ -30,6 +30,7 @@ type PublicSalonPageProps = {
 type ActiveBusinessRow = {
   id: string;
   slug: string;
+  default_locale: string;
 };
 
 async function getActiveBusiness(
@@ -48,7 +49,8 @@ async function getActiveBusiness(
     .select(
       `
         id,
-        slug
+        slug,
+        default_locale
       `
     )
     .eq(
@@ -121,6 +123,9 @@ export default async function PublicSalonPage({
     <SalonPlatform
       businessSlug={
         business.slug
+      }
+      initialLocale={
+        business.default_locale
       }
       templateKey={
         template.key

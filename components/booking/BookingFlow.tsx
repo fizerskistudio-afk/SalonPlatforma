@@ -85,10 +85,15 @@ type CreateBookingResponse =
   | CreateBookingSuccessResponse
   | CreateBookingErrorResponse;
 
-type LocalizedErrorMessage = Record<
-  Locale,
-  string
->;
+type LocalizedErrorMessage =
+  Partial<
+    Record<Locale, string>
+  > & {
+    "sr-Latn": string;
+    mk: string;
+    sq: string;
+    en: string;
+  };
 
 const stepOrder: BookingStep[] = [
   "service",
@@ -102,6 +107,7 @@ const stepOrder: BookingStep[] = [
 
 const unavailableMessages: LocalizedErrorMessage =
   {
+    "sr-Latn": "Taj termin je upravo rezervisan. Izaberi drugi slobodan termin.",
     mk: "Терминот штотуку беше резервиран. Изберете друг слободен термин.",
     sq: "Ky orar sapo u rezervua. Zgjidhni një orar tjetër të lirë.",
     en: "That time was just booked. Please choose another available time.",
@@ -109,6 +115,7 @@ const unavailableMessages: LocalizedErrorMessage =
 
 const genericErrorMessages: LocalizedErrorMessage =
   {
+    "sr-Latn": "Rezervacija nije mogla da se sačuva. Pokušaj ponovo.",
     mk: "Резервацијата не можеше да се зачува. Обидете се повторно.",
     sq: "Rezervimi nuk mund të ruhej. Ju lutemi provoni përsëri.",
     en: "The booking could not be saved. Please try again.",
@@ -116,6 +123,7 @@ const genericErrorMessages: LocalizedErrorMessage =
 
 const submittingMessages: LocalizedErrorMessage =
   {
+    "sr-Latn": "Zakazivanje...",
     mk: "Се резервира...",
     sq: "Duke rezervuar...",
     en: "Booking...",
@@ -126,84 +134,98 @@ const bookingErrorMessages: Record<
   LocalizedErrorMessage
 > = {
   INVALID_CUSTOMER_NAME: {
+    "sr-Latn": "Unesi ime i prezime sa najmanje 2 karaktera.",
     mk: "Внесете име и презиме со најмалку 2 знаци.",
     sq: "Shkruani emrin dhe mbiemrin me të paktën 2 karaktere.",
     en: "Enter a name with at least 2 characters.",
   },
 
   CUSTOMER_PHONE_REQUIRED: {
+    "sr-Latn": "Broj telefona je obavezan.",
     mk: "Телефонскиот број е задолжителен.",
     sq: "Numri i telefonit është i detyrueshëm.",
     en: "A phone number is required.",
   },
 
   CUSTOMER_EMAIL_REQUIRED: {
+    "sr-Latn": "Email adresa je obavezna.",
     mk: "Електронската адреса е задолжителна.",
     sq: "Adresa e emailit është e detyrueshme.",
     en: "An email address is required.",
   },
 
   CUSTOMER_CONTACT_REQUIRED: {
+    "sr-Latn": "Unesi broj telefona ili email adresu.",
     mk: "Внесете телефонски број или електронска адреса.",
     sq: "Shkruani një numër telefoni ose adresë emaili.",
     en: "Enter a phone number or email address.",
   },
 
   INVALID_CUSTOMER_PHONE: {
+    "sr-Latn": "Broj telefona nije ispravan. Unesi najmanje 6 cifara.",
     mk: "Телефонскиот број не е валиден. Внесете најмалку 6 цифри.",
     sq: "Numri i telefonit nuk është i vlefshëm. Shkruani të paktën 6 shifra.",
     en: "The phone number is invalid. Enter at least 6 digits.",
   },
 
   INVALID_CUSTOMER_EMAIL: {
+    "sr-Latn": "Email adresa nije ispravna.",
     mk: "Електронската адреса не е валидна.",
     sq: "Adresa e emailit nuk është e vlefshme.",
     en: "The email address is invalid.",
   },
 
   CUSTOMER_NOTE_TOO_LONG: {
+    "sr-Latn": "Napomena je predugačka. Maksimalno je 2.000 karaktera.",
     mk: "Забелешката е предолга. Максимумот е 2000 знаци.",
     sq: "Shënimi është shumë i gjatë. Maksimumi është 2000 karaktere.",
     en: "The note is too long. The maximum is 2,000 characters.",
   },
 
   INVALID_SERVICE_ID: {
+    "sr-Latn": "Izabrana usluga više nije dostupna. Izaberi drugu uslugu.",
     mk: "Избраната услуга повеќе не е достапна. Изберете друга услуга.",
     sq: "Shërbimi i zgjedhur nuk është më i disponueshëm. Zgjidhni një shërbim tjetër.",
     en: "The selected service is no longer available. Choose another service.",
   },
 
   INVALID_SERVICE: {
+    "sr-Latn": "Izabrana usluga više nije dostupna. Izaberi drugu uslugu.",
     mk: "Избраната услуга повеќе не е достапна. Изберете друга услуга.",
     sq: "Shërbimi i zgjedhur nuk është më i disponueshëm. Zgjidhni një shërbim tjetër.",
     en: "The selected service is no longer available. Choose another service.",
   },
 
   INVALID_EMPLOYEE_ID: {
+    "sr-Latn": "Izabrani član tima više nije dostupan. Izaberi drugog člana tima.",
     mk: "Избраниот вработен повеќе не е достапен. Изберете друг вработен.",
     sq: "Punonjësi i zgjedhur nuk është më i disponueshëm. Zgjidhni një punonjës tjetër.",
     en: "The selected employee is no longer available. Choose another employee.",
   },
 
   INVALID_EMPLOYEE: {
+    "sr-Latn": "Izabrani član tima više nije dostupan. Izaberi drugog člana tima.",
     mk: "Избраниот вработен повеќе не е достапен. Изберете друг вработен.",
     sq: "Punonjësi i zgjedhur nuk është më i disponueshëm. Zgjidhni një punonjës tjetër.",
     en: "The selected employee is no longer available. Choose another employee.",
   },
 
   INVALID_START_TIME: {
+    "sr-Latn": "Izabrani termin nije ispravan. Izaberi drugi termin.",
     mk: "Избраниот термин не е валиден. Изберете друг термин.",
     sq: "Orari i zgjedhur nuk është i vlefshëm. Zgjidhni një orar tjetër.",
     en: "The selected time is invalid. Choose another time.",
   },
 
   BUSINESS_NOT_FOUND: {
+    "sr-Latn": "Salon trenutno nije dostupan za onlajn rezervacije.",
     mk: "Салонот моментално не е достапен за онлајн резервации.",
     sq: "Salloni aktualisht nuk është i disponueshëm për rezervime online.",
     en: "The salon is currently unavailable for online bookings.",
   },
 
   INVALID_BUSINESS: {
+    "sr-Latn": "Salon trenutno nije dostupan za onlajn rezervacije.",
     mk: "Салонот моментално не е достапен за онлајн резервации.",
     sq: "Salloni aktualisht nuk është i disponueshëm për rezervime online.",
     en: "The salon is currently unavailable for online bookings.",
@@ -233,15 +255,27 @@ const employeeErrorCodes =
     "INVALID_EMPLOYEE",
   ]);
 
+function getLocalizedErrorMessage(
+  messages: LocalizedErrorMessage,
+  locale: Locale
+): string {
+  return (
+    messages[locale] ??
+    messages.en ??
+    messages["sr-Latn"] ??
+    messages.mk ??
+    messages.sq
+  );
+}
+
 function getBookingErrorMessage(
   code: string,
   locale: Locale
 ): string {
-  return (
-    bookingErrorMessages[code]?.[
-      locale
-    ] ??
-    genericErrorMessages[locale]
+  return getLocalizedErrorMessage(
+    bookingErrorMessages[code] ??
+      genericErrorMessages,
+    locale
   );
 }
 
@@ -742,9 +776,10 @@ export default function BookingFlow({
         !selectedStartsAt
       ) {
         setSubmitError(
-          genericErrorMessages[
+          getLocalizedErrorMessage(
+            genericErrorMessages,
             locale
-          ]
+          )
         );
 
         return;
@@ -844,9 +879,10 @@ export default function BookingFlow({
             );
 
             setSubmitError(
-              unavailableMessages[
+              getLocalizedErrorMessage(
+                unavailableMessages,
                 locale
-              ]
+              )
             );
 
             setCurrentStep(
@@ -1001,9 +1037,10 @@ export default function BookingFlow({
         );
 
         setSubmitError(
-          genericErrorMessages[
+          getLocalizedErrorMessage(
+            genericErrorMessages,
             locale
-          ]
+          )
         );
       } finally {
         setSubmitStatus(
@@ -1209,9 +1246,10 @@ export default function BookingFlow({
                     />
 
                     {
-                      submittingMessages[
+                      getLocalizedErrorMessage(
+                        submittingMessages,
                         locale
-                      ]
+                      )
                     }
                   </>
                 ) : (
