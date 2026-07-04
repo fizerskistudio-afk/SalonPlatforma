@@ -6,6 +6,7 @@ import {
 } from "react";
 import Link from "next/link";
 import {
+  CalendarCheck2,
   CalendarClock,
   CalendarX2,
   Check,
@@ -130,10 +131,17 @@ export default function BusinessPublicLinkActions({
       className:
         "border-rose-300/20 bg-rose-300/10 text-rose-200 hover:border-rose-300/35 hover:bg-rose-300/15 focus:ring-rose-300",
     },
+    {
+      href: `${businessBasePath}/bookings`,
+      label: "Rezervacije",
+      icon: CalendarCheck2,
+      className:
+        "border-indigo-300/20 bg-indigo-300/10 text-indigo-200 hover:border-indigo-300/35 hover:bg-indigo-300/15 focus:ring-indigo-300",
+    },
   ] as const;
 
   return (
-    <div className="flex w-full max-w-4xl flex-col gap-3 xl:w-auto">
+    <div className="flex w-full max-w-5xl flex-col gap-3 xl:w-auto">
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
         <p className="text-xs uppercase tracking-wider text-zinc-600">
           Javni booking link
@@ -149,7 +157,7 @@ export default function BusinessPublicLinkActions({
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         {managementLinks.map((item) => {
           const Icon = item.icon;
           return (
