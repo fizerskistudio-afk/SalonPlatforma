@@ -3,14 +3,17 @@ import {
   NextResponse,
 } from "next/server";
 
-import { requireAdmin } from "@/lib/auth/admin";
+import {
+  getPlatformAdminAccess,
+} from "@/lib/auth/platform-admin";
+
 import {
   BUSINESS_PRESET_CURRENCIES,
   BUSINESS_PRESET_LOCALES,
   getBusinessPresetOptions,
-  isBusinessPresetKey,
   materializeBusinessPreset,
   type BusinessPresetCurrency,
+  type BusinessPresetKey,
   type BusinessPresetLocale,
 } from "@/lib/business-presets";
 
@@ -29,45 +32,232 @@ type PreviewRequestBody = {
 
 function isJsonRecord(
   value: unknown
-): value is Record<string, unknown> {
+): value is Record<
+  string,
+  unknown
+> {
   return (
-    typeof value === "object" &&
+    typeof value ===
+      "object" &&
     value !== null &&
-    !Array.isArray(value)
-  );
-}
-
-function isBusinessPresetLocale(
-  value: unknown
-): value is BusinessPresetLocale {
-  return (
-    typeof value === "string" &&
-    BUSINESS_PRESET_LOCALES.includes(
-      value as BusinessPresetLocale
+    !Array.isArray(
+      value
     )
   );
 }
 
-function isBusinessPresetCurrency(
+function normalizePresetKey(
   value: unknown
-): value is BusinessPresetCurrency {
-  return (
-    typeof value === "string" &&
+): BusinessPresetKey | null {
+  if (
+    typeof value !==
+      "string"
+  ) {
+    return null;
+  }
+
+  const normalizedValue =
+    value
+      .trim()
+      .toLowerCase()
+      .replaceAll(
+        "_",
+        "-"
+      )
+      .replace(/\s+/g, "-");
+
+  switch (
+    normalizedValue
+  ) {
+    case "hair-salon":
+    case "hairsalon":
+    case "salon":
+    case "frizerski-salon":
+    case "frizerskisalon":
+      return "hair-salon";
+
+    case "barbershop":
+    case "barber-shop":
+    case "barber":
+    case "berbernica":
+      return "barbershop";
+
+    default:
+      return null;
+  }
+}
+
+function normalizePresetLocale(
+  value: unknown,
+  fallback:
+    BusinessPresetLocale =
+      "sr-Latn"
+): BusinessPresetLocale {
+  if (
+    typeof value !==
+      "string"
+  ) {
+    return fallback;
+  }
+
+  const normalizedValue =
+    value
+      .trim()
+      .replaceAll(
+        "_",
+        "-"
+      )
+      .toLowerCase();
+
+  switch (
+    normalizedValue
+  ) {
+    case "sr":
+    case "sr-rs":
+    case "sr-latn":
+    case "sr-latn-rs":
+      return "sr-Latn";
+
+    case "en":
+    case "en-gb":
+    case "en-us":
+      return "en";
+
+    case "de":
+    case "de-de":
+    case "de-at":
+    case "de-ch":
+      return "de";
+
+    default:
+      return fallback;
+  }
+}
+
+function normalizePresetCurrency(
+  value: unknown,
+  fallback:
+    BusinessPresetCurrency =
+      "RSD"
+): BusinessPresetCurrency {
+  if (
+    typeof value !==
+      "string"
+  ) {
+    return fallback;
+  }
+
+  const normalizedValue =
+    value
+      .trim()
+      .toUpperCase();
+
+  if (
     BUSINESS_PRESET_CURRENCIES.includes(
-      value as BusinessPresetCurrency
+      normalizedValue as
+        BusinessPresetCurrency
     )
-  );
+  ) {
+    return normalizedValue as
+      BusinessPresetCurrency;
+  }
+
+  return fallback;
 }
 
-function isSupportedLocaleList(
-  value: unknown
-): value is BusinessPresetLocale[] {
-  return (
-    Array.isArray(value) &&
-    value.every(
-      isBusinessPresetLocale
+function normalizeSupportedLocales(
+  value: unknown,
+  defaultLocale:
+    BusinessPresetLocale
+): BusinessPresetLocale[] {
+  const normalizedLocales:
+    BusinessPresetLocale[] =
+      [];
+
+  if (
+    Array.isArray(
+      value
     )
-  );
+  ) {
+    for (
+      const requestedLocale of
+      value
+    ) {
+      if (
+        typeof requestedLocale !==
+          "string" ||
+        requestedLocale
+          .trim()
+          .length ===
+          0
+      ) {
+        continue;
+      }
+
+      const normalizedLocale =
+        normalizePresetLocale(
+          requestedLocale,
+          defaultLocale
+        );
+
+      if (
+        !normalizedLocales.includes(
+          normalizedLocale
+        )
+      ) {
+        normalizedLocales.push(
+          normalizedLocale
+        );
+      }
+    }
+  }
+
+  if (
+    !normalizedLocales.includes(
+      defaultLocale
+    )
+  ) {
+    normalizedLocales.unshift(
+      defaultLocale
+    );
+  }
+
+  return normalizedLocales;
+}
+
+function describeReceivedValue(
+  value: unknown
+): string {
+  if (
+    value ===
+      undefined
+  ) {
+    return "undefined";
+  }
+
+  if (
+    value ===
+      null
+  ) {
+    return "null";
+  }
+
+  if (
+    typeof value ===
+      "string"
+  ) {
+    return JSON.stringify(
+      value
+    );
+  }
+
+  try {
+    return JSON.stringify(
+      value
+    );
+  } catch {
+    return typeof value;
+  }
 }
 
 function errorResponse(
@@ -93,7 +283,8 @@ function errorResponse(
 }
 
 function successResponse(
-  payload: Record<string, unknown>
+  payload:
+    Record<string, unknown>
 ) {
   return NextResponse.json(
     {
@@ -111,22 +302,51 @@ function successResponse(
   );
 }
 
+async function authorizePlatformAdmin() {
+  const access =
+    await getPlatformAdminAccess();
+
+  if (
+    "context" in
+    access
+  ) {
+    return null;
+  }
+
+  if (
+    access.status ===
+      "unauthenticated"
+  ) {
+    return errorResponse(
+      401,
+      "Platform admin sesija nije aktivna.",
+      "PLATFORM_ADMIN_UNAUTHENTICATED"
+    );
+  }
+
+  return errorResponse(
+    403,
+    "Nemaš dozvolu za pristup Platform Admin panelu.",
+    "PLATFORM_ADMIN_FORBIDDEN"
+  );
+}
+
 function createPreview({
   presetKey,
   locale,
   currency,
   supportedLocales,
 }: {
-  presetKey: Parameters<
-    typeof materializeBusinessPreset
-  >[0]["presetKey"];
+  presetKey:
+    BusinessPresetKey;
 
-  locale: BusinessPresetLocale;
+  locale:
+    BusinessPresetLocale;
 
   currency:
     BusinessPresetCurrency;
 
-  supportedLocales?:
+  supportedLocales:
     readonly BusinessPresetLocale[];
 }) {
   return materializeBusinessPreset({
@@ -140,55 +360,30 @@ function createPreview({
 export async function GET(
   request: NextRequest
 ) {
-  /*
-   * Poziv je namerno izvan try/catch bloka.
-   * Ako admin sesija nije validna,
-   * Next.js redirect ka login stranici mora
-   * slobodno da se izvrši.
-   */
-  await requireAdmin();
+  const authorizationError =
+    await authorizePlatformAdmin();
+
+  if (
+    authorizationError
+  ) {
+    return authorizationError;
+  }
 
   const searchParams =
     request.nextUrl.searchParams;
 
-  const rawLocale =
-    searchParams.get(
-      "locale"
+  const locale =
+    normalizePresetLocale(
+      searchParams.get(
+        "locale"
+      )
     );
-
-  const locale:
-    BusinessPresetLocale =
-      rawLocale === null
-        ? "sr-Latn"
-        : isBusinessPresetLocale(
-              rawLocale
-            )
-          ? rawLocale
-          : "sr-Latn";
-
-  if (
-    rawLocale !== null &&
-    !isBusinessPresetLocale(
-      rawLocale
-    )
-  ) {
-    return errorResponse(
-      400,
-      "Jezik preseta nije podržan.",
-      "INVALID_PRESET_LOCALE"
-    );
-  }
 
   const rawPresetKey =
     searchParams.get(
       "presetKey"
     );
 
-  /*
-   * Bez presetKey vraćamo metadata paket
-   * koji će budući onboarding UI koristiti
-   * za dropdown liste.
-   */
   if (!rawPresetKey) {
     return successResponse({
       locale,
@@ -208,100 +403,76 @@ export async function GET(
     });
   }
 
-  if (
-    !isBusinessPresetKey(
+  const presetKey =
+    normalizePresetKey(
       rawPresetKey
-    )
-  ) {
+    );
+
+  if (!presetKey) {
     return errorResponse(
       400,
-      "Izabrani poslovni preset nije podržan.",
+      [
+        "Izabrani poslovni preset nije podržan.",
+        "Primljeno:",
+        describeReceivedValue(
+          rawPresetKey
+        ),
+      ].join(" "),
       "INVALID_BUSINESS_PRESET"
     );
   }
 
-  const rawCurrency =
-    searchParams.get(
-      "currency"
+  const currency =
+    normalizePresetCurrency(
+      searchParams.get(
+        "currency"
+      )
     );
-
-  const currency:
-    BusinessPresetCurrency =
-      rawCurrency === null
-        ? "RSD"
-        : isBusinessPresetCurrency(
-              rawCurrency
-            )
-          ? rawCurrency
-          : "RSD";
-
-  if (
-    rawCurrency !== null &&
-    !isBusinessPresetCurrency(
-      rawCurrency
-    )
-  ) {
-    return errorResponse(
-      400,
-      "Valuta preseta nije podržana.",
-      "INVALID_PRESET_CURRENCY"
-    );
-  }
 
   const rawSupportedLocales =
     searchParams.get(
       "supportedLocales"
     );
 
-  let supportedLocales:
-    BusinessPresetLocale[] |
-    undefined;
+  const requestedLocales =
+    rawSupportedLocales
+      ? rawSupportedLocales
+          .split(",")
+          .map(
+            (value) =>
+              value.trim()
+          )
+          .filter(
+            (value) =>
+              value.length >
+              0
+          )
+      : [];
 
-  if (rawSupportedLocales) {
-    const requestedLocales =
-      rawSupportedLocales
-        .split(",")
-        .map(
-          (value) =>
-            value.trim()
-        )
-        .filter(
-          (value) =>
-            value.length > 0
-        );
-
-    if (
-      requestedLocales.length === 0 ||
-      !requestedLocales.every(
-        isBusinessPresetLocale
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Lista podržanih jezika nije ispravna.",
-        "INVALID_SUPPORTED_LOCALES"
-      );
-    }
-
-    supportedLocales =
-      requestedLocales;
-  }
+  const supportedLocales =
+    normalizeSupportedLocales(
+      requestedLocales,
+      locale
+    );
 
   try {
     const preview =
       createPreview({
-        presetKey:
-          rawPresetKey,
-
+        presetKey,
         locale,
-
         currency,
-
         supportedLocales,
       });
 
     return successResponse({
       preview,
+
+      normalizedInput: {
+        presetKey,
+        locale,
+        currency,
+        supportedLocales,
+      },
     });
   } catch (error) {
     console.error(
@@ -320,9 +491,17 @@ export async function GET(
 export async function POST(
   request: NextRequest
 ) {
-  await requireAdmin();
+  const authorizationError =
+    await authorizePlatformAdmin();
 
-  let bodyValue: unknown;
+  if (
+    authorizationError
+  ) {
+    return authorizationError;
+  }
+
+  let bodyValue:
+    unknown;
 
   try {
     bodyValue =
@@ -348,76 +527,81 @@ export async function POST(
   }
 
   const body =
-    bodyValue as PreviewRequestBody;
+    bodyValue as
+      PreviewRequestBody;
 
-  if (
-    !isBusinessPresetKey(
+  const presetKey =
+    normalizePresetKey(
       body.presetKey
-    )
-  ) {
+    );
+
+  if (!presetKey) {
+    console.warn(
+      "Invalid business preset preview request:",
+      {
+        receivedPresetKey:
+          body.presetKey,
+
+        receivedLocale:
+          body.locale,
+
+        receivedCurrency:
+          body.currency,
+
+        receivedSupportedLocales:
+          body.supportedLocales,
+      }
+    );
+
     return errorResponse(
       400,
-      "Izabrani poslovni preset nije podržan.",
+      [
+        "Izabrani poslovni preset nije podržan.",
+        "Primljeno:",
+        describeReceivedValue(
+          body.presetKey
+        ),
+      ].join(" "),
       "INVALID_BUSINESS_PRESET"
     );
   }
 
-  if (
-    !isBusinessPresetLocale(
-      body.locale
-    )
-  ) {
-    return errorResponse(
-      400,
-      "Jezik preseta nije podržan.",
-      "INVALID_PRESET_LOCALE"
+  const locale =
+    normalizePresetLocale(
+      body.locale,
+      "sr-Latn"
     );
-  }
 
-  if (
-    !isBusinessPresetCurrency(
-      body.currency
-    )
-  ) {
-    return errorResponse(
-      400,
-      "Valuta preseta nije podržana.",
-      "INVALID_PRESET_CURRENCY"
+  const currency =
+    normalizePresetCurrency(
+      body.currency,
+      "RSD"
     );
-  }
 
-  if (
-    body.supportedLocales !==
-      undefined &&
-    !isSupportedLocaleList(
-      body.supportedLocales
-    )
-  ) {
-    return errorResponse(
-      400,
-      "Lista podržanih jezika nije ispravna.",
-      "INVALID_SUPPORTED_LOCALES"
+  const supportedLocales =
+    normalizeSupportedLocales(
+      body.supportedLocales,
+      locale
     );
-  }
 
   try {
     const preview =
       createPreview({
-        presetKey:
-          body.presetKey,
-
-        locale:
-          body.locale,
-
-        currency:
-          body.currency,
-
-        supportedLocales:
-          body.supportedLocales,
+        presetKey,
+        locale,
+        currency,
+        supportedLocales,
       });
 
     return successResponse({
       preview,
+
+      normalizedInput: {
+        presetKey,
+        locale,
+        currency,
+        supportedLocales,
+      },
     });
   } catch (error) {
     console.error(
@@ -427,7 +611,7 @@ export async function POST(
 
     return errorResponse(
       500,
-      "Nije moguće napraviti preview poslovnog preseta.",
+      "Nije moguće pripremiti poslovni preset.",
       "PRESET_MATERIALIZATION_FAILED"
     );
   }
