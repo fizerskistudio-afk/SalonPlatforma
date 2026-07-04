@@ -13,6 +13,7 @@ import {
   Copy,
   ExternalLink,
   Pencil,
+  Scissors,
   UsersRound,
 } from "lucide-react";
 
@@ -81,8 +82,7 @@ export default function BusinessPublicLinkActions({
   const [
     copied,
     setCopied,
-  ] =
-    useState(false);
+  ] = useState(false);
 
   const resetTimerRef =
     useRef<
@@ -103,7 +103,9 @@ export default function BusinessPublicLinkActions({
 
   const handleCopy =
     async () => {
-      if (!isActive) {
+      if (
+        !isActive
+      ) {
         return;
       }
 
@@ -142,7 +144,9 @@ export default function BusinessPublicLinkActions({
           );
       }
 
-      if (!copySucceeded) {
+      if (
+        !copySucceeded
+      ) {
         return;
       }
 
@@ -167,7 +171,7 @@ export default function BusinessPublicLinkActions({
 
   return (
     <div
-      className="flex w-full max-w-2xl flex-col gap-3 xl:w-auto"
+      className="flex w-full max-w-3xl flex-col gap-3 xl:w-auto"
     >
       <div
         className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
@@ -190,7 +194,7 @@ export default function BusinessPublicLinkActions({
       </div>
 
       <div
-        className="grid gap-3 sm:grid-cols-3"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
         <Link
           href={
@@ -229,6 +233,19 @@ export default function BusinessPublicLinkActions({
           />
 
           Zaposleni
+        </Link>
+
+        <Link
+          href={
+            `${businessBasePath}/catalog`
+          }
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-300/20 bg-rose-300/10 px-4 py-2.5 text-sm font-semibold text-rose-200 transition hover:border-rose-300/35 hover:bg-rose-300/15 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+        >
+          <Scissors
+            size={17}
+          />
+
+          Katalog
         </Link>
       </div>
 
