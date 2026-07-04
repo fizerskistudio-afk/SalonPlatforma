@@ -13,6 +13,7 @@ import {
   Copy,
   ExternalLink,
   Pencil,
+  UsersRound,
 } from "lucide-react";
 
 type BusinessPublicLinkActionsProps = {
@@ -166,7 +167,7 @@ export default function BusinessPublicLinkActions({
 
   return (
     <div
-      className="flex w-full max-w-md flex-col gap-3 xl:w-auto"
+      className="flex w-full max-w-2xl flex-col gap-3 xl:w-auto"
     >
       <div
         className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
@@ -189,7 +190,7 @@ export default function BusinessPublicLinkActions({
       </div>
 
       <div
-        className="grid gap-3 sm:grid-cols-2"
+        className="grid gap-3 sm:grid-cols-3"
       >
         <Link
           href={
@@ -215,6 +216,19 @@ export default function BusinessPublicLinkActions({
           />
 
           Booking i vreme
+        </Link>
+
+        <Link
+          href={
+            `${businessBasePath}/employees`
+          }
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-violet-300/20 bg-violet-300/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition hover:border-violet-300/35 hover:bg-violet-300/15 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+        >
+          <UsersRound
+            size={17}
+          />
+
+          Zaposleni
         </Link>
       </div>
 
