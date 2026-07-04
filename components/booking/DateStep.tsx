@@ -1,13 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
-import { CalendarDays } from "lucide-react";
+import {
+  useMemo,
+} from "react";
 
-import { useCatalogData } from "@/lib/catalogContext";
+import {
+  CalendarDays,
+} from "lucide-react";
+
+import {
+  useCatalogData,
+} from "@/lib/catalogContext";
+
 import {
   t,
   translations,
 } from "@/lib/translations";
+
 import type {
   DayOfWeek,
   Locale,
@@ -18,7 +27,9 @@ import SectionHeader from "../shared/SectionHeader";
 type DateStepProps = {
   locale: Locale;
   selectedDate: string | null;
-  onSelectDate: (date: string) => void;
+  onSelectDate: (
+    date: string
+  ) => void;
 };
 
 type DateOption = {
@@ -40,10 +51,28 @@ const intlLocaleMap: Record<
   Locale,
   string
 > = {
-  mk: "mk-MK",
-  sq: "sq-MK",
-  en: "en-GB",
+  "sr-Latn":
+    "sr-Latn-RS",
+
+  mk:
+    "mk-MK",
+
+  sq:
+    "sq-AL",
+
+  en:
+    "en-GB",
 };
+
+function resolveIntlLocale(
+  locale: Locale
+): string {
+  return (
+    intlLocaleMap[locale] ??
+    locale ??
+    "en-GB"
+  );
+}
 
 function getCurrentDateParts(
   timezone: string
@@ -52,10 +81,17 @@ function getCurrentDateParts(
     new Intl.DateTimeFormat(
       "en-CA",
       {
-        timeZone: timezone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+        timeZone:
+          timezone,
+
+        year:
+          "numeric",
+
+        month:
+          "2-digit",
+
+        day:
+          "2-digit",
       }
     );
 
@@ -64,45 +100,60 @@ function getCurrentDateParts(
       new Date()
     );
 
-  const year = Number(
-    parts.find(
-      (part) =>
-        part.type === "year"
-    )?.value
-  );
+  const year =
+    Number(
+      parts.find(
+        (part) =>
+          part.type ===
+          "year"
+      )?.value
+    );
 
-  const month = Number(
-    parts.find(
-      (part) =>
-        part.type === "month"
-    )?.value
-  );
+  const month =
+    Number(
+      parts.find(
+        (part) =>
+          part.type ===
+          "month"
+      )?.value
+    );
 
-  const day = Number(
-    parts.find(
-      (part) =>
-        part.type === "day"
-    )?.value
-  );
+  const day =
+    Number(
+      parts.find(
+        (part) =>
+          part.type ===
+          "day"
+      )?.value
+    );
 
   if (
-    !Number.isInteger(year) ||
-    !Number.isInteger(month) ||
-    !Number.isInteger(day)
+    !Number.isInteger(
+      year
+    ) ||
+    !Number.isInteger(
+      month
+    ) ||
+    !Number.isInteger(
+      day
+    )
   ) {
     const fallbackDate =
       new Date();
 
     return {
       year:
-        fallbackDate.getUTCFullYear(),
+        fallbackDate
+          .getUTCFullYear(),
 
       month:
-        fallbackDate.getUTCMonth() +
+        fallbackDate
+          .getUTCMonth() +
         1,
 
       day:
-        fallbackDate.getUTCDate(),
+        fallbackDate
+          .getUTCDate(),
     };
   }
 
@@ -114,14 +165,16 @@ function getCurrentDateParts(
 }
 
 function createCalendarDate(
-  startDate: CalendarDateParts,
+  startDate:
+    CalendarDateParts,
   dayOffset: number
 ): Date {
   return new Date(
     Date.UTC(
       startDate.year,
       startDate.month - 1,
-      startDate.day + dayOffset,
+      startDate.day +
+        dayOffset,
       12,
       0,
       0
@@ -135,13 +188,22 @@ function formatCalendarDate(
   const year =
     date.getUTCFullYear();
 
-  const month = String(
-    date.getUTCMonth() + 1
-  ).padStart(2, "0");
+  const month =
+    String(
+      date.getUTCMonth() +
+        1
+    ).padStart(
+      2,
+      "0"
+    );
 
-  const day = String(
-    date.getUTCDate()
-  ).padStart(2, "0");
+  const day =
+    String(
+      date.getUTCDate()
+    ).padStart(
+      2,
+      "0"
+    );
 
   return `${year}-${month}-${day}`;
 }
@@ -154,19 +216,27 @@ export default function DateStep({
   const {
     business,
     booking,
-  } = useCatalogData();
+  } =
+    useCatalogData();
 
   const dates =
-    useMemo<DateOption[]>(() => {
+    useMemo<
+      DateOption[]
+    >(() => {
       const localeCode =
-        intlLocaleMap[locale];
+        resolveIntlLocale(
+          locale
+        );
 
       const weekdayFormatter =
         new Intl.DateTimeFormat(
           localeCode,
           {
-            weekday: "short",
-            timeZone: "UTC",
+            weekday:
+              "short",
+
+            timeZone:
+              "UTC",
           }
         );
 
@@ -174,8 +244,11 @@ export default function DateStep({
         new Intl.DateTimeFormat(
           localeCode,
           {
-            month: "short",
-            timeZone: "UTC",
+            month:
+              "short",
+
+            timeZone:
+              "UTC",
           }
         );
 
@@ -183,11 +256,20 @@ export default function DateStep({
         new Intl.DateTimeFormat(
           localeCode,
           {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            timeZone: "UTC",
+            weekday:
+              "long",
+
+            day:
+              "numeric",
+
+            month:
+              "long",
+
+            year:
+              "numeric",
+
+            timeZone:
+              "UTC",
           }
         );
 
@@ -196,8 +278,9 @@ export default function DateStep({
           business.timezone
         );
 
-      const result: DateOption[] =
-        [];
+      const result:
+        DateOption[] =
+          [];
 
       for (
         let dayOffset = 0;
@@ -212,20 +295,26 @@ export default function DateStep({
           );
 
         const dayOfWeek =
-          date.getUTCDay() as DayOfWeek;
+          date.getUTCDay() as
+            DayOfWeek;
 
         const workingHours =
-          business.workingHours.find(
-            (hours) =>
-              hours.dayOfWeek ===
-              dayOfWeek
-          );
+          business
+            .workingHours
+            .find(
+              (hours) =>
+                hours.dayOfWeek ===
+                dayOfWeek
+            );
 
         const isClosed =
           !workingHours ||
-          workingHours.isClosed ||
-          !workingHours.openTime ||
-          !workingHours.closeTime;
+          workingHours
+            .isClosed ||
+          !workingHours
+            .openTime ||
+          !workingHours
+            .closeTime;
 
         result.push({
           date:
@@ -236,159 +325,227 @@ export default function DateStep({
           isClosed,
 
           dayName:
-            weekdayFormatter.format(
-              date
-            ),
+            weekdayFormatter
+              .format(
+                date
+              ),
 
           dayNumber:
             date.getUTCDate(),
 
           monthName:
-            monthFormatter.format(
-              date
-            ),
+            monthFormatter
+              .format(
+                date
+              ),
 
           fullDateLabel:
-            fullDateFormatter.format(
-              date
-            ),
+            fullDateFormatter
+              .format(
+                date
+              ),
         });
       }
 
       return result;
     }, [
-      booking.bookingWindowDays,
-      business.timezone,
-      business.workingHours,
+      booking
+        .bookingWindowDays,
+
+      business
+        .timezone,
+
+      business
+        .workingHours,
+
       locale,
     ]);
 
   const allDatesClosed =
     dates.every(
-      (date) => date.isClosed
+      (date) =>
+        date.isClosed
     );
 
   return (
-    <div className="space-y-6">
+    <div
+      className="
+        space-y-6
+      "
+    >
       <SectionHeader
         title={
-          translations.booking
+          translations
+            .booking
             .selectDate
         }
         subtitle={
-          translations.booking
+          translations
+            .booking
             .selectDateDescription
         }
-        locale={locale}
+        locale={
+          locale
+        }
         align="left"
       />
 
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3">
-        {dates.map((option) => {
-          const isSelected =
-            selectedDate ===
-            option.date;
+      <div
+        className="
+          -mx-1
+          flex
+          gap-2
+          overflow-x-auto
+          px-1
+          pb-3
+        "
+      >
+        {dates.map(
+          (
+            option
+          ) => {
+            const isSelected =
+              selectedDate ===
+              option.date;
 
-          const closedLabel = t(
-            translations.contact.closed,
-            locale
-          );
+            const closedLabel =
+              t(
+                translations
+                  .contact
+                  .closed,
+                locale
+              );
 
-          const ariaLabel =
-            option.isClosed
-              ? `${option.fullDateLabel}, ${closedLabel}`
-              : option.fullDateLabel;
+            const ariaLabel =
+              option.isClosed
+                ? `${option.fullDateLabel}, ${closedLabel}`
+                : option.fullDateLabel;
 
-          return (
-            <button
-              key={option.date}
-              type="button"
-              disabled={
-                option.isClosed
-              }
-              onClick={() =>
-                onSelectDate(
+            return (
+              <button
+                key={
                   option.date
-                )
-              }
-              aria-pressed={
-                option.isClosed
-                  ? undefined
-                  : isSelected
-              }
-              aria-label={
-                ariaLabel
-              }
-              className={`flex w-20 flex-shrink-0 flex-col items-center gap-0.5 rounded-2xl border-2 py-3 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none ${
-                option.isClosed
-                  ? "cursor-not-allowed border-[var(--brand-border)] bg-[var(--brand-secondary)] opacity-50"
-                  : isSelected
-                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-[var(--brand-surface)]"
-                    : "border-[var(--brand-border)] bg-[var(--brand-surface)] hover:border-[var(--brand-primary)]"
-              }`}
-            >
-              <span
-                className={`text-[10px] font-semibold uppercase ${
+                }
+                type="button"
+                disabled={
                   option.isClosed
-                    ? "text-[var(--brand-muted)]"
+                }
+                onClick={() =>
+                  onSelectDate(
+                    option.date
+                  )
+                }
+                aria-pressed={
+                  option.isClosed
+                    ? undefined
                     : isSelected
-                      ? "text-[var(--brand-surface)]"
-                      : "text-[var(--brand-muted)]"
+                }
+                aria-label={
+                  ariaLabel
+                }
+                className={`flex w-20 flex-shrink-0 flex-col items-center gap-0.5 rounded-2xl border-2 py-3 transition-all focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 motion-reduce:transition-none ${
+                  option.isClosed
+                    ? "cursor-not-allowed border-[var(--brand-border)] bg-[var(--brand-secondary)] opacity-50"
+                    : isSelected
+                      ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-[var(--brand-surface)]"
+                      : "border-[var(--brand-border)] bg-[var(--brand-surface)] hover:border-[var(--brand-primary)]"
                 }`}
               >
-                {option.dayName}
-              </span>
-
-              <span
-                className={`font-display text-xl font-semibold ${
-                  option.isClosed
-                    ? "text-[var(--brand-muted)]"
-                    : isSelected
-                      ? "text-[var(--brand-surface)]"
-                      : "text-[var(--brand-text)]"
-                }`}
-              >
-                {option.dayNumber}
-              </span>
-
-              <span
-                className={`text-[10px] ${
-                  option.isClosed
-                    ? "text-[var(--brand-muted)]"
-                    : isSelected
-                      ? "text-[var(--brand-surface)]"
-                      : "text-[var(--brand-muted)]"
-                }`}
-              >
-                {option.monthName}
-              </span>
-
-              {option.isClosed && (
-                <span className="mt-0.5 text-[9px] uppercase tracking-wider text-[var(--brand-muted)]">
-                  {closedLabel}
+                <span
+                  className={`text-[10px] font-semibold uppercase ${
+                    option.isClosed
+                      ? "text-[var(--brand-muted)]"
+                      : isSelected
+                        ? "text-[var(--brand-surface)]"
+                        : "text-[var(--brand-muted)]"
+                  }`}
+                >
+                  {
+                    option.dayName
+                  }
                 </span>
-              )}
-            </button>
-          );
-        })}
+
+                <span
+                  className={`font-display text-xl font-semibold ${
+                    option.isClosed
+                      ? "text-[var(--brand-muted)]"
+                      : isSelected
+                        ? "text-[var(--brand-surface)]"
+                        : "text-[var(--brand-text)]"
+                  }`}
+                >
+                  {
+                    option.dayNumber
+                  }
+                </span>
+
+                <span
+                  className={`text-[10px] ${
+                    option.isClosed
+                      ? "text-[var(--brand-muted)]"
+                      : isSelected
+                        ? "text-[var(--brand-surface)]"
+                        : "text-[var(--brand-muted)]"
+                  }`}
+                >
+                  {
+                    option.monthName
+                  }
+                </span>
+
+                {option.isClosed ? (
+                  <span
+                    className="
+                      mt-0.5
+                      text-[9px]
+                      uppercase
+                      tracking-wider
+                      text-[var(--brand-muted)]
+                    "
+                  >
+                    {
+                      closedLabel
+                    }
+                  </span>
+                ) : null}
+              </button>
+            );
+          }
+        )}
       </div>
 
-      {allDatesClosed && (
-        <div className="flex items-center gap-3 rounded-2xl bg-[var(--brand-secondary)] p-4 text-sm text-[var(--brand-muted)]">
+      {allDatesClosed ? (
+        <div
+          className="
+            flex
+            items-center
+            gap-3
+            rounded-2xl
+            bg-[var(--brand-secondary)]
+            p-4
+            text-sm
+            text-[var(--brand-muted)]
+          "
+        >
           <CalendarDays
-            className="h-5 w-5 flex-shrink-0"
+            className="
+              h-5
+              w-5
+              flex-shrink-0
+            "
             aria-hidden="true"
           />
 
           <span>
             {t(
-              translations.booking
+              translations
+                .booking
                 .noAvailableDates,
               locale
             )}
           </span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
