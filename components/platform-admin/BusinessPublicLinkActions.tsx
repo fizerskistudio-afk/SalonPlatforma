@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 
 import {
+  CalendarClock,
   Check,
   Copy,
   ExternalLink,
@@ -65,9 +66,7 @@ function getBusinessSlug(
   const segments =
     publicPath
       .split("/")
-      .filter(
-        Boolean
-      );
+      .filter(Boolean);
 
   return segments[
     segments.length - 1
@@ -82,27 +81,23 @@ export default function BusinessPublicLinkActions({
     copied,
     setCopied,
   ] =
-    useState(
-      false
-    );
+    useState(false);
 
   const resetTimerRef =
     useRef<
       ReturnType<
         typeof setTimeout
       > | null
-    >(
-      null
-    );
+    >(null);
 
   const businessSlug =
     getBusinessSlug(
       publicPath
     );
 
-  const editPath =
+  const businessBasePath =
     businessSlug
-      ? `/platform-admin/businesses/${businessSlug}/edit`
+      ? `/platform-admin/businesses/${businessSlug}`
       : "/platform-admin/businesses";
 
   const handleCopy =
@@ -146,15 +141,11 @@ export default function BusinessPublicLinkActions({
           );
       }
 
-      if (
-        !copySucceeded
-      ) {
+      if (!copySucceeded) {
         return;
       }
 
-      setCopied(
-        true
-      );
+      setCopied(true);
 
       if (
         resetTimerRef.current
@@ -167,9 +158,7 @@ export default function BusinessPublicLinkActions({
       resetTimerRef.current =
         setTimeout(
           () => {
-            setCopied(
-              false
-            );
+            setCopied(false);
           },
           1800
         );
@@ -199,18 +188,35 @@ export default function BusinessPublicLinkActions({
         </p>
       </div>
 
-      <Link
-        href={
-          editPath
-        }
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-300/20 bg-amber-300/10 px-4 py-2.5 text-sm font-semibold text-amber-200 transition hover:border-amber-300/35 hover:bg-amber-300/15 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+      <div
+        className="grid gap-3 sm:grid-cols-2"
       >
-        <Pencil
-          size={17}
-        />
+        <Link
+          href={
+            `${businessBasePath}/edit`
+          }
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-300/20 bg-amber-300/10 px-4 py-2.5 text-sm font-semibold text-amber-200 transition hover:border-amber-300/35 hover:bg-amber-300/15 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+        >
+          <Pencil
+            size={17}
+          />
 
-        Uredi osnovne podatke
-      </Link>
+          Osnovni podaci
+        </Link>
+
+        <Link
+          href={
+            `${businessBasePath}/settings`
+          }
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-sky-300/20 bg-sky-300/10 px-4 py-2.5 text-sm font-semibold text-sky-200 transition hover:border-sky-300/35 hover:bg-sky-300/15 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+        >
+          <CalendarClock
+            size={17}
+          />
+
+          Booking i vreme
+        </Link>
+      </div>
 
       {isActive ? (
         <div
@@ -240,9 +246,7 @@ export default function BusinessPublicLinkActions({
           </button>
 
           <a
-            href={
-              publicPath
-            }
+            href={publicPath}
             target="_blank"
             rel="noreferrer"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-950"
