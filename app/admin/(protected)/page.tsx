@@ -20,6 +20,9 @@ import {
   type BookingStatus,
 } from "@/lib/admin/bookings";
 
+import DashboardBookingQuickActions from "@/components/admin/DashboardBookingQuickActions";
+import DashboardPendingBookings from "@/components/admin/DashboardPendingBookings";
+
 export const dynamic = "force-dynamic";
 
 const statusLabels: Record<BookingStatus, string> = {
@@ -277,6 +280,14 @@ export default async function AdminDashboardPage() {
 
   const nextBooking = upcomingBookings[0] ?? null;
 
+  const pendingBookings = upcomingBookings
+    .filter(
+      (booking) =>
+        booking.status === "pending"
+    )
+    .slice(0, 5);
+
+
   const monthlyCompletedBookings = bookings.filter(
     (booking) =>
       booking.status === "completed" &&
@@ -465,6 +476,11 @@ export default async function AdminDashboardPage() {
           );
         })}
       </section>
+
+      <DashboardPendingBookings
+        bookings={pendingBookings}
+        timezone={business.timezone}
+      />
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
         <article className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.025]">
@@ -712,6 +728,12 @@ export default async function AdminDashboardPage() {
                   aria-hidden="true"
                 />
               </Link>
+
+              <DashboardBookingQuickActions
+                bookingId={nextBooking.id}
+                status={nextBooking.status}
+                compact
+              />
             </>
           )}
         </article>
