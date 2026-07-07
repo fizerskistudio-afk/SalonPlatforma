@@ -6,21 +6,19 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
-import {
-  google,
-} from "googleapis";
+import { google } from "googleapis";
 
-import {
-  getGoogleCalendarConfig,
-} from "./config";
+import { getGoogleCalendarConfig } from "./config";
 
 const OAUTH_STATE_VERSION = 1;
-
 const OAUTH_STATE_LIFETIME_MS =
   10 * 60 * 1000;
-
 const OAUTH_CLOCK_SKEW_MS =
   60 * 1000;
+
+export type GoogleOAuthTarget =
+  | "business"
+  | "employee";
 
 export type GoogleOAuthStatePayload = {
   version: 1;
@@ -29,11 +27,15 @@ export type GoogleOAuthStatePayload = {
   nonce: string;
   issuedAt: number;
   expiresAt: number;
+  target?: GoogleOAuthTarget;
+  employeeId?: string;
 };
 
 type CreateGoogleOAuthStateInput = {
   businessId: string;
   userId: string;
+  target?: GoogleOAuthTarget;
+  employeeId?: string | null;
 };
 
 type GenerateAuthorizationUrlInput = {
@@ -71,8 +73,7 @@ function createStateSignature(
 ): Buffer {
   const {
     tokenEncryptionKey,
-  } =
-    getGoogleCalendarConfig();
+  } = getGoogleCalendarConfig();
 
   return createHmac(
     "sha256",
@@ -103,6 +104,15 @@ function isFiniteNumber(
   );
 }
 
+function isGoogleOAuthTarget(
+  value: unknown
+): value is GoogleOAuthTarget {
+  return (
+    value === "business" ||
+    value === "employee"
+  );
+}
+
 function isValidStatePayload(
   value: unknown
 ): value is GoogleOAuthStatePayload {
@@ -116,25 +126,52 @@ function isValidStatePayload(
   const payload =
     value as Partial<GoogleOAuthStatePayload>;
 
-  return (
-    payload.version ===
-      OAUTH_STATE_VERSION &&
-    isString(
+  if (
+    payload.version !==
+      OAUTH_STATE_VERSION ||
+    !isString(
       payload.businessId
-    ) &&
-    isString(
+    ) ||
+    !isString(
       payload.userId
-    ) &&
-    isString(
+    ) ||
+    !isString(
       payload.nonce
-    ) &&
-    isFiniteNumber(
+    ) ||
+    !isFiniteNumber(
       payload.issuedAt
-    ) &&
-    isFiniteNumber(
+    ) ||
+    !isFiniteNumber(
       payload.expiresAt
     )
-  );
+  ) {
+    return false;
+  }
+
+  if (
+    payload.target !==
+      undefined &&
+    !isGoogleOAuthTarget(
+      payload.target
+    )
+  ) {
+    return false;
+  }
+
+  const target =
+    payload.target ??
+    "business";
+
+  if (
+    target === "employee" &&
+    !isString(
+      payload.employeeId
+    )
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export function createGoogleOAuthClient() {
@@ -142,8 +179,7 @@ export function createGoogleOAuthClient() {
     clientId,
     clientSecret,
     redirectUri,
-  } =
-    getGoogleCalendarConfig();
+  } = getGoogleCalendarConfig();
 
   return new google.auth.OAuth2(
     clientId,
@@ -155,32 +191,46 @@ export function createGoogleOAuthClient() {
 export function createGoogleOAuthState({
   businessId,
   userId,
+  target = "business",
+  employeeId,
 }: CreateGoogleOAuthStateInput): {
   state: string;
   nonce: string;
 } {
-  const now = Date.now();
+  if (
+    target === "employee" &&
+    !employeeId?.trim()
+  ) {
+    throw new Error(
+      "Employee Google OAuth state requires an employee ID."
+    );
+  }
 
+  const now = Date.now();
   const nonce =
     randomBytes(32).toString(
       "base64url"
     );
 
-  const payload: GoogleOAuthStatePayload =
-    {
-      version:
-        OAUTH_STATE_VERSION,
-
-      businessId,
-      userId,
-      nonce,
-
-      issuedAt: now,
-
-      expiresAt:
-        now +
-        OAUTH_STATE_LIFETIME_MS,
-    };
+  const payload: GoogleOAuthStatePayload = {
+    version:
+      OAUTH_STATE_VERSION,
+    businessId,
+    userId,
+    nonce,
+    issuedAt: now,
+    expiresAt:
+      now +
+      OAUTH_STATE_LIFETIME_MS,
+    target,
+    ...(target ===
+      "employee"
+      ? {
+          employeeId:
+            employeeId!.trim(),
+        }
+      : {}),
+  };
 
   const encodedPayload =
     encodeBase64Url(
@@ -304,8 +354,7 @@ export function generateGoogleAuthorizationUrl({
 }: GenerateAuthorizationUrlInput): string {
   const {
     scopes,
-  } =
-    getGoogleCalendarConfig();
+  } = getGoogleCalendarConfig();
 
   const oauthClient =
     createGoogleOAuthClient();
@@ -314,19 +363,14 @@ export function generateGoogleAuthorizationUrl({
     {
       access_type:
         "offline",
-
       scope: [
         ...scopes,
       ],
-
       include_granted_scopes:
         true,
-
       prompt:
         "consent",
-
       state,
-
       ...(loginHint?.trim()
         ? {
             login_hint:

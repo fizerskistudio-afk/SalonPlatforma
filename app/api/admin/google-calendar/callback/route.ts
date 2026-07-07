@@ -14,18 +14,19 @@ import {
   createGoogleOAuthClient,
   exchangeGoogleAuthorizationCode,
   verifyGoogleOAuthState,
+  type GoogleOAuthTarget,
 } from "@/lib/google-calendar/oauth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic =
   "force-dynamic";
-
 export const revalidate = 0;
 
 const OAUTH_NONCE_COOKIE =
   "salon_google_calendar_oauth_nonce";
-
+const OAUTH_TARGET_COOKIE =
+  "salon_google_calendar_oauth_target";
 const OAUTH_COOKIE_PATH =
   "/api/admin/google-calendar/callback";
 
@@ -34,6 +35,16 @@ type ExistingConnectionRow = {
   calendar_id: string;
   calendar_name: string | null;
 };
+
+function readTargetCookie(
+  request: NextRequest
+): GoogleOAuthTarget {
+  return request.cookies.get(
+    OAUTH_TARGET_COOKIE
+  )?.value === "employee"
+    ? "employee"
+    : "business";
+}
 
 function createNoStoreRedirect(
   url: URL
@@ -46,58 +57,70 @@ function createNoStoreRedirect(
     "no-store, max-age=0"
   );
 
-  response.cookies.set(
+  for (const cookieName of [
     OAUTH_NONCE_COOKIE,
-    "",
-    {
-      httpOnly: true,
-
-      secure:
-        process.env.NODE_ENV ===
-        "production",
-
-      sameSite: "lax",
-
-      path:
-        OAUTH_COOKIE_PATH,
-
-      maxAge: 0,
-    }
-  );
+    OAUTH_TARGET_COOKIE,
+  ]) {
+    response.cookies.set(
+      cookieName,
+      "",
+      {
+        httpOnly: true,
+        secure:
+          process.env.NODE_ENV ===
+          "production",
+        sameSite: "lax",
+        path:
+          OAUTH_COOKIE_PATH,
+        maxAge: 0,
+      }
+    );
+  }
 
   return response;
 }
 
-function redirectToSettings(
+function redirectToDestination(
   request: NextRequest,
+  target: GoogleOAuthTarget,
   status: string
 ): NextResponse {
-  const settingsUrl = new URL(
-    "/admin/settings",
+  const destination =
+    target === "employee"
+      ? "/staff/calendar"
+      : "/admin/settings";
+
+  const url = new URL(
+    destination,
     request.url
   );
 
-  settingsUrl.searchParams.set(
+  url.searchParams.set(
     "googleCalendar",
     status
   );
 
   return createNoStoreRedirect(
-    settingsUrl
+    url
   );
 }
 
 function redirectToLogin(
-  request: NextRequest
+  request: NextRequest,
+  target: GoogleOAuthTarget
 ): NextResponse {
   const loginUrl = new URL(
-    "/admin/login",
+    target === "employee"
+      ? "/staff/login"
+      : "/admin/login",
     request.url
   );
 
   loginUrl.searchParams.set(
     "next",
-    "/admin/settings"
+    target === "employee"
+      ? "/staff/calendar"
+      : "/admin/settings"
   );
 
   return createNoStoreRedirect(
@@ -108,9 +131,13 @@ function redirectToLogin(
 export async function GET(
   request: NextRequest
 ) {
+  const cookieTarget =
+    readTargetCookie(
+      request
+    );
+
   const searchParams =
     request.nextUrl.searchParams;
-
   const googleError =
     searchParams.get("error");
 
@@ -120,8 +147,9 @@ export async function GET(
       googleError
     );
 
-    return redirectToSettings(
+    return redirectToDestination(
       request,
+      cookieTarget,
       googleError ===
         "access_denied"
         ? "cancelled"
@@ -131,13 +159,13 @@ export async function GET(
 
   const code =
     searchParams.get("code");
-
   const state =
     searchParams.get("state");
 
   if (!code || !state) {
-    return redirectToSettings(
+    return redirectToDestination(
       request,
+      cookieTarget,
       "missing_callback_data"
     );
   }
@@ -149,9 +177,25 @@ export async function GET(
       );
 
     if (!statePayload) {
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        cookieTarget,
         "invalid_state"
+      );
+    }
+
+    const stateTarget =
+      statePayload.target ??
+      "business";
+
+    if (
+      stateTarget !==
+      cookieTarget
+    ) {
+      return redirectToDestination(
+        request,
+        cookieTarget,
+        "target_mismatch"
       );
     }
 
@@ -165,8 +209,9 @@ export async function GET(
       cookieNonce !==
         statePayload.nonce
     ) {
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        stateTarget,
         "invalid_nonce"
       );
     }
@@ -187,7 +232,8 @@ export async function GET(
       !user
     ) {
       return redirectToLogin(
-        request
+        request,
+        stateTarget
       );
     }
 
@@ -195,8 +241,9 @@ export async function GET(
       user.id !==
       statePayload.userId
     ) {
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        stateTarget,
         "user_mismatch"
       );
     }
@@ -204,11 +251,115 @@ export async function GET(
     const adminClient =
       createAdminClient();
 
-    const {
-      data: membership,
-      error: membershipError,
-    } =
-      await adminClient
+    if (
+      stateTarget ===
+      "employee"
+    ) {
+      if (
+        !statePayload.employeeId
+      ) {
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "employee_link_required"
+        );
+      }
+
+      const {
+        data: membership,
+        error: membershipError,
+      } = await adminClient
+        .from(
+          "business_members"
+        )
+        .select(
+          "business_id, employee_id, role, is_active"
+        )
+        .eq(
+          "business_id",
+          statePayload.businessId
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .eq(
+          "employee_id",
+          statePayload.employeeId
+        )
+        .eq(
+          "role",
+          "staff"
+        )
+        .eq(
+          "is_active",
+          true
+        )
+        .maybeSingle();
+
+      if (membershipError) {
+        console.error(
+          "Failed to verify staff Google Calendar membership:",
+          membershipError
+        );
+
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "membership_error"
+        );
+      }
+
+      if (!membership) {
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "forbidden"
+        );
+      }
+
+      const {
+        data: employee,
+        error: employeeError,
+      } = await adminClient
+        .from("employees")
+        .select(
+          "id, business_id, is_active"
+        )
+        .eq(
+          "id",
+          statePayload.employeeId
+        )
+        .eq(
+          "business_id",
+          statePayload.businessId
+        )
+        .eq(
+          "is_active",
+          true
+        )
+        .maybeSingle();
+
+      if (
+        employeeError ||
+        !employee
+      ) {
+        console.error(
+          "Failed to verify employee before Google Calendar connection:",
+          employeeError
+        );
+
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "employee_not_found"
+        );
+      }
+    } else {
+      const {
+        data: membership,
+        error: membershipError,
+      } = await adminClient
         .from(
           "business_members"
         )
@@ -236,58 +387,57 @@ export async function GET(
         )
         .maybeSingle();
 
-    if (membershipError) {
-      console.error(
-        "Failed to verify Google Calendar membership:",
-        membershipError
-      );
+      if (membershipError) {
+        console.error(
+          "Failed to verify salon Google Calendar membership:",
+          membershipError
+        );
 
-      return redirectToSettings(
-        request,
-        "membership_error"
-      );
-    }
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "membership_error"
+        );
+      }
 
-    if (!membership) {
-      return redirectToSettings(
-        request,
-        "forbidden"
-      );
+      if (!membership) {
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "forbidden"
+        );
+      }
     }
 
     const {
       data: business,
       error: businessError,
-    } =
-      await adminClient
-        .from("businesses")
-        .select("id, is_active")
-        .eq(
-          "id",
-          statePayload.businessId
-        )
-        .eq(
-          "is_active",
-          true
-        )
-        .maybeSingle();
+    } = await adminClient
+      .from("businesses")
+      .select("id, is_active")
+      .eq(
+        "id",
+        statePayload.businessId
+      )
+      .eq(
+        "is_active",
+        true
+      )
+      .maybeSingle();
 
-    if (businessError) {
+    if (
+      businessError ||
+      !business
+    ) {
       console.error(
         "Failed to verify Google Calendar business:",
         businessError
       );
 
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        stateTarget,
         "business_error"
-      );
-    }
-
-    if (!business) {
-      return redirectToSettings(
-        request,
-        "business_not_found"
       );
     }
 
@@ -298,7 +448,6 @@ export async function GET(
 
     const oauthClient =
       createGoogleOAuthClient();
-
     oauthClient.setCredentials(
       tokens
     );
@@ -314,26 +463,39 @@ export async function GET(
     } =
       await oauth2Client.userinfo.get();
 
-    const {
-      data: existingConnectionData,
-      error: existingConnectionError,
-    } =
-      await adminClient
-        .from(
-          "google_calendar_connections"
-        )
+    const connectionTable =
+      stateTarget ===
+      "employee"
+        ? "employee_google_calendar_connections"
+        : "google_calendar_connections";
+
+    let existingQuery =
+      adminClient
+        .from(connectionTable)
         .select(
-          `
-            refresh_token_encrypted,
-            calendar_id,
-            calendar_name
-          `
+          "refresh_token_encrypted, calendar_id, calendar_name"
         )
         .eq(
           "business_id",
           statePayload.businessId
-        )
-        .maybeSingle();
+        );
+
+    if (
+      stateTarget ===
+      "employee"
+    ) {
+      existingQuery =
+        existingQuery.eq(
+          "employee_id",
+          statePayload.employeeId!
+        );
+    }
+
+    const {
+      data: existingConnectionData,
+      error: existingConnectionError,
+    } =
+      await existingQuery.maybeSingle();
 
     if (
       existingConnectionError
@@ -343,8 +505,9 @@ export async function GET(
         existingConnectionError
       );
 
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        stateTarget,
         "connection_read_error"
       );
     }
@@ -371,8 +534,9 @@ export async function GET(
         "Google did not return a refresh token and no previous token exists."
       );
 
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        stateTarget,
         "missing_refresh_token"
       );
     }
@@ -389,59 +553,120 @@ export async function GET(
         .filter(Boolean) ??
       [...configuredScopes];
 
+    const hasCalendarWriteScope =
+      grantedScopes.some(
+        (scope) =>
+          scope ===
+            "https://www.googleapis.com/auth/calendar.events" ||
+          scope ===
+            "https://www.googleapis.com/auth/calendar" ||
+          scope ===
+            "https://www.googleapis.com/auth/calendar.events.owned"
+      );
+
+    if (
+      stateTarget ===
+        "employee" &&
+      !hasCalendarWriteScope
+    ) {
+      console.error(
+        "Staff Google OAuth completed without a writable Calendar scope:",
+        grantedScopes
+      );
+
+      /*
+       * Ne ostavljamo stari ili parcijalni token prikazan kao
+       * aktivna konekcija. Staff mora ponoviti OAuth i eksplicitno
+       * odobriti Google Calendar dozvolu.
+       */
+      const {
+        error: cleanupError,
+      } = await adminClient
+        .from(
+          "employee_google_calendar_connections"
+        )
+        .delete()
+        .eq(
+          "business_id",
+          statePayload.businessId
+        )
+        .eq(
+          "employee_id",
+          statePayload.employeeId!
+        );
+
+      if (cleanupError) {
+        console.error(
+          "Failed to remove employee Google connection with insufficient scopes:",
+          cleanupError
+        );
+      }
+
+      return redirectToDestination(
+        request,
+        stateTarget,
+        "insufficient_scope"
+      );
+    }
+
     const now =
       new Date().toISOString();
 
+    const commonValues = {
+      business_id:
+        statePayload.businessId,
+      google_account_id:
+        googleProfile.id ?? null,
+      google_account_email:
+        googleProfile.email ??
+        user.email ??
+        null,
+      calendar_id:
+        existingConnection
+          ?.calendar_id ??
+        "primary",
+      calendar_name:
+        existingConnection
+          ?.calendar_name ??
+        "Primary calendar",
+      refresh_token_encrypted:
+        encryptedRefreshToken,
+      scopes:
+        grantedScopes,
+      is_active: true,
+      connected_at: now,
+      last_error: null,
+      updated_at: now,
+    };
+
+    const saveValues =
+      stateTarget ===
+      "employee"
+        ? {
+            ...commonValues,
+            employee_id:
+              statePayload.employeeId!,
+            connected_by_user_id:
+              user.id,
+          }
+        : commonValues;
+
+    const onConflict =
+      stateTarget ===
+      "employee"
+        ? "business_id,employee_id"
+        : "business_id";
+
     const {
       error: saveError,
-    } =
-      await adminClient
-        .from(
-          "google_calendar_connections"
-        )
-        .upsert(
-          {
-            business_id:
-              statePayload.businessId,
-
-            google_account_id:
-              googleProfile.id ??
-              null,
-
-            google_account_email:
-              googleProfile.email ??
-              user.email ??
-              null,
-
-            calendar_id:
-              existingConnection
-                ?.calendar_id ??
-              "primary",
-
-            calendar_name:
-              existingConnection
-                ?.calendar_name ??
-              "Primary calendar",
-
-            refresh_token_encrypted:
-              encryptedRefreshToken,
-
-            scopes:
-              grantedScopes,
-
-            is_active: true,
-
-            connected_at: now,
-
-            last_error: null,
-
-            updated_at: now,
-          },
-          {
-            onConflict:
-              "business_id",
-          }
-        );
+    } = await adminClient
+      .from(connectionTable)
+      .upsert(
+        saveValues,
+        {
+          onConflict,
+        }
+      );
 
     if (saveError) {
       console.error(
@@ -449,14 +674,16 @@ export async function GET(
         saveError
       );
 
-      return redirectToSettings(
+      return redirectToDestination(
         request,
+        stateTarget,
         "connection_save_error"
       );
     }
 
-    return redirectToSettings(
+    return redirectToDestination(
       request,
+      stateTarget,
       "connected"
     );
   } catch (error) {
@@ -465,8 +692,9 @@ export async function GET(
       error
     );
 
-    return redirectToSettings(
+    return redirectToDestination(
       request,
+      cookieTarget,
       "callback_error"
     );
   }

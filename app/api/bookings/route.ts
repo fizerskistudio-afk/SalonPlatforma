@@ -5,8 +5,8 @@ import {
 
 import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
 import {
-  syncBookingToGoogleCalendar,
-} from "@/lib/google-calendar/sync";
+  syncBookingToAllGoogleCalendars,
+} from "@/lib/google-calendar/dual-sync";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic =
@@ -260,7 +260,7 @@ async function synchronizeConfirmedBooking(
 
   try {
     const syncResult =
-      await syncBookingToGoogleCalendar(
+      await syncBookingToAllGoogleCalendars(
         booking.id
       );
 

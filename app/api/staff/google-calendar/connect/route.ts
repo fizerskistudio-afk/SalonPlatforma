@@ -41,13 +41,13 @@ function redirectToLogin(
   request: NextRequest
 ): NextResponse {
   const loginUrl = new URL(
-    "/admin/login",
+    "/staff/login",
     request.url
   );
 
   loginUrl.searchParams.set(
     "next",
-    "/api/admin/google-calendar/connect"
+    "/staff/calendar"
   );
 
   return createNoStoreRedirect(
@@ -55,22 +55,22 @@ function redirectToLogin(
   );
 }
 
-function redirectToSettings(
+function redirectToCalendar(
   request: NextRequest,
   status: string
 ): NextResponse {
-  const settingsUrl = new URL(
-    "/admin/settings",
+  const calendarUrl = new URL(
+    "/staff/calendar",
     request.url
   );
 
-  settingsUrl.searchParams.set(
+  calendarUrl.searchParams.set(
     "googleCalendar",
     status
   );
 
   return createNoStoreRedirect(
-    settingsUrl
+    calendarUrl
   );
 }
 
@@ -109,53 +109,59 @@ export async function GET(
         "business_members"
       )
       .select(
-        "business_id, role, is_active"
+        "business_id, employee_id, role, is_active"
       )
       .eq(
         "user_id",
         user.id
       )
       .eq(
+        "role",
+        "staff"
+      )
+      .eq(
         "is_active",
         true
-      )
-      .in(
-        "role",
-        [
-          "owner",
-          "manager",
-        ]
       )
       .limit(1)
       .maybeSingle();
 
     if (membershipError) {
       console.error(
-        "Failed to load Google Calendar membership:",
+        "Failed to load staff Google Calendar membership:",
         membershipError
       );
 
-      return redirectToSettings(
+      return redirectToCalendar(
         request,
         "membership_error"
       );
     }
 
-    if (!membership) {
-      return redirectToSettings(
+    if (
+      !membership ||
+      !membership.employee_id
+    ) {
+      return redirectToCalendar(
         request,
-        "forbidden"
+        "employee_link_required"
       );
     }
 
     const {
-      data: business,
-      error: businessError,
+      data: employee,
+      error: employeeError,
     } = await adminClient
-      .from("businesses")
-      .select("id, is_active")
+      .from("employees")
+      .select(
+        "id, business_id, is_active"
+      )
       .eq(
         "id",
+        membership.employee_id
+      )
+      .eq(
+        "business_id",
         membership.business_id
       )
       .eq(
@@ -165,17 +171,17 @@ export async function GET(
       .maybeSingle();
 
     if (
-      businessError ||
-      !business
+      employeeError ||
+      !employee
     ) {
       console.error(
-        "Failed to load Google Calendar business:",
-        businessError
+        "Failed to load staff employee before Google OAuth:",
+        employeeError
       );
 
-      return redirectToSettings(
+      return redirectToCalendar(
         request,
-        "business_error"
+        "employee_not_found"
       );
     }
 
@@ -188,7 +194,9 @@ export async function GET(
       userId:
         user.id,
       target:
-        "business",
+        "employee",
+      employeeId:
+        employee.id,
     });
 
     const authorizationUrl =
@@ -223,7 +231,7 @@ export async function GET(
 
     response.cookies.set(
       OAUTH_TARGET_COOKIE,
-      "business",
+      "employee",
       {
         httpOnly: true,
         secure:
@@ -240,11 +248,11 @@ export async function GET(
     return response;
   } catch (error) {
     console.error(
-      "Failed to start salon Google Calendar OAuth:",
+      "Failed to start staff Google Calendar OAuth:",
       error
     );
 
-    return redirectToSettings(
+    return redirectToCalendar(
       request,
       "connect_error"
     );

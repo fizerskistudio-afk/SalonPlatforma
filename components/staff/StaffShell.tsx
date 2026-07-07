@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import {
+  CalendarDays,
   ExternalLink,
   LogOut,
   Scissors,
@@ -47,6 +48,16 @@ export default function StaffShell({
           </Link>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/staff/calendar"
+              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-400/15 bg-blue-400/[0.06] px-3 text-xs font-medium text-blue-200 transition hover:border-blue-400/25 hover:bg-blue-400/10"
+            >
+              <CalendarDays className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                Moj kalendar
+              </span>
+            </Link>
+
             <a
               href={`/salon/${staff.business.slug}`}
               target="_blank"
@@ -57,7 +68,7 @@ export default function StaffShell({
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
 
-            <div className="hidden items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.035] px-3 py-2 sm:flex">
+            <div className="hidden items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.035] px-3 py-2 md:flex">
               <UserRound className="h-4 w-4 text-amber-300" />
 
               <div>

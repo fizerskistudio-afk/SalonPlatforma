@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireStaff } from "@/lib/auth/staff";
-import { syncBookingToGoogleCalendar } from "@/lib/google-calendar/sync";
+import { syncBookingToAllGoogleCalendars } from "@/lib/google-calendar/dual-sync";
 import { createClient } from "@/lib/supabase/server";
 
 export type StaffActionResult = {
@@ -155,7 +155,7 @@ export async function updateStaffBookingStatusAction(
   ) {
     try {
       const syncResult =
-        await syncBookingToGoogleCalendar(
+        await syncBookingToAllGoogleCalendars(
           bookingId
         );
 

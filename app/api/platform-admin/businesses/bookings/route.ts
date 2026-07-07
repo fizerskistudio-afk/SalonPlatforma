@@ -5,7 +5,7 @@ import {
 import { revalidatePath } from "next/cache";
 
 import { getPlatformAdminAccess } from "@/lib/auth/platform-admin";
-import { syncBookingToGoogleCalendar } from "@/lib/google-calendar/sync";
+import { syncBookingToAllGoogleCalendars } from "@/lib/google-calendar/dual-sync";
 import {
   BUSINESS_BOOKING_STATUSES,
   getAllowedBusinessBookingStatuses,
@@ -122,7 +122,7 @@ async function syncBookingSafely(
   bookingId: string
 ): Promise<boolean> {
   try {
-    const result = await syncBookingToGoogleCalendar(bookingId);
+    const result = await syncBookingToAllGoogleCalendars(bookingId);
 
     if (!result.ok) {
       console.error(

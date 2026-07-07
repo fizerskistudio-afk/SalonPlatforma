@@ -7,8 +7,8 @@ import type {
 } from "@/lib/admin/bookings";
 import { requireAdmin } from "@/lib/auth/admin";
 import {
-  syncBookingToGoogleCalendar,
-} from "@/lib/google-calendar/sync";
+  syncBookingToAllGoogleCalendars,
+} from "@/lib/google-calendar/dual-sync";
 import { createClient } from "@/lib/supabase/server";
 
 export type BookingActionResult = {
@@ -90,7 +90,7 @@ async function synchronizeBookingSafely(
 ): Promise<boolean> {
   try {
     const syncResult =
-      await syncBookingToGoogleCalendar(
+      await syncBookingToAllGoogleCalendars(
         bookingId
       );
 
