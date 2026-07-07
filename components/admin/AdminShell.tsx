@@ -105,6 +105,13 @@ const navigationItems: NavigationItem[] = [
     enabled: true,
   },
   {
+    label: "Notifikacije",
+    description: "Email pravila i delivery log",
+    href: "/admin/notifications",
+    icon: Bell,
+    enabled: true,
+  },
+  {
     label: "Podešavanja",
     description: "Salon i booking pravila",
     href: "/admin/settings",

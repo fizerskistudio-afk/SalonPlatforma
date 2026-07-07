@@ -78,6 +78,11 @@ type BusinessEmailSettingsRow = {
     | null;
   customer_notifications_enabled: boolean;
   business_notifications_enabled: boolean;
+  booking_request_received_enabled: boolean;
+  booking_confirmed_enabled: boolean;
+  booking_rescheduled_enabled: boolean;
+  booking_cancelled_enabled: boolean;
+  business_new_booking_enabled: boolean;
 };
 
 type LoadedBookingNotificationContext = {
@@ -295,7 +300,12 @@ async function loadBookingNotificationContext(
         `
           notification_email,
           customer_notifications_enabled,
-          business_notifications_enabled
+          business_notifications_enabled,
+          booking_request_received_enabled,
+          booking_confirmed_enabled,
+          booking_rescheduled_enabled,
+          booking_cancelled_enabled,
+          business_new_booking_enabled
         `
       )
       .eq(
@@ -407,22 +417,66 @@ async function loadBookingNotificationContext(
   };
 }
 
+type CustomerBookingNotificationTemplateKey =
+  | "booking_request_received"
+  | "booking_confirmed"
+  | "booking_rescheduled"
+  | "booking_cancelled";
+
+function resolveCustomerTemplateKey(
+  context: LoadedBookingNotificationContext,
+  templateKey?: CustomerBookingNotificationTemplateKey
+): CustomerBookingNotificationTemplateKey {
+  if (templateKey) {
+    return templateKey;
+  }
+
+  if (context.booking.status === "confirmed") {
+    return "booking_confirmed";
+  }
+
+  if (context.booking.status === "cancelled") {
+    return "booking_cancelled";
+  }
+
+  return "booking_request_received";
+}
+
 function isCustomerNotificationEnabled(
-  context:
-    LoadedBookingNotificationContext
+  context: LoadedBookingNotificationContext,
+  templateKey?: CustomerBookingNotificationTemplateKey
 ): boolean {
-  return context.settings
-    ?.customer_notifications_enabled ??
-    true;
+  const settings = context.settings;
+
+  if (settings?.customer_notifications_enabled === false) {
+    return false;
+  }
+
+  if (!settings) {
+    return true;
+  }
+
+  switch (resolveCustomerTemplateKey(context, templateKey)) {
+    case "booking_request_received":
+      return settings.booking_request_received_enabled;
+    case "booking_confirmed":
+      return settings.booking_confirmed_enabled;
+    case "booking_rescheduled":
+      return settings.booking_rescheduled_enabled;
+    case "booking_cancelled":
+      return settings.booking_cancelled_enabled;
+  }
 }
 
 function isBusinessNotificationEnabled(
-  context:
-    LoadedBookingNotificationContext
+  context: LoadedBookingNotificationContext
 ): boolean {
-  return context.settings
-    ?.business_notifications_enabled ??
-    true;
+  const settings = context.settings;
+
+  return (
+    (settings?.business_notifications_enabled ?? true) &&
+    (settings?.business_new_booking_enabled ?? true)
+  );
 }
 
 async function sendCustomerCreatedNotification(
@@ -752,7 +806,8 @@ export async function notifyBookingRescheduledSafely(
     if (
       !recipient ||
       !isCustomerNotificationEnabled(
-        context
+        context,
+        "booking_rescheduled"
       )
     ) {
       return {
@@ -809,6 +864,179 @@ export async function notifyBookingRescheduledSafely(
       ok: false,
       customerSent: false,
       businessSent: false,
+    };
+  }
+}
+
+type RetryableBookingNotificationTemplateKey =
+  | "booking_request_received"
+  | "booking_confirmed"
+  | "booking_rescheduled"
+  | "booking_cancelled"
+  | "business_new_booking";
+
+type RetryDeliveryRow = {
+  id: string;
+  business_id: string | null;
+  booking_id: string | null;
+  template_key: string;
+  dedupe_key: string;
+  original_recipient: string;
+  status: string;
+};
+
+export type RetryBookingNotificationResult = {
+  ok: boolean;
+  message: string;
+};
+
+function isRetryableBookingTemplate(
+  value: string
+): value is RetryableBookingNotificationTemplateKey {
+  return [
+    "booking_request_received",
+    "booking_confirmed",
+    "booking_rescheduled",
+    "booking_cancelled",
+    "business_new_booking",
+  ].includes(value);
+}
+
+export async function retryBookingNotificationDeliverySafely(
+  deliveryId: string,
+  expectedBusinessId: string
+): Promise<RetryBookingNotificationResult> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("notification_deliveries")
+      .select(
+        `
+          id,
+          business_id,
+          booking_id,
+          template_key,
+          dedupe_key,
+          original_recipient,
+          status
+        `
+      )
+      .eq("id", deliveryId)
+      .eq("business_id", expectedBusinessId)
+      .maybeSingle();
+
+    if (error) {
+      return {
+        ok: false,
+        message: `Notifikaciju nije moguće učitati: ${error.message}`,
+      };
+    }
+
+    if (!data) {
+      return {
+        ok: false,
+        message: "Notifikacija nije pronađena ili ne pripada ovom salonu.",
+      };
+    }
+
+    const delivery = data as unknown as RetryDeliveryRow;
+
+    if (delivery.status === "sent") {
+      return {
+        ok: false,
+        message: "Već poslata notifikacija ne može ponovo da se šalje.",
+      };
+    }
+
+    if (delivery.status !== "failed" && delivery.status !== "skipped") {
+      return {
+        ok: false,
+        message: "Samo neuspešna ili preskočena notifikacija može da se ponovi.",
+      };
+    }
+
+    const templateKey = delivery.template_key;
+
+    if (!delivery.booking_id || !isRetryableBookingTemplate(templateKey)) {
+      return {
+        ok: false,
+        message: "Ovaj tip notifikacije trenutno ne podržava ručni retry.",
+      };
+    }
+
+    const context = await loadBookingNotificationContext(delivery.booking_id);
+
+    if (!context || context.business.id !== expectedBusinessId) {
+      return {
+        ok: false,
+        message: "Rezervacija povezana sa notifikacijom nije pronađena.",
+      };
+    }
+
+    let audience: "customer" | "business" = "customer";
+    let content: { subject: string; html: string; text: string } | null = null;
+
+    switch (templateKey) {
+      case "booking_request_received":
+        content = renderBookingRequestReceivedEmail(context.template);
+        break;
+      case "booking_confirmed":
+        content = renderBookingConfirmedEmail(context.template);
+        break;
+      case "booking_rescheduled":
+        content = renderBookingRescheduledEmail(context.template);
+        break;
+      case "booking_cancelled":
+        content = renderBookingCancelledEmail(context.template);
+        break;
+      case "business_new_booking":
+        audience = "business";
+        content = renderNewBookingBusinessEmail(context.template);
+        break;
+    }
+
+    if (!content) {
+      return {
+        ok: false,
+        message: "Email sadržaj za retry nije moguće pripremiti.",
+      };
+    }
+
+    const result = await sendNotificationEmail({
+      scope: "business",
+      audience,
+      templateKey,
+      dedupeKey: delivery.dedupe_key,
+      recipient: delivery.original_recipient,
+      businessId: context.business.id,
+      bookingId: context.booking.id,
+      ...content,
+      metadata: {
+        manualRetry: true,
+        referenceCode: context.booking.reference_code,
+      },
+    });
+
+    return {
+      ok: result.ok && result.status === "sent",
+      message:
+        result.ok && result.status === "sent"
+          ? "Notifikacija je uspešno poslata."
+          : result.message,
+    };
+  } catch (error) {
+    console.error("Manual booking notification retry failed:", {
+      deliveryId,
+      expectedBusinessId,
+      error,
+    });
+
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Notifikacija trenutno ne može ponovo da se pošalje.",
     };
   }
 }
