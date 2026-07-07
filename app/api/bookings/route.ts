@@ -7,6 +7,9 @@ import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
 import {
   syncBookingToAllGoogleCalendars,
 } from "@/lib/google-calendar/dual-sync";
+import {
+  notifyBookingCreatedSafely,
+} from "@/lib/notifications/booking";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic =
@@ -645,6 +648,10 @@ export async function POST(
      */
     await synchronizeConfirmedBooking(
       booking
+    );
+
+    await notifyBookingCreatedSafely(
+      booking.id
     );
 
     return NextResponse.json(

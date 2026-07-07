@@ -9,6 +9,9 @@ import { requireAdmin } from "@/lib/auth/admin";
 import {
   syncBookingToAllGoogleCalendars,
 } from "@/lib/google-calendar/dual-sync";
+import {
+  notifyBookingStatusChangedSafely,
+} from "@/lib/notifications/booking";
 import { createClient } from "@/lib/supabase/server";
 
 export type BookingActionResult = {
@@ -325,6 +328,11 @@ export async function updateBookingStatusAction(
         updatedBooking.id
       );
   }
+
+  await notifyBookingStatusChangedSafely(
+    updatedBooking.id,
+    updatedBooking.status
+  );
 
   refreshBookingPages();
 

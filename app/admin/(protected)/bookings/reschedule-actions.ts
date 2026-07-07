@@ -11,6 +11,9 @@ import {
   syncBookingToAllGoogleCalendars,
 } from "@/lib/google-calendar/dual-sync";
 import {
+  notifyBookingRescheduledSafely,
+} from "@/lib/notifications/booking";
+import {
   createAdminClient,
 } from "@/lib/supabase/admin";
 
@@ -655,6 +658,10 @@ export async function rescheduleAdminBookingAction(
         updatedBooking.id
       );
   }
+
+  await notifyBookingRescheduledSafely(
+    updatedBooking.id
+  );
 
   refreshBookingPages();
 

@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 
 import { requireStaff } from "@/lib/auth/staff";
 import { syncBookingToAllGoogleCalendars } from "@/lib/google-calendar/dual-sync";
+import {
+  notifyBookingStatusChangedSafely,
+} from "@/lib/notifications/booking";
 import { createClient } from "@/lib/supabase/server";
 
 export type StaffActionResult = {
@@ -171,6 +174,11 @@ export async function updateStaffBookingStatusAction(
       );
     }
   }
+
+  await notifyBookingStatusChangedSafely(
+    bookingId,
+    input.nextStatus
+  );
 
   revalidatePath("/staff");
   revalidatePath("/admin");

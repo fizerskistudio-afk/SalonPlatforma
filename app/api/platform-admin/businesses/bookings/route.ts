@@ -7,6 +7,10 @@ import { revalidatePath } from "next/cache";
 import { getPlatformAdminAccess } from "@/lib/auth/platform-admin";
 import { syncBookingToAllGoogleCalendars } from "@/lib/google-calendar/dual-sync";
 import {
+  notifyBookingRescheduledSafely,
+  notifyBookingStatusChangedSafely,
+} from "@/lib/notifications/booking";
+import {
   BUSINESS_BOOKING_STATUSES,
   getAllowedBusinessBookingStatuses,
   type BusinessBookingStatus,
@@ -598,6 +602,11 @@ export async function PUT(request: NextRequest) {
         ? await syncBookingSafely(context.booking.id)
         : true;
 
+    await notifyBookingStatusChangedSafely(
+      context.booking.id,
+      nextStatus
+    );
+
     refreshBookingPages(parsed.businessSlug);
 
     return NextResponse.json({
@@ -743,6 +752,10 @@ export async function PUT(request: NextRequest) {
       updatedBooking.status === "confirmed"
         ? await syncBookingSafely(updatedBooking.id)
         : true;
+
+    await notifyBookingRescheduledSafely(
+      updatedBooking.id
+    );
 
     refreshBookingPages(parsed.businessSlug);
 
