@@ -11,6 +11,16 @@ export type ManagedNotificationTemplateKey =
   | "booking_cancelled"
   | "business_new_booking";
 
+export type ProviderDeliveryStatus =
+  | "unknown"
+  | "sent"
+  | "delivered"
+  | "delayed"
+  | "bounced"
+  | "complained"
+  | "failed"
+  | "suppressed";
+
 export type AdminNotificationSettings = {
   deliveryMode: "platform" | "custom_domain";
   domainStatus:
@@ -44,6 +54,16 @@ export type AdminNotificationDelivery = {
   testMode: boolean;
   error: string | null;
   providerMessageId: string | null;
+  providerDeliveryStatus: ProviderDeliveryStatus;
+  providerEventType: string | null;
+  providerEventAt: string | null;
+  providerError: string | null;
+  providerEventCount: number;
+  deliveredAt: string | null;
+  delayedAt: string | null;
+  bouncedAt: string | null;
+  complainedAt: string | null;
+  suppressedAt: string | null;
   lastAttemptAt: string | null;
   sentAt: string | null;
   createdAt: string;
@@ -104,6 +124,16 @@ type DeliveryRow = {
   test_mode: boolean;
   error: string | null;
   provider_message_id: string | null;
+  provider_delivery_status: ProviderDeliveryStatus;
+  provider_event_type: string | null;
+  provider_event_at: string | null;
+  provider_error: string | null;
+  provider_event_count: number;
+  delivered_at: string | null;
+  delayed_at: string | null;
+  bounced_at: string | null;
+  complained_at: string | null;
+  suppressed_at: string | null;
   last_attempt_at: string | null;
   sent_at: string | null;
   created_at: string;
@@ -210,6 +240,16 @@ export async function getAdminNotificationManagement(): Promise<AdminNotificatio
           test_mode,
           error,
           provider_message_id,
+          provider_delivery_status,
+          provider_event_type,
+          provider_event_at,
+          provider_error,
+          provider_event_count,
+          delivered_at,
+          delayed_at,
+          bounced_at,
+          complained_at,
+          suppressed_at,
           last_attempt_at,
           sent_at,
           created_at
@@ -300,6 +340,16 @@ export async function getAdminNotificationManagement(): Promise<AdminNotificatio
         testMode: row.test_mode,
         error: row.error,
         providerMessageId: row.provider_message_id,
+        providerDeliveryStatus: row.provider_delivery_status,
+        providerEventType: row.provider_event_type,
+        providerEventAt: row.provider_event_at,
+        providerError: row.provider_error,
+        providerEventCount: row.provider_event_count,
+        deliveredAt: row.delivered_at,
+        delayedAt: row.delayed_at,
+        bouncedAt: row.bounced_at,
+        complainedAt: row.complained_at,
+        suppressedAt: row.suppressed_at,
         lastAttemptAt: row.last_attempt_at,
         sentAt: row.sent_at,
         createdAt: row.created_at,

@@ -69,10 +69,24 @@ const reminderTemplateLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<AdminNotificationDelivery["status"], string> = {
-  sent: "Poslato",
+  sent: "Poslato Resendu",
   failed: "Neuspešno",
   skipped: "Preskočeno",
   pending: "U toku",
+};
+
+const providerStatusLabels: Record<
+  AdminNotificationDelivery["providerDeliveryStatus"],
+  string
+> = {
+  unknown: "Čeka delivery status",
+  sent: "Resend prihvatio",
+  delivered: "Isporučeno",
+  delayed: "Isporuka odložena",
+  bounced: "Email odbijen",
+  complained: "Prijavljen spam",
+  failed: "Provider greška",
+  suppressed: "Slanje potisnuto",
 };
 
 function formatDate(value: string | null): string {
@@ -104,6 +118,27 @@ function getStatusClasses(
       return "border-amber-400/20 bg-amber-400/10 text-amber-200";
     case "pending":
       return "border-sky-400/20 bg-sky-400/10 text-sky-200";
+  }
+}
+
+function getProviderStatusClasses(
+  status: AdminNotificationDelivery["providerDeliveryStatus"]
+): string {
+  switch (status) {
+    case "delivered":
+      return "border-emerald-400/20 bg-emerald-400/10 text-emerald-200";
+    case "sent":
+      return "border-sky-400/20 bg-sky-400/10 text-sky-200";
+    case "delayed":
+      return "border-amber-400/20 bg-amber-400/10 text-amber-200";
+    case "bounced":
+    case "failed":
+    case "suppressed":
+      return "border-red-400/20 bg-red-400/10 text-red-200";
+    case "complained":
+      return "border-fuchsia-400/20 bg-fuchsia-400/10 text-fuchsia-200";
+    case "unknown":
+      return "border-white/10 bg-white/[0.03] text-zinc-500";
   }
 }
 
@@ -282,13 +317,13 @@ export default function AdminNotificationsManager({
           <div className="max-w-3xl">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
               <Bell className="h-4 w-4" aria-hidden="true" />
-              Notifications-02
+              Notifications-04
             </div>
             <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Email notifikacije
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-              Kontroliši koje booking poruke salon šalje, prati poslednjih 100 isporuka i ponovi neuspešno slanje bez dupliranja već poslatih emailova.
+              Kontroliši booking poruke, prati poslednjih 100 slanja i vidi stvarni Resend status: isporučeno, odloženo, odbijeno ili prijavljeno kao spam.
             </p>
           </div>
 
@@ -546,6 +581,15 @@ export default function AdminNotificationsManager({
                         >
                           {statusLabels[delivery.status]}
                         </span>
+                        {delivery.providerMessageId && (
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getProviderStatusClasses(
+                              delivery.providerDeliveryStatus
+                            )}`}
+                          >
+                            {providerStatusLabels[delivery.providerDeliveryStatus]}
+                          </span>
+                        )}
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-500">
                           {getTemplateLabel(delivery.templateKey)}
                         </span>
@@ -571,7 +615,13 @@ export default function AdminNotificationsManager({
                             </span>
                           )}
                         <span>Pokušaja: {delivery.attemptCount}</span>
+                        {delivery.providerEventCount > 0 && (
+                          <span>Provider događaja: {delivery.providerEventCount}</span>
+                        )}
                         <span>{formatDate(delivery.lastAttemptAt ?? delivery.createdAt)}</span>
+                        {delivery.providerEventAt && (
+                          <span>Delivery status: {formatDate(delivery.providerEventAt)}</span>
+                        )}
                       </div>
 
                       {(delivery.bookingReference || delivery.customerName) && (
@@ -583,7 +633,19 @@ export default function AdminNotificationsManager({
 
                       {delivery.error && (
                         <div className="mt-3 rounded-xl border border-red-400/15 bg-red-400/[0.07] px-3 py-2 text-xs leading-5 text-red-200">
-                          {delivery.error}
+                          Aplikacija: {delivery.error}
+                        </div>
+                      )}
+
+                      {delivery.providerError && (
+                        <div
+                          className={`mt-3 rounded-xl border px-3 py-2 text-xs leading-5 ${
+                            delivery.providerDeliveryStatus === "delayed"
+                              ? "border-amber-400/15 bg-amber-400/[0.07] text-amber-100"
+                              : "border-red-400/15 bg-red-400/[0.07] text-red-200"
+                          }`}
+                        >
+                          Resend: {delivery.providerError}
                         </div>
                       )}
                     </div>
