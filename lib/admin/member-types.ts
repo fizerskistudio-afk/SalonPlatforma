@@ -7,12 +7,22 @@ export const BUSINESS_MEMBER_ROLES = [
 export type BusinessMemberRole =
   (typeof BUSINESS_MEMBER_ROLES)[number];
 
+export type BusinessMemberEmployeeOption = {
+  id: string;
+  name: string;
+  isActive: boolean;
+};
+
 export type BusinessMemberItem = {
   id: string;
   userId: string;
   email: string | null;
   role: BusinessMemberRole;
   isActive: boolean;
+
+  employeeId: string | null;
+  employeeName: string | null;
+
   createdAt: string;
   updatedAt: string;
   invitedAt: string | null;
@@ -26,11 +36,14 @@ export type BusinessMembersPageData = {
     name: string;
     slug: string;
   };
+
   currentUser: {
     id: string;
     role: "owner" | "manager";
   };
+
   members: BusinessMemberItem[];
+  employees: BusinessMemberEmployeeOption[];
 };
 
 export const BUSINESS_MEMBER_ROLE_LABELS:

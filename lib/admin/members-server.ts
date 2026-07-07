@@ -2,6 +2,7 @@ import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import type {
+  BusinessMemberEmployeeOption,
   BusinessMemberItem,
   BusinessMemberRole,
   BusinessMembersPageData,
@@ -13,8 +14,16 @@ type MembershipRow = {
   user_id: string;
   role: BusinessMemberRole;
   is_active: boolean;
+  employee_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type EmployeeRow = {
+  id: string;
+  name: string;
+  is_active: boolean;
+  sort_order: number;
 };
 
 const roleOrder: Record<BusinessMemberRole, number> = {
@@ -28,26 +37,64 @@ export async function getBusinessMembersPageData():
   const admin = await requireAdmin();
   const adminClient = createAdminClient();
 
-  const { data, error } = await adminClient
-    .from("business_members")
-    .select(
-      "id, user_id, role, is_active, created_at, updated_at"
-    )
-    .eq("business_id", admin.business.id)
-    .order("created_at", { ascending: true });
+  const [
+    membershipResult,
+    employeeResult,
+  ] = await Promise.all([
+    adminClient
+      .from("business_members")
+      .select(
+        "id, user_id, role, is_active, employee_id, created_at, updated_at"
+      )
+      .eq("business_id", admin.business.id)
+      .order("created_at", { ascending: true }),
 
-  if (error) {
+    adminClient
+      .from("employees")
+      .select(
+        "id, name, is_active, sort_order"
+      )
+      .eq("business_id", admin.business.id)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
+  ]);
+
+  if (membershipResult.error) {
     throw new Error(
-      `Članovi salona nisu mogli da se učitaju: ${error.message}`
+      `Članovi salona nisu mogli da se učitaju: ${membershipResult.error.message}`
     );
   }
 
-  const rows = (data ?? []) as unknown as MembershipRow[];
+  if (employeeResult.error) {
+    throw new Error(
+      `Zaposleni nisu mogli da se učitaju: ${employeeResult.error.message}`
+    );
+  }
+
+  const rows =
+    (membershipResult.data ?? []) as unknown as MembershipRow[];
+
+  const employeeRows =
+    (employeeResult.data ?? []) as unknown as EmployeeRow[];
+
+  const employeeNameById =
+    new Map(
+      employeeRows.map(
+        (employee) => [
+          employee.id,
+          employee.name,
+        ]
+      )
+    );
 
   const members = await Promise.all(
     rows.map(async (row): Promise<BusinessMemberItem> => {
-      const { data: userData, error: userError } =
-        await adminClient.auth.admin.getUserById(row.user_id);
+      const {
+        data: userData,
+        error: userError,
+      } = await adminClient.auth.admin.getUserById(
+        row.user_id
+      );
 
       if (userError) {
         console.error(
@@ -68,6 +115,12 @@ export async function getBusinessMembersPageData():
         email: user?.email ?? null,
         role: row.role,
         isActive: row.is_active,
+
+        employeeId: row.employee_id,
+        employeeName: row.employee_id
+          ? employeeNameById.get(row.employee_id) ?? null
+          : null,
+
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         invitedAt: user?.invited_at ?? null,
@@ -90,16 +143,26 @@ export async function getBusinessMembersPageData():
     );
   });
 
+  const employees: BusinessMemberEmployeeOption[] =
+    employeeRows.map((employee) => ({
+      id: employee.id,
+      name: employee.name,
+      isActive: employee.is_active,
+    }));
+
   return {
     business: {
       id: admin.business.id,
       name: admin.business.name,
       slug: admin.business.slug,
     },
+
     currentUser: {
       id: admin.userId,
       role: admin.role,
     },
+
     members,
+    employees,
   };
 }

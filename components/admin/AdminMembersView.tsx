@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type ChangeEvent,
   type FormEvent,
   useState,
 } from "react";
@@ -49,7 +50,7 @@ const roleDescriptions:
     manager:
       "Pristup operativnom admin panelu bez upravljanja članovima.",
     staff:
-      "Članstvo je spremno za budući staff dashboard; postojeći admin panel nije dostupan.",
+      "Pristup sopstvenom rasporedu, rezervacijama i zahtevima za odsustvo.",
   };
 
 function formatDateTime(
@@ -415,7 +416,7 @@ export default function AdminMembersView({
                 <input
                   type="email"
                   value={inviteEmail}
-                  onChange={(event) =>
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
                     setInviteEmail(
                       event.target.value
                     )
@@ -436,7 +437,7 @@ export default function AdminMembersView({
 
               <select
                 value={inviteRole}
-                onChange={(event) =>
+                onChange={(event: ChangeEvent<HTMLSelectElement>) =>
                   setInviteRole(
                     event.target.value as
                       BusinessMemberRole
@@ -484,7 +485,7 @@ export default function AdminMembersView({
 
         {canManage && (
           <div className="mt-4 rounded-2xl border border-white/[0.07] bg-black/20 px-4 py-3 text-xs leading-6 text-zinc-500">
-            Staff nalog može biti pozvan već sada, ali poseban staff dashboard dolazi kasnije. Staff ne dobija pristup postojećem owner/manager admin panelu.
+            Staff nalog koristi poseban /staff dashboard i nema pristup owner/manager admin panelu. Nakon poziva poveži nalog sa zaposlenim u sekciji Staff pristup.
           </div>
         )}
       </section>
@@ -578,7 +579,7 @@ export default function AdminMembersView({
 
                       <select
                         value={member.role}
-                        onChange={(event) =>
+                        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
                           void updateMember(
                             member,
                             event.target

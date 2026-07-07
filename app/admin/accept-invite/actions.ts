@@ -11,38 +11,54 @@ export type AcceptInviteActionState = {
 export async function acceptInviteAction(
   _previousState:
     AcceptInviteActionState,
-  formData: FormData
+  formData:
+    FormData
 ): Promise<AcceptInviteActionState> {
-  const password = String(
-    formData.get("password") ?? ""
-  );
+  const password =
+    String(
+      formData.get(
+        "password"
+      ) ?? ""
+    );
 
-  const confirmation = String(
-    formData.get(
-      "passwordConfirmation"
-    ) ?? ""
-  );
+  const confirmation =
+    String(
+      formData.get(
+        "passwordConfirmation"
+      ) ?? ""
+    );
 
-  if (password.length < 10) {
+  if (
+    password.length < 10
+  ) {
     return {
       error:
         "Lozinka mora imati najmanje 10 karaktera.",
     };
   }
 
-  if (password !== confirmation) {
+  if (
+    password !==
+    confirmation
+  ) {
     return {
       error:
         "Lozinke se ne podudaraju.",
     };
   }
 
-  const supabase = await createClient();
+  const supabase =
+    await createClient();
 
   const {
-    data: userData,
-    error: userError,
-  } = await supabase.auth.getUser();
+    data:
+      userData,
+    error:
+      userError,
+  } =
+    await supabase
+      .auth
+      .getUser();
 
   if (
     userError ||
@@ -55,17 +71,35 @@ export async function acceptInviteAction(
   }
 
   const {
-    data: membershipData,
-    error: membershipError,
+    data:
+      membershipData,
+    error:
+      membershipError,
   } = await supabase
-    .from("business_members")
-    .select("role, is_active")
-    .eq("user_id", userData.user.id)
-    .eq("is_active", true)
-    .order("created_at", {
-      ascending: true,
-    })
-    .limit(1)
+    .from(
+      "business_members"
+    )
+    .select(
+      "role, is_active"
+    )
+    .eq(
+      "user_id",
+      userData.user.id
+    )
+    .eq(
+      "is_active",
+      true
+    )
+    .order(
+      "created_at",
+      {
+        ascending:
+          true,
+      }
+    )
+    .limit(
+      1
+    )
     .maybeSingle();
 
   if (
@@ -79,10 +113,14 @@ export async function acceptInviteAction(
   }
 
   const {
-    error: passwordError,
-  } = await supabase.auth.updateUser({
-    password,
-  });
+    error:
+      passwordError,
+  } =
+    await supabase
+      .auth
+      .updateUser({
+        password,
+      });
 
   if (passwordError) {
     return {
@@ -91,18 +129,19 @@ export async function acceptInviteAction(
     };
   }
 
-  const role = String(
-    membershipData.role
-  );
+  const role =
+    String(
+      membershipData.role
+    );
 
   if (
     role === "owner" ||
     role === "manager"
   ) {
-    redirect("/admin");
+    redirect(
+      "/admin"
+    );
   }
 
-  redirect(
-    "/admin/accept-invite?status=staff-ready"
-  );
+  redirect("/staff");
 }
