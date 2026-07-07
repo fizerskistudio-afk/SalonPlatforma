@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import {
-  retryBookingNotificationDeliverySafely,
-} from "@/lib/notifications/booking";
+  retryNotificationDeliverySafely,
+} from "@/lib/notifications/retry";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type NotificationManagementActionResult = {
@@ -153,7 +153,7 @@ export async function retryNotificationDeliveryAction(input: {
     };
   }
 
-  const result = await retryBookingNotificationDeliverySafely(
+  const result = await retryNotificationDeliverySafely(
     deliveryId,
     admin.business.id
   );

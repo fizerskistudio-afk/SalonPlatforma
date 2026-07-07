@@ -63,6 +63,11 @@ const templateDescriptions: Record<ManagedNotificationTemplateKey, string> = {
     "Salon dobija obaveštenje kada stigne nova online rezervacija.",
 };
 
+const reminderTemplateLabels: Record<string, string> = {
+  booking_reminder_24h: "Podsetnik 24 sata pre termina",
+  booking_reminder_2h: "Podsetnik 2 sata pre termina",
+};
+
 const statusLabels: Record<AdminNotificationDelivery["status"], string> = {
   sent: "Poslato",
   failed: "Neuspešno",
@@ -103,6 +108,10 @@ function getStatusClasses(
 }
 
 function getTemplateLabel(templateKey: string): string {
+  if (templateKey in reminderTemplateLabels) {
+    return reminderTemplateLabels[templateKey];
+  }
+
   return templateKey in templateLabels
     ? templateLabels[templateKey as ManagedNotificationTemplateKey]
     : templateKey;
