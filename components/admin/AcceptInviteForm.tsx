@@ -1,7 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import {
+  useActionState,
+} from "react";
+
+import {
+  useFormStatus,
+} from "react-dom";
+
 import {
   ArrowRight,
   LoaderCircle,
@@ -15,17 +21,30 @@ import {
 
 const initialState:
   AcceptInviteActionState = {
-    error: null,
+    error:
+      null,
   };
 
+type AcceptInviteFormProps = {
+  businessSlug:
+    string;
+
+  inviteEmail:
+    string;
+};
+
 function SubmitButton() {
-  const { pending } =
+  const {
+    pending,
+  } =
     useFormStatus();
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={
+        pending
+      }
       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-amber-300 px-5 py-3 font-semibold text-zinc-950 transition hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
@@ -43,8 +62,14 @@ function SubmitButton() {
   );
 }
 
-export default function AcceptInviteForm() {
-  const [state, formAction] =
+export default function AcceptInviteForm({
+  businessSlug,
+  inviteEmail,
+}: AcceptInviteFormProps) {
+  const [
+    state,
+    formAction,
+  ] =
     useActionState(
       acceptInviteAction,
       initialState
@@ -52,28 +77,47 @@ export default function AcceptInviteForm() {
 
   return (
     <form
-      action={formAction}
+      action={
+        formAction
+      }
       className="space-y-5"
     >
+      <input
+        type="hidden"
+        name="businessSlug"
+        value={
+          businessSlug
+        }
+      />
+
+      <input
+        type="hidden"
+        name="inviteEmail"
+        value={
+          inviteEmail
+        }
+      />
+
       <PasswordField
         name="password"
         label="Nova lozinka"
         placeholder="Najmanje 10 karaktera"
       />
+
       <PasswordField
         name="passwordConfirmation"
         label="Ponovi lozinku"
         placeholder="Ponovi novu lozinku"
       />
 
-      {state.error && (
+      {state.error ? (
         <div
           role="alert"
           className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200"
         >
           {state.error}
         </div>
-      )}
+      ) : null}
 
       <SubmitButton />
     </form>
@@ -85,9 +129,14 @@ function PasswordField({
   label,
   placeholder,
 }: {
-  name: string;
-  label: string;
-  placeholder: string;
+  name:
+    string;
+
+  label:
+    string;
+
+  placeholder:
+    string;
 }) {
   return (
     <label className="block">
@@ -102,13 +151,19 @@ function PasswordField({
         />
 
         <input
-          name={name}
+          name={
+            name
+          }
           type="password"
-          minLength={10}
+          minLength={
+            10
+          }
           autoComplete="new-password"
           required
           className="w-full rounded-2xl border border-white/10 bg-white/[0.06] py-3.5 pl-11 pr-4 text-white outline-none transition placeholder:text-zinc-600 hover:border-white/20 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/20"
-          placeholder={placeholder}
+          placeholder={
+            placeholder
+          }
         />
       </div>
     </label>

@@ -1,319 +1,345 @@
-# Salon Platforma — Product & Engineering Roadmap
+# Beauty & Wellness Platform — Product & Engineering Roadmap
 
-**Ažurirano:** 7. jul 2026.  
+**Ažurirano:** 8. jul 2026.  
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
-**Aktuelni production-ready milestone commit:** `450180e` — Resend delivery webhooks
+**Status:** aktivan razvoj; roadmap je izvor istine zajedno sa `main` granom.  
+**Radni naziv platforme:** nije izabran.
 
 ---
 
-## 1. Vizija proizvoda
+## 1. Vizija
 
-Salon Platforma je multi-tenant SaaS za frizerske i beauty salone koji objedinjuje:
+Gradimo multi-tenant platformu za beauty i wellness biznise:
 
-- javni salonski sajt;
+- javni sajt svakog biznisa;
 - online rezervacije;
-- admin i staff panele;
-- Google Calendar sinhronizaciju;
-- email notifikacije i podsetnike;
-- upravljanje zaposlenima, uslugama, rasporedom i odsustvima;
-- hostovanje salonskih sajtova uz pretplatu;
-- povezivanje sopstvenog domena salona;
-- export gotovog standalone sajta sa sopstvenim domenom i konfiguracijom.
+- owner, manager i staff administracija;
+- centralni platform-admin;
+- usluge, zaposleni, raspored, odsustva i klijenti;
+- Google Calendar;
+- transakcioni emailovi i podsetnici;
+- salonski poddomeni i kasnije custom domeni;
+- više poslovnih vertikala i vizuelnih template sistema;
+- hostovani SaaS i kasnije kontrolisani standalone export.
 
-### Model proizvoda
-
-1. **Platform-hosted SaaS**
-   - salon ostaje na infrastrukturi platforme;
-   - mesečna ili godišnja pretplata;
-   - automatska ažuriranja;
-   - salonski poddomen ili sopstveni domen;
-   - centralizovane rezervacije, email, kalendari i administracija.
-
-2. **Standalone export**
-   - generisani sajt se izvozi kao poseban projekat;
-   - koristi sopstveni domen i environment konfiguraciju;
-   - može koristiti posebne Supabase/Resend naloge ili ugovoreni managed backend;
-   - nema automatska platform updates bez posebnog maintenance paketa.
+Platforma nije ograničena na frizerske salone. Planirane vertikale uključuju hair, barber, nails, lashes/brows, masaže, depilaciju, laser, solarijum i spa/wellness.
 
 ---
 
-## 2. Završeno
+## 2. Način rada
 
-### FOUNDATION — Osnova platforme
+### Product i arhitektura — korisnik + ChatGPT
 
-- [x] Next.js App Router + TypeScript + Tailwind struktura
+- definišemo cilj, workflow, podatke, dozvole i edge case-ove;
+- radimo reviziju postojećeg koda;
+- delimo posao na male milestone pakete;
+- svaki tehnički paket stiže kao ZIP spreman za raspakivanje u root;
+- posle svakog paketa obavezni su brisanje `.next`, lint, build i ručni test.
+
+### UI/UX — Qwen
+
+Qwen koristimo samo kada postoji odobren funkcionalni brief.
+
+Tok:
+
+1. ChatGPT priprema precizan prompt i acceptance criteria.
+2. Korisnik prosleđuje prompt Qwenu.
+3. Zajedno pregledamo Qwen rezultat.
+4. Po potrebi šaljemo ciljanu korekciju.
+5. Tek odobrena verzija ulazi u kod i testiranje.
+
+### Engineering cleanup — Codex
+
+Codex ne uvodimo kao zamenu za product odluke niti kao generator dizajna.
+
+Uvodimo ga kada:
+
+- kritični tokovi budu funkcionalno stabilni;
+- platform-admin i tenant routing budu završeni;
+- postoje odobreni Qwen dizajni;
+- želimo refactor, uklanjanje duplikata, testove, accessibility i završno pakovanje.
+
+---
+
+## 3. Stvarno završeno
+
+### Foundation
+
+- [x] Next.js App Router, TypeScript i Tailwind
 - [x] Supabase baza, Auth i Storage
-- [x] Multi-tenant poslovni model
-- [x] Javni salonski profil
-- [x] Javni booking tok
-- [x] Validacija termina i zaštita od duplih rezervacija
-- [x] Serbian Latin lokalizacija javnog booking toka
-- [x] Admin i platform-admin autentikacija
+- [x] multi-tenant model po `business_id`
+- [x] javni salonski profil i booking
+- [x] validacija termina i zaštita od duplih rezervacija
+- [x] lokalizacija booking toka
+- [x] path tenant ruta `/salon/[businessSlug]`
+- [x] template registry sa `hair-luxury` i `hair-editorial`
+- [x] business preseti za hair salon i barbershop
 
-### PLATFORM-ADMIN — Upravljanje salonima
+### Tenant admin i staff
 
-- [x] Pregled i upravljanje salonima
-- [x] Izmena poslovnog profila
-- [x] Booking pravila i radno vreme
-- [x] Upravljanje zaposlenima
-- [x] Radno vreme po zaposlenom
-- [x] Katalog usluga
-- [x] Upravljanje odsustvima
-- [x] Upravljanje rezervacijama
-- [x] Galerija, logo i branding mediji
+- [x] owner, manager i staff role
+- [x] admin stranice za profil, radno vreme, zaposlene, usluge, galeriju i rezervacije
+- [x] članovi i role management
+- [x] ograničeni staff dashboard
+- [x] staff pristup sopstvenim rezervacijama
+- [x] time-off request i approval tok
 
-### TENANT-ADMIN — Owner/manager/staff sistem
+### Integracije
 
-- [x] Članovi salona i role: owner, manager, staff
-- [x] Dashboard booking quick actions
-- [x] Ograničeni staff dashboard
-- [x] Staff vidi samo sopstvene rezervacije
-- [x] Staff statusi: confirmed, completed, no-show
-- [x] Zahtevi za odsustvo i owner/manager approval
-- [x] Automatsko kreiranje time-off zapisa
-- [x] Konflikt provere i RLS zaštita
+- [x] Google Calendar salona
+- [x] Google Calendar zaposlenog
+- [x] create, reschedule, cancel i reassignment sinhronizacija
+- [x] integracione greške ne blokiraju booking
 
-### INTEGRATIONS-01A — Dual Google Calendar
+### Email i podsetnici
 
-- [x] Zajednički Google Calendar salona
-- [x] Sopstveni Google Calendar svakog frizera
-- [x] Nezavisna sinhronizacija na oba kalendara
-- [x] Kreiranje, pomeranje i otkazivanje događaja
-- [x] Reassignment zaposlenog bez duplih događaja
-- [x] Google greška ne blokira booking
-- [x] OAuth scope validacija i reconnect flow
-
-### NOTIFICATIONS-01 — Transakcioni emailovi
-
-- [x] Email kupcu za primljen zahtev
-- [x] Email kupcu za potvrđen termin
-- [x] Email kupcu za pomeren termin
-- [x] Email kupcu za otkazan termin
-- [x] Email salonu za novu rezervaciju
-- [x] Resend test mode sa jednim stvarnim primaocem
-- [x] Platform, custom-domain i standalone sender resolver
-- [x] Delivery log, deduplikacija i idempotency
-- [x] Email greška ne blokira booking
-
-### NOTIFICATIONS-02 — Owner kontrole i retry
-
-- [x] `/admin/notifications`
-- [x] Master prekidači za customer/business poruke
-- [x] Prekidači po email template-u
-- [x] Podešavanje notification i reply-to adrese
-- [x] Delivery log i status filteri
-- [x] Ručni retry za failed/skipped poruke
-- [x] Zaštita od ponovnog slanja već poslatih emailova
-
-### NOTIFICATIONS-03 — Automatski podsetnici
-
-- [x] Podsetnik 24 sata pre termina
-- [x] Opcioni podsetnik 2 sata pre termina
-- [x] Per-salon podešavanja
-- [x] Zaštićen cron endpoint
-- [x] Deduplikacija podsetnika
-- [x] Novi reminder ciklus nakon pomeranja termina
-- [x] Samo confirmed rezervacije ulaze u reminder obradu
-
-### NOTIFICATIONS-04 — Resend delivery webhooks
-
-- [x] Verifikacija webhook potpisa
-- [x] `email.sent`
-- [x] `email.delivered`
-- [x] `email.delivery_delayed`
-- [x] `email.bounced`
-- [x] `email.complained`
-- [x] `email.failed`
-- [x] `email.suppressed`
-- [x] Deduplikacija webhook događaja
-- [x] Zaštita od događaja pristiglih van redosleda
-- [x] Provider statusi u admin delivery logu
+- [x] customer i business transakcioni emailovi
+- [x] platform, custom-domain i standalone sender resolver
+- [x] delivery log, retry, deduplikacija i idempotency
+- [x] 24h i opcioni 2h podsetnici
+- [x] Resend webhook statusi i zaštita od out-of-order događaja
 
 ---
 
-## 3. Sledeći milestone
+## 4. Nije završeno i ne sme se predstavljati kao završeno
 
-# BRAND-DEPLOY-01 — Brend, domen i produkcioni deployment
+### Platform-admin
 
-### Cilj
+Backend i pojedinačne management stranice postoje, ali proizvod nije kompletan.
 
-Postaviti platformu na sopstveni domen i napraviti stabilnu produkcionu osnovu bez vezivanja aplikacije za klasičan PHP/WordPress hosting.
+Nedostaje:
 
-### Predložena arhitektura domena
+- [ ] stvarni overview sa operativnim podacima i upozorenjima
+- [ ] konzistentna globalna navigacija
+- [ ] tenant command center informacijska arhitektura
+- [ ] kompletan onboarding/provisioning workflow
+- [ ] dodela prvog ownera postojećem ili novom salonu
+- [ ] invite status, resend i transfer ownership
+- [ ] templates/presets biblioteka kao pravi management modul
+- [ ] integration health i platform settings
+- [ ] ujednačen UI sistem, loading/empty/error states i responsive QA
 
-- `salonio.rs` — javni marketing sajt platforme
-- `app.salonio.rs` — admin, platform-admin i staff aplikacija
-- `booking.salonio.rs` — opcioni zajednički booking entry point
-- `<slug>.salonio.rs` — salonski sajtovi bez sopstvenog domena
-- `mail.salonio.rs` — Resend sending subdomain
-- sopstveni domen salona — CNAME/custom-domain povezivanje
+### Public hosting
 
-> Naziv `Salonio` je radni predlog dok se ne potvrde domen i pravna dostupnost imena.
+- [ ] glavni domen odvojen od demo salona
+- [ ] tenant poddomeni
+- [ ] `app` poddomen
+- [ ] custom domeni
+- [ ] published/draft status
+- [ ] tenant-specifični SEO metadata i sitemap
 
-### Zadaci
+### Engineering kvalitet
 
-- [ ] Finalni izbor naziva platforme
-- [ ] Provera i registracija `.rs` domena
-- [ ] Provera dostupnosti odgovarajućeg `.com` ili `.app` domena
-- [ ] Produkcioni deployment Next.js aplikacije
-- [ ] Povezivanje glavnog domena
-- [ ] Povezivanje `app` poddomena
-- [ ] Wildcard DNS plan za salonske poddomene
-- [ ] Produkcioni Supabase environment
-- [ ] Produkcioni Resend domen i DNS verifikacija
-- [ ] Produkcioni Resend webhook
-- [ ] Produkcioni cron za booking reminders
-- [ ] Environment separation: local, preview, production
-- [ ] Error logging i osnovni monitoring
-- [ ] Rate limiting za javni booking i webhook rute
-- [ ] Backup i restore procedura
-- [ ] Security review environment promenljivih
-- [ ] Smoke test svih booking lifecycle tokova
+- [ ] automatizovani testovi kritičnih tokova
+- [ ] GitHub Actions CI
+- [ ] rate limiting i anti-abuse javnog bookinga
+- [ ] kompletan env contract i README
+- [ ] centralni monitoring i audit log
+- [ ] backup/restore procedura
+
+---
+
+# 5. Aktivni milestone
+
+# TENANT-DOMAINS-01 — Javni tenant poddomeni
+
+## Cilj
+
+Odvojiti platformu od pojedinačnog demo salona i omogućiti da svaki tenant koristi svoj platformski poddomen iz jednog Next.js deploymenta.
+
+### Faza A — Routing foundation
+
+- [x] root `/` više ne prikazuje Lumière — lokalno prihvaćeno
+- [x] root prikazuje privremeni platform demo hub — lokalno prihvaćeno
+- [x] hostname resolver
+- [x] reserved subdomain lista
+- [x] `<slug>.<platform-domain>` rewrite na `/salon/<slug>`
+- [x] Supabase session cookies ostaju sačuvani pri rewrite-u
+- [x] nepoznat tenant vraća 404
+- [x] stare `/salon/[slug]` rute ostaju kao fallback
+- [x] local test preko `*.localhost`
+- [x] prikaz pravog poddomena u platform-admin javnom linku — paket pripremljen
+
+### Faza B — Tenant access
+
+- [x] platform-admin UI i backend za dodelu prvog ownera salonu — paket pripremljen
+- [x] owner email/invite/account status prikaz — paket pripremljen
+- [x] resend/activation link za ownera koji još nije prvi put ušao — paket pripremljen
+- [x] aktivacija i deaktivacija owner pristupa — paket pripremljen
+- [x] Mika dobija owner membership za `mika-berberin` — lokalno potvrđeno
+- [ ] Mika vidi samo podatke svog salona
+- [ ] Lumière owner vidi samo Lumière
+- [ ] owner access lint/build i završni ručni acceptance test
+- [x] invite aktivacija vezana za konkretan email i tenant
+- [x] zaštita od promene lozinke pogrešnoj aktivnoj sesiji
+
+### Faza C — Production domains
+
+Radi se tek nakon izbora imena i domena.
+
+- [ ] apex domen
+- [ ] `www`
+- [ ] `app`
+- [ ] wildcard `*.<domain>`
+- [ ] Vercel domain konfiguracija
+- [ ] produkcioni smoke test
 
 ### Definition of Done
 
-- platforma radi na sopstvenom `.rs` domenu;
-- admin i javni booking rade u produkciji;
-- Google Calendar radi sa produkcionim callback URL-ovima;
-- Resend šalje sa verifikovanog domena;
-- webhook statusi i reminder cron rade automatski;
-- nema development/test secreta u produkciji;
-- postoji dokumentovana rollback procedura.
+- glavni domen otvara platformu;
+- Lumière i Mika rade na odvojenim poddomenima;
+- nijedan hostname ne može da učita pogrešan tenant;
+- Mikin owner nalog postoji i izolovan je na njegov business;
+- direktna path ruta ostaje dostupna za preview i fallback.
 
 ---
 
-## 4. WEBSITE-HOSTING-01 — Hostovani salonski sajtovi
+## 6. Sledeći milestoneovi — redosled
 
-### Cilj
+### 2. PLATFORM-LANDING-01 — Demo/prodajni sajt platforme
 
-Omogućiti salonima da uz pretplatu dobiju sajt, rezervacije i administraciju na infrastrukturi platforme.
+Qwen milestone nakon završene Tenant Domains faze A.
 
-- [ ] Planovi pretplate i feature entitlements
-- [ ] Trial period
-- [ ] Aktivacija/deaktivacija tenant funkcija
-- [ ] Podrazumevani salonski poddomen
-- [ ] Custom-domain onboarding
-- [ ] DNS instrukcije za vlasnika salona
-- [ ] Provera domena i SSL status
-- [ ] Theme/template izbor
-- [ ] Brand boje, fontovi i layout konfiguracija
-- [ ] Draft/published status sajta
-- [ ] SEO title, description, Open Graph i sitemap
-- [ ] Analytics osnovni pregled
-- [ ] Storage kvote za galeriju
-- [ ] Subscription grace period i read-only režim
+- [ ] product brief
+- [ ] Qwen desktop i mobile koncept
+- [ ] review i korekcije
+- [ ] implementacija odobrenog dizajna
+- [ ] demo tenant kartice
+- [ ] jasna prezentacija platforme
+- [ ] privremeni neutralni branding dok se ne izabere ime
+
+### 3. PLATFORM-ADMIN-COMPLETION-01
+
+- [ ] audit svih postojećih platform-admin ekrana
+- [ ] navigation i business command center
+- [ ] overview sa stvarnim podacima
+- [ ] onboarding i provisioning consolidation
+- [ ] owner access management
+- [ ] templates/presets workspace
+- [ ] integration health
+- [ ] Qwen dizajn ključnih ekrana
+- [ ] funkcionalna integracija i QA
+
+### 4. PLATFORM-DESIGN-SYSTEM-01
+
+- [ ] admin design tokens
+- [ ] layout primitives
+- [ ] forms, tables, statusi i feedback states
+- [ ] modal/drawer standardi
+- [ ] mobile i accessibility pravila
+- [ ] javni template config tipovi
+
+### 5. VERTICAL-CORE-01
+
+- [ ] proširen business vertical registry
+- [ ] capabilities po vertikali
+- [ ] typed template config
+- [ ] section ordering i visibility
+- [ ] service variants i addons
+- [ ] resource model osnova
+- [ ] onboarding izbor vertikale
+
+### 6. BARBER-01
+
+- [ ] završiti barber preset
+- [ ] Qwen barber template/design variant
+- [ ] Mika kao kompletan demo tenant
+- [ ] booking/admin end-to-end QA
+
+### 7. NAILS-BEAUTY-01
+
+- [ ] nails, lashes i brows preseti
+- [ ] varijante usluge i addons
+- [ ] portfolio po zaposlenom
+- [ ] Qwen odgovarajući javni template
+
+### 8. WELLNESS-RESOURCES-01
+
+- [ ] masaže i spa preset
+- [ ] sobe, kreveti i oprema kao resursi
+- [ ] buffer vreme
+- [ ] intake/consent formulari
+- [ ] paketi tretmana
+
+### 9. EQUIPMENT-BOOKING-01
+
+- [ ] depilacija i laser
+- [ ] solarijum i booking uređaja/kabine
+- [ ] paketi minuta/kredita
+- [ ] servisno blokiranje opreme
+
+### 10. PRODUCTION-HARDENING-01
+
+- [ ] `.env.example` i environment matrica
+- [ ] novi README
+- [ ] CI lint/build/test
+- [ ] rate limiting
+- [ ] monitoring
+- [ ] backup/restore
+- [ ] security review
+- [ ] Playwright kritični tokovi
+
+### 11. BRAND-DEPLOY-01
+
+- [ ] finalno ime
+- [ ] pravna i domain provera
+- [ ] registracija domena
+- [ ] produkcioni Supabase
+- [ ] produkcioni Resend domen/webhook
+- [ ] cron
+- [ ] wildcard domeni
+- [ ] Google callback URL-ovi
+
+### 12. HOSTING-BILLING-01
+
+- [ ] planovi i entitlements
+- [ ] trial i grace period
+- [ ] subscription status
+- [ ] ručna evidencija uplata u početnoj fazi
+- [ ] kasnija payment provider integracija
+- [ ] custom-domain onboarding
+
+### 13. CUSTOMER-SELF-SERVICE-01
+
+- [ ] siguran booking link
+- [ ] customer cancel/reschedule request
+- [ ] add-to-calendar
+- [ ] consent i privacy evidencija
+- [ ] customer istorija
+
+### 14. STANDALONE-EXPORT-01
+
+- [ ] export manifest
+- [ ] generisani ZIP projekta
+- [ ] odvojena env konfiguracija
+- [ ] deployment i DNS uputstvo
+- [ ] zaštita platform secrets
+- [ ] maintenance i update strategija
 
 ---
 
-## 5. WEBSITE-EXPORT-01 — Standalone export
+## 7. Pravilo prioriteta
 
-### Cilj
+Ne otvaramo sledeći veliki milestone dok aktivni milestone nema:
 
-Izvesti gotov salonski sajt koji može da radi na sopstvenom hostingu i domenu.
+1. implementiran kod;
+2. obrisan `.next`;
+3. čist lint;
+4. uspešan build;
+5. ručni acceptance test;
+6. zabeležene greške i odluku da li je paket prihvaćen.
 
-- [ ] Export manifest sa business konfiguracijom
-- [ ] Generisanje standalone projekta/ZIP paketa
-- [ ] `.env.example`
-- [ ] Standalone Resend sender konfiguracija
-- [ ] Standalone Supabase konfiguracija
-- [ ] Migracije potrebne za odvojeni projekat
-- [ ] Deployment uputstvo
-- [ ] Domain i DNS uputstvo
-- [ ] Branding asset export
-- [ ] Provera da export ne sadrži platform secrets
-- [ ] Licencni i maintenance model
-- [ ] Verzija export paketa i update strategija
+Dizajn ne ulazi u implementaciju dok Qwen rezultat nije pregledan i odobren. Codex ne ulazi u širok refactor dok kritična funkcionalnost nije stabilna.
 
 ---
 
-## 6. BILLING-01 — Pretplate i naplata
+## 8. Tehničke odluke
 
-- [ ] Definicija cenovnih paketa
-- [ ] Mesečna i godišnja pretplata
-- [ ] Subscription status po salonu
-- [ ] Trial i grace period
-- [ ] Fakturisanje
-- [ ] Ručna evidencija uplata za početnu fazu
-- [ ] Payment provider integracija u kasnijoj fazi
-- [ ] Platform-admin billing pregled
-- [ ] Automatske email notifikacije za obnovu i neuspelu naplatu
-
----
-
-## 7. CUSTOMER-SELF-SERVICE-01
-
-- [ ] Siguran link za pregled rezervacije
-- [ ] Kupac može da otkaže rezervaciju u dozvoljenom roku
-- [ ] Kupac može da zatraži pomeranje
-- [ ] Potvrda email adrese po potrebi
-- [ ] Add-to-calendar link
-- [ ] Booking istorija za registrovane kupce
-- [ ] Consent i privacy evidencija
-
----
-
-## 8. OPERATIONS-01
-
-- [ ] Centralni audit log
-- [ ] Platform health dashboard
-- [ ] Failed integration queue
-- [ ] Automatski retry politike
-- [ ] Alert za veći broj bounced/complained emailova
-- [ ] Alert za Google token failure
-- [ ] Data retention politika
-- [ ] GDPR/privacy dokumentacija
-- [ ] Terms of Service
-- [ ] Incident response procedura
-
----
-
-## 9. QA-LAUNCH-01
-
-- [ ] Playwright kritični booking testovi
-- [ ] Owner/manager/staff permission testovi
-- [ ] Multi-tenant isolation testovi
-- [ ] Mobile responsive QA
-- [ ] Accessibility osnovna provera
-- [ ] Performance/Lighthouse provera
-- [ ] Produkcioni seed salon
-- [ ] Pilot sa prvim stvarnim salonom
-- [ ] Feedback i bugfix ciklus
-- [ ] Public launch checklist
-
----
-
-## 10. Trenutni prioriteti
-
-1. **Finalizovati naziv i kupiti domen**
-2. **Deployovati platformu na produkcioni Next.js hosting**
-3. **Povezati Resend domen, webhook i cron**
-4. **Uvesti custom domains za hostovane salonske sajtove**
-5. **Napraviti subscription/entitlement model**
-6. **Napraviti standalone export pipeline**
-
----
-
-## 11. Tehničke odluke
-
-- Klasičan PHP/WordPress shared hosting nije primarni runtime za platformu.
-- Platforma zahteva Node.js/Next.js runtime, environment variables, server routes, webhooks i scheduled cron pozive.
-- Supabase ostaje baza, Auth i Storage servis.
-- Resend ostaje email provider.
-- Google Calendar integracija ostaje best-effort i ne blokira booking.
-- Email slanje ostaje best-effort i ne blokira booking.
-- Hostovani i standalone modeli koriste isti notification/template sloj, ali različitu sender i deployment konfiguraciju.
-- Svi tenant podaci moraju ostati izolovani po `business_id`.
-
----
-
-## 12. Commit evidencija glavnih završenih milestoneova
-
-- `450180e` — `feat(notifications): track Resend delivery webhooks`
-- `34dbdd1` — `feat(notifications): add automated booking reminders`
-- `6fbc857` — `feat(notifications): add owner controls and delivery retry`
-- `fa2e88c` — `feat(notifications): add transactional booking emails`
-- `23c6544` — `feat(integrations): add salon and employee Google calendars`
-- `1d92881` — `feat(tenant-admin): add restricted staff dashboard`
-- `d0d8b65` — `feat(tenant-admin): add dashboard booking quick actions`
-- `cd9e0af` — `feat(tenant-admin): add member and role management`
-- `b4a3635` — `feat(platform-admin): add business media management`
+- jedan Next.js deployment služi platformu i hostovane tenant sajtove;
+- Supabase ostaje baza, Auth i Storage;
+- tenant izolacija ostaje zasnovana na `business_id` i RLS-u;
+- platformski poddomen u prvoj fazi koristi `business.slug`;
+- custom domeni kasnije dobijaju posebnu `business_domains` evidenciju;
+- Google Calendar i email ostaju best-effort i ne blokiraju booking;
+- hostovani i standalone modeli dele core logiku, ali imaju različit deployment i sender setup;
+- klasičan PHP/WordPress hosting nije primarni runtime platforme.
