@@ -16,51 +16,139 @@ type ReviewsSectionProps = {
   locale: Locale;
 };
 
-const intlLocaleMap: Record<
-  Locale,
-  string
-> = {
-  mk: "mk-MK",
-  sq: "sq-MK",
-  en: "en-GB",
+type ParsedReviewDate = {
+  year: number;
+  month: number;
+  day: number;
 };
 
-function parseLocalDate(
-  dateString: string
-): Date | null {
-  const parts =
-    dateString.split("-");
+type ReviewDateLocale =
+  | "mk"
+  | "sq"
+  | "en"
+  | "sr-Latn";
 
-  if (parts.length !== 3) {
-    return null;
+const monthNames: Record<
+  ReviewDateLocale,
+  readonly string[]
+> = {
+  mk: [
+    "јануари",
+    "февруари",
+    "март",
+    "април",
+    "мај",
+    "јуни",
+    "јули",
+    "август",
+    "септември",
+    "октомври",
+    "ноември",
+    "декември",
+  ],
+  sq: [
+    "janar",
+    "shkurt",
+    "mars",
+    "prill",
+    "maj",
+    "qershor",
+    "korrik",
+    "gusht",
+    "shtator",
+    "tetor",
+    "nëntor",
+    "dhjetor",
+  ],
+  en: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ],
+  "sr-Latn": [
+    "januar",
+    "februar",
+    "mart",
+    "april",
+    "maj",
+    "jun",
+    "jul",
+    "avgust",
+    "septembar",
+    "oktobar",
+    "novembar",
+    "decembar",
+  ],
+};
+
+function resolveReviewDateLocale(
+  locale: Locale
+): ReviewDateLocale {
+  const normalized =
+    locale.trim().toLowerCase();
+
+  if (normalized.startsWith("mk")) {
+    return "mk";
   }
 
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
+  if (normalized.startsWith("sq")) {
+    return "sq";
+  }
 
   if (
-    !Number.isInteger(year) ||
-    !Number.isInteger(month) ||
-    !Number.isInteger(day)
+    normalized.startsWith("sr")
   ) {
+    return "sr-Latn";
+  }
+
+  return "en";
+}
+
+function parseReviewDate(
+  dateString: string
+): ParsedReviewDate | null {
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})$/.exec(
+      dateString
+    );
+
+  if (!match) {
     return null;
   }
 
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+
   const date = new Date(
-    year,
-    month - 1,
-    day
+    Date.UTC(
+      year,
+      month - 1,
+      day
+    )
   );
 
   const isValid =
-    date.getFullYear() === year &&
-    date.getMonth() ===
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() ===
       month - 1 &&
-    date.getDate() === day;
+    date.getUTCDate() === day;
 
   return isValid
-    ? date
+    ? {
+        year,
+        month,
+        day,
+      }
     : null;
 }
 
@@ -68,34 +156,53 @@ function formatReviewDate(
   dateString: string,
   locale: Locale
 ): string | null {
-  const date =
-    parseLocalDate(dateString);
+  const parsed =
+    parseReviewDate(dateString);
 
-  if (!date) {
+  if (!parsed) {
     return null;
   }
 
-  return new Intl.DateTimeFormat(
-    intlLocaleMap[locale],
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }
-  ).format(date);
+  const resolvedLocale =
+    resolveReviewDateLocale(locale);
+
+  const month =
+    monthNames[resolvedLocale][
+      parsed.month - 1
+    ];
+
+  if (!month) {
+    return null;
+  }
+
+  switch (resolvedLocale) {
+    case "mk":
+      return `${parsed.day} ${month} ${parsed.year} г.`;
+
+    case "sr-Latn":
+      return `${parsed.day}. ${month} ${parsed.year}.`;
+
+    case "sq":
+    case "en":
+      return `${parsed.day} ${month} ${parsed.year}`;
+  }
 }
 
 function formatRating(
   rating: number,
   locale: Locale
 ): string {
-  return new Intl.NumberFormat(
-    intlLocaleMap[locale],
-    {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 1,
-    }
-  ).format(rating);
+  const normalized =
+    Number.isInteger(rating)
+      ? String(rating)
+      : rating.toFixed(1);
+
+  const resolvedLocale =
+    resolveReviewDateLocale(locale);
+
+  return resolvedLocale === "en"
+    ? normalized
+    : normalized.replace(".", ",");
 }
 
 export default function ReviewsSection({
