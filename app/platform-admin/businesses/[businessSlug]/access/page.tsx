@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import BusinessOwnerAccessManager from "@/components/platform-admin/BusinessOwnerAccessManager";
+import BusinessOwnerCredentialManager from "@/components/platform-admin/BusinessOwnerCredentialManager";
 
 import {
   getBusinessAccessPageData,
@@ -155,6 +156,20 @@ export default async function BusinessAccessPage({
           }
         />
       </section>
+
+      <div className="mt-7">
+        <BusinessOwnerCredentialManager
+          businessSlug={
+            business.slug
+          }
+          businessName={
+            business.name
+          }
+          owners={
+            owners
+          }
+        />
+      </div>
 
       <div className="mt-7">
         <BusinessOwnerAccessManager

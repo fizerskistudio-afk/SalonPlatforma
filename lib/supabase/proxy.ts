@@ -4,9 +4,15 @@ import {
   type NextRequest,
 } from "next/server";
 
+export type ProxySessionState = {
+  response: NextResponse;
+  claims:
+    Record<string, unknown> | null;
+};
+
 export async function updateSession(
   request: NextRequest
-) {
+): Promise<ProxySessionState> {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -74,14 +80,22 @@ export async function updateSession(
     }
   );
 
-  /*
-   * Validira postojeći JWT i po potrebi
-   * osvežava auth cookies.
-   *
-   * Nemoj uklanjati ovaj poziv čak ni kada
-   * rezultat trenutno ne koristimo.
-   */
-  await supabase.auth.getClaims();
+  const {
+    data,
+    error,
+  } =
+    await supabase.auth.getClaims();
 
-  return response;
+  return {
+    response,
+    claims:
+      !error &&
+      data?.claims
+        ? data.claims as unknown as
+            Record<
+              string,
+              unknown
+            >
+        : null,
+  };
 }

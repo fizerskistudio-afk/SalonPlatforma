@@ -30,11 +30,155 @@ function copyResponseCookies(
   }
 }
 
+function isJsonRecord(
+  value: unknown
+): value is Record<
+  string,
+  unknown
+> {
+  return (
+    typeof value ===
+      "object" &&
+    value !== null &&
+    !Array.isArray(
+      value
+    )
+  );
+}
+
+function mustChangePassword(
+  claims:
+    Record<string, unknown> | null
+): boolean {
+  if (!claims) {
+    return false;
+  }
+
+  const appMetadata =
+    claims.app_metadata;
+
+  return (
+    isJsonRecord(
+      appMetadata
+    ) &&
+    appMetadata.must_change_password ===
+      true
+  );
+}
+
+function isPasswordChangePath(
+  pathname: string
+): boolean {
+  return (
+    pathname ===
+      "/admin/change-password" ||
+    pathname.startsWith(
+      "/admin/change-password/"
+    )
+  );
+}
+
+function enforceTemporaryPassword(
+  request: NextRequest,
+  sessionResponse: NextResponse,
+  claims:
+    Record<string, unknown> | null
+): NextResponse | null {
+  if (
+    !mustChangePassword(
+      claims
+    )
+  ) {
+    return null;
+  }
+
+  const pathname =
+    request.nextUrl.pathname;
+
+  if (
+    pathname.startsWith(
+      "/api/admin"
+    )
+  ) {
+    const response =
+      NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Pre korišćenja administracije moraš promeniti privremenu lozinku.",
+          code:
+            "PASSWORD_CHANGE_REQUIRED",
+        },
+        {
+          status:
+            428,
+          headers: {
+            "Cache-Control":
+              "no-store",
+          },
+        }
+      );
+
+    copyResponseCookies(
+      sessionResponse,
+      response
+    );
+
+    return response;
+  }
+
+  if (
+    pathname.startsWith(
+      "/admin"
+    ) &&
+    !isPasswordChangePath(
+      pathname
+    )
+  ) {
+    const redirectUrl =
+      request.nextUrl.clone();
+
+    redirectUrl.pathname =
+      "/admin/change-password";
+    redirectUrl.search =
+      "";
+
+    const response =
+      NextResponse.redirect(
+        redirectUrl
+      );
+
+    copyResponseCookies(
+      sessionResponse,
+      response
+    );
+
+    return response;
+  }
+
+  return null;
+}
+
 export async function proxy(
   request: NextRequest
 ) {
-  const sessionResponse =
+  const {
+    response:
+      sessionResponse,
+    claims,
+  } =
     await updateSession(request);
+
+  const passwordResponse =
+    enforceTemporaryPassword(
+      request,
+      sessionResponse,
+      claims
+    );
+
+  if (passwordResponse) {
+    return passwordResponse;
+  }
 
   const rootHostname =
     getConfiguredPlatformRootHostname();

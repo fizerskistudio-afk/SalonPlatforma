@@ -32,6 +32,7 @@ export type AdminContext = {
   email: string | null;
   membershipId: string;
   role: AdminRole;
+  mustChangePassword: boolean;
 
   business: {
     id: string;
@@ -39,6 +40,49 @@ export type AdminContext = {
     slug: string;
   };
 };
+
+type RequireAdminOptions = {
+  allowPasswordChange?: boolean;
+};
+
+function isJsonRecord(
+  value: unknown
+): value is Record<
+  string,
+  unknown
+> {
+  return (
+    typeof value ===
+      "object" &&
+    value !== null &&
+    !Array.isArray(
+      value
+    )
+  );
+}
+
+function getMustChangePassword(
+  claims: unknown
+): boolean {
+  if (
+    !isJsonRecord(
+      claims
+    )
+  ) {
+    return false;
+  }
+
+  const appMetadata =
+    claims.app_metadata;
+
+  return (
+    isJsonRecord(
+      appMetadata
+    ) &&
+    appMetadata.must_change_password ===
+      true
+  );
+}
 
 /**
  * Vraća kontekst trenutno prijavljenog
@@ -167,6 +211,11 @@ export const getAdminContext = cache(
       role:
         membership.role,
 
+      mustChangePassword:
+        getMustChangePassword(
+          claims
+        ),
+
       business: {
         id: business.id,
         name: business.name,
@@ -179,13 +228,29 @@ export const getAdminContext = cache(
 /**
  * Koristi se u zaštićenim admin rutama.
  * Neprijavljeni korisnik se šalje na login.
+ * Nalog sa privremenom lozinkom se šalje na
+ * obaveznu promenu lozinke, osim kada je ta
+ * ruta eksplicitno dozvoljena.
  */
-export async function requireAdmin(): Promise<AdminContext> {
+export async function requireAdmin(
+  options:
+    RequireAdminOptions =
+      {}
+): Promise<AdminContext> {
   const context =
     await getAdminContext();
 
   if (!context) {
     redirect("/admin/login");
+  }
+
+  if (
+    context.mustChangePassword &&
+    !options.allowPasswordChange
+  ) {
+    redirect(
+      "/admin/change-password"
+    );
   }
 
   return context;

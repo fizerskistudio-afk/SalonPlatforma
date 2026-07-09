@@ -85,5 +85,16 @@ export async function loginAction(
     };
   }
 
+  if (
+    data.user
+      .app_metadata
+      ?.must_change_password ===
+    true
+  ) {
+    redirect(
+      "/admin/change-password"
+    );
+  }
+
   redirect("/admin");
 }
