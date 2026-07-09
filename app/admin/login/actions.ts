@@ -1,7 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import {
+  consumeRateLimit,
+  formatRetryAfter,
+  getClientAddress,
+} from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginActionState = {
@@ -26,6 +32,67 @@ export async function loginAction(
     return {
       error:
         "Unesi email adresu i lozinku.",
+    };
+  }
+
+  const requestHeaders =
+    await headers();
+
+  const clientAddress =
+    getClientAddress(
+      requestHeaders
+    );
+
+  const [
+    addressLimit,
+    accountLimit,
+  ] = await Promise.all([
+    consumeRateLimit({
+      scope:
+        "admin-login-address",
+      parts: [
+        clientAddress,
+      ],
+      limit: 30,
+      windowSeconds: 15 * 60,
+      failureMode: "closed",
+    }),
+
+    consumeRateLimit({
+      scope:
+        "admin-login-account",
+      parts: [
+        clientAddress,
+        email,
+      ],
+      limit: 8,
+      windowSeconds: 15 * 60,
+      failureMode: "closed",
+    }),
+  ]);
+
+  const blockedLimit =
+    !addressLimit.allowed
+      ? addressLimit
+      : !accountLimit.allowed
+        ? accountLimit
+        : null;
+
+  if (blockedLimit) {
+    if (
+      blockedLimit.unavailable
+    ) {
+      return {
+        error:
+          "Prijava trenutno nije dostupna. Pokušaj ponovo malo kasnije.",
+      };
+    }
+
+    return {
+      error:
+        `Previše pokušaja prijave. Pokušaj ponovo za ${formatRetryAfter(
+          blockedLimit.retryAfterSeconds
+        )}.`,
     };
   }
 

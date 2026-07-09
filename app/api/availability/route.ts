@@ -3,7 +3,11 @@ import {
   NextResponse,
 } from "next/server";
 
-import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
+import {
+  consumeRateLimit,
+  getClientAddress,
+  getRateLimitHeaders,
+} from "@/lib/security/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -69,8 +73,8 @@ export async function GET(
       request.nextUrl.searchParams;
 
     const businessSlug =
-      searchParams.get("businessSlug") ??
-      DEFAULT_BUSINESS_SLUG;
+      searchParams.get("businessSlug")
+        ?.trim() ?? "";
 
     const serviceId =
       searchParams.get("serviceId");
@@ -79,6 +83,12 @@ export async function GET(
 
     const employeeId =
       searchParams.get("employeeId");
+
+    if (!businessSlug) {
+      return validationError(
+        "Missing businessSlug."
+      );
+    }
 
     if (
       !SLUG_PATTERN.test(businessSlug)
@@ -120,6 +130,43 @@ export async function GET(
     ) {
       return validationError(
         "Invalid employeeId."
+      );
+    }
+
+    const availabilityLimit =
+      await consumeRateLimit({
+        scope:
+          "availability-address-tenant",
+        parts: [
+          getClientAddress(
+            request.headers
+          ),
+          businessSlug,
+        ],
+        limit: 90,
+        windowSeconds: 60,
+        failureMode: "open",
+      });
+
+    if (!availabilityLimit.allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Too many availability requests. Please try again shortly.",
+          code:
+            "RATE_LIMITED",
+        },
+        {
+          status: 429,
+          headers: {
+            "Cache-Control":
+              "no-store",
+            ...getRateLimitHeaders(
+              availabilityLimit
+            ),
+          },
+        }
       );
     }
 
@@ -219,6 +266,14 @@ export async function GET(
       },
       count: slots.length,
       slots,
+    }, {
+      headers: {
+        "Cache-Control":
+          "no-store",
+        ...getRateLimitHeaders(
+          availabilityLimit
+        ),
+      },
     });
   } catch (error) {
     const message =

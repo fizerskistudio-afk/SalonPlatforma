@@ -3,7 +3,14 @@ import {
   NextResponse,
 } from "next/server";
 
-import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
+import {
+  consumeRateLimit,
+  getClientAddress,
+  getRateLimitHeaders,
+} from "@/lib/security/rate-limit";
+import {
+  readJsonBodyWithLimit,
+} from "@/lib/security/request-body";
 import {
   syncBookingToAllGoogleCalendars,
 } from "@/lib/google-calendar/dual-sync";
@@ -16,6 +23,9 @@ export const dynamic =
   "force-dynamic";
 
 export const revalidate = 0;
+
+const MAX_BOOKING_REQUEST_BYTES =
+  16 * 1024;
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -84,7 +94,11 @@ function isJsonRecord(
 function errorResponse(
   status: number,
   message: string,
-  code: string
+  code: string,
+  extraHeaders: Record<
+    string,
+    string
+  > = {}
 ) {
   return NextResponse.json(
     {
@@ -97,6 +111,7 @@ function errorResponse(
       headers: {
         "Cache-Control":
           "no-store",
+        ...extraHeaders,
       },
     }
   );
@@ -320,18 +335,22 @@ export async function POST(
   request: NextRequest
 ) {
   try {
-    let body: unknown;
+    const bodyResult =
+      await readJsonBodyWithLimit(
+        request,
+        MAX_BOOKING_REQUEST_BYTES
+      );
 
-    try {
-      body =
-        await request.json();
-    } catch {
+    if (!bodyResult.ok) {
       return errorResponse(
-        400,
-        "Invalid JSON request body.",
-        "INVALID_JSON"
+        bodyResult.status,
+        bodyResult.message,
+        bodyResult.code
       );
     }
+
+    const body =
+      bodyResult.value;
 
     if (
       !isJsonRecord(body)
@@ -346,8 +365,7 @@ export async function POST(
     const businessSlug =
       optionalTrimmedString(
         body.businessSlug
-      ) ??
-      DEFAULT_BUSINESS_SLUG;
+      );
 
     const serviceId =
       optionalTrimmedString(
@@ -399,6 +417,14 @@ export async function POST(
             customer.note
           )
         : null;
+
+    if (!businessSlug) {
+      return errorResponse(
+        400,
+        "Business slug is required.",
+        "MISSING_BUSINESS_SLUG"
+      );
+    }
 
     if (
       !SLUG_PATTERN.test(
@@ -520,6 +546,76 @@ export async function POST(
         400,
         "Customer note is too long.",
         "CUSTOMER_NOTE_TOO_LONG"
+      );
+    }
+
+    const clientAddress =
+      getClientAddress(
+        request.headers
+      );
+
+    const contactIdentity =
+      customerEmail ??
+      customerPhone?.replace(
+        /\D/g,
+        ""
+      ) ??
+      "missing-contact";
+
+    const [
+      addressLimit,
+      contactLimit,
+    ] = await Promise.all([
+      consumeRateLimit({
+        scope:
+          "booking-address-tenant",
+        parts: [
+          clientAddress,
+          businessSlug,
+        ],
+        limit: 10,
+        windowSeconds: 10 * 60,
+        failureMode: "closed",
+      }),
+
+      consumeRateLimit({
+        scope:
+          "booking-contact-tenant",
+        parts: [
+          businessSlug,
+          contactIdentity,
+        ],
+        limit: 4,
+        windowSeconds: 30 * 60,
+        failureMode: "closed",
+      }),
+    ]);
+
+    const blockedLimit =
+      !addressLimit.allowed
+        ? addressLimit
+        : !contactLimit.allowed
+          ? contactLimit
+          : null;
+
+    if (blockedLimit) {
+      if (
+        blockedLimit.unavailable
+      ) {
+        return errorResponse(
+          503,
+          "Booking protection is temporarily unavailable.",
+          "RATE_LIMIT_UNAVAILABLE"
+        );
+      }
+
+      return errorResponse(
+        429,
+        "Too many booking attempts. Please try again later.",
+        "RATE_LIMITED",
+        getRateLimitHeaders(
+          blockedLimit
+        )
       );
     }
 
@@ -664,6 +760,9 @@ export async function POST(
         headers: {
           "Cache-Control":
             "no-store",
+          ...getRateLimitHeaders(
+            addressLimit
+          ),
         },
       }
     );

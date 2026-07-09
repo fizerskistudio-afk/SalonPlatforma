@@ -133,6 +133,20 @@ const bookingErrorMessages: Record<
   string,
   LocalizedErrorMessage
 > = {
+  RATE_LIMITED: {
+    "sr-Latn": "Poslato je previše zahteva za rezervaciju. Sačekaj malo i pokušaj ponovo.",
+    mk: "Испратени се премногу барања за резервација. Почекајте малку и обидете се повторно.",
+    sq: "Janë dërguar shumë kërkesa rezervimi. Prisni pak dhe provoni përsëri.",
+    en: "Too many booking attempts were sent. Please wait and try again.",
+  },
+
+  RATE_LIMIT_UNAVAILABLE: {
+    "sr-Latn": "Zaštita rezervacija trenutno nije dostupna. Pokušaj ponovo malo kasnije.",
+    mk: "Заштитата на резервациите моментално не е достапна. Обидете се повторно подоцна.",
+    sq: "Mbrojtja e rezervimeve nuk është aktualisht e disponueshme. Provoni përsëri më vonë.",
+    en: "Booking protection is temporarily unavailable. Please try again later.",
+  },
+
   INVALID_CUSTOMER_NAME: {
     "sr-Latn": "Unesi ime i prezime sa najmanje 2 karaktera.",
     mk: "Внесете име и презиме со најмалку 2 знаци.",
