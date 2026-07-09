@@ -1,46 +1,9 @@
 begin;
 
-create table if not exists public.public_rate_limit_buckets (
-  scope text not null,
-  key_hash text not null,
-  window_started_at timestamptz not null,
-  request_count integer not null default 0,
-  expires_at timestamptz not null,
-  updated_at timestamptz not null default now(),
-
-  constraint public_rate_limit_buckets_scope_check
-    check (
-      char_length(scope) between 1 and 100
-    ),
-
-  constraint public_rate_limit_buckets_key_hash_check
-    check (
-      key_hash ~ '^[0-9a-f]{64}$'
-    ),
-
-  constraint public_rate_limit_buckets_request_count_check
-    check (
-      request_count >= 0
-    ),
-
-  primary key (
-    scope,
-    key_hash,
-    window_started_at
-  )
-);
-
-create index if not exists public_rate_limit_buckets_expires_at_idx
-  on public.public_rate_limit_buckets (
-    expires_at
-  );
-
-alter table public.public_rate_limit_buckets
-  enable row level security;
-
-revoke all
-  on table public.public_rate_limit_buckets
-  from anon, authenticated;
+-- Hotfix for migration 022 already applied to a database.
+-- The old PL/pgSQL variable name `current_time` collided with the
+-- PostgreSQL CURRENT_TIME keyword (timetz), which broke writes to
+-- the timestamptz updated_at column.
 
 create or replace function public.consume_public_rate_limit(
   p_scope text,
@@ -169,5 +132,16 @@ grant execute
     integer
   )
   to service_role;
+
+-- Release only login buckets so administrators and staff can retry
+-- immediately after this migration. Public booking/availability
+-- limits are intentionally preserved.
+delete from public.public_rate_limit_buckets
+where scope in (
+  'admin-login-address',
+  'admin-login-account',
+  'staff-login-address',
+  'staff-login-account'
+);
 
 commit;
