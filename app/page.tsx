@@ -1,17 +1,50 @@
-import type { Metadata } from "next";
+import type {
+  Metadata,
+} from "next";
 
 import {
   buildTenantPublicUrl,
 } from "@/lib/tenancy/hostname";
+
+const HOME_TITLE =
+  "Beauty i wellness poslovna platforma";
+
+const HOME_DESCRIPTION =
+  "Multi-tenant platforma za javne sajtove, online rezervacije i upravljanje beauty i wellness biznisima.";
 
 export const dynamic =
   "force-dynamic";
 
 export const metadata: Metadata = {
   title:
-    "Beauty business platform — demo",
+    HOME_TITLE,
+
   description:
-    "Demo ulaz za multi-tenant platformu za beauty i wellness biznise.",
+    HOME_DESCRIPTION,
+
+  alternates: {
+    canonical:
+      "/",
+  },
+
+  openGraph: {
+    title:
+      HOME_TITLE,
+
+    description:
+      HOME_DESCRIPTION,
+
+    url:
+      "/",
+  },
+
+  twitter: {
+    title:
+      HOME_TITLE,
+
+    description:
+      HOME_DESCRIPTION,
+  },
 };
 
 const demoBusinesses = [
@@ -85,7 +118,7 @@ export default function Home() {
           <strong className="text-zinc-200">
             Trenutna faza:
           </strong>{" "}
-          potvrđujemo tenant poddomene i odvajamo glavni domen platforme od javnih sajtova salona. Owner pristup za Miku dolazi u sledećem, zasebnom bezbednosnom paketu.
+          potvrđujemo tenant poddomene i odvajamo glavni domen platforme od javnih sajtova salona.
         </section>
       </div>
     </main>

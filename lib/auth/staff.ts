@@ -30,9 +30,36 @@ type EmployeeRow = {
   is_active: boolean;
 };
 
+function isJsonRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function getMustChangePassword(
+  claims: unknown
+): boolean {
+  if (!isJsonRecord(claims)) {
+    return false;
+  }
+
+  const appMetadata =
+    claims.app_metadata;
+
+  return (
+    isJsonRecord(appMetadata) &&
+    appMetadata.must_change_password === true
+  );
+}
+
 export type StaffContext = {
   userId: string;
   email: string | null;
+  mustChangePassword: boolean;
 
   membership: {
     id: string;
@@ -72,8 +99,11 @@ export const getStaffContext = cache(
       return null;
     }
 
+    const claims =
+      claimsData.claims;
+
     const userId =
-      claimsData.claims.sub;
+      claims.sub;
 
     if (
       typeof userId !== "string" ||
@@ -166,7 +196,7 @@ export const getStaffContext = cache(
     }
 
     const emailClaim =
-      claimsData.claims.email;
+      claims.email;
 
     return {
       userId,
@@ -174,6 +204,10 @@ export const getStaffContext = cache(
         typeof emailClaim === "string"
           ? emailClaim
           : null,
+      mustChangePassword:
+        getMustChangePassword(
+          claims
+        ),
 
       membership: {
         id: membership.id,
@@ -194,6 +228,18 @@ export const getStaffContext = cache(
   }
 );
 
+export async function requireStaffForPasswordChange():
+  Promise<StaffContext> {
+  const context =
+    await getStaffContext();
+
+  if (!context) {
+    redirect("/staff/login");
+  }
+
+  return context;
+}
+
 export async function requireStaff():
   Promise<StaffContext & {
     employee: NonNullable<
@@ -205,6 +251,12 @@ export async function requireStaff():
 
   if (!context) {
     redirect("/staff/login");
+  }
+
+  if (context.mustChangePassword) {
+    redirect(
+      "/staff/change-password"
+    );
   }
 
   if (!context.employee) {

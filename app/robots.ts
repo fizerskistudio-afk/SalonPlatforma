@@ -3,12 +3,18 @@ import type {
 } from "next";
 
 import {
-  getSiteUrl,
-} from "@/lib/seo/site";
+  getRequestUrlContext,
+} from "@/lib/seo/request-origin";
 
-export default function robots(): MetadataRoute.Robots {
-  const siteUrl =
-    getSiteUrl();
+export const dynamic =
+  "force-dynamic";
+
+export default async function robots():
+  Promise<MetadataRoute.Robots> {
+  const {
+    origin,
+  } =
+    await getRequestUrlContext();
 
   return {
     rules: {
@@ -16,7 +22,15 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
 
       disallow: [
+        "/admin",
         "/admin/",
+        "/staff",
+        "/staff/",
+        "/platform-admin",
+        "/platform-admin/",
+        "/auth",
+        "/auth/",
+        "/api",
         "/api/",
       ],
     },
@@ -24,10 +38,10 @@ export default function robots(): MetadataRoute.Robots {
     sitemap:
       new URL(
         "/sitemap.xml",
-        siteUrl
+        origin
       ).toString(),
 
     host:
-      siteUrl.origin,
+      origin,
   };
 }

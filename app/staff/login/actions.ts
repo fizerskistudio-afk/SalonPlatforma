@@ -74,5 +74,15 @@ export async function staffLoginAction(
     };
   }
 
+  if (
+    data.user.app_metadata
+      ?.must_change_password ===
+    true
+  ) {
+    redirect(
+      "/staff/change-password"
+    );
+  }
+
   redirect("/staff");
 }

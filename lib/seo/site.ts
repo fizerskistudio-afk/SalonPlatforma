@@ -1,14 +1,29 @@
+import type {
+  Metadata,
+} from "next";
+
 export const SITE_NAME =
-  "Lumière Studio";
+  "Salon Platforma";
 
 export const SITE_SHORT_NAME =
-  "Lumière";
+  "Platforma";
 
 export const SITE_DESCRIPTION =
-  "Frizerske i beauty usluge sa jednostavnim online zakazivanjem termina.";
+  "Platforma za online zakazivanje i upravljanje beauty i wellness biznisima.";
 
 export const DEFAULT_SITE_URL =
   "https://salon-platforma.vercel.app";
+
+export const PRIVATE_PAGE_ROBOTS:
+  Metadata["robots"] = {
+    index: false,
+    follow: false,
+
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  };
 
 export function getSiteUrl(): URL {
   const configuredUrl =
@@ -25,4 +40,19 @@ export function getSiteUrl(): URL {
   return new URL(
     DEFAULT_SITE_URL
   );
+}
+
+export function toAbsoluteSiteUrl(
+  value: string
+): string {
+  try {
+    return new URL(
+      value
+    ).toString();
+  } catch {
+    return new URL(
+      value,
+      getSiteUrl()
+    ).toString();
+  }
 }

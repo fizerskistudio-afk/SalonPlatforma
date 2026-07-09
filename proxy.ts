@@ -9,6 +9,14 @@ import {
 } from "@/lib/tenancy/hostname";
 import { updateSession } from "@/lib/supabase/proxy";
 
+const PRIVATE_PATH_PREFIXES = [
+  "/admin",
+  "/staff",
+  "/platform-admin",
+  "/auth",
+  "/api",
+] as const;
+
 function getIncomingHost(
   request: NextRequest
 ): string {
@@ -28,6 +36,36 @@ function copyResponseCookies(
   for (const cookie of source.cookies.getAll()) {
     target.cookies.set(cookie);
   }
+}
+
+function isPrivatePath(
+  pathname: string
+): boolean {
+  return PRIVATE_PATH_PREFIXES.some(
+    (prefix) =>
+      pathname === prefix ||
+      pathname.startsWith(
+        `${prefix}/`
+      )
+  );
+}
+
+function applyRobotsPrivacyHeader(
+  request: NextRequest,
+  response: NextResponse
+): NextResponse {
+  if (
+    isPrivatePath(
+      request.nextUrl.pathname
+    )
+  ) {
+    response.headers.set(
+      "X-Robots-Tag",
+      "noindex, nofollow, noarchive, nosnippet"
+    );
+  }
+
+  return response;
 }
 
 function isJsonRecord(
@@ -74,8 +112,26 @@ function isPasswordChangePath(
       "/admin/change-password" ||
     pathname.startsWith(
       "/admin/change-password/"
+    ) ||
+    pathname ===
+      "/staff/change-password" ||
+    pathname.startsWith(
+      "/staff/change-password/"
     )
   );
+}
+
+function passwordChangeTarget(
+  pathname: string
+): string {
+  return pathname.startsWith(
+    "/staff"
+  ) ||
+  pathname.startsWith(
+    "/api/staff"
+  )
+    ? "/staff/change-password"
+    : "/admin/change-password";
 }
 
 function enforceTemporaryPassword(
@@ -98,6 +154,9 @@ function enforceTemporaryPassword(
   if (
     pathname.startsWith(
       "/api/admin"
+    ) ||
+    pathname.startsWith(
+      "/api/staff"
     )
   ) {
     const response =
@@ -105,13 +164,12 @@ function enforceTemporaryPassword(
         {
           ok: false,
           message:
-            "Pre korišćenja administracije moraš promeniti privremenu lozinku.",
+            "Pre korišćenja naloga moraš promeniti privremenu lozinku.",
           code:
             "PASSWORD_CHANGE_REQUIRED",
         },
         {
-          status:
-            428,
+          status: 428,
           headers: {
             "Cache-Control":
               "no-store",
@@ -128,8 +186,13 @@ function enforceTemporaryPassword(
   }
 
   if (
-    pathname.startsWith(
-      "/admin"
+    (
+      pathname.startsWith(
+        "/admin"
+      ) ||
+      pathname.startsWith(
+        "/staff"
+      )
     ) &&
     !isPasswordChangePath(
       pathname
@@ -139,7 +202,9 @@ function enforceTemporaryPassword(
       request.nextUrl.clone();
 
     redirectUrl.pathname =
-      "/admin/change-password";
+      passwordChangeTarget(
+        pathname
+      );
     redirectUrl.search =
       "";
 
@@ -177,7 +242,10 @@ export async function proxy(
     );
 
   if (passwordResponse) {
-    return passwordResponse;
+    return applyRobotsPrivacyHeader(
+      request,
+      passwordResponse
+    );
   }
 
   const rootHostname =
@@ -195,7 +263,10 @@ export async function proxy(
     request.nextUrl.pathname === "/";
 
   if (!isTenantHomepage) {
-    return sessionResponse;
+    return applyRobotsPrivacyHeader(
+      request,
+      sessionResponse
+    );
   }
 
   const rewriteUrl =
@@ -225,11 +296,6 @@ export async function proxy(
 
 export const config = {
   matcher: [
-    /*
-     * Proxy se ne pokreće za Next.js statičke
-     * fajlove, optimizovane slike i uobičajene
-     * javne asset fajlove.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
   ],
 };
