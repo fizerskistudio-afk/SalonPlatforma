@@ -42,3 +42,15 @@ next-env.d.ts
 
 # Local reports
 lint-report.txt
+
+# Local milestone package artifacts
+/APPLY-*.cmd
+/WORKSPACE-CLEANUP-*.cmd
+/*_README.txt
+/PUBLIC-*-01.md
+/TENANT-*-01.md
+/PROJECT-*-01.md
+/PUBLIC-*.zip
+/TENANT-*.zip
+/PROJECT-*.zip
+/scripts/apply-*.mjs
