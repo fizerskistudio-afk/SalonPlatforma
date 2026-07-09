@@ -25,6 +25,7 @@ import {
 import {
   EMPTY_TEMPLATE_CONFIG,
   DEFAULT_TEMPLATE_KEY,
+  getTemplateManifest,
   type TemplateConfig,
   type TemplateKey,
 } from "@/lib/templates/registry";
@@ -92,11 +93,11 @@ const loadingMessages: LocalizedText = {
 
 const catalogErrorMessages:
   LocalizedText = {
-    "sr-Latn": "Podaci salona nisu mogli da se učitaju.",
-    mk: "Податоците за салонот не можеа да се вчитаат.",
-    sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
-    en: "The salon data could not be loaded.",
-  };
+  "sr-Latn": "Podaci salona nisu mogli da se učitaju.",
+  mk: "Податоците за салонот не можеа да се вчитаат.",
+  sq: "Të dhënat e sallonit nuk mund të ngarkoheshin.",
+  en: "The salon data could not be loaded.",
+};
 
 const retryMessages: LocalizedText = {
   "sr-Latn": "Pokušaj ponovo",
@@ -258,13 +259,17 @@ function SalonPlatformContent({
   const [
     locale,
     setLocale,
-  ] = useState<Locale>(initialLocale);
+  ] = useState<Locale>(
+    initialLocale
+  );
 
   const [
     viewPreference,
     setViewPreference,
   ] =
-    useState<ViewPreference>("auto");
+    useState<ViewPreference>(
+      "auto"
+    );
 
   const isMobileViewport =
     useSyncExternalStore(
@@ -276,17 +281,24 @@ function SalonPlatformContent({
   const [
     isBookingOpen,
     setIsBookingOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     initialServiceId,
     setInitialServiceId,
-  ] = useState<string | null>(null);
+  ] =
+    useState<
+      string | null
+    >(null);
 
   const [
     initialEmployeeId,
     setInitialEmployeeId,
-  ] = useState<string | null>(null);
+  ] =
+    useState<
+      string | null
+    >(null);
 
   const localeInitializedRef =
     useRef(false);
@@ -304,10 +316,13 @@ function SalonPlatformContent({
 
     const {
       business,
-    } = catalog;
+    } =
+      catalog;
 
-    let initialLocale: Locale =
-      business.defaultContentLocale;
+    let initialBusinessLocale:
+      Locale =
+        business
+          .defaultContentLocale;
 
     try {
       const storedLocale =
@@ -325,20 +340,26 @@ function SalonPlatformContent({
           storedLocale
         )
       ) {
-        initialLocale =
+        initialBusinessLocale =
           storedLocale;
       }
     } catch {
       // localStorage nije dostupan.
     }
 
-    setLocale(initialLocale);
-  }, [catalog]);
+    setLocale(
+      initialBusinessLocale
+    );
+  }, [
+    catalog,
+  ]);
 
   useEffect(() => {
     if (
       !catalog ||
-      !isLocaleCode(locale)
+      !isLocaleCode(
+        locale
+      )
     ) {
       return;
     }
@@ -371,29 +392,38 @@ function SalonPlatformContent({
         );
 
       if (
-        stored === "desktop" ||
-        stored === "mobile"
+        stored ===
+          "desktop" ||
+        stored ===
+          "mobile"
       ) {
-        setViewPreference(stored);
+        setViewPreference(
+          stored
+        );
       }
     } catch {
       // localStorage nije dostupan.
     }
   }, []);
 
-  const effectiveView: ResolvedViewport =
-    viewPreference === "auto"
-      ? isMobileViewport
-        ? "mobile"
-        : "desktop"
-      : viewPreference;
+  const effectiveView:
+    ResolvedViewport =
+      viewPreference ===
+      "auto"
+        ? isMobileViewport
+          ? "mobile"
+          : "desktop"
+        : viewPreference;
 
   const handleLocaleChange = (
-    nextLocale: Locale
+    nextLocale:
+      Locale
   ) => {
     if (
       !catalog ||
-      !isLocaleCode(nextLocale) ||
+      !isLocaleCode(
+        nextLocale
+      ) ||
       !catalog.business.supportedContentLocales.includes(
         nextLocale
       )
@@ -401,12 +431,16 @@ function SalonPlatformContent({
       return;
     }
 
-    setLocale(nextLocale);
+    setLocale(
+      nextLocale
+    );
 
     try {
       localStorage.setItem(
         getLocaleStorageKey(
-          catalog.business.slug
+          catalog
+            .business
+            .slug
         ),
         nextLocale
       );
@@ -416,33 +450,63 @@ function SalonPlatformContent({
   };
 
   const openBooking = () => {
-    setInitialServiceId(null);
-    setInitialEmployeeId(null);
-    setIsBookingOpen(true);
+    setInitialServiceId(
+      null
+    );
+
+    setInitialEmployeeId(
+      null
+    );
+
+    setIsBookingOpen(
+      true
+    );
   };
 
   const openBookingWithService = (
-    serviceId: string
+    serviceId:
+      string
   ) => {
-    setInitialServiceId(serviceId);
-    setInitialEmployeeId(null);
-    setIsBookingOpen(true);
+    setInitialServiceId(
+      serviceId
+    );
+
+    setInitialEmployeeId(
+      null
+    );
+
+    setIsBookingOpen(
+      true
+    );
   };
 
   const openBookingWithEmployee = (
-    employeeId: string
+    employeeId:
+      string
   ) => {
-    setInitialEmployeeId(employeeId);
-    setInitialServiceId(null);
-    setIsBookingOpen(true);
+    setInitialEmployeeId(
+      employeeId
+    );
+
+    setInitialServiceId(
+      null
+    );
+
+    setIsBookingOpen(
+      true
+    );
   };
 
   const closeBooking = () => {
-    setIsBookingOpen(false);
+    setIsBookingOpen(
+      false
+    );
   };
 
   const switchToDesktop = () => {
-    setViewPreference("desktop");
+    setViewPreference(
+      "desktop"
+    );
 
     try {
       localStorage.setItem(
@@ -455,7 +519,9 @@ function SalonPlatformContent({
   };
 
   const switchToMobile = () => {
-    setViewPreference("mobile");
+    setViewPreference(
+      "mobile"
+    );
 
     try {
       localStorage.setItem(
@@ -468,46 +534,77 @@ function SalonPlatformContent({
   };
 
   if (
-    status === "loading" ||
+    status ===
+      "loading" ||
     !catalog
   ) {
-    if (status === "error") {
+    if (
+      status ===
+      "error"
+    ) {
       return (
         <CatalogErrorScreen
-          locale={locale}
-          error={error}
-          onRetry={reload}
+          locale={
+            locale
+          }
+          error={
+            error
+          }
+          onRetry={
+            reload
+          }
         />
       );
     }
 
     return (
       <CatalogLoadingScreen
-        locale={locale}
+        locale={
+          locale
+        }
       />
     );
   }
 
+  const templateManifest =
+    getTemplateManifest(
+      templateKey
+    );
+
+  const themeColors =
+    templateManifest
+      .defaultPalette ??
+    catalog.business.theme;
+
   const brandStyle =
     createBrandStyle(
-      catalog.business.theme
+      themeColors
     );
 
   const direction =
-    isLocaleCode(locale)
-      ? getLocaleDirection(locale)
+    isLocaleCode(
+      locale
+    )
+      ? getLocaleDirection(
+          locale
+        )
       : "ltr";
 
   const templateProps = {
     locale,
+
     onLocaleChange:
       handleLocaleChange,
+
     onBook:
       openBooking,
+
     onBookService:
       openBookingWithService,
+
     onBookEmployee:
       openBookingWithEmployee,
+
     onSwitchToDesktop:
       switchToDesktop,
   };
@@ -515,9 +612,15 @@ function SalonPlatformContent({
   return (
     <div
       className="min-h-[100dvh] bg-[var(--brand-background)] text-[var(--brand-text)]"
-      style={brandStyle}
-      lang={locale}
-      dir={direction}
+      style={
+        brandStyle
+      }
+      lang={
+        locale
+      }
+      dir={
+        direction
+      }
       data-active-template={
         templateKey
       }
@@ -529,57 +632,74 @@ function SalonPlatformContent({
         templateConfig={
           templateConfig
         }
-        viewport={effectiveView}
+        viewport={
+          effectiveView
+        }
         {...templateProps}
       />
 
-      {viewPreference === "desktop" && (
-        <>
-          <button
-            type="button"
-            onClick={switchToMobile}
-            className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--brand-border)] bg-[var(--brand-surface)] text-[var(--brand-primary)] shadow-lg transition-colors hover:bg-[var(--brand-primary)] hover:text-[var(--brand-background)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none md:hidden"
-            style={{
-              marginBottom:
-                "env(safe-area-inset-bottom)",
-            }}
-            aria-label={t(
-              translations.common
-                .mobileNavigation,
-              locale
-            )}
-          >
-            <Smartphone
-              className="h-5 w-5"
-              aria-hidden="true"
-            />
-          </button>
-        </>
+      {viewPreference ===
+        "desktop" && (
+        <button
+          type="button"
+          onClick={
+            switchToMobile
+          }
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--brand-border)] bg-[var(--brand-surface)] text-[var(--brand-primary)] shadow-lg transition-colors hover:bg-[var(--brand-primary)] hover:text-[var(--brand-background)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none md:hidden"
+          style={{
+            marginBottom:
+              "env(safe-area-inset-bottom)",
+          }}
+          aria-label={t(
+            translations
+              .common
+              .mobileNavigation,
+            locale
+          )}
+        >
+          <Smartphone
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+        </button>
       )}
 
-      {effectiveView === "mobile" ? (
+      {effectiveView ===
+      "mobile" ? (
         <MobileBookingModal
-          isOpen={isBookingOpen}
-          locale={locale}
+          isOpen={
+            isBookingOpen
+          }
+          locale={
+            locale
+          }
           initialServiceId={
             initialServiceId
           }
           initialEmployeeId={
             initialEmployeeId
           }
-          onClose={closeBooking}
+          onClose={
+            closeBooking
+          }
         />
       ) : (
         <DesktopBookingModal
-          isOpen={isBookingOpen}
-          locale={locale}
+          isOpen={
+            isBookingOpen
+          }
+          locale={
+            locale
+          }
           initialServiceId={
             initialServiceId
           }
           initialEmployeeId={
             initialEmployeeId
           }
-          onClose={closeBooking}
+          onClose={
+            closeBooking
+          }
         />
       )}
     </div>

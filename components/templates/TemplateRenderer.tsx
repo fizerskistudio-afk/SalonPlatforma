@@ -8,101 +8,78 @@ import {
   type TemplateKey,
   type TemplateViewport,
 } from "@/lib/templates/registry";
-
-import HairEditorialDesktopTemplate from "./hair-editorial/HairEditorialDesktopTemplate";
-import HairEditorialMobileTemplate from "./hair-editorial/HairEditorialMobileTemplate";
+import type { PublicTemplateProps } from "./template-props";
 import HairLuxuryDesktopTemplate from "./hair-luxury/HairLuxuryDesktopTemplate";
 import HairLuxuryMobileTemplate from "./hair-luxury/HairLuxuryMobileTemplate";
-import type {
-  PublicTemplateProps,
-} from "./template-props";
+import HairEditorialDesktopTemplate from "./hair-editorial/HairEditorialDesktopTemplate";
+import HairEditorialMobileTemplate from "./hair-editorial/HairEditorialMobileTemplate";
+import BarberHeritageDesktopTemplate from "./barber-heritage/BarberHeritageDesktopTemplate";
+import BarberHeritageMobileTemplate from "./barber-heritage/BarberHeritageMobileTemplate";
 
-type TemplateRendererProps =
-  PublicTemplateProps & {
-    templateKey:
-      TemplateKey;
-
-    templateConfig:
-      TemplateConfig;
-
-    viewport:
-      TemplateViewport;
-  };
+type TemplateRendererProps = PublicTemplateProps & {
+  templateKey: TemplateKey;
+  templateConfig: TemplateConfig;
+  viewport: TemplateViewport;
+};
 
 export default function TemplateRenderer({
   templateKey,
   templateConfig,
   viewport,
-  ...templateProps
+  ...props
 }: TemplateRendererProps) {
-  const resolvedKey =
-    resolveTemplateKey(
-      templateKey
-    );
+  const resolvedKey = resolveTemplateKey(templateKey);
+  const normalizedConfig = normalizeTemplateConfig(templateConfig);
+  const manifest = getTemplateManifest(resolvedKey);
 
-  const normalizedConfig =
-    normalizeTemplateConfig(
-      templateConfig
-    );
+  const configured = Object.keys(normalizedConfig).length > 0;
 
-  const manifest =
-    getTemplateManifest(
-      resolvedKey
-    );
-
-  const configured =
-    Object.keys(
-      normalizedConfig
-    ).length > 0;
-
-  let content:
-    React.ReactNode;
+  let content: React.ReactNode = null;
 
   switch (resolvedKey) {
-    case "hair-editorial":
+    case "hair-luxury":
       content =
-        viewport ===
-        "mobile" ? (
-          <HairEditorialMobileTemplate
-            {...templateProps}
-          />
+        viewport === "mobile" ? (
+          <HairLuxuryMobileTemplate {...props} />
         ) : (
-          <HairEditorialDesktopTemplate
-            {...templateProps}
-          />
+          <HairLuxuryDesktopTemplate {...props} />
         );
-
       break;
 
-    case "hair-luxury":
+    case "hair-editorial":
+      content =
+        viewport === "mobile" ? (
+          <HairEditorialMobileTemplate {...props} />
+        ) : (
+          <HairEditorialDesktopTemplate {...props} />
+        );
+      break;
+
+    case "barber-heritage":
+      content =
+        viewport === "mobile" ? (
+          <BarberHeritageMobileTemplate {...props} />
+        ) : (
+          <BarberHeritageDesktopTemplate {...props} />
+        );
+      break;
+
     default:
       content =
-        viewport ===
-        "mobile" ? (
-          <HairLuxuryMobileTemplate
-            {...templateProps}
-          />
+        viewport === "mobile" ? (
+          <HairLuxuryMobileTemplate {...props} />
         ) : (
-          <HairLuxuryDesktopTemplate
-            {...templateProps}
-          />
+          <HairLuxuryDesktopTemplate {...props} />
         );
+      break;
   }
 
   return (
     <div
       className="contents"
-      data-template={
-        manifest.key
-      }
-      data-template-version={
-        manifest.version
-      }
-      data-template-configured={
-        configured
-          ? "true"
-          : "false"
-      }
+      data-template={manifest.key}
+      data-template-version={manifest.version}
+      data-template-configured={configured ? "true" : "false"}
     >
       {content}
     </div>
