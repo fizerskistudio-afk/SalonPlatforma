@@ -1,29 +1,20 @@
 import type {
   Metadata,
 } from "next";
-
-import {
-  cache,
-} from "react";
-
 import {
   notFound,
 } from "next/navigation";
 
 import SalonPlatform from "@/components/SalonPlatform";
-
 import {
-  createAdminClient,
-} from "@/lib/supabase/admin";
-
+  loadPublicCatalog,
+} from "@/lib/catalog/server";
 import {
   toAbsoluteSiteUrl,
 } from "@/lib/seo/site";
-
 import {
   buildTenantPublicUrl,
 } from "@/lib/tenancy/hostname";
-
 import {
   getBusinessTemplateRuntime,
 } from "@/lib/templates/server";
@@ -49,13 +40,6 @@ type PublicSalonPageProps = {
   }>;
 };
 
-type ActiveBusinessRow = {
-  id: string;
-  name: string;
-  slug: string;
-  default_locale: string;
-};
-
 function normalizeBusinessSlug(
   value: string
 ): string {
@@ -64,67 +48,26 @@ function normalizeBusinessSlug(
     .toLowerCase();
 }
 
-const getActiveBusiness = cache(
-  async (
-    businessSlug: string
-  ): Promise<ActiveBusinessRow | null> => {
-    const supabase =
-      createAdminClient();
-
-    const {
-      data,
-      error,
-    } = await supabase
-      .from(
-        "businesses"
-      )
-      .select(
-        `
-          id,
-          name,
-          slug,
-          default_locale
-        `
-      )
-      .eq(
-        "slug",
-        businessSlug
-      )
-      .eq(
-        "is_active",
-        true
-      )
-      .maybeSingle();
-
-    if (error) {
-      console.error(
-        "Failed to resolve public salon route:",
-        error
-      );
-
-      throw new Error(
-        "Public salon could not be loaded."
-      );
-    }
-
-    if (!data) {
-      return null;
-    }
-
-    return data as
-      unknown as
-      ActiveBusinessRow;
-  }
-);
+function createNotFoundMetadata():
+  Metadata {
+  return {
+    title: {
+      absolute:
+        "Salon nije pronađen",
+    },
+    robots:
+      PRIVATE_NOT_FOUND_ROBOTS,
+  };
+}
 
 export async function generateMetadata({
   params,
-}: PublicSalonPageProps): Promise<Metadata> {
+}: PublicSalonPageProps):
+  Promise<Metadata> {
   const {
     businessSlug:
       rawBusinessSlug,
-  } =
-    await params;
+  } = await params;
 
   const businessSlug =
     normalizeBusinessSlug(
@@ -136,33 +79,20 @@ export async function generateMetadata({
       businessSlug
     )
   ) {
-    return {
-      title: {
-        absolute:
-          "Salon nije pronađen",
-      },
-
-      robots:
-        PRIVATE_NOT_FOUND_ROBOTS,
-    };
+    return createNotFoundMetadata();
   }
 
-  const business =
-    await getActiveBusiness(
+  const result =
+    await loadPublicCatalog(
       businessSlug
     );
 
-  if (!business) {
-    return {
-      title: {
-        absolute:
-          "Salon nije pronađen",
-      },
-
-      robots:
-        PRIVATE_NOT_FOUND_ROBOTS,
-    };
+  if (!result) {
+    return createNotFoundMetadata();
   }
+
+  const business =
+    result.catalog.business;
 
   const title =
     `${business.name} | Online zakazivanje`;
@@ -182,39 +112,29 @@ export async function generateMetadata({
       absolute:
         title,
     },
-
     description,
-
     alternates: {
       canonical:
         canonicalUrl,
     },
-
     openGraph: {
       type:
         "website",
-
       title,
       description,
-
       url:
         canonicalUrl,
-
       siteName:
         business.name,
-
       locale:
         "sr_RS",
     },
-
     twitter: {
       card:
         "summary",
-
       title,
       description,
     },
-
     robots: {
       index: true,
       follow: true,
@@ -228,8 +148,7 @@ export default async function PublicSalonPage({
   const {
     businessSlug:
       rawBusinessSlug,
-  } =
-    await params;
+  } = await params;
 
   const businessSlug =
     normalizeBusinessSlug(
@@ -244,27 +163,34 @@ export default async function PublicSalonPage({
     notFound();
   }
 
-  const business =
-    await getActiveBusiness(
+  const result =
+    await loadPublicCatalog(
       businessSlug
     );
 
-  if (!business) {
+  if (!result) {
     notFound();
   }
 
+  const catalog =
+    result.catalog;
+
   const template =
     await getBusinessTemplateRuntime(
-      business.slug
+      catalog.business.slug
     );
 
   return (
     <SalonPlatform
       businessSlug={
-        business.slug
+        catalog.business.slug
+      }
+      initialCatalog={
+        catalog
       }
       initialLocale={
-        business.default_locale
+        catalog.business
+          .defaultContentLocale
       }
       templateKey={
         template.key

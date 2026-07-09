@@ -8,12 +8,16 @@ import {
   useState,
 } from "react";
 
-import { DEFAULT_BUSINESS_SLUG } from "@/lib/business/defaults";
+import {
+  DEFAULT_BUSINESS_SLUG,
+} from "@/lib/business/defaults";
 import type {
   CatalogData,
 } from "@/lib/types";
 
-export { DEFAULT_BUSINESS_SLUG };
+export {
+  DEFAULT_BUSINESS_SLUG,
+};
 
 type CatalogStatus =
   | "loading"
@@ -30,6 +34,8 @@ type CatalogContextValue = {
 type CatalogProviderProps = {
   children: ReactNode;
   businessSlug?: string;
+  initialCatalog?:
+    CatalogData | null;
 };
 
 type CatalogSuccessResponse = {
@@ -65,12 +71,25 @@ export function CatalogProvider({
   children,
   businessSlug =
     DEFAULT_BUSINESS_SLUG,
+  initialCatalog = null,
 }: CatalogProviderProps) {
+  const validInitialCatalog =
+    initialCatalog?.business.slug ===
+      businessSlug
+      ? initialCatalog
+      : null;
+
   const [catalog, setCatalog] =
-    useState<CatalogData | null>(null);
+    useState<CatalogData | null>(
+      validInitialCatalog
+    );
 
   const [status, setStatus] =
-    useState<CatalogStatus>("loading");
+    useState<CatalogStatus>(
+      validInitialCatalog
+        ? "success"
+        : "loading"
+    );
 
   const [error, setError] =
     useState<string | null>(null);
@@ -81,6 +100,13 @@ export function CatalogProvider({
   ] = useState(0);
 
   useEffect(() => {
+    if (
+      reloadVersion === 0 &&
+      validInitialCatalog
+    ) {
+      return;
+    }
+
     const abortController =
       new AbortController();
 
@@ -105,7 +131,8 @@ export function CatalogProvider({
         );
 
         const payload =
-          (await response.json()) as CatalogResponse;
+          (await response.json()) as
+            CatalogResponse;
 
         if (
           !response.ok ||
@@ -119,12 +146,16 @@ export function CatalogProvider({
           throw new Error(message);
         }
 
-        setCatalog(payload.catalog);
+        setCatalog(
+          payload.catalog
+        );
         setStatus("success");
       } catch (loadError) {
         if (
-          loadError instanceof DOMException &&
-          loadError.name === "AbortError"
+          loadError instanceof
+            DOMException &&
+          loadError.name ===
+            "AbortError"
         ) {
           return;
         }
@@ -153,6 +184,7 @@ export function CatalogProvider({
   }, [
     businessSlug,
     reloadVersion,
+    validInitialCatalog,
   ]);
 
   const reload = () => {
@@ -176,7 +208,8 @@ export function CatalogProvider({
   );
 }
 
-export function useCatalog(): CatalogContextValue {
+export function useCatalog():
+  CatalogContextValue {
   const context =
     useContext(CatalogContext);
 
@@ -189,7 +222,8 @@ export function useCatalog(): CatalogContextValue {
   return context;
 }
 
-export function useCatalogData(): CatalogData {
+export function useCatalogData():
+  CatalogData {
   const {
     catalog,
     status,

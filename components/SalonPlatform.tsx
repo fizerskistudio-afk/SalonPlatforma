@@ -34,6 +34,7 @@ import {
   translations,
 } from "@/lib/translations";
 import type {
+  CatalogData,
   Locale,
   LocalizedText,
   ThemeColors,
@@ -53,6 +54,8 @@ type ResolvedViewport =
 
 type SalonPlatformProps = {
   businessSlug?: string;
+  initialCatalog?:
+    CatalogData | null;
   initialLocale?: Locale;
   templateKey?: TemplateKey;
   templateConfig?: TemplateConfig;
@@ -709,6 +712,7 @@ function SalonPlatformContent({
 export default function SalonPlatform({
   businessSlug =
     DEFAULT_BUSINESS_SLUG,
+  initialCatalog = null,
   initialLocale =
     "mk",
   templateKey =
@@ -718,8 +722,14 @@ export default function SalonPlatform({
 }: SalonPlatformProps) {
   return (
     <CatalogProvider
+      key={
+        businessSlug
+      }
       businessSlug={
         businessSlug
+      }
+      initialCatalog={
+        initialCatalog
       }
     >
       <SalonPlatformContent
