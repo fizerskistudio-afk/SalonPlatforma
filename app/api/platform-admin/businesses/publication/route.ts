@@ -4,6 +4,10 @@ import {
 } from "next/server";
 
 import {
+  jsonError,
+} from "@/lib/api/http";
+
+import {
   getPlatformAdminAccess,
 } from "@/lib/auth/platform-admin";
 
@@ -21,28 +25,6 @@ export const dynamic =
 
 const BUSINESS_SLUG_PATTERN =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-function jsonError(
-  status: number,
-  message: string,
-  code: string
-) {
-  return NextResponse.json(
-    {
-      ok:
-        false,
-      message,
-      code,
-    },
-    {
-      status,
-      headers: {
-        "Cache-Control":
-          "no-store",
-      },
-    }
-  );
-}
 
 function isRecord(
   value: unknown

@@ -316,12 +316,16 @@ fix(ssr): stabilize localized review formatting
 - [x] availability API smoke: validation, invalid slug i unknown tenant — PASSED
 - [ ] vizuelni globalni/tenant 404 i puni error-state regression — `MASTER-SYSTEM-QA-01`
 
-#### ERROR-RESILIENCE-01B — sledeća faza
+#### ERROR-RESILIENCE-01B — implementiran u paketu; čeka verifikaciju
 
-- [ ] konsolidacija preostalih lokalnih `jsonError` helpera
-- [ ] booking i catalog API helper migracija
-- [ ] admin i platform-admin API helper migracija
-- [ ] finalni standardizovani API error audit
+- [x] zajednički `jsonResponse` dodat u `lib/api/http.ts`
+- [x] booking i catalog error helper migracija
+- [x] admin member-credentials helper konsolidacija
+- [x] platform-admin credentials i business API helper konsolidacija
+- [x] source-level audit ciljnih ruta bez lokalnih duplicate implementacija
+- [ ] završni `npm run check`
+- [ ] ciljani booking/catalog/platform-admin smoke test
+- [ ] commit i push
 
 ### 6. DATABASE-PERFORMANCE-01
 
@@ -490,12 +494,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre ERROR-RESILIENCE-01A: b4d0975bb1a9a6999dd8c13c38be3f8467198e43
-Poslednji završen milestone: PLATFORM-ADMIN-COMPLETION-01
-Aktivni milestone: ERROR-RESILIENCE-01A
-Implementirano u paketu: route error boundaries, globalni i tenant not-found, zajednički API helper i availability hardening
-Security: availability više ne vraća interne Supabase/RPC/exception detalje klijentu
+Poslednji potvrđeni remote commit: eafd4e3e26a0f36b3657bc4b8e3942888896951f
+Poslednji završen milestone: ERROR-RESILIENCE-01A
+Aktivni milestone: ERROR-RESILIENCE-01B
+Implementirano u paketu: zajednički success/error HTTP helper i konsolidacija booking, catalog, admin i platform-admin API ruta
+Compatibility: postojeći status kodovi, machine kodovi, cache politike i rate-limit headeri su sačuvani
 Database: nema migracije; auth, tenancy i RLS nisu menjani
-Prvi sledeći zadatak: pregledati staged diff, commitovati i pushovati ERROR-RESILIENCE-01A
-Obavezno: posle verifikacije ažurirati ROADMAP.md i obrisati privremene installer fajlove
+Prvi sledeći zadatak: pokrenuti npm run check i ciljane API smoke testove
+Obavezno: posle verifikacije ažurirati milestone status, commitovati i pushovati
 ```

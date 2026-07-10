@@ -100,4 +100,34 @@ UNKNOWN_AVAILABILITY_ERROR
 
 ## ERROR-RESILIENCE-01B
 
-Sledeća faza konsoliduje preostale lokalne `jsonError` kopije u booking, catalog, admin i platform-admin API rutama. Ne radi se u istom paketu da bi prvi diff ostao mali, pregledan i lako reverzibilan.
+**Status:** implementiran u paketu; čeka lokalni quality gate i ciljane API smoke testove.
+
+### Scope
+
+- `lib/api/http.ts` dobija zajednički `jsonResponse` uz postojeći `jsonError`;
+- booking i catalog rute koriste zajednički helper bez promene postojećih statusa i machine kodova;
+- admin member-credentials helper postaje re-export zajedničkog sloja;
+- platform-admin credentials wrapper zadržava stroži no-cache policy, ali delegira zajedničkom helperu;
+- platform-admin access, public-url, publication i theme rute više nemaju lokalne duplicate `jsonError` implementacije.
+
+### Compatibility i security
+
+- booking rate-limit odgovor zadržava sve rate-limit headere;
+- catalog error odgovori zadržavaju `Cache-Control: no-store, max-age=0`;
+- platform-admin credentials odgovori zadržavaju `Cache-Control: no-store, no-cache, must-revalidate` i `Pragma: no-cache`;
+- success response strukture nisu menjane;
+- nema izmene auth, role, tenant resolver, RLS ili Supabase query logike;
+- nema database migracije.
+
+### ERROR-RESILIENCE-01B acceptance
+
+- [x] zajednički `jsonResponse` i prošireni unit testovi implementirani u paketu;
+- [x] ciljne lokalne duplicate helper implementacije uklonjene;
+- [x] source-level audit ciljnih ruta prolazi u apply skripti;
+- [ ] `npm run lint`;
+- [ ] `npm test`;
+- [ ] `npm run build`;
+- [ ] `npm run check`;
+- [ ] booking validation/rate-limit smoke;
+- [ ] catalog validation/unknown tenant smoke;
+- [ ] platform-admin auth/no-cache smoke.

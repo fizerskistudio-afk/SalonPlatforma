@@ -8,6 +8,10 @@ import {
 } from "next/server";
 
 import {
+  jsonError,
+} from "@/lib/api/http";
+
+import {
   getPlatformAdminAccess,
 } from "@/lib/auth/platform-admin";
 
@@ -31,28 +35,6 @@ type UpdateThemeRequest = {
   templateKey?: unknown;
   expectedUpdatedAt?: unknown;
 };
-
-function jsonError(
-  status: number,
-  message: string,
-  code: string
-) {
-  return NextResponse.json(
-    {
-      ok:
-        false,
-      message,
-      code,
-    },
-    {
-      status,
-      headers: {
-        "Cache-Control":
-          "no-store",
-      },
-    }
-  );
-}
 
 function readString(
   value: unknown

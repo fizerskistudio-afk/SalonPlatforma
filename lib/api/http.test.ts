@@ -6,6 +6,7 @@ import {
 
 import {
   jsonError,
+  jsonResponse,
 } from "@/lib/api/http";
 
 describe("jsonError", () => {
@@ -84,6 +85,69 @@ describe("jsonError", () => {
       )
     ).toBe(
       "no-store, max-age=0"
+    );
+  });
+});
+
+describe("jsonResponse", () => {
+  it("returns success data with a configurable status", async () => {
+    const response = jsonResponse(
+      {
+        ok: true,
+        value: "ready",
+      },
+      201,
+      {
+        headers: {
+          Pragma:
+            "no-cache",
+        },
+      }
+    );
+
+    expect(response.status).toBe(
+      201
+    );
+    expect(
+      response.headers.get(
+        "cache-control"
+      )
+    ).toBe("no-store");
+    expect(
+      response.headers.get(
+        "pragma"
+      )
+    ).toBe("no-cache");
+    expect(
+      await response.json()
+    ).toEqual({
+      ok: true,
+      value: "ready",
+    });
+  });
+
+  it("preserves an explicit Cache-Control header", () => {
+    const response = jsonResponse(
+      {
+        ok: true,
+      },
+      200,
+      {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+        cacheControl:
+          "public, max-age=60",
+      }
+    );
+
+    expect(
+      response.headers.get(
+        "cache-control"
+      )
+    ).toBe(
+      "private, no-store"
     );
   });
 });

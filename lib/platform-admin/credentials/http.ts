@@ -1,12 +1,20 @@
 import "server-only";
 
 import {
-  NextResponse,
-} from "next/server";
-
+  jsonError as sharedJsonError,
+  jsonResponse as sharedJsonResponse,
+} from "@/lib/api/http";
 import {
   getPlatformAdminAccess,
 } from "@/lib/auth/platform-admin";
+
+const PLATFORM_ADMIN_RESPONSE_HEADERS:
+  HeadersInit = {
+    "Cache-Control":
+      "no-store, no-cache, must-revalidate",
+    Pragma:
+      "no-cache",
+  };
 
 export function jsonResponse(
   body: Record<
@@ -15,16 +23,12 @@ export function jsonResponse(
   >,
   status: number
 ) {
-  return NextResponse.json(
+  return sharedJsonResponse(
     body,
+    status,
     {
-      status,
-      headers: {
-        "Cache-Control":
-          "no-store, no-cache, must-revalidate",
-        Pragma:
-          "no-cache",
-      },
+      headers:
+        PLATFORM_ADMIN_RESPONSE_HEADERS,
     }
   );
 }
@@ -34,13 +38,14 @@ export function jsonError(
   message: string,
   code: string
 ) {
-  return jsonResponse(
+  return sharedJsonError(
+    status,
+    message,
+    code,
     {
-      ok: false,
-      message,
-      code,
-    },
-    status
+      headers:
+        PLATFORM_ADMIN_RESPONSE_HEADERS,
+    }
   );
 }
 

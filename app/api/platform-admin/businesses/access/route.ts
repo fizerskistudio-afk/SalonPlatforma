@@ -12,6 +12,10 @@ import {
 } from "next/server";
 
 import {
+  jsonError,
+} from "@/lib/api/http";
+
+import {
   getPlatformAdminAccess,
 } from "@/lib/auth/platform-admin";
 
@@ -124,28 +128,6 @@ function escapeHtml(
       /'/g,
       "&#039;"
     );
-}
-
-function jsonError(
-  status: number,
-  message: string,
-  code: string
-) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message,
-      code,
-    },
-    {
-      status,
-
-      headers: {
-        "Cache-Control":
-          "no-store",
-      },
-    }
-  );
 }
 
 async function authorizePlatformAdmin() {

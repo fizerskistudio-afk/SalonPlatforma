@@ -4,6 +4,10 @@ import {
 } from "next/server";
 
 import {
+  jsonError as errorResponse,
+} from "@/lib/api/http";
+
+import {
   loadPublicCatalog,
   PublicCatalogError,
 } from "@/lib/catalog/server";
@@ -14,26 +18,10 @@ export const dynamic =
 export const revalidate =
   0;
 
-function errorResponse(
-  status: number,
-  message: string,
-  code: string
-) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message,
-      code,
-    },
-    {
-      status,
-      headers: {
-        "Cache-Control":
-          "no-store, max-age=0",
-      },
-    }
-  );
-}
+const CATALOG_ERROR_OPTIONS = {
+  cacheControl:
+    "no-store, max-age=0",
+} as const;
 
 export async function GET(
   request: NextRequest
@@ -48,7 +36,8 @@ export async function GET(
     return errorResponse(
       400,
       "Business slug is required.",
-      "BUSINESS_SLUG_REQUIRED"
+      "BUSINESS_SLUG_REQUIRED",
+      CATALOG_ERROR_OPTIONS
     );
   }
 
@@ -62,7 +51,8 @@ export async function GET(
       return errorResponse(
         404,
         "Active business was not found.",
-        "BUSINESS_NOT_FOUND"
+        "BUSINESS_NOT_FOUND",
+        CATALOG_ERROR_OPTIONS
       );
     }
 
@@ -91,7 +81,8 @@ export async function GET(
       return errorResponse(
         error.status,
         error.message,
-        error.code
+        error.code,
+        CATALOG_ERROR_OPTIONS
       );
     }
 
@@ -103,7 +94,8 @@ export async function GET(
     return errorResponse(
       500,
       "Unexpected catalog error.",
-      "UNKNOWN_CATALOG_ERROR"
+      "UNKNOWN_CATALOG_ERROR",
+      CATALOG_ERROR_OPTIONS
     );
   }
 }

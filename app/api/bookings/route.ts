@@ -4,6 +4,10 @@ import {
 } from "next/server";
 
 import {
+  jsonError as errorResponse,
+} from "@/lib/api/http";
+
+import {
   consumeRateLimit,
   getClientAddress,
   getRateLimitHeaders,
@@ -82,32 +86,6 @@ function isJsonRecord(
     typeof value === "object" &&
     value !== null &&
     !Array.isArray(value)
-  );
-}
-
-function errorResponse(
-  status: number,
-  message: string,
-  code: string,
-  extraHeaders: Record<
-    string,
-    string
-  > = {}
-) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message,
-      code,
-    },
-    {
-      status,
-      headers: {
-        "Cache-Control":
-          "no-store",
-        ...extraHeaders,
-      },
-    }
   );
 }
 
@@ -419,9 +397,12 @@ export async function POST(
         429,
         "Too many booking attempts. Please try again later.",
         "RATE_LIMITED",
-        getRateLimitHeaders(
-          blockedLimit
-        )
+        {
+          headers:
+            getRateLimitHeaders(
+              blockedLimit
+            ),
+        }
       );
     }
 

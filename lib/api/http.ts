@@ -8,17 +8,14 @@ export type ApiErrorBody = {
   code: string;
 };
 
-type JsonErrorOptions = {
+export type JsonResponseOptions = {
   headers?: HeadersInit;
   cacheControl?: string;
 };
 
-export function jsonError(
-  status: number,
-  message: string,
-  code: string,
-  options: JsonErrorOptions = {}
-) {
+function createResponseHeaders(
+  options: JsonResponseOptions
+): Headers {
   const headers = new Headers(
     options.headers
   );
@@ -35,15 +32,39 @@ export function jsonError(
     );
   }
 
-  return NextResponse.json<ApiErrorBody>(
+  return headers;
+}
+
+export function jsonResponse<TBody>(
+  body: TBody,
+  status = 200,
+  options: JsonResponseOptions = {}
+) {
+  return NextResponse.json<TBody>(
+    body,
+    {
+      status,
+      headers:
+        createResponseHeaders(
+          options
+        ),
+    }
+  );
+}
+
+export function jsonError(
+  status: number,
+  message: string,
+  code: string,
+  options: JsonResponseOptions = {}
+) {
+  return jsonResponse<ApiErrorBody>(
     {
       ok: false,
       message,
       code,
     },
-    {
-      status,
-      headers,
-    }
+    status,
+    options
   );
 }
