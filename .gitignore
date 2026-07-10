@@ -47,6 +47,7 @@ lint-report.txt
 /APPLY-*.cmd
 /WORKSPACE-CLEANUP-*.cmd
 /*_README.txt
+/README-FIRST.txt
 /PUBLIC-*-01.md
 /TENANT-*-01.md
 /PROJECT-*-01.md
@@ -54,4 +55,5 @@ lint-report.txt
 /TENANT-*.zip
 /PROJECT-*.zip
 /*-01*.zip
+/apply-*.mjs
 /scripts/apply-*.mjs

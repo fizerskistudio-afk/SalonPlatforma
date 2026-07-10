@@ -1,7 +1,7 @@
 # PLATFORM-ADMIN-COMPLETION-01
 
 **Datum pripreme:** 10. jul 2026.  
-**Status:** implementiran u paketu; čeka `npm run check` i osnovni smoke test.
+**Status:** završen u ubrzanom režimu; lokalni quality gate i osnovni dashboard/tenant smoke test su prošli.
 
 ## Cilj
 
@@ -77,12 +77,26 @@ Checklist stavke vode direktno na ekran gde se problem rešava.
 - health proverava konfiguraciju, ne poziva spoljašnje provajdere;
 - kompletan responsive/error/empty regression ostaje za `MASTER-SYSTEM-QA-01`.
 
+## Verifikacija
+
+- [x] `npm run lint` — PASSED lokalno;
+- [x] `npm test` — PASSED lokalno;
+- [x] `npm run build` — PASSED lokalno;
+- [x] `npm run check` — PASSED lokalno;
+- [x] dashboard smoke preko lokalnog servera — PASSED;
+- [x] tenant command center smoke za `mika-berberin` — PASSED;
+- [x] commit `2cbec52789468353b60a35998aa35c072b3087a3` je pushovan na `origin/backup/theme-core-barber-beta`;
+- [x] Vercel status za commit — SUCCESS;
+- [ ] GitHub Actions `Lint, test and build` run za commit nije potvrđen;
+- tenant isolation audit nije ponovo pokretan jer milestone nije menjao tenant auth, tenancy resolver, public API ni RLS; kompletan audit ostaje obavezan u `MASTER-SYSTEM-QA-01`;
+- puni responsive i error/loading regression ostaje odložen u `MASTER-SYSTEM-QA-01`.
+
 ## Acceptance criteria
 
-- dashboard učitava stvarne podatke;
-- partial query error ne ruši celu stranicu;
-- tenant detail prikazuje readiness;
-- nedostajući owner vodi na Access ekran;
-- sidebar pravilno označava tenant child rute;
-- `npm run check` prolazi;
-- osnovni platform-admin smoke test prolazi.
+- [x] dashboard učitava stvarne podatke;
+- [x] partial query error ne ruši celu stranicu;
+- [x] tenant detail prikazuje readiness;
+- [x] nedostajući owner vodi na Access ekran;
+- [x] sidebar pravilno označava tenant child rute;
+- [x] `npm run check` prolazi;
+- [x] osnovni platform-admin smoke test prolazi.

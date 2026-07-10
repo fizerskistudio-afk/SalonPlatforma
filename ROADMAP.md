@@ -279,7 +279,7 @@ fix(ssr): stabilize localized review formatting
 - [x] završni `npm run check`
 - [ ] osnovni lifecycle smoke test — odloženo u MASTER-SYSTEM-QA-01
 
-### 4. PLATFORM-ADMIN-COMPLETION-01 — aktivan
+### 4. PLATFORM-ADMIN-COMPLETION-01 — završen u ubrzanom režimu
 
 - [x] stvarni operativni overview iz baze
 - [x] lifecycle i upcoming booking brojači
@@ -294,8 +294,11 @@ fix(ssr): stabilize localized review formatting
 - [x] partial query error stanje
 - [x] empty dashboard stanje
 - [x] unit testovi readiness logike
-- [ ] završni `npm run check`
-- [ ] osnovni dashboard/tenant smoke test
+- [x] završni `npm run check`
+- [x] osnovni dashboard/tenant smoke test preko lokalnog servera (`/platform-admin` i `/platform-admin/businesses/mika-berberin`)
+- [x] commit `2cbec52789468353b60a35998aa35c072b3087a3`
+- [x] push na `origin/backup/theme-core-barber-beta`
+- [ ] GitHub Actions `Lint, test and build` run nije potvrđen za ovaj commit
 - [ ] puni responsive i error/loading regression — MASTER-SYSTEM-QA-01
 
 ### 5. ERROR-RESILIENCE-01
@@ -474,12 +477,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre publishing paketa: f83c7cb14ad7e238b34ce685574f85cc842e04ce
-Poslednji implementiran milestone: PUBLISHING-LIFECYCLE-01
-Aktivni milestone: PLATFORM-ADMIN-COMPLETION-01
-Publishing provera: lint PASSED, tests PASSED, build PASSED; live lifecycle smoke odložen
-Platform-admin scope: real dashboard, attention queue, configuration health, tenant readiness i navigation
-Test režim: npm run check + dashboard/tenant smoke
-Prvi sledeći zadatak: primeniti paket, check, proveriti dashboard i Mika command center
+Poslednji potvrđeni remote commit: 2cbec52789468353b60a35998aa35c072b3087a3
+Poslednji završen milestone: PLATFORM-ADMIN-COMPLETION-01
+Aktivni milestone: ERROR-RESILIENCE-01
+Platform-admin provera: npm run check PASSED; dashboard smoke PASSED; tenant command center smoke PASSED
+Remote status: commit i push potvrđeni; Vercel SUCCESS; GitHub Actions quality run nije potvrđen
+Publishing lifecycle: migration 024 je commitovana; live status nije potvrđen i ostaje za MASTER-SYSTEM-QA-01
+Prvi sledeći zadatak: analizirati ERROR-RESILIENCE-01 i odobriti precizan scope pre izmene koda
 Obavezno: posle svake izmene ažurirati ROADMAP.md
 ```
