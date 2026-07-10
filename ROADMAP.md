@@ -301,14 +301,27 @@ fix(ssr): stabilize localized review formatting
 - [ ] GitHub Actions `Lint, test and build` run nije potvrđen za ovaj commit
 - [ ] puni responsive i error/loading regression — MASTER-SYSTEM-QA-01
 
-### 5. ERROR-RESILIENCE-01
+### 5. ERROR-RESILIENCE-01 — aktivan
 
-- [ ] root error boundary
-- [ ] tenant error boundary
-- [ ] admin i staff error boundary
-- [ ] smislen `not-found`
-- [ ] standardizovan API error format
-- [ ] production-safe poruke bez internog error detalja
+#### ERROR-RESILIENCE-01A — završen u ubrzanom režimu
+
+- [x] root i global error boundary
+- [x] tenant error boundary
+- [x] admin, staff i platform-admin error boundary
+- [x] globalni i tenant-safe `not-found`
+- [x] zajednički API error helper i unit testovi
+- [x] availability endpoint koristi stabilan `{ ok, message, code }` format
+- [x] availability 500 odgovori ne vraćaju interne Supabase/RPC/exception detalje
+- [x] završni `npm run check` — PASSED lokalno
+- [x] availability API smoke: validation, invalid slug i unknown tenant — PASSED
+- [ ] vizuelni globalni/tenant 404 i puni error-state regression — `MASTER-SYSTEM-QA-01`
+
+#### ERROR-RESILIENCE-01B — sledeća faza
+
+- [ ] konsolidacija preostalih lokalnih `jsonError` helpera
+- [ ] booking i catalog API helper migracija
+- [ ] admin i platform-admin API helper migracija
+- [ ] finalni standardizovani API error audit
 
 ### 6. DATABASE-PERFORMANCE-01
 
@@ -477,12 +490,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit: 2cbec52789468353b60a35998aa35c072b3087a3
+Poslednji potvrđeni remote commit pre ERROR-RESILIENCE-01A: b4d0975bb1a9a6999dd8c13c38be3f8467198e43
 Poslednji završen milestone: PLATFORM-ADMIN-COMPLETION-01
-Aktivni milestone: ERROR-RESILIENCE-01
-Platform-admin provera: npm run check PASSED; dashboard smoke PASSED; tenant command center smoke PASSED
-Remote status: commit i push potvrđeni; Vercel SUCCESS; GitHub Actions quality run nije potvrđen
-Publishing lifecycle: migration 024 je commitovana; live status nije potvrđen i ostaje za MASTER-SYSTEM-QA-01
-Prvi sledeći zadatak: analizirati ERROR-RESILIENCE-01 i odobriti precizan scope pre izmene koda
-Obavezno: posle svake izmene ažurirati ROADMAP.md
+Aktivni milestone: ERROR-RESILIENCE-01A
+Implementirano u paketu: route error boundaries, globalni i tenant not-found, zajednički API helper i availability hardening
+Security: availability više ne vraća interne Supabase/RPC/exception detalje klijentu
+Database: nema migracije; auth, tenancy i RLS nisu menjani
+Prvi sledeći zadatak: pregledati staged diff, commitovati i pushovati ERROR-RESILIENCE-01A
+Obavezno: posle verifikacije ažurirati ROADMAP.md i obrisati privremene installer fajlove
 ```
