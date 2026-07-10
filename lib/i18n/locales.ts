@@ -63,7 +63,7 @@ export const LOCALE_REGISTRY: Record<
     shortName: "SR",
     intlLocale: "sr-Latn-RS",
     direction: "ltr",
-    uiTranslationReady: false,
+    uiTranslationReady: true,
   },
 
   "sr-Cyrl": {

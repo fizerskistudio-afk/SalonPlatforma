@@ -8,11 +8,10 @@ import type {
 
 /**
  * Jezici za koje je kompletan sistemski UI
- * trenutno preveden.
- *
- * Ovaj tip ostaje uzak tokom bezbedne migracije.
+ * trenutno preveden i pokriven readiness testom.
  */
 export type UiLocale =
+  | "sr-Latn"
   | "mk"
   | "sq"
   | "en";
@@ -34,17 +33,27 @@ export type Locale = string;
 export type ContentLocale = LocaleCode;
 
 /**
- * Prevod ne mora postojati za svaki globalno
- * podržani jezik. Nedostajuće vrednosti rešava
- * fallback funkcija t().
+ * Sistemski UI ima stroži readiness test za sve UiLocale jezike.
+ *
+ * Tenant sadržaj ostaje kompatibilan sa postojećim zapisima:
+ * mk/sq/en su istorijski obavezni, dok su sr-Latn i svi ostali
+ * content jezici opcioni po zapisu i koriste bezbedan fallback.
  */
+export type LegacyRequiredUiLocale =
+  | "mk"
+  | "sq"
+  | "en";
+
 export type LocalizedText =
-  Record<UiLocale, string> &
+  Record<
+    LegacyRequiredUiLocale,
+    string
+  > &
   Partial<
     Record<
       Exclude<
         ContentLocale,
-        UiLocale
+        LegacyRequiredUiLocale
       >,
       string
     >
@@ -154,8 +163,8 @@ export type CatalogBusiness = {
   logoUrl: string;
 
   /**
-   * Privremeni UI-jezički sloj.
-   * Trenutno su kompletno prevedeni mk/sq/en.
+   * UI-jezički sloj.
+   * Trenutno su kompletno prevedeni sr-Latn/mk/sq/en.
    */
   defaultLocale: UiLocale;
   supportedLocales: UiLocale[];

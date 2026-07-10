@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** funkcionalni multi-tenant core je završen; u toku su performance, automatizovani QA i production priprema.
+**Status:** funkcionalni multi-tenant core je završen; aktivna je privremena DEMO-PRODUCTION-READY obilaznica pre nastavka originalnog production roadmapa.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -238,6 +238,38 @@ fix(ssr): stabilize localized review formatting
 - booking conflict/database testovi;
 - Playwright public booking;
 - admin/staff login smoke test.
+
+---
+
+## 5B. Aktivna obilaznica — DEMO-PRODUCTION-READY-01
+
+Originalni milestone redosled u nastavku ostaje važeći. Privremeno se pauzira pre `BACKUP-RECOVERY-01` kako bi se završio production-like demo koji može pouzdano da predstavi kompletan proizvod.
+
+### Zaključani redosled obilaznice
+
+1. `DEMO-I18N-01` — zajednički UI jezici i uklanjanje legacy translation slojeva;
+2. `DEMO-THEME-ARCHITECTURE-01` — isti modularni desktop/mobile contract za svaku temu;
+3. `DEMO-THEME-LUMIERE-01` — detaljan closeout referentne teme;
+4. `DEMO-THEME-EDITORIAL-01` — modularizacija i završetak;
+5. `DEMO-THEME-BARBER-01` — modularizacija, polish i izlazak iz beta statusa;
+6. `DEMO-THEME-NAILS-01`;
+7. `DEMO-THEME-WELLNESS-01`;
+8. `DEMO-THEME-BEAUTY-01`;
+9. `DEMO-DATA-LANDING-01`;
+10. `DEMO-DEPLOY-QA-01`.
+
+Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
+
+### DEMO-I18N-01A — aktivan
+
+- [x] `sr-Latn` postoji u globalnim UI prevodima;
+- [x] `sr-Latn` dodat u formalni `UiLocale` contract;
+- [x] `sr-Latn` označen kao `uiTranslationReady`;
+- [x] dodat test kompletnosti globalnih `sr-Latn`, `mk`, `sq` i `en` prevoda;
+- [ ] proveriti template-specifične Editorial i Barber labele;
+- [ ] konsolidovati duplicate translation helper funkcije;
+- [ ] završiti nemački UI prevod;
+- [ ] kompletan jezički smoke kroz booking i sve tri postojeće teme.
 
 ---
 
@@ -514,11 +546,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Bazni remote commit pre closeout paketa: 836ab078edfe5a5b31b18d5e832b626080e2ae70
+Poslednji potvrđeni remote commit pre demo obilaznice: 0e7fcb269afb169e69bfd64fada57b4068c98ce4
 Poslednji završen milestone: MONITORING-AUDIT-01
-Aktivni milestone: BACKUP-RECOVERY-01
-Implementirano: PII-safe monitoring za booking, availability, auth, Calendar, email, webhook i reminder putanje
-Safety: nema SQL migracije, nove monitoring tabele ili spoljnog providera
-Prvi sledeći zadatak: mapirati Supabase database/storage backup i proverljiv restore runbook
-Odloženo: pravi provider/cron/auth regression ostaje u MASTER-SYSTEM-QA-01
+Aktivni milestone: DEMO-I18N-01A
+Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
+Implementirano u paketu: sr-Latn UI readiness contract i global translation completeness test
+Prvi sledeći zadatak: audit i konsolidacija Editorial/Barber template labela i translation helpera
+Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
 ```
