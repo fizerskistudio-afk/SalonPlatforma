@@ -100,7 +100,7 @@ UNKNOWN_AVAILABILITY_ERROR
 
 ## ERROR-RESILIENCE-01B
 
-**Status:** implementiran u paketu; čeka lokalni quality gate i ciljane API smoke testove.
+**Status:** završen u ubrzanom režimu; lokalni quality gate i remote push su potvrđeni. Ciljani runtime smoke ostaje u `MASTER-SYSTEM-QA-01`.
 
 ### Scope
 
@@ -124,10 +124,11 @@ UNKNOWN_AVAILABILITY_ERROR
 - [x] zajednički `jsonResponse` i prošireni unit testovi implementirani u paketu;
 - [x] ciljne lokalne duplicate helper implementacije uklonjene;
 - [x] source-level audit ciljnih ruta prolazi u apply skripti;
-- [ ] `npm run lint`;
-- [ ] `npm test`;
-- [ ] `npm run build`;
-- [ ] `npm run check`;
-- [ ] booking validation/rate-limit smoke;
-- [ ] catalog validation/unknown tenant smoke;
-- [ ] platform-admin auth/no-cache smoke.
+- [x] `npm run lint` — PASSED kroz `npm run check`;
+- [x] `npm test` — PASSED kroz `npm run check`;
+- [x] `npm run build` — PASSED kroz `npm run check`;
+- [x] `npm run check` — PASSED lokalno;
+- [x] commit i push — `e50b7de48acf8c7e50acda424c57a43c01732561`;
+- [ ] booking validation/rate-limit runtime smoke nije zasebno zabeležen — `MASTER-SYSTEM-QA-01`;
+- [ ] catalog validation/unknown tenant runtime smoke nije zasebno zabeležen — `MASTER-SYSTEM-QA-01`;
+- [ ] platform-admin auth/no-cache runtime smoke nije zasebno zabeležen — `MASTER-SYSTEM-QA-01`.

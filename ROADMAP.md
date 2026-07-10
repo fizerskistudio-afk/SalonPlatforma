@@ -301,7 +301,7 @@ fix(ssr): stabilize localized review formatting
 - [ ] GitHub Actions `Lint, test and build` run nije potvrđen za ovaj commit
 - [ ] puni responsive i error/loading regression — MASTER-SYSTEM-QA-01
 
-### 5. ERROR-RESILIENCE-01 — aktivan
+### 5. ERROR-RESILIENCE-01 — završen u ubrzanom režimu
 
 #### ERROR-RESILIENCE-01A — završen u ubrzanom režimu
 
@@ -316,25 +316,36 @@ fix(ssr): stabilize localized review formatting
 - [x] availability API smoke: validation, invalid slug i unknown tenant — PASSED
 - [ ] vizuelni globalni/tenant 404 i puni error-state regression — `MASTER-SYSTEM-QA-01`
 
-#### ERROR-RESILIENCE-01B — implementiran u paketu; čeka verifikaciju
+#### ERROR-RESILIENCE-01B — završen u ubrzanom režimu
 
 - [x] zajednički `jsonResponse` dodat u `lib/api/http.ts`
 - [x] booking i catalog error helper migracija
 - [x] admin member-credentials helper konsolidacija
 - [x] platform-admin credentials i business API helper konsolidacija
 - [x] source-level audit ciljnih ruta bez lokalnih duplicate implementacija
-- [ ] završni `npm run check`
-- [ ] ciljani booking/catalog/platform-admin smoke test
-- [ ] commit i push
+- [x] završni `npm run check` — PASSED lokalno
+- [x] commit i push — `e50b7de48acf8c7e50acda424c57a43c01732561`
+- [ ] ciljani booking/catalog/platform-admin runtime smoke nije zasebno zabeležen — `MASTER-SYSTEM-QA-01`
 
-### 6. DATABASE-PERFORMANCE-01
+### 6. DATABASE-PERFORMANCE-01 — aktivan
 
-- [ ] audit stvarnih booking i availability query-ja
-- [ ] `EXPLAIN ANALYZE`
-- [ ] potrebni indeksi
-- [ ] rate-limit bucket cleanup
-- [ ] notification delivery retention
-- [ ] constraint audit
+#### DATABASE-PERFORMANCE-01A — read-only audit paket
+
+- [x] mapirani booking, availability i rate-limit app hot-spotovi
+- [x] dodat read-only SQL inventory tabela, indeksa, constraint-a i RPC funkcija
+- [x] dokumentovan bezbedan business lookup i availability `EXPLAIN`
+- [x] zabranjen `EXPLAIN ANALYZE` nad write funkcijom `create_public_booking`
+- [ ] audit pokrenut nad ciljnom Supabase bazom
+- [ ] sačuvani planovi, veličine i usage statistika bez PII/secrets
+- [ ] odobren precizan migration scope
+
+#### DATABASE-PERFORMANCE-01B — tek posle audit rezultata
+
+- [ ] potrebni indeksi potvrđeni stvarnim planom
+- [ ] rate-limit bucket cleanup odluka zasnovana na rastu tabele
+- [ ] notification delivery retention audit
+- [ ] constraint/exclusion hot-spot audit
+- [ ] migracija, rollback i post-migration verifikacija
 
 ### 7. MONITORING-AUDIT-01
 
@@ -494,12 +505,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit: eafd4e3e26a0f36b3657bc4b8e3942888896951f
-Poslednji završen milestone: ERROR-RESILIENCE-01A
-Aktivni milestone: ERROR-RESILIENCE-01B
-Implementirano u paketu: zajednički success/error HTTP helper i konsolidacija booking, catalog, admin i platform-admin API ruta
-Compatibility: postojeći status kodovi, machine kodovi, cache politike i rate-limit headeri su sačuvani
-Database: nema migracije; auth, tenancy i RLS nisu menjani
-Prvi sledeći zadatak: pokrenuti npm run check i ciljane API smoke testove
-Obavezno: posle verifikacije ažurirati milestone status, commitovati i pushovati
+Poslednji potvrđeni remote commit: e50b7de48acf8c7e50acda424c57a43c01732561
+Poslednji završen milestone: ERROR-RESILIENCE-01
+Aktivni milestone: DATABASE-PERFORMANCE-01A
+Implementirano u paketu: read-only SQL audit i runbook za booking, availability i rate-limit hot-spotove
+Safety: nema migracije, DDL/DML izmene ili production write testa
+Prvi sledeći zadatak: pokrenuti docs/qa/DATABASE-PERFORMANCE-01A.sql u Supabase SQL Editor-u
+Obavezno: sačuvati samo planove, brojeve, veličine i definicije bez PII/secrets
 ```
