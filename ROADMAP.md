@@ -327,36 +327,44 @@ fix(ssr): stabilize localized review formatting
 - [x] commit i push — `e50b7de48acf8c7e50acda424c57a43c01732561`
 - [ ] ciljani booking/catalog/platform-admin runtime smoke nije zasebno zabeležen — `MASTER-SYSTEM-QA-01`
 
-### 6. DATABASE-PERFORMANCE-01 — aktivan
+### 6. DATABASE-PERFORMANCE-01 — završen bez migracije
 
-#### DATABASE-PERFORMANCE-01A — read-only audit paket
+- [x] read-only audit pokrenut nad ciljnom Supabase bazom
+- [x] availability plan: 18 termina / 37.182 ms
+- [x] booking i availability runtime proseci u prihvatljivom opsegu
+- [x] booking GiST overlap indeks i exclusion constraint potvrđeni
+- [x] rate-limit tabela: 8 redova / 56 kB
+- [x] nema opravdanja za novi indeks, cleanup ili RPC rewrite
+- [x] `time_off` range GiST ostaje future watch item
+- [x] `DATABASE-PERFORMANCE-01B` migracija trenutno nije potrebna
 
-- [x] mapirani booking, availability i rate-limit app hot-spotovi
-- [x] dodat read-only SQL inventory tabela, indeksa, constraint-a i RPC funkcija
-- [x] dokumentovan bezbedan business lookup i availability `EXPLAIN`
-- [x] zabranjen `EXPLAIN ANALYZE` nad write funkcijom `create_public_booking`
-- [ ] audit pokrenut nad ciljnom Supabase bazom
-- [ ] sačuvani planovi, veličine i usage statistika bez PII/secrets
-- [ ] odobren precizan migration scope
+### 7. MONITORING-AUDIT-01 — aktivan
 
-#### DATABASE-PERFORMANCE-01B — tek posle audit rezultata
+#### MONITORING-AUDIT-01A — strukturisani server signal
 
-- [ ] potrebni indeksi potvrđeni stvarnim planom
-- [ ] rate-limit bucket cleanup odluka zasnovana na rastu tabele
-- [ ] notification delivery retention audit
-- [ ] constraint/exclusion hot-spot audit
-- [ ] migracija, rollback i post-migration verifikacija
+- [x] centralni PII-safe monitoring core implementiran u paketu
+- [x] correlation/request ID implementiran za booking i availability
+- [x] booking failure i rate-limit signal implementiran
+- [x] availability failure i rate-limit signal implementiran
+- [x] public booking calendar sync signal implementiran
+- [x] booking-created notification failure signal implementiran
+- [x] rate-limit storage failure signal implementiran
+- [x] unit testovi za redaction, request ID i error fingerprint
+- [ ] završni `npm run check`
+- [ ] response header i strukturisani log smoke
 
-### 7. MONITORING-AUDIT-01
+#### MONITORING-AUDIT-01B
 
-- [ ] centralno server error praćenje
-- [ ] booking failure signal
-- [ ] calendar sync failure signal
-- [ ] email delivery failure signal
-- [ ] auth/rate-limit anomalije
+- [ ] duboki Google Calendar sync moduli
+- [ ] notification delivery/retry/webhook putanje
+- [ ] admin/staff auth anomalije
+- [ ] cron/reminder monitoring
+
+#### MONITORING-AUDIT-01C
+
 - [ ] platform-admin audit log
-- [ ] correlation/request ID
-- [ ] bez PII u logovima
+- [ ] spoljni provider adapter i alerting
+- [ ] retention, pristup i SLO pragovi
 
 ### 8. BACKUP-RECOVERY-01
 
@@ -505,11 +513,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit: e50b7de48acf8c7e50acda424c57a43c01732561
-Poslednji završen milestone: ERROR-RESILIENCE-01
-Aktivni milestone: DATABASE-PERFORMANCE-01A
-Implementirano u paketu: read-only SQL audit i runbook za booking, availability i rate-limit hot-spotove
-Safety: nema migracije, DDL/DML izmene ili production write testa
-Prvi sledeći zadatak: pokrenuti docs/qa/DATABASE-PERFORMANCE-01A.sql u Supabase SQL Editor-u
-Obavezno: sačuvati samo planove, brojeve, veličine i definicije bez PII/secrets
+Poslednji potvrđeni remote commit: 76e6bb4d90a4e2118f4ea041ffe31462f69510d8
+Poslednji završen milestone: DATABASE-PERFORMANCE-01
+Aktivni milestone: MONITORING-AUDIT-01A
+Implementirano u paketu: PII-safe strukturisani logger, request correlation i public booking/availability/rate-limit signali
+Safety: nema raw error message/stack logovanja, baze, migracije ili spoljnog monitoring providera
+Prvi sledeći zadatak: pokrenuti npm run check i ciljani X-Request-ID/log smoke
+Obavezno: ne logovati customer podatke, payload, auth header, cookie, token ili secret
 ```

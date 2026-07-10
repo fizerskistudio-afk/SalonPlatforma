@@ -1,7 +1,7 @@
 # DATABASE-PERFORMANCE-01
 
 **Datum pripreme:** 10. jul 2026.  
-**Status:** `DATABASE-PERFORMANCE-01A` je aktivan kao read-only audit.
+**Status:** završen bez performance migracije; audit nije pokazao opravdan hot-spot za schema promenu.
 
 ## Cilj
 
@@ -49,6 +49,19 @@ Ovakav cleanup može biti sasvim dovoljan pri malom obimu, ali odluka mora da se
 - bezbedni `EXPLAIN` template-i;
 - API latency baseline u lokalnom okruženju.
 
+## Rezultat audita
+
+- availability plan: 18 termina za 37.182 ms;
+- `pg_stat_statements` availability prosek: 24.59 ms kroz 44 poziva;
+- `create_public_booking` prosek: 34.94 ms kroz 20 poziva;
+- rate-limit RPC prosek: 9.66 ms kroz 12 poziva;
+- rate-limit tabela: 8 redova, 4 aktivna, 4 istekla, ukupno 56 kB;
+- booking overlap već koristi partial GiST indeks i exclusion constraint;
+- employee/service, working-hours i business lookup imaju odgovarajuće indekse;
+- sekvencijalni scan-ovi su očekivani zbog veoma malih tabela;
+- `time_off` range GiST ostaje future watch item, bez opravdanja pri 2 live reda;
+- `DATABASE-PERFORMANCE-01B` migracija trenutno nije potrebna.
+
 ## Van scope-a
 
 - nema SQL migracije;
@@ -64,9 +77,10 @@ Ovakav cleanup može biti sasvim dovoljan pri malom obimu, ali odluka mora da se
 - [x] app query hot-spotovi mapirani;
 - [x] read-only SQL audit dodat;
 - [x] runbook i bezbednosna ograničenja dokumentovani;
-- [ ] audit pokrenut nad ciljnom Supabase bazom;
-- [ ] rezultati sačuvani bez PII/secrets;
-- [ ] business lookup plan snimljen;
-- [ ] availability RPC plan snimljen;
-- [ ] rate-limit growth procenjen;
-- [ ] precizan `DATABASE-PERFORMANCE-01B` migration scope odobren.
+- [x] audit pokrenut nad ciljnom Supabase bazom;
+- [x] rezultati pregledani bez PII/secrets;
+- [x] business lookup plan snimljen;
+- [x] availability RPC plan snimljen;
+- [x] rate-limit growth procenjen;
+- [x] index i exclusion constraint pokrivenost potvrđena;
+- [x] zaključeno da `DATABASE-PERFORMANCE-01B` migracija trenutno nije potrebna.

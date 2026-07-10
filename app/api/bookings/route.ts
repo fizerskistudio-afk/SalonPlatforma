@@ -4,7 +4,7 @@ import {
 } from "next/server";
 
 import {
-  jsonError as errorResponse,
+  jsonError,
 } from "@/lib/api/http";
 
 import {
@@ -15,6 +15,12 @@ import {
 import {
   readJsonBodyWithLimit,
 } from "@/lib/security/request-body";
+import {
+  createRequestId,
+  logServerError,
+  logServerEvent,
+  withRequestId,
+} from "@/lib/monitoring/server";
 import {
   validatePublicBookingRequest,
 } from "@/lib/booking/public-validation";
@@ -79,6 +85,29 @@ type DatabaseErrorPayload = {
   code?: string | null;
 };
 
+type ErrorResponder =
+  typeof jsonError;
+
+function createErrorResponder(
+  requestId: string
+): ErrorResponder {
+  return (
+    status,
+    message,
+    code,
+    options = {}
+  ) =>
+    withRequestId(
+      jsonError(
+        status,
+        message,
+        code,
+        options
+      ),
+      requestId
+    );
+}
+
 function isJsonRecord(
   value: unknown
 ): value is JsonRecord {
@@ -131,88 +160,90 @@ function extractDatabaseErrorCode(
 }
 
 function databaseErrorResponse(
-  code: DatabaseErrorCode
+  code: DatabaseErrorCode,
+  respondError:
+    ErrorResponder
 ) {
   switch (code) {
     case "SLOT_UNAVAILABLE":
-      return errorResponse(
+      return respondError(
         409,
         "The selected time is no longer available.",
         code
       );
 
     case "INVALID_BUSINESS":
-      return errorResponse(
+      return respondError(
         404,
         "Active business was not found.",
         code
       );
 
     case "INVALID_SERVICE":
-      return errorResponse(
+      return respondError(
         400,
         "The selected service is invalid.",
         code
       );
 
     case "INVALID_EMPLOYEE":
-      return errorResponse(
+      return respondError(
         400,
         "The selected employee is invalid.",
         code
       );
 
     case "INVALID_START_TIME":
-      return errorResponse(
+      return respondError(
         400,
         "The selected booking time is invalid.",
         code
       );
 
     case "INVALID_CUSTOMER_NAME":
-      return errorResponse(
+      return respondError(
         400,
         "Customer name is invalid.",
         code
       );
 
     case "CUSTOMER_PHONE_REQUIRED":
-      return errorResponse(
+      return respondError(
         400,
         "Customer phone is required.",
         code
       );
 
     case "CUSTOMER_EMAIL_REQUIRED":
-      return errorResponse(
+      return respondError(
         400,
         "Customer email is required.",
         code
       );
 
     case "CUSTOMER_CONTACT_REQUIRED":
-      return errorResponse(
+      return respondError(
         400,
         "Customer phone or email is required.",
         code
       );
 
     case "INVALID_CUSTOMER_PHONE":
-      return errorResponse(
+      return respondError(
         400,
         "Customer phone is invalid.",
         code
       );
 
     case "INVALID_CUSTOMER_EMAIL":
-      return errorResponse(
+      return respondError(
         400,
         "Customer email is invalid.",
         code
       );
 
     case "CUSTOMER_NOTE_TOO_LONG":
-      return errorResponse(
+      return respondError(
         400,
         "Customer note is too long.",
         code
@@ -221,7 +252,8 @@ function databaseErrorResponse(
 }
 
 async function synchronizeConfirmedBooking(
-  booking: BookingResult
+  booking: BookingResult,
+  requestId: string
 ): Promise<void> {
   if (
     booking.status !==
@@ -237,35 +269,30 @@ async function synchronizeConfirmedBooking(
       );
 
     if (!syncResult.ok) {
-      console.error(
-        "Booking was created, but Google Calendar synchronization failed:",
+      logServerEvent(
+        "error",
+        "calendar.booking_sync.failed",
         {
+          requestId,
           bookingId:
             booking.id,
-
           action:
             syncResult.action,
-
-          message:
-            syncResult.message,
         }
       );
 
       return;
     }
 
-    console.info(
-      "Booking synchronized with Google Calendar:",
+    logServerEvent(
+      "info",
+      "calendar.booking_sync.succeeded",
       {
+        requestId,
         bookingId:
           booking.id,
-
         action:
           syncResult.action,
-
-        eventId:
-          syncResult.eventId ??
-          null,
       }
     );
   } catch (error) {
@@ -273,13 +300,13 @@ async function synchronizeConfirmedBooking(
      * Calendar sinhronizacija nikada ne sme
      * da poništi uspešno kreiranu rezervaciju.
      */
-    console.error(
-      "Unexpected Google Calendar synchronization error:",
+    logServerError(
+      "calendar.booking_sync.unexpected",
+      error,
       {
+        requestId,
         bookingId:
           booking.id,
-
-        error,
       }
     );
   }
@@ -288,6 +315,15 @@ async function synchronizeConfirmedBooking(
 export async function POST(
   request: NextRequest
 ) {
+  const requestId =
+    createRequestId(
+      request.headers
+    );
+  const errorResponse =
+    createErrorResponder(
+      requestId
+    );
+
   try {
     const bodyResult =
       await readJsonBodyWithLimit(
@@ -360,6 +396,7 @@ export async function POST(
         limit: 10,
         windowSeconds: 10 * 60,
         failureMode: "closed",
+        requestId,
       }),
 
       consumeRateLimit({
@@ -372,6 +409,7 @@ export async function POST(
         limit: 4,
         windowSeconds: 30 * 60,
         failureMode: "closed",
+        requestId,
       }),
     ]);
 
@@ -383,15 +421,42 @@ export async function POST(
           : null;
 
     if (blockedLimit) {
+      const blockedScope =
+        !addressLimit.allowed
+          ? "booking-address-tenant"
+          : "booking-contact-tenant";
+
       if (
         blockedLimit.unavailable
       ) {
+        logServerEvent(
+          "error",
+          "booking.rate_limit.unavailable",
+          {
+            requestId,
+            businessSlug,
+            scope:
+              blockedScope,
+          }
+        );
+
         return errorResponse(
           503,
           "Booking protection is temporarily unavailable.",
           "RATE_LIMIT_UNAVAILABLE"
         );
       }
+
+      logServerEvent(
+        "warn",
+        "booking.rate_limit.blocked",
+        {
+          requestId,
+          businessSlug,
+          scope:
+            blockedScope,
+        }
+      );
 
       return errorResponse(
         429,
@@ -431,9 +496,13 @@ export async function POST(
         .maybeSingle();
 
     if (businessError) {
-      console.error(
-        "Failed to load business:",
-        businessError
+      logServerError(
+        "booking.business_query.failed",
+        businessError,
+        {
+          requestId,
+          businessSlug,
+        }
       );
 
       return errorResponse(
@@ -487,11 +556,6 @@ export async function POST(
       );
 
     if (error) {
-      console.error(
-        "Failed to create booking:",
-        error
-      );
-
       const databaseErrorCode =
         extractDatabaseErrorCode(
           error
@@ -500,10 +564,31 @@ export async function POST(
       if (
         databaseErrorCode
       ) {
+        logServerEvent(
+          "warn",
+          "booking.create.rejected",
+          {
+            requestId,
+            businessSlug,
+            errorCode:
+              databaseErrorCode,
+          }
+        );
+
         return databaseErrorResponse(
-          databaseErrorCode
+          databaseErrorCode,
+          errorResponse
         );
       }
+
+      logServerError(
+        "booking.create.failed",
+        error,
+        {
+          requestId,
+          businessSlug,
+        }
+      );
 
       return errorResponse(
         500,
@@ -516,6 +601,15 @@ export async function POST(
       !data ||
       !isJsonRecord(data)
     ) {
+      logServerEvent(
+        "error",
+        "booking.create.invalid_result",
+        {
+          requestId,
+          businessSlug,
+        }
+      );
+
       return errorResponse(
         500,
         "Booking was created but no result was returned.",
@@ -534,33 +628,55 @@ export async function POST(
      * i ne utiče na uspešan booking odgovor.
      */
     await synchronizeConfirmedBooking(
-      booking
+      booking,
+      requestId
     );
 
-    await notifyBookingCreatedSafely(
-      booking.id
-    );
+    const notificationResult =
+      await notifyBookingCreatedSafely(
+        booking.id
+      );
 
-    return NextResponse.json(
-      {
-        ok: true,
-        booking,
-      },
-      {
-        status: 201,
-        headers: {
-          "Cache-Control":
-            "no-store",
-          ...getRateLimitHeaders(
-            addressLimit
-          ),
+    if (
+      !notificationResult.ok
+    ) {
+      logServerEvent(
+        "error",
+        "notification.booking_created.failed",
+        {
+          requestId,
+          bookingId:
+            booking.id,
+        }
+      );
+    }
+
+    return withRequestId(
+      NextResponse.json(
+        {
+          ok: true,
+          booking,
         },
-      }
+        {
+          status: 201,
+          headers: {
+            "Cache-Control":
+              "no-store",
+            ...getRateLimitHeaders(
+              addressLimit
+            ),
+          },
+        }
+      ),
+      requestId
     );
   } catch (error) {
-    console.error(
-      "Unexpected booking error:",
-      error
+    logServerError(
+      "booking.unexpected",
+      error,
+      {
+        requestId,
+      }
     );
 
     return errorResponse(

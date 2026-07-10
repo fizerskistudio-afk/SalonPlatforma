@@ -7,6 +7,12 @@ import {
   jsonError,
 } from "@/lib/api/http";
 import {
+  createRequestId,
+  logServerError,
+  logServerEvent,
+  withRequestId,
+} from "@/lib/monitoring/server";
+import {
   consumeRateLimit,
   getClientAddress,
   getRateLimitHeaders,
@@ -32,6 +38,29 @@ type AvailableSlotRow = {
   starts_at: string;
   ends_at: string;
 };
+
+type ErrorResponder =
+  typeof jsonError;
+
+function createErrorResponder(
+  requestId: string
+): ErrorResponder {
+  return (
+    status,
+    message,
+    code,
+    options = {}
+  ) =>
+    withRequestId(
+      jsonError(
+        status,
+        message,
+        code,
+        options
+      ),
+      requestId
+    );
+}
 
 function isValidDateString(
   value: string
@@ -70,6 +99,15 @@ function isValidDateString(
 export async function GET(
   request: NextRequest
 ) {
+  const requestId =
+    createRequestId(
+      request.headers
+    );
+  const errorResponse =
+    createErrorResponder(
+      requestId
+    );
+
   try {
     const searchParams =
       request.nextUrl.searchParams;
@@ -93,7 +131,7 @@ export async function GET(
       );
 
     if (!businessSlug) {
-      return jsonError(
+      return errorResponse(
         400,
         "Missing businessSlug.",
         "BUSINESS_SLUG_REQUIRED"
@@ -105,7 +143,7 @@ export async function GET(
         businessSlug
       )
     ) {
-      return jsonError(
+      return errorResponse(
         400,
         "Invalid businessSlug.",
         "INVALID_BUSINESS_SLUG"
@@ -113,7 +151,7 @@ export async function GET(
     }
 
     if (!serviceId) {
-      return jsonError(
+      return errorResponse(
         400,
         "Missing serviceId.",
         "SERVICE_ID_REQUIRED"
@@ -125,7 +163,7 @@ export async function GET(
         serviceId
       )
     ) {
-      return jsonError(
+      return errorResponse(
         400,
         "Invalid serviceId.",
         "INVALID_SERVICE_ID"
@@ -133,7 +171,7 @@ export async function GET(
     }
 
     if (!date) {
-      return jsonError(
+      return errorResponse(
         400,
         "Missing date.",
         "DATE_REQUIRED"
@@ -145,7 +183,7 @@ export async function GET(
         date
       )
     ) {
-      return jsonError(
+      return errorResponse(
         400,
         "Invalid date. Use YYYY-MM-DD.",
         "INVALID_DATE"
@@ -158,7 +196,7 @@ export async function GET(
         employeeId
       )
     ) {
-      return jsonError(
+      return errorResponse(
         400,
         "Invalid employeeId.",
         "INVALID_EMPLOYEE_ID"
@@ -178,12 +216,39 @@ export async function GET(
         limit: 90,
         windowSeconds: 60,
         failureMode: "open",
+        requestId,
       });
+
+    if (
+      availabilityLimit.unavailable
+    ) {
+      logServerEvent(
+        "warn",
+        "availability.rate_limit.unavailable",
+        {
+          requestId,
+          businessSlug,
+          scope:
+            "availability-address-tenant",
+        }
+      );
+    }
 
     if (
       !availabilityLimit.allowed
     ) {
-      return jsonError(
+      logServerEvent(
+        "warn",
+        "availability.rate_limit.blocked",
+        {
+          requestId,
+          businessSlug,
+          scope:
+            "availability-address-tenant",
+        }
+      );
+
+      return errorResponse(
         429,
         "Too many availability requests. Please try again shortly.",
         "RATE_LIMITED",
@@ -222,12 +287,16 @@ export async function GET(
       .maybeSingle();
 
     if (businessError) {
-      console.error(
-        "Failed to load availability business:",
-        businessError
+      logServerError(
+        "availability.business_query.failed",
+        businessError,
+        {
+          requestId,
+          businessSlug,
+        }
       );
 
-      return jsonError(
+      return errorResponse(
         500,
         "Failed to load business.",
         "BUSINESS_QUERY_FAILED"
@@ -235,7 +304,7 @@ export async function GET(
     }
 
     if (!business) {
-      return jsonError(
+      return errorResponse(
         404,
         "Active business was not found.",
         "BUSINESS_NOT_FOUND"
@@ -259,12 +328,17 @@ export async function GET(
     );
 
     if (error) {
-      console.error(
-        "Failed to calculate available slots:",
-        error
+      logServerError(
+        "availability.query.failed",
+        error,
+        {
+          requestId,
+          businessSlug,
+          serviceId,
+        }
       );
 
-      return jsonError(
+      return errorResponse(
         500,
         "Failed to calculate available slots.",
         "AVAILABILITY_QUERY_FAILED"
@@ -287,42 +361,48 @@ export async function GET(
       })
     );
 
-    return NextResponse.json(
-      {
-        ok: true,
-        business: {
-          id: business.id,
-          slug: business.slug,
-          timezone:
-            business.timezone,
+    return withRequestId(
+      NextResponse.json(
+        {
+          ok: true,
+          business: {
+            id: business.id,
+            slug: business.slug,
+            timezone:
+              business.timezone,
+          },
+          request: {
+            serviceId,
+            date,
+            employeeId:
+              employeeId ?? null,
+          },
+          count:
+            slots.length,
+          slots,
         },
-        request: {
-          serviceId,
-          date,
-          employeeId:
-            employeeId ?? null,
-        },
-        count:
-          slots.length,
-        slots,
-      },
-      {
-        headers: {
-          "Cache-Control":
-            "no-store",
-          ...getRateLimitHeaders(
-            availabilityLimit
-          ),
-        },
-      }
+        {
+          headers: {
+            "Cache-Control":
+              "no-store",
+            ...getRateLimitHeaders(
+              availabilityLimit
+            ),
+          },
+        }
+      ),
+      requestId
     );
   } catch (error) {
-    console.error(
-      "Unexpected availability error:",
-      error
+    logServerError(
+      "availability.unexpected",
+      error,
+      {
+        requestId,
+      }
     );
 
-    return jsonError(
+    return errorResponse(
       500,
       "Availability is temporarily unavailable.",
       "UNKNOWN_AVAILABILITY_ERROR"

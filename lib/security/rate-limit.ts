@@ -3,6 +3,10 @@ import "server-only";
 import { createHmac } from "node:crypto";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  logServerError,
+  logServerEvent,
+} from "@/lib/monitoring/server";
 
 export type RateLimitFailureMode =
   | "open"
@@ -14,6 +18,7 @@ export type ConsumeRateLimitInput = {
   limit: number;
   windowSeconds: number;
   failureMode?: RateLimitFailureMode;
+  requestId?: string;
 };
 
 export type RateLimitResult = {
@@ -162,11 +167,17 @@ export async function consumeRateLimit(
         ...input.parts
       );
   } catch (error) {
-    console.error(
-      "Rate-limit key could not be created:",
+    logServerError(
+      "rate_limit.key_creation.failed",
+      error,
       {
-        scope: input.scope,
-        error,
+        requestId:
+          input.requestId ?? null,
+        scope:
+          input.scope,
+        failureMode:
+          input.failureMode ??
+          "closed",
       }
     );
 
@@ -194,12 +205,17 @@ export async function consumeRateLimit(
   );
 
   if (error) {
-    console.error(
-      "Rate-limit storage is unavailable:",
+    logServerError(
+      "rate_limit.storage.failed",
+      error,
       {
-        scope: input.scope,
-        code: error.code ?? null,
-        message: error.message,
+        requestId:
+          input.requestId ?? null,
+        scope:
+          input.scope,
+        failureMode:
+          input.failureMode ??
+          "closed",
       }
     );
 
@@ -212,10 +228,17 @@ export async function consumeRateLimit(
       : data;
 
   if (!row) {
-    console.error(
-      "Rate-limit storage returned no result:",
+    logServerEvent(
+      "error",
+      "rate_limit.storage.empty_result",
       {
-        scope: input.scope,
+        requestId:
+          input.requestId ?? null,
+        scope:
+          input.scope,
+        failureMode:
+          input.failureMode ??
+          "closed",
       }
     );
 
