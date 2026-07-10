@@ -15,6 +15,9 @@ import type {
   GoogleCalendarSyncResult,
 } from "@/lib/google-calendar/sync";
 import {
+  logServerError,
+} from "@/lib/monitoring/server";
+import {
   createAdminClient,
 } from "@/lib/supabase/admin";
 
@@ -736,9 +739,13 @@ async function updateConnectionSuccess(
     );
 
   if (error) {
-    console.error(
-      "Failed to update employee Google Calendar connection success state:",
-      error
+    logServerError(
+      "calendar.employee.connection_success_state.failed",
+      error,
+      {
+        businessId,
+        employeeId,
+      }
     );
   }
 }
@@ -769,9 +776,13 @@ async function updateConnectionFailure(
     );
 
   if (error) {
-    console.error(
-      "Failed to update employee Google Calendar connection failure state:",
-      error
+    logServerError(
+      "calendar.employee.connection_failure_state.failed",
+      error,
+      {
+        businessId,
+        employeeId,
+      }
     );
   }
 }
@@ -958,6 +969,19 @@ async function deleteMappedEvent(
   } catch (error) {
     const message =
       getErrorMessage(error);
+
+    logServerError(
+      "calendar.employee.delete.failed",
+      error,
+      {
+        bookingId:
+          mapping.booking_id,
+        businessId:
+          mapping.business_id,
+        employeeId:
+          mapping.employee_id,
+      }
+    );
 
     await upsertMapping(
       adminClient,
@@ -1152,6 +1176,19 @@ async function synchronizeCurrentEmployeeEvent(
     const message =
       getErrorMessage(error);
 
+    logServerError(
+      "calendar.employee.sync.failed",
+      error,
+      {
+        bookingId:
+          booking.id,
+        businessId:
+          booking.business_id,
+        employeeId:
+          booking.employee_id,
+      }
+    );
+
     try {
       await upsertMapping(
         adminClient,
@@ -1172,9 +1209,17 @@ async function synchronizeCurrentEmployeeEvent(
         }
       );
     } catch (mappingError) {
-      console.error(
-        "Failed to record employee Google Calendar mapping failure:",
-        mappingError
+      logServerError(
+        "calendar.employee.mapping_failure_record.failed",
+        mappingError,
+        {
+          bookingId:
+            booking.id,
+          businessId:
+            booking.business_id,
+          employeeId:
+            booking.employee_id,
+        }
       );
     }
 
@@ -1209,6 +1254,14 @@ export async function syncBookingToEmployeeGoogleCalendar(
         bookingId
       );
   } catch (error) {
+    logServerError(
+      "calendar.employee.context_load.failed",
+      error,
+      {
+        bookingId,
+      }
+    );
+
     return {
       ok: false,
       action: "failed",

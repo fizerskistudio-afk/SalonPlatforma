@@ -338,33 +338,34 @@ fix(ssr): stabilize localized review formatting
 - [x] `time_off` range GiST ostaje future watch item
 - [x] `DATABASE-PERFORMANCE-01B` migracija trenutno nije potrebna
 
-### 7. MONITORING-AUDIT-01 — aktivan
+### 7. MONITORING-AUDIT-01 — završen u ubrzanom režimu
 
-#### MONITORING-AUDIT-01A — strukturisani server signal
+#### MONITORING-AUDIT-01A
 
-- [x] centralni PII-safe monitoring core implementiran u paketu
-- [x] correlation/request ID implementiran za booking i availability
-- [x] booking failure i rate-limit signal implementiran
-- [x] availability failure i rate-limit signal implementiran
-- [x] public booking calendar sync signal implementiran
-- [x] booking-created notification failure signal implementiran
-- [x] rate-limit storage failure signal implementiran
-- [x] unit testovi za redaction, request ID i error fingerprint
-- [ ] završni `npm run check`
-- [ ] response header i strukturisani log smoke
+- [x] centralni PII-safe monitoring core
+- [x] booking, availability i rate-limit strukturisani signali
+- [x] correlation/request ID u javnim API odgovorima
+- [x] unit testovi redakcije, request ID-a i error fingerprint-a
+- [x] završni `npm run check`
+- [x] booking/availability response-header smoke
+- [x] commit i push — `836ab078edfe5a5b31b18d5e832b626080e2ae70`
 
-#### MONITORING-AUDIT-01B
+#### MONITORING-AUDIT-01B closeout
 
-- [ ] duboki Google Calendar sync moduli
-- [ ] notification delivery/retry/webhook putanje
-- [ ] admin/staff auth anomalije
-- [ ] cron/reminder monitoring
+- [x] duboki salon i employee Google Calendar signali
+- [x] notification delivery, booking handler i retry signali
+- [x] Resend webhook correlation i processing signali
+- [x] reminder cron, scan, context i retry signali
+- [x] admin/staff auth i login rate-limit anomalije
+- [x] ciljni moduli bez direktnog raw `console.error` / `console.warn`
+- [x] završni `npm run check` pokrenut tokom primene
+- [ ] puni realni provider/cron/auth regression — `MASTER-SYSTEM-QA-01`
 
-#### MONITORING-AUDIT-01C
+#### Production observability backlog — nije blocker ovog audita
 
-- [ ] platform-admin audit log
-- [ ] spoljni provider adapter i alerting
-- [ ] retention, pristup i SLO pragovi
+- [ ] spoljni provider i alert routing — `PRODUCTION-DOMAINS-ENV-01`
+- [ ] immutable platform-admin audit log — production security backlog
+- [ ] retention i formalni SLO pragovi — `PRIVACY-LEGAL-01` / pilot
 
 ### 8. BACKUP-RECOVERY-01
 
@@ -513,11 +514,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit: 76e6bb4d90a4e2118f4ea041ffe31462f69510d8
-Poslednji završen milestone: DATABASE-PERFORMANCE-01
-Aktivni milestone: MONITORING-AUDIT-01A
-Implementirano u paketu: PII-safe strukturisani logger, request correlation i public booking/availability/rate-limit signali
-Safety: nema raw error message/stack logovanja, baze, migracije ili spoljnog monitoring providera
-Prvi sledeći zadatak: pokrenuti npm run check i ciljani X-Request-ID/log smoke
-Obavezno: ne logovati customer podatke, payload, auth header, cookie, token ili secret
+Bazni remote commit pre closeout paketa: 836ab078edfe5a5b31b18d5e832b626080e2ae70
+Poslednji završen milestone: MONITORING-AUDIT-01
+Aktivni milestone: BACKUP-RECOVERY-01
+Implementirano: PII-safe monitoring za booking, availability, auth, Calendar, email, webhook i reminder putanje
+Safety: nema SQL migracije, nove monitoring tabele ili spoljnog providera
+Prvi sledeći zadatak: mapirati Supabase database/storage backup i proverljiv restore runbook
+Odloženo: pravi provider/cron/auth regression ostaje u MASTER-SYSTEM-QA-01
 ```

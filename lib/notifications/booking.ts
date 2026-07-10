@@ -1,6 +1,9 @@
 import "server-only";
 
 import {
+  logServerError,
+} from "@/lib/monitoring/server";
+import {
   sendNotificationEmail,
 } from "@/lib/notifications/delivery";
 import {
@@ -707,11 +710,11 @@ export async function notifyBookingCreatedSafely(
       businessSent,
     };
   } catch (error) {
-    console.error(
-      "Booking creation notifications failed:",
+    logServerError(
+      "notification.booking_created.handler_failed",
+      error,
       {
         bookingId,
-        error,
       }
     );
 
@@ -764,12 +767,13 @@ export async function notifyBookingStatusChangedSafely(
       businessSent: false,
     };
   } catch (error) {
-    console.error(
-      "Booking status notification failed:",
+    logServerError(
+      "notification.booking_status.handler_failed",
+      error,
       {
         bookingId,
-        status,
-        error,
+        bookingStatus:
+          status,
       }
     );
 
@@ -852,11 +856,11 @@ export async function notifyBookingRescheduledSafely(
       businessSent: false,
     };
   } catch (error) {
-    console.error(
-      "Booking reschedule notification failed:",
+    logServerError(
+      "notification.booking_reschedule.handler_failed",
+      error,
       {
         bookingId,
-        error,
       }
     );
 
@@ -1025,18 +1029,20 @@ export async function retryBookingNotificationDeliverySafely(
           : result.message,
     };
   } catch (error) {
-    console.error("Manual booking notification retry failed:", {
-      deliveryId,
-      expectedBusinessId,
+    logServerError(
+      "notification.booking_retry.failed",
       error,
-    });
+      {
+        deliveryId,
+        businessId:
+          expectedBusinessId,
+      }
+    );
 
     return {
       ok: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Notifikacija trenutno ne može ponovo da se pošalje.",
+        "Notifikacija trenutno ne može ponovo da se pošalje.",
     };
   }
 }

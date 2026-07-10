@@ -8,6 +8,9 @@ import {
   type GoogleCalendarSyncAction,
   type GoogleCalendarSyncResult,
 } from "@/lib/google-calendar/sync";
+import {
+  logServerError,
+} from "@/lib/monitoring/server";
 
 export type DualGoogleCalendarSyncResult =
   GoogleCalendarSyncResult & {
@@ -27,6 +30,7 @@ function getErrorMessage(
 
 async function runSafely(
   scope: "salon" | "employee",
+  bookingId: string,
   runner:
     () =>
       Promise<GoogleCalendarSyncResult>
@@ -37,9 +41,14 @@ async function runSafely(
     const message =
       getErrorMessage(error);
 
-    console.error(
-      `Unexpected ${scope} Google Calendar synchronization error:`,
-      error
+    logServerError(
+      `calendar.${scope}.unexpected`,
+      error,
+      {
+        bookingId,
+        calendarScope:
+          scope,
+      }
     );
 
     return {
@@ -105,6 +114,7 @@ export async function syncBookingToAllGoogleCalendars(
   ] = await Promise.all([
     runSafely(
       "salon",
+      bookingId,
       () =>
         syncBookingToGoogleCalendar(
           bookingId
@@ -112,6 +122,7 @@ export async function syncBookingToAllGoogleCalendars(
     ),
     runSafely(
       "employee",
+      bookingId,
       () =>
         syncBookingToEmployeeGoogleCalendar(
           bookingId

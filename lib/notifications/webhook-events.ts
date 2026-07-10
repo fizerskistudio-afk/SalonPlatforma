@@ -1,6 +1,9 @@
 import "server-only";
 
 import {
+  logServerError,
+} from "@/lib/monitoring/server";
+import {
   createAdminClient,
 } from "@/lib/supabase/admin";
 
@@ -485,9 +488,11 @@ async function applyDeliveryEvent({
 export async function processResendWebhookEvent({
   svixId,
   payload,
+  requestId,
 }: {
   svixId: string;
   payload: unknown;
+  requestId?: string;
 }): Promise<ProcessResendWebhookResult> {
   if (!isRecord(payload)) {
     throw new Error(
@@ -684,9 +689,16 @@ export async function processResendWebhookEvent({
     } catch (
       markError
     ) {
-      console.error(
-        "Unable to mark Resend webhook event as failed:",
-        markError
+      logServerError(
+        "notification.webhook.mark_failed.failed",
+        markError,
+        {
+          requestId:
+            requestId ?? null,
+          svixId,
+          eventId:
+            reserved.id,
+        }
       );
     }
 

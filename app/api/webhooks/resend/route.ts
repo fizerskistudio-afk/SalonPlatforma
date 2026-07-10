@@ -4,6 +4,12 @@ import {
 } from "next/server";
 
 import {
+  createRequestId,
+  logServerError,
+  logServerEvent,
+  withRequestId,
+} from "@/lib/monitoring/server";
+import {
   processResendWebhookEvent,
 } from "@/lib/notifications/webhook-events";
 import {
@@ -19,6 +25,26 @@ export const runtime =
 
 export const revalidate =
   0;
+
+function webhookResponse<TBody>(
+  requestId: string,
+  body: TBody,
+  status: number
+) {
+  return withRequestId(
+    NextResponse.json(
+      body,
+      {
+        status,
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
+      }
+    ),
+    requestId
+  );
+}
 
 function getToleranceSeconds(): number {
   const raw =
@@ -50,29 +76,32 @@ function getToleranceSeconds(): number {
 export async function POST(
   request: NextRequest
 ) {
+  const requestId =
+    createRequestId(
+      request.headers
+    );
   const secret =
     process.env
       .RESEND_WEBHOOK_SECRET
       ?.trim();
 
   if (!secret) {
-    console.error(
-      "RESEND_WEBHOOK_SECRET is missing."
+    logServerEvent(
+      "error",
+      "notification.webhook.configuration_missing",
+      {
+        requestId,
+      }
     );
 
-    return NextResponse.json(
+    return webhookResponse(
+      requestId,
       {
         ok: false,
         message:
           "Webhook endpoint is not configured.",
       },
-      {
-        status: 503,
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
-      }
+      503
     );
   }
 
@@ -101,36 +130,27 @@ export async function POST(
         getToleranceSeconds(),
     });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Invalid Resend webhook signature.";
-
-    console.warn(
-      "Rejected Resend webhook:",
+    logServerError(
+      "notification.webhook.signature_rejected",
+      error,
       {
-        svixId,
-        error:
-          message,
+        requestId,
+        svixId:
+          svixId ?? null,
       }
     );
 
-    return NextResponse.json(
+    return webhookResponse(
+      requestId,
       {
         ok: false,
         message:
           error instanceof
           ResendWebhookVerificationError
-            ? message
+            ? "Invalid webhook signature."
             : "Invalid webhook.",
       },
-      {
-        status: 400,
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
-      }
+      400
     );
   }
 
@@ -140,19 +160,24 @@ export async function POST(
     parsed =
       JSON.parse(payload);
   } catch {
-    return NextResponse.json(
+    logServerEvent(
+      "warn",
+      "notification.webhook.invalid_json",
+      {
+        requestId,
+        svixId:
+          svixId ?? null,
+      }
+    );
+
+    return webhookResponse(
+      requestId,
       {
         ok: false,
         message:
           "Webhook payload is not valid JSON.",
       },
-      {
-        status: 400,
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
-      }
+      400
     );
   }
 
@@ -163,24 +188,47 @@ export async function POST(
           svixId as string,
         payload:
           parsed,
+        requestId,
       });
 
-    return NextResponse.json(
-      result,
+    logServerEvent(
+      result.matched
+        ? "info"
+        : result.ignored ||
+            result.duplicate
+          ? "info"
+          : "warn",
+      "notification.webhook.processed",
       {
-        status: 200,
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
+        requestId,
+        svixId:
+          svixId ?? null,
+        duplicate:
+          result.duplicate,
+        ignored:
+          result.ignored,
+        matched:
+          result.matched,
+        providerStatus:
+          result.providerStatus,
+        deliveryId:
+          result.deliveryId,
       }
     );
+
+    return webhookResponse(
+      requestId,
+      result,
+      200
+    );
   } catch (error) {
-    console.error(
-      "Resend webhook processing failed:",
+    logServerError(
+      "notification.webhook.processing_failed",
+      error,
       {
-        svixId,
-        error,
+        requestId,
+        svixId:
+          svixId ?? null,
       }
     );
 
@@ -188,19 +236,14 @@ export async function POST(
      * Non-2xx response intentionally asks Resend/Svix
      * to retry the same event.
      */
-    return NextResponse.json(
+    return webhookResponse(
+      requestId,
       {
         ok: false,
         message:
           "Webhook processing failed.",
       },
-      {
-        status: 500,
-        headers: {
-          "Cache-Control":
-            "no-store",
-        },
-      }
+      500
     );
   }
 }

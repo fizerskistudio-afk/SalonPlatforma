@@ -4,6 +4,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
+  createRequestId,
+  logServerError,
+  logServerEvent,
+} from "@/lib/monitoring/server";
+import {
   consumeRateLimit,
   formatRetryAfter,
   getClientAddress,
@@ -37,6 +42,10 @@ export async function staffLoginAction(
 
   const requestHeaders =
     await headers();
+  const requestId =
+    createRequestId(
+      requestHeaders
+    );
 
   const clientAddress =
     getClientAddress(
@@ -56,6 +65,7 @@ export async function staffLoginAction(
       limit: 30,
       windowSeconds: 15 * 60,
       failureMode: "closed",
+      requestId,
     }),
 
     consumeRateLimit({
@@ -68,6 +78,7 @@ export async function staffLoginAction(
       limit: 8,
       windowSeconds: 15 * 60,
       failureMode: "closed",
+      requestId,
     }),
   ]);
 
@@ -79,14 +90,39 @@ export async function staffLoginAction(
         : null;
 
   if (blockedLimit) {
+    const blockedScope =
+      !addressLimit.allowed
+        ? "staff-login-address"
+        : "staff-login-account";
+
     if (
       blockedLimit.unavailable
     ) {
+      logServerEvent(
+        "error",
+        "auth.staff.rate_limit.unavailable",
+        {
+          requestId,
+          scope:
+            blockedScope,
+        }
+      );
+
       return {
         error:
           "Prijava trenutno nije dostupna. Pokušaj ponovo malo kasnije.",
       };
     }
+
+    logServerEvent(
+      "warn",
+      "auth.staff.rate_limit.blocked",
+      {
+        requestId,
+        scope:
+          blockedScope,
+      }
+    );
 
     return {
       error:
@@ -108,7 +144,18 @@ export async function staffLoginAction(
       password,
     });
 
-  if (error || !data.user) {
+  if (
+    error ||
+    !data.user
+  ) {
+    logServerEvent(
+      "warn",
+      "auth.staff.credentials.rejected",
+      {
+        requestId,
+      }
+    );
+
     return {
       error:
         "Email ili lozinka nisu ispravni.",
@@ -129,10 +176,36 @@ export async function staffLoginAction(
     .limit(1)
     .maybeSingle();
 
-  if (
-    membershipError ||
-    !membership
-  ) {
+  if (membershipError) {
+    logServerError(
+      "auth.staff.membership_query.failed",
+      membershipError,
+      {
+        requestId,
+        userId:
+          data.user.id,
+      }
+    );
+
+    await supabase.auth.signOut();
+
+    return {
+      error:
+        "Ovaj nalog nema aktivan staff pristup.",
+    };
+  }
+
+  if (!membership) {
+    logServerEvent(
+      "warn",
+      "auth.staff.membership.denied",
+      {
+        requestId,
+        userId:
+          data.user.id,
+      }
+    );
+
     await supabase.auth.signOut();
 
     return {

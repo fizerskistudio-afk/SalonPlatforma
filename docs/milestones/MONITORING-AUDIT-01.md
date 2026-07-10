@@ -1,110 +1,85 @@
 # MONITORING-AUDIT-01
 
-**Datum pripreme:** 10. jul 2026.  
-**Status:** `MONITORING-AUDIT-01A` je implementiran u paketu i čeka lokalni quality gate.
+**Datum zatvaranja:** 10. jul 2026.  
+**Status:** završen u ubrzanom režimu.
 
 ## Cilj
 
-Uvesti zajednički server monitoring sloj pre povezivanja spoljnog error-tracking servisa. Prvi korak mora da obezbedi stabilne event kodove, request correlation i PII-safe error signal bez menjanja poslovne logike.
+Platforma sada ima zajednički PII-safe server monitoring sloj sa stabilnim event kodovima, request correlation signalom i bez raw exception objekata u kritičnim runtime putanjama.
 
-## MONITORING-AUDIT-01A scope
+## Završeni scope
+
+### MONITORING-AUDIT-01A
 
 - zajednički monitoring core;
 - validacija ili generisanje `X-Request-ID`;
-- isti request ID u strukturisanom logu i HTTP response header-u;
-- JSON log zapis sa `timestamp`, `level` i stabilnim `event` kodom;
+- isti request ID u API logu i response header-u;
+- strukturisani jednolinijski JSON zapis;
 - error fingerprint bez raw poruke i stack-a;
 - automatska redakcija osetljivih context ključeva;
-- booking create failure signal;
-- booking rate-limit anomaly signal;
-- availability query i rate-limit signal;
-- Google Calendar sync signal iz public booking putanje;
-- booking-created notification failure signal;
-- centralizovani rate-limit storage failure signal.
+- public booking, availability i rate-limit signali;
+- unit testovi redakcije, request ID-a i error fingerprint-a;
+- booking/availability header smoke;
+- commit `836ab078edfe5a5b31b18d5e832b626080e2ae70`.
 
-## Event kodovi u 01A
+### MONITORING-AUDIT-01B closeout
 
-- `booking.business_query.failed`
-- `booking.create.rejected`
-- `booking.create.failed`
-- `booking.create.invalid_result`
-- `booking.rate_limit.blocked`
-- `booking.rate_limit.unavailable`
-- `booking.unexpected`
-- `availability.business_query.failed`
-- `availability.query.failed`
-- `availability.rate_limit.blocked`
-- `availability.rate_limit.unavailable`
-- `availability.unexpected`
-- `calendar.booking_sync.failed`
-- `calendar.booking_sync.succeeded`
-- `calendar.booking_sync.unexpected`
-- `notification.booking_created.failed`
-- `rate_limit.key_creation.failed`
-- `rate_limit.storage.failed`
-- `rate_limit.storage.empty_result`
+- admin i staff login rate-limit, credentials i membership anomaly signali;
+- reminder cron konfiguracija, autorizacija, run rezultat i unexpected failure;
+- reminder scan, context i retry signali;
+- email delivery i delivery-status update signali;
+- booking notification handler i manual retry signali;
+- Resend webhook signature, JSON, matching i processing signali;
+- salon i employee Google Calendar sync, context i state-update signali;
+- request correlation za cron i webhook HTTP putanje;
+- source audit bez direktnog `console.error`/`console.warn` u ciljnim modulima;
+- završni `npm run check` pokrenut tokom primene paketa.
+
+## Kritične event porodice
+
+- `auth.admin.*`
+- `auth.staff.*`
+- `calendar.salon.*`
+- `calendar.employee.*`
+- `notification.delivery.*`
+- `notification.booking_*`
+- `notification.reminder.*`
+- `notification.webhook.*`
 
 ## PII politika
 
-Monitoring context ne sme da sadrži:
+Monitoring context ne sadrži:
 
-- customer ime;
-- email;
-- telefon;
+- ime klijenta;
+- email ili telefon;
 - booking napomenu;
-- adresu;
-- recipient vrednost;
-- request payload ili body;
+- adresu ili recipient;
+- request payload/body;
 - cookie ili authorization header;
 - password, token ili secret;
 - raw exception message ili stack.
 
-Dozvoljeni context primeri:
+Dozvoljeni su pseudonimni i operativni identifikatori kao `requestId`, `businessId`, `bookingId`, `deliveryId`, `userId`, stabilan machine code i bezlični status/action enum.
 
-- `requestId`;
-- `businessSlug`;
-- `businessId`;
-- `bookingId`;
-- stabilan machine/error code;
-- rate-limit scope;
-- boolean status;
-- bezlični action enum.
+## Namerno nije uvedeno
 
-## Van scope-a
+Sledeće stavke nisu potrebne za zatvaranje code audit-a i ostaju production observability backlog:
 
-- nema Sentry, Datadog ili drugog spoljnog providera;
-- nema nove baze ili monitoring tabele;
-- nema SQL migracije;
-- nema platform-admin audit log tabele;
-- nema globalne migracije svih postojećih `console.*` poziva;
-- nema promene auth, tenancy, RLS ili booking logike.
+- Sentry, Datadog ili drugi spoljni provider;
+- alert routing i on-call pravila;
+- immutable platform-admin audit tabela;
+- retention politika monitoring podataka;
+- dashboard i formalni SLO pragovi.
 
-## Sledeće faze
-
-### MONITORING-AUDIT-01B
-
-- Google Calendar sync moduli van public booking rute;
-- notification delivery/retry/webhook duboke putanje;
-- admin/staff auth anomalije;
-- cron/reminder monitoring.
-
-### MONITORING-AUDIT-01C
-
-- platform-admin immutable audit log dizajn;
-- retention i pristup audit podacima;
-- provider adapter i produkcioni alerting;
-- dashboard/SLO pragovi.
+Te stavke se rešavaju zajedno sa `PRODUCTION-DOMAINS-ENV-01`, `PRIVACY-LEGAL-01` i pilot launch konfiguracijom, kada postoje stvarni production domen, provider nalozi i retention odluke.
 
 ## Acceptance
 
-- [x] monitoring core i unit testovi implementirani u paketu;
-- [x] raw error message i stack se ne emituju kroz novi logger;
-- [x] public booking, availability i rate-limit putanje koriste strukturisane evente;
-- [x] response dobija `X-Request-ID`;
-- [x] source audit ne nalazi `console.error` u tri ciljna fajla;
-- [ ] `npm run lint`;
-- [ ] `npm test`;
-- [ ] `npm run build`;
-- [ ] `npm run check`;
-- [ ] booking/availability response header smoke;
-- [ ] strukturisani log smoke bez PII.
+- [x] `MONITORING-AUDIT-01A` quality gate prošao;
+- [x] booking/availability `X-Request-ID` smoke prošao;
+- [x] duboki Calendar, notification, webhook, reminder i auth signali implementirani;
+- [x] novi monitoring context ne emituje customer PII;
+- [x] ciljni moduli ne loguju raw exception objekte direktno;
+- [x] nema SQL migracije, nove tabele ili promene poslovne logike;
+- [x] završni `npm run check` prolazi pre upisa ovog closeout dokumenta;
+- [ ] puni realni Resend/Google/cron/auth regression ostaje u `MASTER-SYSTEM-QA-01`.

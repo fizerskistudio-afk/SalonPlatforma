@@ -1,6 +1,10 @@
 import "server-only";
 
 import {
+  logServerError,
+  logServerEvent,
+} from "@/lib/monitoring/server";
+import {
   sendNotificationEmail,
 } from "@/lib/notifications/delivery";
 import {
@@ -472,10 +476,12 @@ export async function processBookingReminders({
   businessId,
   now = new Date(),
   limit = DEFAULT_BATCH_LIMIT,
+  requestId,
 }: {
   businessId?: string;
   now?: Date;
   limit?: number;
+  requestId?: string;
 } = {}): Promise<BookingReminderRunResult> {
   const supabase = createAdminClient();
   const safeLimit = Math.min(
@@ -526,6 +532,17 @@ export async function processBookingReminders({
   const bookingResult = await query;
 
   if (bookingResult.error) {
+    logServerError(
+      "notification.reminder.scan.failed",
+      bookingResult.error,
+      {
+        requestId:
+          requestId ?? null,
+        businessId:
+          businessId ?? null,
+      }
+    );
+
     return {
       ok: false,
       checked: 0,
@@ -534,7 +551,7 @@ export async function processBookingReminders({
       skipped: 0,
       failed: 1,
       message:
-        `Reminder scan failed: ${bookingResult.error.message}`,
+        "Reminder scan failed.",
     };
   }
 
@@ -610,6 +627,19 @@ export async function processBookingReminders({
     settingsResult.error;
 
   if (loadError) {
+    logServerError(
+      "notification.reminder.context_load.failed",
+      loadError,
+      {
+        requestId:
+          requestId ?? null,
+        businessId:
+          businessId ?? null,
+        checked:
+          bookings.length,
+      }
+    );
+
     return {
       ok: false,
       checked: bookings.length,
@@ -618,7 +648,7 @@ export async function processBookingReminders({
       skipped: 0,
       failed: 1,
       message:
-        `Reminder context failed: ${loadError.message}`,
+        "Reminder context failed.",
     };
   }
 
@@ -664,6 +694,20 @@ export async function processBookingReminders({
       !employee
     ) {
       failed += 1;
+
+      logServerEvent(
+        "error",
+        "notification.reminder.context_missing",
+        {
+          requestId:
+            requestId ?? null,
+          bookingId:
+            booking.id,
+          businessId:
+            booking.business_id,
+        }
+      );
+
       continue;
     }
 
@@ -714,7 +758,7 @@ export async function processBookingReminders({
     }
   }
 
-  return {
+  const result = {
     ok: failed === 0,
     checked: bookings.length,
     eligible,
@@ -724,6 +768,31 @@ export async function processBookingReminders({
     message:
       `Provereno: ${bookings.length}. Poslato: ${sent}. Preskočeno: ${skipped}. Greške: ${failed}.`,
   };
+
+  logServerEvent(
+    failed === 0
+      ? "info"
+      : "warn",
+    "notification.reminder.run.completed",
+    {
+      requestId:
+        requestId ?? null,
+      businessId:
+        businessId ?? null,
+      checked:
+        result.checked,
+      eligible:
+        result.eligible,
+      sent:
+        result.sent,
+      skipped:
+        result.skipped,
+      failed:
+        result.failed,
+    }
+  );
+
+  return result;
 }
 
 function readMetadataString(
@@ -878,12 +947,12 @@ export async function retryReminderNotificationDeliverySafely(
           : result.message,
     };
   } catch (error) {
-    console.error(
-      "Reminder delivery retry failed:",
+    logServerError(
+      "notification.reminder.retry.failed",
+      error,
       {
         deliveryId,
         businessId,
-        error,
       }
     );
 

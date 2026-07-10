@@ -5,6 +5,9 @@ import {
 } from "node:crypto";
 
 import {
+  logServerError,
+} from "@/lib/monitoring/server";
+import {
   getNotificationEmailConfig,
 } from "@/lib/notifications/config";
 import {
@@ -358,12 +361,12 @@ async function updateDeliveryStatus({
     .eq("id", deliveryId);
 
   if (error) {
-    console.error(
-      "Unable to update notification delivery status:",
+    logServerError(
+      "notification.delivery.status_update.failed",
+      error,
       {
         deliveryId,
         status,
-        error,
       }
     );
   }
@@ -546,8 +549,9 @@ export async function sendNotificationEmail(
       });
     }
 
-    console.error(
-      "Notification email delivery failed:",
+    logServerError(
+      "notification.delivery.failed",
+      error,
       {
         templateKey:
           input.templateKey,
@@ -555,10 +559,8 @@ export async function sendNotificationEmail(
           input.businessId ?? null,
         bookingId:
           input.bookingId ?? null,
-        recipient:
-          originalRecipient,
-        error:
-          errorMessage,
+        deliveryId:
+          deliveryId ?? null,
       }
     );
 

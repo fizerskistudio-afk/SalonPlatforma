@@ -14,6 +14,9 @@ import {
   createGoogleOAuthClientWithRefreshToken,
 } from "@/lib/google-calendar/oauth";
 import {
+  logServerError,
+} from "@/lib/monitoring/server";
+import {
   createAdminClient,
 } from "@/lib/supabase/admin";
 
@@ -638,9 +641,12 @@ async function updateConnectionSuccess(
       );
 
   if (error) {
-    console.error(
-      "Failed to update Google Calendar connection success state:",
-      error
+    logServerError(
+      "calendar.salon.connection_success_state.failed",
+      error,
+      {
+        businessId,
+      }
     );
   }
 }
@@ -667,9 +673,12 @@ async function updateConnectionFailure(
       );
 
   if (error) {
-    console.error(
-      "Failed to update Google Calendar connection failure state:",
-      error
+    logServerError(
+      "calendar.salon.connection_failure_state.failed",
+      error,
+      {
+        businessId,
+      }
     );
   }
 }
@@ -682,17 +691,14 @@ async function recordSyncFailure(
   const errorMessage =
     getErrorMessage(error);
 
-  console.error(
-    "Google Calendar synchronization failed:",
+  logServerError(
+    "calendar.salon.sync.failed",
+    error,
     {
       bookingId:
         booking.id,
-
       businessId:
         booking.business_id,
-
-      error:
-        errorMessage,
     }
   );
 
@@ -712,9 +718,15 @@ async function recordSyncFailure(
       }
     );
   } catch (stateError) {
-    console.error(
-      "Failed to record booking Google sync failure:",
-      stateError
+    logServerError(
+      "calendar.salon.sync_state_record.failed",
+      stateError,
+      {
+        bookingId:
+          booking.id,
+        businessId:
+          booking.business_id,
+      }
     );
   }
 
@@ -1346,6 +1358,15 @@ export async function syncBookingToGoogleCalendar(
         normalizedBookingId
       );
   } catch (error) {
+    logServerError(
+      "calendar.salon.context_load.failed",
+      error,
+      {
+        bookingId:
+          normalizedBookingId,
+      }
+    );
+
     return {
       ok: false,
       action: "failed",
