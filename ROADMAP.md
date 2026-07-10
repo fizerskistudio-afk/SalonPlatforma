@@ -194,55 +194,72 @@ fix(ssr): stabilize localized review formatting
 
 ---
 
-## 5A. Aktivni milestone
+## 5A. CI i test foundation
 
-# CI-FOUNDATION-01
-
-### Implementirano u paketu
+# CI-FOUNDATION-01 — implementiran
 
 - [x] GitHub Actions workflow
 - [x] Node.js 20 i npm cache
 - [x] `npm ci`
-- [x] lint job
-- [x] production build job
-- [x] concurrency cancellation
-- [x] read-only repository permissions
-- [x] build-only placeholder environment
-- [x] lokalni `npm run check`
-- [ ] prvi remote GitHub Actions run
-- [ ] potvrđen zelen status na branch commit-u
+- [x] lint
+- [x] production build
+- [x] read-only permissions
+- [x] placeholder build env
+- [x] ispravljen concurrency expression
+- [x] unit test korak dodat u workflow
+- [ ] prvi potvrđen zeleni remote run
 
-### Acceptance criteria
+# TEST-FOUNDATION-01 — aktivan
 
-- workflow se pokreće na aktivnoj grani, `main` i pull request događajima;
-- nema production secrets;
-- lint nema error;
-- build prolazi;
-- rezultat je vidljiv uz commit.
+### Implementirano u paketu
+
+- [x] Vitest konfiguracija
+- [x] hostname normalization testovi
+- [x] root, tenant, reserved i external resolver testovi
+- [x] tenant public URL testovi
+- [x] template registry i fallback testovi
+- [x] booking payload validator izdvojen iz route-a
+- [x] validni booking payload normalization testovi
+- [x] glavni booking payload error kodovi
+- [x] `npm test`
+- [x] `npm run test:watch`
+- [x] `npm run check` = lint + test + build
+- [ ] lokalni unit test run
+- [ ] završni lint
+- [ ] završni build
+- [ ] prvi CI run sa test korakom
+
+### Odloženo za prošireni QA sloj
+
+- rate limiter testovi;
+- permission matrix;
+- cross-tenant API testovi;
+- booking conflict/database testovi;
+- Playwright public booking;
+- admin/staff login smoke test.
 
 ---
 
 ## 6. Sledeći milestone-ovi — realan redosled do prvog launch-a
 
-### 1. CI-FOUNDATION-01 — aktivan
+### 1. CI-FOUNDATION-01 — implementiran
 
 - [x] GitHub Actions workflow
-- [x] `npm ci`
-- [x] `npm run lint`
-- [x] `npm run build`
+- [x] install, lint, unit test i build koraci
 - [x] lokalna `npm run check` komanda
-- [ ] prvi branch/PR status check
+- [ ] potvrditi prvi zeleni remote run
 
-### 2. TEST-FOUNDATION-01
+### 2. TEST-FOUNDATION-01 — aktivan
 
-- [ ] hostname i tenant resolver testovi
-- [ ] booking payload validation testovi
-- [ ] rate limiter testovi
-- [ ] permission matrix owner/manager/staff
-- [ ] cross-tenant API testovi
-- [ ] booking konflikt testovi
-- [ ] Playwright public booking smoke test
-- [ ] admin/staff login smoke test
+- [x] hostname i tenant resolver unit testovi
+- [x] template registry unit testovi
+- [x] booking payload validation unit testovi
+- [ ] rate limiter testovi — odloženo
+- [ ] permission matrix owner/manager/staff — odloženo
+- [ ] cross-tenant API testovi — odloženo
+- [ ] booking konflikt testovi — odloženo
+- [ ] Playwright public booking smoke test — master QA
+- [ ] admin/staff login smoke test — master QA
 
 ### 3. PUBLISHING-LIFECYCLE-01
 
@@ -442,11 +459,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Remote baseline pre performance commita: 6c14bcc4f46af471a0e29aaf42ce210ea167c942
+Poslednji potvrđeni remote commit: abb0b3a39424a1d523dc6cf960ea01ce630a03d3
 Poslednji završen milestone: TEMPLATE-BUNDLE-OPTIMIZATION-01
-Aktivni milestone: CI-FOUNDATION-01
-Lokalna potvrda: lint PASSED, build PASSED
-Test režim: ubrzani smoke test po promenjenom toku; master regression kasnije
-Prvi sledeći zadatak: commit/push performance izmena, primeniti CI paket i potvrditi prvi Actions run
+Aktivni milestone: TEST-FOUNDATION-01
+CI foundation: commitovan; paket ispravlja concurrency izraz i dodaje unit test korak
+Test scope: hostname, template registry i public booking validation
+Test režim: lint + unit tests + build; širok regression u MASTER-SYSTEM-QA-01
+Prvi sledeći zadatak: primeniti paket, npm run check, push i proveriti GitHub Actions
 Obavezno: posle svake izmene ažurirati ROADMAP.md
 ```

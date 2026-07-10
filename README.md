@@ -133,11 +133,13 @@ Glavne npm komande:
 ```bash
 npm run dev
 npm run lint
+npm test
 npm run build
+npm run check
 npm run start
 ```
 
-GitHub Actions CI automatski pokreće `npm ci`, lint i production build. Automatizovani funkcionalni test runner uvodi se u sledećem milestone-u.
+GitHub Actions CI automatski pokreće `npm ci`, lint, Vitest unit testove i production build. Browser i database integracioni testovi ostaju u narednom QA sloju.
 
 ## Arhitektura
 
@@ -607,6 +609,23 @@ npm run lint
 npm run build
 ```
 
+### Unit testovi
+
+Test runner:
+
+```text
+Vitest 4
+```
+
+Komande:
+
+```bash
+npm test
+npm run test:watch
+```
+
+Početni unit test scope pokriva hostname/tenant routing, template registry i javnu booking payload validaciju. Testovi ne koriste produkcionu bazu ili spoljašnje servise.
+
 ### GitHub Actions CI
 
 Workflow:
@@ -617,7 +636,7 @@ Workflow:
 
 Pokreće se na push za `backup/theme-core-barber-beta` i `main`, kao i na pull request događajima.
 
-CI koristi build-only placeholder environment vrednosti i nema pristup produkcionim Supabase, Google ili Resend nalozima.
+CI koristi build-only placeholder environment vrednosti, pokreće unit testove i nema pristup produkcionim Supabase, Google ili Resend nalozima.
 
 Lokalna objedinjena provera:
 

@@ -12,6 +12,9 @@ import {
   readJsonBodyWithLimit,
 } from "@/lib/security/request-body";
 import {
+  validatePublicBookingRequest,
+} from "@/lib/booking/public-validation";
+import {
   syncBookingToAllGoogleCalendars,
 } from "@/lib/google-calendar/dual-sync";
 import {
@@ -26,15 +29,6 @@ export const revalidate = 0;
 
 const MAX_BOOKING_REQUEST_BYTES =
   16 * 1024;
-
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const SLUG_PATTERN =
-  /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-const EMAIL_PATTERN =
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DATABASE_ERROR_CODES = [
   "SLOT_UNAVAILABLE",
@@ -115,24 +109,6 @@ function errorResponse(
       },
     }
   );
-}
-
-function optionalTrimmedString(
-  value: unknown
-): string | null {
-  if (
-    typeof value !==
-    "string"
-  ) {
-    return null;
-  }
-
-  const trimmed =
-    value.trim();
-
-  return trimmed.length > 0
-    ? trimmed
-    : null;
 }
 
 function extractDatabaseErrorCode(
@@ -349,205 +325,35 @@ export async function POST(
       );
     }
 
-    const body =
-      bodyResult.value;
+    const validationResult =
+      validatePublicBookingRequest(
+        bodyResult.value
+      );
 
     if (
-      !isJsonRecord(body)
+      !validationResult.ok
     ) {
       return errorResponse(
-        400,
-        "Invalid booking request.",
-        "INVALID_REQUEST"
+        validationResult
+          .error.status,
+        validationResult
+          .error.message,
+        validationResult
+          .error.code
       );
     }
 
-    const businessSlug =
-      optionalTrimmedString(
-        body.businessSlug
-      );
-
-    const serviceId =
-      optionalTrimmedString(
-        body.serviceId
-      );
-
-    const employeeId =
-      optionalTrimmedString(
-        body.employeeId
-      );
-
-    const startsAt =
-      optionalTrimmedString(
-        body.startsAt
-      );
-
-    const customer =
-      isJsonRecord(
-        body.customer
-      )
-        ? body.customer
-        : null;
-
-    const customerName =
-      customer
-        ? optionalTrimmedString(
-            customer.name
-          )
-        : null;
-
-    const customerPhone =
-      customer
-        ? optionalTrimmedString(
-            customer.phone
-          )
-        : null;
-
-    const customerEmail =
-      customer
-        ? optionalTrimmedString(
-            customer.email
-          )?.toLowerCase() ??
-          null
-        : null;
-
-    const customerNote =
-      customer
-        ? optionalTrimmedString(
-            customer.note
-          )
-        : null;
-
-    if (!businessSlug) {
-      return errorResponse(
-        400,
-        "Business slug is required.",
-        "MISSING_BUSINESS_SLUG"
-      );
-    }
-
-    if (
-      !SLUG_PATTERN.test(
-        businessSlug
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Invalid business slug.",
-        "INVALID_BUSINESS_SLUG"
-      );
-    }
-
-    if (
-      !serviceId ||
-      !UUID_PATTERN.test(
-        serviceId
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Invalid service ID.",
-        "INVALID_SERVICE_ID"
-      );
-    }
-
-    if (
-      !employeeId ||
-      !UUID_PATTERN.test(
-        employeeId
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Invalid employee ID.",
-        "INVALID_EMPLOYEE_ID"
-      );
-    }
-
-    if (
-      !startsAt ||
-      Number.isNaN(
-        Date.parse(startsAt)
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Invalid booking start time.",
-        "INVALID_START_TIME"
-      );
-    }
-
-    if (
-      !customerName ||
-      customerName.length <
-        2 ||
-      customerName.length >
-        120
-    ) {
-      return errorResponse(
-        400,
-        "Invalid customer name.",
-        "INVALID_CUSTOMER_NAME"
-      );
-    }
-
-    if (
-      !customerPhone &&
-      !customerEmail
-    ) {
-      return errorResponse(
-        400,
-        "Phone or email is required.",
-        "CUSTOMER_CONTACT_REQUIRED"
-      );
-    }
-
-    if (
-      customerPhone &&
-      (
-        customerPhone.length >
-          40 ||
-        customerPhone.replace(
-          /\D/g,
-          ""
-        ).length < 6
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Invalid customer phone.",
-        "INVALID_CUSTOMER_PHONE"
-      );
-    }
-
-    if (
-      customerEmail &&
-      (
-        customerEmail.length >
-          254 ||
-        !EMAIL_PATTERN.test(
-          customerEmail
-        )
-      )
-    ) {
-      return errorResponse(
-        400,
-        "Invalid customer email.",
-        "INVALID_CUSTOMER_EMAIL"
-      );
-    }
-
-    if (
-      customerNote &&
-      customerNote.length >
-        2000
-    ) {
-      return errorResponse(
-        400,
-        "Customer note is too long.",
-        "CUSTOMER_NOTE_TOO_LONG"
-      );
-    }
+    const {
+      businessSlug,
+      serviceId,
+      employeeId,
+      startsAt,
+      customerName,
+      customerPhone,
+      customerEmail,
+      customerNote,
+    } =
+      validationResult.value;
 
     const clientAddress =
       getClientAddress(

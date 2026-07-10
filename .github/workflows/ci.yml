@@ -11,12 +11,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-\${{ github.workflow }}-\${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   quality:
-    name: Lint and build
+    name: Lint, test and build
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -65,6 +65,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Unit tests
+        run: npm test
 
       - name: Production build
         run: npm run build
