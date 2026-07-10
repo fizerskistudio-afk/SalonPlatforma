@@ -1,7 +1,7 @@
 # PUBLISHING-LIFECYCLE-01
 
 **Datum pripreme:** 10. jul 2026.  
-**Status:** implementiran u paketu; čeka migration, check i smoke test.
+**Status:** kod primenjen; lint, unit testovi i build prošli. Live lifecycle smoke i migration verifikacija ostaju u master QA ciklusu.
 
 ## Cilj
 
@@ -88,3 +88,12 @@ Dodati unit testovi za:
 - prethodni installer je stao pre sitemap upisa i pre platform-admin UI patch-eva;
 - FIX-01 je idempotentan i nastavlja od delimično primenjenog stanja;
 - admin preview sada koristi pravi template i za suspended/archived tenant-e.
+
+
+## Ubrzana lokalna potvrda
+
+- `npm run lint`: PASSED
+- `npm test`: PASSED
+- `npm run build`: PASSED
+- lifecycle UI smoke: DEFERRED TO MASTER-SYSTEM-QA-01
+- migration 024 live verification: DEFERRED TO MASTER-SYSTEM-QA-01

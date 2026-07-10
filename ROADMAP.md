@@ -262,7 +262,7 @@ fix(ssr): stabilize localized review formatting
 - [ ] Playwright public booking smoke test — master QA
 - [ ] admin/staff login smoke test — master QA
 
-### 3. PUBLISHING-LIFECYCLE-01 — aktivan
+### 3. PUBLISHING-LIFECYCLE-01 — implementiran u ubrzanom režimu
 
 - [x] database status model
 - [x] legacy backfill aktivnih tenant-a na `published`
@@ -275,21 +275,28 @@ fix(ssr): stabilize localized review formatting
 - [x] autentifikovani platform-admin preview
 - [x] preview booking je onemogućen
 - [x] unit testovi status pravila
-- [ ] primenjena migration `024`
+- [ ] live verifikacija migration `024` — odloženo u MASTER-SYSTEM-QA-01
+- [x] završni `npm run check`
+- [ ] osnovni lifecycle smoke test — odloženo u MASTER-SYSTEM-QA-01
+
+### 4. PLATFORM-ADMIN-COMPLETION-01 — aktivan
+
+- [x] stvarni operativni overview iz baze
+- [x] lifecycle i upcoming booking brojači
+- [x] attention queue
+- [x] globalni configuration health
+- [x] konzistentna sidebar navigacija
+- [x] tenant command center readiness
+- [x] povezivanje postojećeg onboarding wizard-a
+- [x] preset i template onboarding ostaju objedinjeni
+- [x] owner pristup uključen u readiness
+- [x] publish/suspend kontrole povezane sa command centrom
+- [x] partial query error stanje
+- [x] empty dashboard stanje
+- [x] unit testovi readiness logike
 - [ ] završni `npm run check`
-- [ ] osnovni lifecycle smoke test
-
-### 4. PLATFORM-ADMIN-COMPLETION-01 — minimalni launch scope
-
-- [ ] operativni overview
-- [ ] konzistentna navigacija
-- [ ] tenant command center
-- [ ] objedinjeno kreiranje tenant-a
-- [ ] izbor preseta i template-a
-- [ ] prvi owner i credentials status
-- [ ] publish/suspend kontrole
-- [ ] integration health
-- [ ] responsive i error/empty/loading QA
+- [ ] osnovni dashboard/tenant smoke test
+- [ ] puni responsive i error/loading regression — MASTER-SYSTEM-QA-01
 
 ### 5. ERROR-RESILIENCE-01
 
@@ -467,12 +474,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit: f83c7cb14ad7e238b34ce685574f85cc842e04ce
-Poslednji završen milestone: TEST-FOUNDATION-01
-Aktivni milestone: PUBLISHING-LIFECYCLE-01
-Lokalna potvrda prethodnog milestone-a: lint PASSED, tests PASSED, build PASSED, smoke PASSED
-Migration za aktivni milestone: 024_add_business_publication_lifecycle.sql
-Test režim: npm run check + osnovni lifecycle smoke test
-Prvi sledeći zadatak: primeniti migration 024, check, testirati draft/publish/suspend i push
+Poslednji potvrđeni remote commit pre publishing paketa: f83c7cb14ad7e238b34ce685574f85cc842e04ce
+Poslednji implementiran milestone: PUBLISHING-LIFECYCLE-01
+Aktivni milestone: PLATFORM-ADMIN-COMPLETION-01
+Publishing provera: lint PASSED, tests PASSED, build PASSED; live lifecycle smoke odložen
+Platform-admin scope: real dashboard, attention queue, configuration health, tenant readiness i navigation
+Test režim: npm run check + dashboard/tenant smoke
+Prvi sledeći zadatak: primeniti paket, check, proveriti dashboard i Mika command center
 Obavezno: posle svake izmene ažurirati ROADMAP.md
 ```

@@ -21,8 +21,12 @@ const navigationItems = [
       "Pregled platforme",
     icon:
       LayoutDashboard,
-    includeChildren:
-      false,
+    match:
+      (
+        pathname: string
+      ) =>
+        pathname ===
+        "/platform-admin",
   },
   {
     href:
@@ -31,8 +35,20 @@ const navigationItems = [
       "Saloni",
     icon:
       Building2,
-    includeChildren:
-      false,
+    match:
+      (
+        pathname: string
+      ) =>
+        (
+          pathname ===
+            "/platform-admin/businesses" ||
+          pathname.startsWith(
+            "/platform-admin/businesses/"
+          )
+        ) &&
+        !pathname.startsWith(
+          "/platform-admin/businesses/new"
+        ),
   },
   {
     href:
@@ -41,8 +57,15 @@ const navigationItems = [
       "Novi salon",
     icon:
       PlusCircle,
-    includeChildren:
-      true,
+    match:
+      (
+        pathname: string
+      ) =>
+        pathname ===
+          "/platform-admin/businesses/new" ||
+        pathname.startsWith(
+          "/platform-admin/businesses/new/"
+        ),
   },
   {
     href:
@@ -51,8 +74,15 @@ const navigationItems = [
       "Business preseti",
     icon:
       Boxes,
-    includeChildren:
-      true,
+    match:
+      (
+        pathname: string
+      ) =>
+        pathname ===
+          "/platform-admin/business-presets" ||
+        pathname.startsWith(
+          "/platform-admin/business-presets/"
+        ),
   },
 ] as const;
 
@@ -62,58 +92,67 @@ export default function PlatformAdminNavigation() {
 
   return (
     <nav
+      aria-label="Platform admin navigacija"
       className="
         mt-8
         space-y-2
       "
     >
-      {navigationItems.map(
-        (item) => {
-          const Icon =
-            item.icon;
+      {
+        navigationItems.map(
+          (
+            item
+          ) => {
+            const Icon =
+              item.icon;
 
-          const isActive =
-            pathname ===
-              item.href ||
-            (
-              item.includeChildren &&
-              pathname.startsWith(
-                `${item.href}/`
-              )
+            const isActive =
+              item.match(
+                pathname
+              );
+
+            return (
+              <Link
+                key={
+                  item.href
+                }
+                href={
+                  item.href
+                }
+                aria-current={
+                  isActive
+                    ? "page"
+                    : undefined
+                }
+                className={[
+                  "flex",
+                  "items-center",
+                  "gap-3",
+                  "rounded-xl",
+                  "px-4",
+                  "py-3",
+                  "text-sm",
+                  "font-semibold",
+                  "transition",
+                  isActive
+                    ? "bg-white text-zinc-950"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-white",
+                ].join(" ")}
+              >
+                <Icon
+                  size={
+                    18
+                  }
+                />
+
+                {
+                  item.label
+                }
+              </Link>
             );
-
-          return (
-            <Link
-              key={
-                item.href
-              }
-              href={
-                item.href
-              }
-              className={[
-                "flex",
-                "items-center",
-                "gap-3",
-                "rounded-xl",
-                "px-4",
-                "py-3",
-                "text-sm",
-                "font-semibold",
-                "transition",
-                isActive
-                  ? "bg-white text-zinc-950"
-                  : "text-zinc-400 hover:bg-white/5 hover:text-white",
-              ].join(" ")}
-            >
-              <Icon
-                size={18}
-              />
-
-              {item.label}
-            </Link>
-          );
-        }
-      )}
+          }
+        )
+      }
     </nav>
   );
 }

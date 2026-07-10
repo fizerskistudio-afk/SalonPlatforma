@@ -544,6 +544,18 @@ Email sistem podržava:
 
 Email i Calendar integracije su namerno best-effort: uspešno sačuvan booking ostaje uspešan čak i kada spoljašnji provider privremeno nije dostupan.
 
+## Platform-admin operativni pregled
+
+Platform-admin root prikazuje stvarne tenant i booking podatke:
+
+- lifecycle brojače;
+- attention queue;
+- upcoming booking brojač;
+- konfiguracioni health bez prikazivanja tajni;
+- poslednje kreirane tenant-e.
+
+Tenant command center prikazuje onboarding readiness za kontakt, katalog, zaposlene, radno vreme, booking settings i owner pristup.
+
 ## Publishing lifecycle
 
 Business javni statusi:

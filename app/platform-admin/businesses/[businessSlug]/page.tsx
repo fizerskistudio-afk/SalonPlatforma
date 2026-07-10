@@ -28,6 +28,7 @@ import {
 
 import BusinessPublicationBadge from "@/components/platform-admin/BusinessPublicationBadge";
 import BusinessPublicationControls from "@/components/platform-admin/BusinessPublicationControls";
+import TenantReadinessCard from "@/components/platform-admin/TenantReadinessCard";
 import BusinessPublicLinkActions from "@/components/platform-admin/BusinessPublicLinkActions";
 
 import {
@@ -1151,6 +1152,49 @@ export default async function BusinessManagementPage({
         }
         initialStatus={
           publicationStatus
+        }
+      />
+
+      <TenantReadinessCard
+        businessId={
+          business.id
+        }
+        businessSlug={
+          business.slug
+        }
+        publicationStatus={
+          publicationStatus
+        }
+        contactReady={
+          Boolean(
+            business.phone
+              ?.trim() ||
+            business.email
+              ?.trim()
+          )
+        }
+        bookingSettingsReady={
+          Boolean(
+            bookingSettings
+          )
+        }
+        categoriesReady={
+          activeCategories >
+          0
+        }
+        servicesReady={
+          activeServices >
+          0
+        }
+        employeesReady={
+          activeEmployees >
+          0
+        }
+        workingHoursReady={
+          getOpenDayCount(
+            salonHours
+          ) >
+          0
         }
       />
 
