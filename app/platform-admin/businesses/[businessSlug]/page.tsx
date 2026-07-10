@@ -26,7 +26,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import BusinessPublicationBadge from "@/components/platform-admin/BusinessPublicationBadge";
+import BusinessPublicationControls from "@/components/platform-admin/BusinessPublicationControls";
 import BusinessPublicLinkActions from "@/components/platform-admin/BusinessPublicLinkActions";
+
+import {
+  BUSINESS_PUBLICATION_LABELS,
+  isBusinessPubliclyAvailable,
+  resolveBusinessPublicationStatus,
+} from "@/lib/publishing/status";
 
 import {
   createAdminClient,
@@ -92,6 +100,9 @@ type BusinessRow = {
     | string
     | null;
   is_active: boolean;
+  publication_status:
+    | string
+    | null;
   created_at: string;
   updated_at: string;
 };
@@ -503,6 +514,7 @@ async function loadBusinessManagementData(
         timezone,
         template_key,
         is_active,
+        publication_status,
         created_at,
         updated_at
       `
@@ -800,6 +812,18 @@ export default async function BusinessManagementPage({
     workingHours,
   } = data;
 
+  const publicationStatus =
+    resolveBusinessPublicationStatus(
+      business.publication_status,
+      business.is_active
+    );
+
+  const publiclyAvailable =
+    isBusinessPubliclyAvailable(
+      publicationStatus,
+      business.is_active
+    );
+
   const supportedLocales =
     normalizeSupportedLocales(
       business
@@ -1050,6 +1074,12 @@ export default async function BusinessManagementPage({
                 business.is_active
               }
             />
+
+            <BusinessPublicationBadge
+              status={
+                publicationStatus
+              }
+            />
           </div>
 
           <h2
@@ -1110,12 +1140,21 @@ export default async function BusinessManagementPage({
             `/salon/${business.slug}`
           }
           isActive={
-            business.is_active
+            publiclyAvailable
           }
         />
       </div>
 
-      {!business.is_active ? (
+      <BusinessPublicationControls
+        businessSlug={
+          business.slug
+        }
+        initialStatus={
+          publicationStatus
+        }
+      />
+
+      {!publiclyAvailable ? (
         <section
           className="
             mt-7
@@ -1133,7 +1172,7 @@ export default async function BusinessManagementPage({
               text-amber-200
             "
           >
-            Javni profil je trenutno isključen
+            Javni profil nije objavljen
           </p>
 
           <p
@@ -1144,9 +1183,12 @@ export default async function BusinessManagementPage({
               text-amber-100/70
             "
           >
-            Salon postoji u platformi, ali javna
-            ruta vraća 404 dok tenant ponovo ne
-            bude aktiviran.
+            Trenutni lifecycle status je „{
+              BUSINESS_PUBLICATION_LABELS[
+                publicationStatus
+              ]
+            }“. Javna ruta, availability i booking
+            rade samo kada je tenant objavljen.
           </p>
         </section>
       ) : null}

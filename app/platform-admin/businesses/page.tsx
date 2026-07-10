@@ -12,6 +12,13 @@ import {
   PlusCircle,
 } from "lucide-react";
 
+import BusinessPublicationBadge from "@/components/platform-admin/BusinessPublicationBadge";
+
+import {
+  resolveBusinessPublicationStatus,
+  type BusinessPublicationStatus,
+} from "@/lib/publishing/status";
+
 import {
   createAdminClient,
 } from "@/lib/supabase/admin";
@@ -51,6 +58,9 @@ type BusinessRow = {
     | null;
 
   is_active: boolean;
+  publication_status:
+    | string
+    | null;
 
   created_at: string;
   updated_at: string;
@@ -77,6 +87,8 @@ type BusinessListItem = {
   templateKey: string;
 
   isActive: boolean;
+  publicationStatus:
+    BusinessPublicationStatus;
 
   createdAt: string;
   updatedAt: string;
@@ -300,6 +312,12 @@ function mapBusinessRow(
     isActive:
       row.is_active,
 
+    publicationStatus:
+      resolveBusinessPublicationStatus(
+        row.publication_status,
+        row.is_active
+      ),
+
     createdAt:
       row.created_at,
 
@@ -335,6 +353,7 @@ async function loadBusinesses():
         timezone,
         template_key,
         is_active,
+        publication_status,
         created_at,
         updated_at
       `
@@ -709,6 +728,13 @@ function BusinessCard({
             <StatusBadge
               isActive={
                 business.isActive
+              }
+            />
+
+            <BusinessPublicationBadge
+              status={
+                business
+                  .publicationStatus
               }
             />
           </div>

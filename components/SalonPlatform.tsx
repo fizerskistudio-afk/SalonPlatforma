@@ -84,6 +84,7 @@ type SalonPlatformProps = {
   initialLocale?: Locale;
   initialViewport?:
     ResolvedViewport;
+  previewMode?: boolean;
   templateKey?: TemplateKey;
   templateConfig?: TemplateConfig;
 };
@@ -92,6 +93,7 @@ type SalonPlatformContentProps = {
   initialLocale: Locale;
   initialViewport:
     ResolvedViewport;
+  previewMode: boolean;
   templateKey: TemplateKey;
   templateConfig: TemplateConfig;
 };
@@ -272,6 +274,7 @@ function CatalogErrorScreen({
 function SalonPlatformContent({
   initialLocale,
   initialViewport,
+  previewMode,
   templateKey,
   templateConfig,
 }: SalonPlatformContentProps) {
@@ -464,6 +467,12 @@ function SalonPlatformContent({
   };
 
   const openBooking = () => {
+    if (
+      previewMode
+    ) {
+      return;
+    }
+
     setInitialServiceId(
       null
     );
@@ -481,6 +490,12 @@ function SalonPlatformContent({
     serviceId:
       string
   ) => {
+    if (
+      previewMode
+    ) {
+      return;
+    }
+
     setInitialServiceId(
       serviceId
     );
@@ -498,6 +513,12 @@ function SalonPlatformContent({
     employeeId:
       string
   ) => {
+    if (
+      previewMode
+    ) {
+      return;
+    }
+
     setInitialEmployeeId(
       employeeId
     );
@@ -620,7 +641,18 @@ function SalonPlatformContent({
       data-active-template={
         templateKey
       }
+      data-preview-mode={
+        previewMode
+          ? "true"
+          : "false"
+      }
     >
+      {previewMode ? (
+        <div className="fixed left-1/2 top-3 z-[80] -translate-x-1/2 rounded-full border border-sky-300/30 bg-zinc-950/95 px-4 py-2 text-center text-xs font-semibold text-sky-200 shadow-xl backdrop-blur">
+          Platform admin preview · booking je isključen
+        </div>
+      ) : null}
+
       <TemplateRenderer
         templateKey={
           templateKey
@@ -660,7 +692,8 @@ function SalonPlatformContent({
         </button>
       )}
 
-      {isBookingOpen &&
+      {!previewMode &&
+      isBookingOpen &&
         (effectiveView ===
         "mobile" ? (
           <MobileBookingModal
@@ -707,6 +740,8 @@ export default function SalonPlatform({
     "mk",
   initialViewport =
     "desktop",
+  previewMode =
+    false,
   templateKey =
     DEFAULT_TEMPLATE_KEY,
   templateConfig =
@@ -730,6 +765,9 @@ export default function SalonPlatform({
         }
         initialViewport={
           initialViewport
+        }
+        previewMode={
+          previewMode
         }
         templateKey={
           templateKey

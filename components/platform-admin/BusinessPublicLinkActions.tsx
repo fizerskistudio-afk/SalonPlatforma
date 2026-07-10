@@ -490,7 +490,7 @@ export default function BusinessPublicLinkActions({
             size={17}
           />
 
-          Profil nije aktivan
+          Profil nije objavljen
         </button>
       )}
     </div>

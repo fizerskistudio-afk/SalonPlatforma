@@ -23,6 +23,10 @@ type BusinessTemplateRow = {
   template_config: unknown;
 };
 
+type BusinessTemplateRuntimeOptions = {
+  includeInactive?: boolean;
+};
+
 function createFallbackRuntime(): BusinessTemplateRuntime {
   const key =
     resolveTemplateKey(null);
@@ -48,7 +52,9 @@ function createFallbackRuntime(): BusinessTemplateRuntime {
  * sajt. U tim slučajevima koristi se stabilni default.
  */
 export async function getBusinessTemplateRuntime(
-  businessSlug: string
+  businessSlug: string,
+  options:
+    BusinessTemplateRuntimeOptions = {}
 ): Promise<BusinessTemplateRuntime> {
   const normalizedSlug =
     businessSlug.trim();
@@ -61,26 +67,37 @@ export async function getBusinessTemplateRuntime(
     const supabase =
       createAdminClient();
 
+    const businessQuery =
+      supabase
+        .from(
+          "businesses"
+        )
+        .select(
+          `
+            template_key,
+            template_config
+          `
+        )
+        .eq(
+          "slug",
+          normalizedSlug
+        );
+
+    if (
+      !options.includeInactive
+    ) {
+      businessQuery.eq(
+        "is_active",
+        true
+      );
+    }
+
     const {
       data,
       error,
-    } = await supabase
-      .from("businesses")
-      .select(
-        `
-          template_key,
-          template_config
-        `
-      )
-      .eq(
-        "slug",
-        normalizedSlug
-      )
-      .eq(
-        "is_active",
-        true
-      )
-      .maybeSingle();
+    } =
+      await businessQuery
+        .maybeSingle();
 
     if (
       error ||

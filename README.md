@@ -278,6 +278,7 @@ Za bazu na kojoj je već bila primenjena prvobitna migration `022`, obavezno pri
 
 ```text
 023_fix_public_rate_limit_timestamp.sql
+024_add_business_publication_lifecycle.sql
 ```
 
 ### 4. Development server
@@ -542,6 +543,27 @@ Email sistem podržava:
 - platform, custom-domain i standalone sender resolution.
 
 Email i Calendar integracije su namerno best-effort: uspešno sačuvan booking ostaje uspešan čak i kada spoljašnji provider privremeno nije dostupan.
+
+## Publishing lifecycle
+
+Business javni statusi:
+
+```text
+draft
+published
+suspended
+archived
+```
+
+Samo tenant sa `publication_status = published` i `is_active = true` ulazi u javni katalog, sitemap, availability i booking.
+
+Platform admin može da menja status i koristi autentifikovani preview:
+
+```text
+/salon/<business-slug>?preview=1
+```
+
+Preview je dostupan samo aktivnoj platform-admin sesiji i ne dozvoljava booking.
 
 ## Tenant domeni
 

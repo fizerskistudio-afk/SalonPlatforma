@@ -10,6 +10,10 @@ import {
 
 import SalonPlatform from "@/components/SalonPlatform";
 import {
+  getPlatformAdminAccess,
+} from "@/lib/auth/platform-admin";
+import {
+  loadPlatformPreviewCatalog,
   loadPublicCatalog,
 } from "@/lib/catalog/server";
 import {
@@ -40,6 +44,12 @@ const PRIVATE_NOT_FOUND_ROBOTS:
 type PublicSalonPageProps = {
   params: Promise<{
     businessSlug: string;
+  }>;
+
+  searchParams: Promise<{
+    preview?:
+      | string
+      | string[];
   }>;
 };
 
@@ -147,6 +157,7 @@ export async function generateMetadata({
 
 export default async function PublicSalonPage({
   params,
+  searchParams,
 }: PublicSalonPageProps) {
   const {
     businessSlug:
@@ -166,10 +177,52 @@ export default async function PublicSalonPage({
     notFound();
   }
 
-  const result =
-    await loadPublicCatalog(
-      businessSlug
+  const resolvedSearchParams =
+    await searchParams;
+
+  const previewValue =
+    resolvedSearchParams.preview;
+
+  const previewRequested =
+    previewValue ===
+      "1" ||
+    (
+      Array.isArray(
+        previewValue
+      ) &&
+      previewValue.includes(
+        "1"
+      )
     );
+
+  let previewMode =
+    false;
+
+  if (
+    previewRequested
+  ) {
+    const access =
+      await getPlatformAdminAccess();
+
+    if (
+      access.status !==
+        "authorized"
+    ) {
+      notFound();
+    }
+
+    previewMode =
+      true;
+  }
+
+  const result =
+    previewMode
+      ? await loadPlatformPreviewCatalog(
+          businessSlug
+        )
+      : await loadPublicCatalog(
+          businessSlug
+        );
 
   if (!result) {
     notFound();
@@ -180,7 +233,11 @@ export default async function PublicSalonPage({
 
   const template =
     await getBusinessTemplateRuntime(
-      catalog.business.slug
+      catalog.business.slug,
+      {
+        includeInactive:
+          previewMode,
+      }
     );
 
   const requestHeaders =
@@ -218,6 +275,9 @@ export default async function PublicSalonPage({
       }
       initialViewport={
         initialViewport
+      }
+      previewMode={
+        previewMode
       }
       templateKey={
         template.key

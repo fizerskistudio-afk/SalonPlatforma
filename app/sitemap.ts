@@ -83,6 +83,10 @@ async function loadActiveBusinessSlugs():
       "is_active",
       true
     )
+    .eq(
+      "publication_status",
+      "published"
+    )
     .order(
       "slug",
       {
@@ -166,6 +170,10 @@ export default async function sitemap():
       .eq(
         "is_active",
         true
+      )
+      .eq(
+        "publication_status",
+        "published"
       )
       .maybeSingle();
 

@@ -443,6 +443,10 @@ export async function POST(
           "is_active",
           true
         )
+        .eq(
+          "publication_status",
+          "published"
+        )
         .maybeSingle();
 
     if (businessError) {

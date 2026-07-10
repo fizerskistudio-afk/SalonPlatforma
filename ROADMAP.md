@@ -209,7 +209,7 @@ fix(ssr): stabilize localized review formatting
 - [x] unit test korak dodat u workflow
 - [ ] prvi potvrđen zeleni remote run
 
-# TEST-FOUNDATION-01 — aktivan
+# TEST-FOUNDATION-01 — završen u ubrzanom režimu
 
 ### Implementirano u paketu
 
@@ -224,10 +224,11 @@ fix(ssr): stabilize localized review formatting
 - [x] `npm test`
 - [x] `npm run test:watch`
 - [x] `npm run check` = lint + test + build
-- [ ] lokalni unit test run
-- [ ] završni lint
-- [ ] završni build
-- [ ] prvi CI run sa test korakom
+- [x] lokalni unit test run
+- [x] završni lint
+- [x] završni build
+- [x] booking validator smoke test
+- [ ] prvi potvrđen zeleni CI run sa test korakom
 
 ### Odloženo za prošireni QA sloj
 
@@ -261,15 +262,22 @@ fix(ssr): stabilize localized review formatting
 - [ ] Playwright public booking smoke test — master QA
 - [ ] admin/staff login smoke test — master QA
 
-### 3. PUBLISHING-LIFECYCLE-01
+### 3. PUBLISHING-LIFECYCLE-01 — aktivan
 
-- [ ] `draft`
-- [ ] `published`
-- [ ] `suspended`
-- [ ] `archived`
-- [ ] draft nije u sitemap-u
-- [ ] preview za platform-admin
-- [ ] suspendovan tenant ne prima nove rezervacije
+- [x] database status model
+- [x] legacy backfill aktivnih tenant-a na `published`
+- [x] novi tenant default `draft`
+- [x] `draft`, `published`, `suspended`, `archived`
+- [x] samo published tenant ulazi u public catalog
+- [x] draft/suspended/archived nisu u sitemap-u
+- [x] availability i booking zahtevaju published status
+- [x] platform-admin status kontrole
+- [x] autentifikovani platform-admin preview
+- [x] preview booking je onemogućen
+- [x] unit testovi status pravila
+- [ ] primenjena migration `024`
+- [ ] završni `npm run check`
+- [ ] osnovni lifecycle smoke test
 
 ### 4. PLATFORM-ADMIN-COMPLETION-01 — minimalni launch scope
 
@@ -459,12 +467,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit: abb0b3a39424a1d523dc6cf960ea01ce630a03d3
-Poslednji završen milestone: TEMPLATE-BUNDLE-OPTIMIZATION-01
-Aktivni milestone: TEST-FOUNDATION-01
-CI foundation: commitovan; paket ispravlja concurrency izraz i dodaje unit test korak
-Test scope: hostname, template registry i public booking validation
-Test režim: lint + unit tests + build; širok regression u MASTER-SYSTEM-QA-01
-Prvi sledeći zadatak: primeniti paket, npm run check, push i proveriti GitHub Actions
+Poslednji potvrđeni remote commit: f83c7cb14ad7e238b34ce685574f85cc842e04ce
+Poslednji završen milestone: TEST-FOUNDATION-01
+Aktivni milestone: PUBLISHING-LIFECYCLE-01
+Lokalna potvrda prethodnog milestone-a: lint PASSED, tests PASSED, build PASSED, smoke PASSED
+Migration za aktivni milestone: 024_add_business_publication_lifecycle.sql
+Test režim: npm run check + osnovni lifecycle smoke test
+Prvi sledeći zadatak: primeniti migration 024, check, testirati draft/publish/suspend i push
 Obavezno: posle svake izmene ažurirati ROADMAP.md
 ```

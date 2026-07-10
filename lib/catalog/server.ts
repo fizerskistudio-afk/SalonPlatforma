@@ -86,6 +86,7 @@ type BusinessRow = {
   brand_text: string;
   brand_muted: string;
   brand_border: string;
+  publication_status: string;
 };
 
 type BookingSettingsRow = {
@@ -315,8 +316,14 @@ function toNumber(
     : 0;
 }
 
+type PublicCatalogLoadMode =
+  | "public"
+  | "platform-preview";
+
 async function loadPublicCatalogUncached(
-  rawBusinessSlug: string
+  rawBusinessSlug: string,
+  mode:
+    PublicCatalogLoadMode
 ): Promise<PublicCatalogResult | null> {
   const businessSlug =
     rawBusinessSlug
@@ -338,12 +345,12 @@ async function loadPublicCatalogUncached(
   const supabase =
     createAdminClient();
 
-  const {
-    data: businessData,
-    error: businessError,
-  } = await supabase
-    .from("businesses")
-    .select(
+  const businessQuery =
+    supabase
+      .from(
+        "businesses"
+      )
+      .select(
       `
         id,
         slug,
@@ -369,12 +376,36 @@ async function loadPublicCatalogUncached(
         brand_surface,
         brand_text,
         brand_muted,
-        brand_border
+        brand_border,
+        publication_status
       `
     )
-    .eq("slug", businessSlug)
-    .eq("is_active", true)
-    .maybeSingle();
+    .eq(
+      "slug",
+      businessSlug
+    );
+
+  if (
+    mode ===
+    "public"
+  ) {
+    businessQuery
+      .eq(
+        "is_active",
+        true
+      )
+      .eq(
+        "publication_status",
+        "published"
+      );
+  }
+
+  const {
+    data: businessData,
+    error: businessError,
+  } =
+    await businessQuery
+      .maybeSingle();
 
   if (businessError) {
     console.error(
@@ -853,5 +884,24 @@ async function loadPublicCatalogUncached(
 
 export const loadPublicCatalog =
   cache(
-    loadPublicCatalogUncached
+    (
+      rawBusinessSlug:
+        string
+    ) =>
+      loadPublicCatalogUncached(
+        rawBusinessSlug,
+        "public"
+      )
+  );
+
+export const loadPlatformPreviewCatalog =
+  cache(
+    (
+      rawBusinessSlug:
+        string
+    ) =>
+      loadPublicCatalogUncached(
+        rawBusinessSlug,
+        "platform-preview"
+      )
   );

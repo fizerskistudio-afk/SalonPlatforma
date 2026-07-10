@@ -1,7 +1,7 @@
 # TEST-FOUNDATION-01
 
 **Datum pripreme:** 10. jul 2026.  
-**Status:** implementiran u paketu; čeka lokalni test, lint, build i CI run.
+**Status:** prihvaćen lokalno — tests, lint, build i smoke test prošli; čeka samo potvrdu remote CI run-a.
 
 ## Cilj
 
@@ -50,3 +50,11 @@ Prvobitni CI workflow imao je literalni backslash u `concurrency.group` GitHub i
 - `npm run check` pokreće sva tri koraka;
 - CI nakon push-a pokreće install, lint, test i build;
 - booking API ponašanje i error kodovi ostaju isti.
+
+
+## Lokalna potvrda
+
+- `npm test`: PASSED
+- `npm run lint`: PASSED
+- `npm run build`: PASSED
+- booking validator smoke test: PASSED

@@ -181,6 +181,10 @@ export async function GET(
       .select("id, slug, timezone")
       .eq("slug", businessSlug)
       .eq("is_active", true)
+      .eq(
+        "publication_status",
+        "published"
+      )
       .maybeSingle();
 
     if (businessError) {
