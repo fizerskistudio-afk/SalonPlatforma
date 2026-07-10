@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - backup/theme-core-barber-beta
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-\${{ github.workflow }}-\${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+
+      # Build-only placeholder values. CI does not connect to production services.
+      NEXT_PUBLIC_SUPABASE_URL: "https://ci-placeholder.supabase.co"
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpLXBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.ci-placeholder"
+      SUPABASE_SECRET_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpLXBsYWNlaG9sZGVyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.ci-placeholder"
+
+      PLATFORM_ROOT_DOMAIN: "localhost:3000"
+      PLATFORM_ROOT_PROTOCOL: "http"
+      PLATFORM_ADMIN_EMAILS: "ci-admin@example.com"
+      PUBLIC_RATE_LIMIT_SECRET: "ci-placeholder-rate-limit-secret-not-for-production"
+
+      GOOGLE_OAUTH_CLIENT_ID: "ci-placeholder-client-id"
+      GOOGLE_OAUTH_CLIENT_SECRET: "ci-placeholder-client-secret"
+      GOOGLE_OAUTH_REDIRECT_URI: "http://localhost:3000/api/admin/google-calendar/callback"
+      GOOGLE_TOKEN_ENCRYPTION_KEY: "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+
+      EMAIL_DELIVERY_ENABLED: "false"
+      EMAIL_TEST_MODE: "true"
+      EMAIL_DEPLOYMENT_MODE: "platform"
+      RESEND_API_BASE_URL: "https://api.resend.com"
+      PLATFORM_EMAIL_FROM: "Salon Platforma <onboarding@resend.dev>"
+      PLATFORM_BUSINESS_EMAIL_ADDRESS: "onboarding@resend.dev"
+      RESEND_WEBHOOK_TOLERANCE_SECONDS: "300"
+
+      CRON_SECRET: "ci-placeholder-cron-secret-not-for-production"
+      REMINDER_CRON_BATCH_LIMIT: "25"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build

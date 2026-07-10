@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import {
   getTemplateManifest,
   normalizeTemplateConfig,
@@ -9,18 +11,121 @@ import {
   type TemplateViewport,
 } from "@/lib/templates/registry";
 import type { PublicTemplateProps } from "./template-props";
-import HairLuxuryDesktopTemplate from "./hair-luxury/HairLuxuryDesktopTemplate";
-import HairLuxuryMobileTemplate from "./hair-luxury/HairLuxuryMobileTemplate";
-import HairEditorialDesktopTemplate from "./hair-editorial/HairEditorialDesktopTemplate";
-import HairEditorialMobileTemplate from "./hair-editorial/HairEditorialMobileTemplate";
-import BarberHeritageDesktopTemplate from "./barber-heritage/BarberHeritageDesktopTemplate";
-import BarberHeritageMobileTemplate from "./barber-heritage/BarberHeritageMobileTemplate";
 
-type TemplateRendererProps = PublicTemplateProps & {
-  templateKey: TemplateKey;
-  templateConfig: TemplateConfig;
-  viewport: TemplateViewport;
-};
+const HairLuxuryDesktopTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./hair-luxury/HairLuxuryDesktopTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+const HairLuxuryMobileTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./hair-luxury/HairLuxuryMobileTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+const HairEditorialDesktopTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./hair-editorial/HairEditorialDesktopTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+const HairEditorialMobileTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./hair-editorial/HairEditorialMobileTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+const BarberHeritageDesktopTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./barber-heritage/BarberHeritageDesktopTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+const BarberHeritageMobileTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./barber-heritage/BarberHeritageMobileTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+type TemplateRendererProps =
+  PublicTemplateProps & {
+    templateKey: TemplateKey;
+    templateConfig: TemplateConfig;
+    viewport: TemplateViewport;
+  };
+
+function renderActiveTemplate(
+  templateKey: TemplateKey,
+  viewport: TemplateViewport,
+  props: PublicTemplateProps
+) {
+  switch (templateKey) {
+    case "hair-editorial":
+      return viewport === "mobile" ? (
+        <HairEditorialMobileTemplate
+          {...props}
+        />
+      ) : (
+        <HairEditorialDesktopTemplate
+          {...props}
+        />
+      );
+
+    case "barber-heritage":
+      return viewport === "mobile" ? (
+        <BarberHeritageMobileTemplate
+          {...props}
+        />
+      ) : (
+        <BarberHeritageDesktopTemplate
+          {...props}
+        />
+      );
+
+    case "hair-luxury":
+    default:
+      return viewport === "mobile" ? (
+        <HairLuxuryMobileTemplate
+          {...props}
+        />
+      ) : (
+        <HairLuxuryDesktopTemplate
+          {...props}
+        />
+      );
+  }
+}
 
 export default function TemplateRenderer({
   templateKey,
@@ -28,58 +133,47 @@ export default function TemplateRenderer({
   viewport,
   ...props
 }: TemplateRendererProps) {
-  const resolvedKey = resolveTemplateKey(templateKey);
-  const normalizedConfig = normalizeTemplateConfig(templateConfig);
-  const manifest = getTemplateManifest(resolvedKey);
+  const resolvedKey =
+    resolveTemplateKey(
+      templateKey
+    );
 
-  const configured = Object.keys(normalizedConfig).length > 0;
+  const normalizedConfig =
+    normalizeTemplateConfig(
+      templateConfig
+    );
 
-  let content: React.ReactNode = null;
+  const manifest =
+    getTemplateManifest(
+      resolvedKey
+    );
 
-  switch (resolvedKey) {
-    case "hair-luxury":
-      content =
-        viewport === "mobile" ? (
-          <HairLuxuryMobileTemplate {...props} />
-        ) : (
-          <HairLuxuryDesktopTemplate {...props} />
-        );
-      break;
+  const configured =
+    Object.keys(
+      normalizedConfig
+    ).length > 0;
 
-    case "hair-editorial":
-      content =
-        viewport === "mobile" ? (
-          <HairEditorialMobileTemplate {...props} />
-        ) : (
-          <HairEditorialDesktopTemplate {...props} />
-        );
-      break;
-
-    case "barber-heritage":
-      content =
-        viewport === "mobile" ? (
-          <BarberHeritageMobileTemplate {...props} />
-        ) : (
-          <BarberHeritageDesktopTemplate {...props} />
-        );
-      break;
-
-    default:
-      content =
-        viewport === "mobile" ? (
-          <HairLuxuryMobileTemplate {...props} />
-        ) : (
-          <HairLuxuryDesktopTemplate {...props} />
-        );
-      break;
-  }
+  const content =
+    renderActiveTemplate(
+      resolvedKey,
+      viewport,
+      props
+    );
 
   return (
     <div
       className="contents"
-      data-template={manifest.key}
-      data-template-version={manifest.version}
-      data-template-configured={configured ? "true" : "false"}
+      data-template={
+        manifest.key
+      }
+      data-template-version={
+        manifest.version
+      }
+      data-template-configured={
+        configured
+          ? "true"
+          : "false"
+      }
     >
       {content}
     </div>

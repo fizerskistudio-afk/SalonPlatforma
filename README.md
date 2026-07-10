@@ -137,7 +137,7 @@ npm run build
 npm run start
 ```
 
-Automatizovani test runner i GitHub Actions CI još nisu uvedeni.
+GitHub Actions CI automatski pokreće `npm ci`, lint i production build. Automatizovani funkcionalni test runner uvodi se u sledećem milestone-u.
 
 ## Arhitektura
 
@@ -605,6 +605,24 @@ Pre svakog prihvatanja milestone-a:
 rmdir /s /q .next
 npm run lint
 npm run build
+```
+
+### GitHub Actions CI
+
+Workflow:
+
+```text
+.github/workflows/ci.yml
+```
+
+Pokreće se na push za `backup/theme-core-barber-beta` i `main`, kao i na pull request događajima.
+
+CI koristi build-only placeholder environment vrednosti i nema pristup produkcionim Supabase, Google ili Resend nalozima.
+
+Lokalna objedinjena provera:
+
+```bash
+npm run check
 ```
 
 ### Tenant isolation audit

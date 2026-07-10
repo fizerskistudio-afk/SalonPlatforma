@@ -53,4 +53,5 @@ lint-report.txt
 /PUBLIC-*.zip
 /TENANT-*.zip
 /PROJECT-*.zip
+/*-01*.zip
 /scripts/apply-*.mjs

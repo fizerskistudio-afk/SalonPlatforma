@@ -2,6 +2,9 @@ import type {
   Metadata,
 } from "next";
 import {
+  headers,
+} from "next/headers";
+import {
   notFound,
 } from "next/navigation";
 
@@ -180,6 +183,27 @@ export default async function PublicSalonPage({
       catalog.business.slug
     );
 
+  const requestHeaders =
+    await headers();
+
+  const mobileHint =
+    requestHeaders.get(
+      "sec-ch-ua-mobile"
+    );
+
+  const userAgent =
+    requestHeaders.get(
+      "user-agent"
+    ) ?? "";
+
+  const initialViewport =
+    mobileHint === "?1" ||
+    /Android|iPhone|iPad|iPod|Mobile|IEMobile|Opera Mini/i.test(
+      userAgent
+    )
+      ? "mobile"
+      : "desktop";
+
   return (
     <SalonPlatform
       businessSlug={
@@ -191,6 +215,9 @@ export default async function PublicSalonPage({
       initialLocale={
         catalog.business
           .defaultContentLocale
+      }
+      initialViewport={
+        initialViewport
       }
       templateKey={
         template.key

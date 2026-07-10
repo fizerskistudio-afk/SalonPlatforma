@@ -1,6 +1,6 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 9. jul 2026.  
+**Ažurirano:** 10. jul 2026.  
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
@@ -37,6 +37,14 @@ Definition of Done za tehnički paket:
 7. privremeni installer fajlovi obrisani
 8. ciljani commit i push
 ```
+
+### Ubrzani test režim do završnog master QA ciklusa
+
+- lint i production build ostaju obavezni za svaki code milestone;
+- ručno se proverava samo direktno promenjeni tok;
+- tenant isolation audit ostaje obavezan za auth, tenancy, public API i database izmene;
+- kompletan booking, admin, staff, Calendar, email i cross-tenant regression radi se u `MASTER-SYSTEM-QA-01`;
+- odloženi testovi se evidentiraju, ne predstavljaju se kao već izvršeni.
 
 ---
 
@@ -163,49 +171,67 @@ fix(ssr): stabilize localized review formatting
 
 ---
 
-## 5. Aktivni milestone
+## 5. Poslednji završeni performance milestone
 
-# TEMPLATE-BUNDLE-OPTIMIZATION-01
+# TEMPLATE-BUNDLE-OPTIMIZATION-01 — završen u ubrzanom režimu
 
-## Cilj
+### Implementirano
 
-Smanjiti JavaScript i asset teret javnog tenant sajta bez menjanja postojećeg UI-a ili booking ponašanja.
+- [x] svih šest template/viewport renderera podeljeno u dynamic chunk-ove
+- [x] aktivni template zadržava SSR
+- [x] booking modal i `BookingFlow` učitavaju se tek pri otvaranju
+- [x] path i tenant poddomen koriste konzistentan početni viewport
+- [x] trajni cross-origin view override uklonjen iz localStorage-a
+- [x] React `static-components` lint error uklonjen
+- [x] završni `npm run lint` prošao
+- [x] završni `npm run build` prošao
 
-## Plan
+### Poznati kvalitetni dug
 
-- [ ] izmeriti trenutni public route bundle
-- [ ] proveriti koje template komponente ulaze u početni bundle
-- [ ] dinamički učitati samo aktivni template gde je bezbedno
-- [ ] proveriti desktop/mobile renderer strategiju bez hydration regresije
-- [ ] proveriti booking modal bundle i mogućnost lazy load-a na otvaranje
-- [ ] pregledati hero, gallery i employee slike
-- [ ] proveriti font loading
-- [ ] sačuvati SSR sadržaj i crawler vidljivost
-- [ ] lint, build i ručni Mika/Lumière test
-- [ ] ponoviti tenant isolation audit
-- [ ] upisati rezultat i metrike u ovaj roadmap
+- lint trenutno završava bez error-a, uz 24 postojeća warning-a;
+- detaljno Network poređenje chunk-ova i kompletan public booking regression prebačeni su u završni master QA;
+- direktni viewport i booking smoke test ostaju deo prvog narednog ručnog pregleda.
 
-## Acceptance criteria
+---
 
-- Mika i Lumière prikazuju isti sadržaj i isti template kao pre izmene;
-- nema hydration warning-a;
-- nema početnog `/api/catalog` zahteva;
-- booking modal radi na desktop i mobile prikazu;
-- neaktivni template kod se ne učitava nepotrebno koliko Next.js arhitektura dozvoljava;
-- lint i build prolaze.
+## 5A. Aktivni milestone
+
+# CI-FOUNDATION-01
+
+### Implementirano u paketu
+
+- [x] GitHub Actions workflow
+- [x] Node.js 20 i npm cache
+- [x] `npm ci`
+- [x] lint job
+- [x] production build job
+- [x] concurrency cancellation
+- [x] read-only repository permissions
+- [x] build-only placeholder environment
+- [x] lokalni `npm run check`
+- [ ] prvi remote GitHub Actions run
+- [ ] potvrđen zelen status na branch commit-u
+
+### Acceptance criteria
+
+- workflow se pokreće na aktivnoj grani, `main` i pull request događajima;
+- nema production secrets;
+- lint nema error;
+- build prolazi;
+- rezultat je vidljiv uz commit.
 
 ---
 
 ## 6. Sledeći milestone-ovi — realan redosled do prvog launch-a
 
-### 1. CI-FOUNDATION-01
+### 1. CI-FOUNDATION-01 — aktivan
 
-- [ ] GitHub Actions workflow
-- [ ] `npm ci`
-- [ ] `npm run lint`
-- [ ] `npm run build`
-- [ ] priprema test komande
-- [ ] branch/PR status check
+- [x] GitHub Actions workflow
+- [x] `npm ci`
+- [x] `npm run lint`
+- [x] `npm run build`
+- [x] lokalna `npm run check` komanda
+- [ ] prvi branch/PR status check
 
 ### 2. TEST-FOUNDATION-01
 
@@ -362,6 +388,8 @@ Smanjiti JavaScript i asset teret javnog tenant sajta bez menjanja postojećeg U
 - `/api/catalog` više nema default tenant fallback i zahteva `businessSlug`.
 - Review datumi na javnom sajtu koriste determinističko formatiranje umesto runtime `Intl` rezultata.
 - Globalni `app/loading.tsx` ostaje za platform/private rute; `app/salon/loading.tsx` sprečava platformski splash na tenant ruti.
+- View override je session-only; path i tenant poddomen ne dele localStorage, pa trajna preferencija nije deo javnog runtime ugovora.
+- Public salon SSR dobija početni viewport hint iz request headera da bi hydration krenuo sa istim rendererom.
 - Finalni tržišni brend još nije usvojen; `ORDO` je kandidat, ne finalna odluka.
 - Klasičan PHP/WordPress hosting nije primarni runtime platforme.
 
@@ -414,9 +442,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Baseline pre roadmap/cleanup paketa: 556a85f10e38c774d3cbae7dc1f7d7474f438c6c
-Poslednji završen milestone: PUBLIC-CATALOG-SSR-01
-Aktivni milestone: TEMPLATE-BUNDLE-OPTIMIZATION-01
-Prvi sledeći zadatak: izmeriti i mapirati javni template bundle pre izmene importa
+Remote baseline pre performance commita: 6c14bcc4f46af471a0e29aaf42ce210ea167c942
+Poslednji završen milestone: TEMPLATE-BUNDLE-OPTIMIZATION-01
+Aktivni milestone: CI-FOUNDATION-01
+Lokalna potvrda: lint PASSED, build PASSED
+Test režim: ubrzani smoke test po promenjenom toku; master regression kasnije
+Prvi sledeći zadatak: commit/push performance izmena, primeniti CI paket i potvrditi prvi Actions run
 Obavezno: posle svake izmene ažurirati ROADMAP.md
 ```

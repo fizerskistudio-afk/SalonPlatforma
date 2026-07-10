@@ -1,7 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import {
   type CSSProperties,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -40,9 +43,31 @@ import type {
   ThemeColors,
 } from "@/lib/types";
 
-import DesktopBookingModal from "./desktop/DesktopBookingModal";
-import MobileBookingModal from "./mobile/MobileBookingModal";
 import TemplateRenderer from "./templates/TemplateRenderer";
+
+const DesktopBookingModal =
+  dynamic(
+    () =>
+      import(
+        "./desktop/DesktopBookingModal"
+      ),
+    {
+      ssr: false,
+      loading: () => null,
+    }
+  );
+
+const MobileBookingModal =
+  dynamic(
+    () =>
+      import(
+        "./mobile/MobileBookingModal"
+      ),
+    {
+      ssr: false,
+      loading: () => null,
+    }
+  );
 
 type ViewPreference =
   | "auto"
@@ -57,12 +82,16 @@ type SalonPlatformProps = {
   initialCatalog?:
     CatalogData | null;
   initialLocale?: Locale;
+  initialViewport?:
+    ResolvedViewport;
   templateKey?: TemplateKey;
   templateConfig?: TemplateConfig;
 };
 
 type SalonPlatformContentProps = {
   initialLocale: Locale;
+  initialViewport:
+    ResolvedViewport;
   templateKey: TemplateKey;
   templateConfig: TemplateConfig;
 };
@@ -77,9 +106,6 @@ type BrandStyle =
     "--brand-muted": string;
     "--brand-border": string;
   };
-
-const VIEW_STORAGE_KEY =
-  "salon-platform-view-preference";
 
 const MOBILE_MEDIA_QUERY =
   "(max-width: 767px)";
@@ -169,10 +195,6 @@ function getMobileViewportSnapshot(): boolean {
   ).matches;
 }
 
-function getServerMobileViewportSnapshot(): boolean {
-  return false;
-}
-
 function CatalogLoadingScreen({
   locale,
 }: {
@@ -249,6 +271,7 @@ function CatalogErrorScreen({
 
 function SalonPlatformContent({
   initialLocale,
+  initialViewport,
   templateKey,
   templateConfig,
 }: SalonPlatformContentProps) {
@@ -274,11 +297,21 @@ function SalonPlatformContent({
       "auto"
     );
 
+  const getInitialMobileViewportSnapshot =
+    useCallback(
+      () =>
+        initialViewport ===
+        "mobile",
+      [
+        initialViewport,
+      ]
+    );
+
   const isMobileViewport =
     useSyncExternalStore(
       subscribeToMobileViewport,
       getMobileViewportSnapshot,
-      getServerMobileViewportSnapshot
+      getInitialMobileViewportSnapshot
     );
 
   const [
@@ -387,28 +420,6 @@ function SalonPlatformContent({
     locale,
   ]);
 
-  useEffect(() => {
-    try {
-      const stored =
-        localStorage.getItem(
-          VIEW_STORAGE_KEY
-        );
-
-      if (
-        stored ===
-          "desktop" ||
-        stored ===
-          "mobile"
-      ) {
-        setViewPreference(
-          stored
-        );
-      }
-    } catch {
-      // localStorage nije dostupan.
-    }
-  }, []);
-
   const effectiveView:
     ResolvedViewport =
       viewPreference ===
@@ -510,30 +521,12 @@ function SalonPlatformContent({
     setViewPreference(
       "desktop"
     );
-
-    try {
-      localStorage.setItem(
-        VIEW_STORAGE_KEY,
-        "desktop"
-      );
-    } catch {
-      // localStorage nije dostupan.
-    }
   };
 
   const switchToMobile = () => {
     setViewPreference(
       "mobile"
     );
-
-    try {
-      localStorage.setItem(
-        VIEW_STORAGE_KEY,
-        "mobile"
-      );
-    } catch {
-      // localStorage nije dostupan.
-    }
   };
 
   if (
@@ -667,44 +660,41 @@ function SalonPlatformContent({
         </button>
       )}
 
-      {effectiveView ===
-      "mobile" ? (
-        <MobileBookingModal
-          isOpen={
-            isBookingOpen
-          }
-          locale={
-            locale
-          }
-          initialServiceId={
-            initialServiceId
-          }
-          initialEmployeeId={
-            initialEmployeeId
-          }
-          onClose={
-            closeBooking
-          }
-        />
-      ) : (
-        <DesktopBookingModal
-          isOpen={
-            isBookingOpen
-          }
-          locale={
-            locale
-          }
-          initialServiceId={
-            initialServiceId
-          }
-          initialEmployeeId={
-            initialEmployeeId
-          }
-          onClose={
-            closeBooking
-          }
-        />
-      )}
+      {isBookingOpen &&
+        (effectiveView ===
+        "mobile" ? (
+          <MobileBookingModal
+            isOpen
+            locale={
+              locale
+            }
+            initialServiceId={
+              initialServiceId
+            }
+            initialEmployeeId={
+              initialEmployeeId
+            }
+            onClose={
+              closeBooking
+            }
+          />
+        ) : (
+          <DesktopBookingModal
+            isOpen
+            locale={
+              locale
+            }
+            initialServiceId={
+              initialServiceId
+            }
+            initialEmployeeId={
+              initialEmployeeId
+            }
+            onClose={
+              closeBooking
+            }
+          />
+        ))}
     </div>
   );
 }
@@ -715,6 +705,8 @@ export default function SalonPlatform({
   initialCatalog = null,
   initialLocale =
     "mk",
+  initialViewport =
+    "desktop",
   templateKey =
     DEFAULT_TEMPLATE_KEY,
   templateConfig =
@@ -735,6 +727,9 @@ export default function SalonPlatform({
       <SalonPlatformContent
         initialLocale={
           initialLocale
+        }
+        initialViewport={
+          initialViewport
         }
         templateKey={
           templateKey
