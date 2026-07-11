@@ -107,15 +107,28 @@ Finishing individual themes before the shared review contract would create dupli
 - [x] final `npm run check`;
 - [x] migration applied to target database;
 - [x] database verification returned `PASS`;
-- [ ] Git checkpoint committed and pushed;
-- [ ] production cron enabled after 01C-C public form deployment.
+- [x] Git checkpoint committed and pushed — `6512ffa959578bd73e6576c0bb1bd08cc2a45f6c`;
+- [ ] production cron enabled after deployed 01C-C browser smoke.
 
 #### 01C-C — Public UX
 
-- [ ] direct site review form;
-- [ ] verified post-booking form;
-- [ ] localized success and error states;
-- [ ] responsive and accessibility QA.
+- [x] direct site review route and form;
+- [x] verified post-booking route and form;
+- [x] server-side tenant and invitation context guard;
+- [x] hash-before-RPC bearer handling;
+- [x] shared responsive form;
+- [x] accessible native star rating controls;
+- [x] honeypot, required and body-length boundaries;
+- [x] seven-language UI through central locale and `t()`;
+- [x] localized validation, unavailable, rate-limit and conflict states;
+- [x] pending and published success states;
+- [x] noindex transactional-page boundary;
+- [x] loading and unavailable states;
+- [x] unit and source-contract tests;
+- [x] final `npm run check`;
+- [ ] deployed direct and verified browser smoke;
+- [ ] Git checkpoint committed and pushed;
+- [ ] production invitation cron enabled after deployed smoke.
 
 ### 01D — Admin moderation
 
@@ -126,7 +139,9 @@ Finishing individual themes before the shared review contract would create dupli
 - [ ] owner/manager permissions;
 - [ ] attention counters.
 
-### 01E — Google provider
+### 01E — Google provider — deferred post-launch
+
+Launch baseline: manually configured official Google review URL and QR CTA. Full Places or Business Profile provider integration is not an initial StudioBiBi launch blocker.
 
 - [ ] Google location settings;
 - [ ] official review link;

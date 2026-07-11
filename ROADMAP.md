@@ -389,15 +389,28 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] unit i source-contract testovi;
 - [x] završni `npm run check`;
 - [x] migracija 027 primenjena i database verification vratila `PASS`;
+- [x] Git checkpoint, commit i push — `6512ffa959578bd73e6576c0bb1bd08cc2a45f6c`;
+- [ ] aktivirati production cron tek posle deploy/browser smoke potvrde 01C-C forme.
+
+#### DEMO-REVIEWS-FOUNDATION-01C-C — PUBLIC UX source spreman
+
+- [x] direct review ruta `/reviews/[businessSlug]`;
+- [x] verified review ruta `/reviews/invitation/[token]`;
+- [x] server-side tenant i invitation context provera;
+- [x] raw invitation bearer se hashira pre database RPC-a;
+- [x] zajednička responsive review forma;
+- [x] accessible 1–5 star radio kontrola;
+- [x] honeypot, required i 2.000-character granice;
+- [x] sedam UI jezika preko centralnog locale registry-ja i `t()`;
+- [x] lokalizovana validation, rate-limit, unavailable i conflict stanja;
+- [x] pending i published success stanja;
+- [x] noindex/nofollow/noarchive privacy granica;
+- [x] loading, unavailable i submit state coverage;
+- [x] unit i source-contract testovi;
+- [x] završni `npm run check`;
+- [ ] direct i verified browser smoke na deployovanom hostu;
 - [ ] Git checkpoint, commit i push;
-- [ ] aktivirati production cron tek posle 01C-C public forme.
-
-#### DEMO-REVIEWS-FOUNDATION-01C-C — PUBLIC UX čeka
-
-- [ ] direct review forma;
-- [ ] verified review forma;
-- [ ] lokalizovana success/error stanja;
-- [ ] responsive i accessibility QA.
+- [ ] production cron aktivacija tek posle deploy/browser smoke potvrde.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
 
@@ -409,6 +422,24 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [ ] zaključati Lumière kao acceptance baseline za naredne teme.
 
 ---
+
+### POST-LAUNCH-ADMIN-I18N-01 — odloženo
+
+Aktivirati tek nakon stabilnog StudioBiBi launch-a i prodaje prva 2–3 sajta, kada prihod može da finansira dalju infrastrukturu.
+
+- [ ] oznaka „nedostaje prevod“ po polju i jeziku;
+- [ ] progress kompletnosti po jeziku;
+- [ ] „kopiraj iz podrazumevanog jezika“;
+- [ ] pregled stvarne fallback vrednosti pre objave;
+- [ ] AI predlog prevoda isključivo uz ručnu potvrdu;
+- [ ] nije blocker za inicijalni launch, StudioBiBi pilot ili prve komercijalne sajtove.
+
+### POST-LAUNCH-GOOGLE-REVIEWS-01 — odloženo
+
+- [ ] inicijalni launch koristi ručno podešen zvanični Google review URL/QR CTA;
+- [ ] Places API read-only rating/count razmotriti u prvom update-u;
+- [ ] puni Business Profile OAuth sync i replies tek posle prvih prihoda;
+- [ ] bez review gating-a, podsticaja ili lažnih recenzija.
 
 ## 6. Sledeći milestone-ovi — realan redosled do prvog launch-a
 
