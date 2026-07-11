@@ -30,6 +30,20 @@ export const LOCALE_CODES = [
 export type LocaleCode =
   (typeof LOCALE_CODES)[number];
 
+export const UI_LOCALE_CODES = [
+  "sr-Latn",
+  "mk",
+  "hr",
+  "sq",
+  "en",
+  "de",
+  "fr",
+] as const satisfies
+  readonly LocaleCode[];
+
+export type UiLocaleCode =
+  (typeof UI_LOCALE_CODES)[number];
+
 export type LocaleDirection =
   | "ltr"
   | "rtl";
@@ -113,7 +127,7 @@ export const LOCALE_REGISTRY: Record<
     shortName: "DE",
     intlLocale: "de-DE",
     direction: "ltr",
-    uiTranslationReady: false,
+    uiTranslationReady: true,
   },
 
   da: {
@@ -133,7 +147,7 @@ export const LOCALE_REGISTRY: Record<
     shortName: "FR",
     intlLocale: "fr-FR",
     direction: "ltr",
-    uiTranslationReady: false,
+    uiTranslationReady: true,
   },
 
   it: {
@@ -233,7 +247,7 @@ export const LOCALE_REGISTRY: Record<
     shortName: "HR",
     intlLocale: "hr-HR",
     direction: "ltr",
-    uiTranslationReady: false,
+    uiTranslationReady: true,
   },
 
   sl: {
@@ -320,12 +334,9 @@ export const LOCALE_REGISTRY: Record<
 export const DEFAULT_CONTENT_LOCALE:
   LocaleCode = "en";
 
-export const CURRENT_UI_LOCALES =
-  LOCALE_CODES.filter(
-    (code) =>
-      LOCALE_REGISTRY[code]
-        .uiTranslationReady
-  );
+export const CURRENT_UI_LOCALES:
+  readonly UiLocaleCode[] =
+  UI_LOCALE_CODES;
 
 export function isLocaleCode(
   value: unknown

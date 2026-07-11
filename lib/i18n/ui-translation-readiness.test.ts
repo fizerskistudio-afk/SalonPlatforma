@@ -7,17 +7,14 @@ import {
 import {
   CURRENT_UI_LOCALES,
   LOCALE_REGISTRY,
+  UI_LOCALE_CODES,
 } from "@/lib/i18n/locales";
 import {
   translations,
 } from "@/lib/translations";
 
-const REQUIRED_UI_LOCALES = [
-  "sr-Latn",
-  "mk",
-  "sq",
-  "en",
-] as const;
+const REQUIRED_UI_LOCALES =
+  UI_LOCALE_CODES;
 
 type TranslationRecord =
   Record<string, unknown>;

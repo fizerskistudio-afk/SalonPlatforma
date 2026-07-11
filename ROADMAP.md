@@ -260,15 +260,30 @@ Originalni milestone redosled u nastavku ostaje važeći. Privremeno se pauzira 
 
 Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
 
-### DEMO-I18N-01A — aktivan
+### DEMO-I18N-01A — završen
 
-- [x] `sr-Latn` postoji u globalnim UI prevodima;
-- [x] `sr-Latn` dodat u formalni `UiLocale` contract;
-- [x] `sr-Latn` označen kao `uiTranslationReady`;
-- [x] dodat test kompletnosti globalnih `sr-Latn`, `mk`, `sq` i `en` prevoda;
-- [ ] proveriti template-specifične Editorial i Barber labele;
-- [ ] konsolidovati duplicate translation helper funkcije;
-- [ ] završiti nemački UI prevod;
+- [x] `sr-Latn` dodat u formalni UI readiness contract;
+- [x] tenant `LocalizedText` ostao kompatibilan sa legacy MK/SQ/EN sadržajem;
+- [x] globalni readiness test uveden;
+- [x] završni `npm run check`.
+
+### DEMO-I18N-01B — CORE UI 7 završen
+
+- [x] eksplicitni `UI_LOCALE_CODES`: SR, MK, HR, SQ, EN, DE i FR;
+- [x] kompletan zajednički UI preveden na svih sedam jezika;
+- [x] booking, navigation, empty state i accessibility globalni tekstovi pokriveni;
+- [x] HR/DE/FR označeni kao `uiTranslationReady`;
+- [x] readiness test zahteva svih sedam jezika za svaki globalni translation leaf;
+- [x] source audit potvrđuje 105 translation leaf-ova po jeziku;
+- [x] završni `npm run check`.
+
+### DEMO-I18N-01C — sledeći
+
+- [ ] Editorial template labele na svih sedam jezika;
+- [ ] Barber template labele na svih sedam jezika;
+- [ ] ukloniti duplicate template `translate()` helper funkcije;
+- [ ] prebaciti teme na zajednički `t()` fallback;
+- [ ] audit hardkodovanih javnih UI tekstova;
 - [ ] kompletan jezički smoke kroz booking i sve tri postojeće teme.
 
 ---
@@ -546,11 +561,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre demo obilaznice: 0e7fcb269afb169e69bfd64fada57b4068c98ce4
-Poslednji završen milestone: MONITORING-AUDIT-01
-Aktivni milestone: DEMO-I18N-01A
+Poslednji potvrđeni remote commit pre CORE UI 7 paketa: f08a2fc29ec3f9e3955e05eec64c0fe166670601
+Poslednji završen milestone: DEMO-I18N-01A
+Aktivni milestone: DEMO-I18N-01C
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: sr-Latn UI readiness contract i global translation completeness test
-Prvi sledeći zadatak: audit i konsolidacija Editorial/Barber template labela i translation helpera
+Implementirano u paketu: zajednički sistemski UI na SR/MK/HR/SQ/EN/DE/FR
+Prvi sledeći zadatak: template-specifične Editorial i Barber labele i zajednički t() helper
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
 ```

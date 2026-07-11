@@ -45,13 +45,16 @@ Mobile prikaz nije samo sužen desktop layout.
 
 ### DEMO-I18N-01
 
-- [x] `sr-Latn` dodat u formalni `UiLocale` contract;
-- [x] `sr-Latn` označen kao spreman sistemski UI jezik;
-- [x] test kompletnosti globalnih `sr-Latn`, `mk`, `sq` i `en` UI prevoda;
+- [x] `sr-Latn` dodat u formalni UI readiness contract;
+- [x] legacy tenant sadržaj ostao kompatibilan kroz opcione content jezike i fallback;
+- [x] eksplicitni početni UI paket: SR, MK, HR, SQ, EN, DE i FR;
+- [x] kompletan globalni UI preveden na svih sedam jezika;
+- [x] navigation, booking, contact, empty state i accessibility globalni tekstovi pokriveni;
+- [x] readiness test zahteva sedam jezika za svaki globalni translation leaf;
+- [x] HR/DE/FR označeni kao `uiTranslationReady`;
 - [ ] audit template-specifičnih hardkodovanih labela;
 - [ ] konsolidacija `t()`, editorial i barber translate helpera;
-- [ ] nemački UI prevod;
-- [ ] booking modal, empty/error/loading i accessibility tekstovi provereni po jeziku.
+- [ ] booking modal i sve tri teme ručno provereni na sedam jezika.
 
 ### DEMO-THEME-ARCHITECTURE-01
 

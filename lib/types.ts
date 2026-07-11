@@ -1,5 +1,6 @@
 import type {
   LocaleCode,
+  UiLocaleCode,
 } from "@/lib/i18n/locales";
 
 // ============================================
@@ -11,10 +12,7 @@ import type {
  * trenutno preveden i pokriven readiness testom.
  */
 export type UiLocale =
-  | "sr-Latn"
-  | "mk"
-  | "sq"
-  | "en";
+  UiLocaleCode;
 
 /**
  * Javni runtime prosleđuje locale kroz mnogo
