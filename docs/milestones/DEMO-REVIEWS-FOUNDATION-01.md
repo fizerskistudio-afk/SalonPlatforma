@@ -70,7 +70,7 @@ Finishing individual themes before the shared review contract would create dupli
 - [x] read-only verification SQL;
 - [x] source file `supabase/migrations/025_reviews_foundation.sql`;
 - [x] migration applied to target Supabase database through Supabase CLI;
-- [ ] database verification returned `PASS`.
+- [x] database verification returned `PASS`.
 
 ### 01C — Public submission
 

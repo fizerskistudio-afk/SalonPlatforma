@@ -344,13 +344,13 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] migration source: `supabase/migrations/025_reviews_foundation.sql`;
 - [x] završni `npm run check`.
 
-### DEMO-REVIEWS-FOUNDATION-01B — DATABASE APPLY završen — GIT CHECKPOINT aktivan
+### DEMO-REVIEWS-FOUNDATION-01B — završen
 
-- [ ] commitovati i pushovati migration source;
+- [x] commitovan i pushovan migration source — `3b46863dbf51ac598fd8727970553a407ed9dc08`;
 - [x] primeniti migraciju 025 na ciljnu Supabase bazu preko Supabase CLI-ja;
-- [ ] pokrenuti `supabase/verification/verify_reviews_foundation.sql`;
-- [ ] sačuvati PASS izlaz i potvrditi backfill svih tenant-a;
-- [ ] tek tada otvoriti public submission segment 01C.
+- [x] pokrenut `supabase/verification/verify_reviews_foundation.sql`;
+- [x] database verification vratila `PASS` i tenant settings backfill je potvrđen;
+- [x] database i Git closeout završeni;`r`n`r`n### DEMO-REVIEWS-FOUNDATION-01C — sledeći`r`n`r`n- [ ] direktan public review submission;`r`n- [ ] verified post-booking invitation flow;`r`n- [ ] token expiry i single-use obrada;`r`n- [ ] validation, rate limiting i abuse granica;`r`n- [ ] lokalizovana success/error stanja.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
 
@@ -636,12 +636,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre REVIEWS DATABASE SOURCE paketa: 4f7571fcb23dfd10ac1d89f5def627a884c58bdf
-Poslednji završen milestone: DEMO-REVIEWS-FOUNDATION-01A
-Aktivni milestone: DEMO-REVIEWS-FOUNDATION-01B DATABASE VERIFICATION
+Poslednji potvrđeni remote commit pre REVIEWS 01B CLOSEOUT-a: 3b46863dbf51ac598fd8727970553a407ed9dc08
+Poslednji završen milestone: DEMO-REVIEWS-FOUNDATION-01B
+Aktivni milestone: DEMO-REVIEWS-FOUNDATION-01C PUBLIC SUBMISSION
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
 Implementirano u paketu: review settings, reviews, invitation hashes, provider metadata, trust triggeri, RLS i verification SQL
-Prvi sledeći zadatak: commit/push, primena migracije i read-only database PASS verifikacija
+Prvi sledeći zadatak: direct i verified public review submission API
 Lumière: nastavlja se posle shared reviews foundation-a
 StudioBiBi: posle svih theme milestone-ova, pre DEMO-DATA-LANDING-01
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
