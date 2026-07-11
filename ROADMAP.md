@@ -370,15 +370,27 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] read-only database verification source;
 - [x] završni `npm run check`.
 - [x] migracija 026 primenjena i database verification vratila `PASS`;
-- [ ] Git checkpoint, commit i push.
+- [x] Git checkpoint, commit i push — `0cc67e58a766d73c281ea6f078fd32f435684c7c`.
 
-#### DEMO-REVIEWS-FOUNDATION-01C-B — INVITATION ISSUANCE sledeći
+#### DEMO-REVIEWS-FOUNDATION-01C-B — INVITATION ISSUANCE source spreman
 
-- [ ] generisanje kriptografski slučajnog raw tokena;
-- [ ] hash-only invitation insert;
-- [ ] booking-completion hook;
-- [ ] expiry, resend i delivery lifecycle;
-- [ ] email invitation request.
+- [x] 256-bitni random base64url bearer token;
+- [x] hash-only invitation persistence;
+- [x] completed-booking database trigger;
+- [x] odloženi outbox job preko `invitation_delay_hours`;
+- [x] concurrent-safe claim sa `FOR UPDATE SKIP LOCKED`;
+- [x] stale processing recovery i maksimalno pet pokušaja;
+- [x] retry sa potpuno novim tokenom i exponential backoff-om;
+- [x] shared Resend delivery, dedupe i audit integracija;
+- [x] sedmojezični review invitation email;
+- [x] zaštićena cron ruta preko postojećeg `CRON_SECRET`;
+- [x] migration source: `supabase/migrations/027_review_invitation_delivery.sql`;
+- [x] read-only database verification source;
+- [x] unit i source-contract testovi;
+- [x] završni `npm run check`;
+- [x] migracija 027 primenjena i database verification vratila `PASS`;
+- [ ] Git checkpoint, commit i push;
+- [ ] aktivirati production cron tek posle 01C-C public forme.
 
 #### DEMO-REVIEWS-FOUNDATION-01C-C — PUBLIC UX čeka
 

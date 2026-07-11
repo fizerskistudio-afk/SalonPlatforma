@@ -88,15 +88,27 @@ Finishing individual themes before the shared review contract would create dupli
 - [x] final `npm run check`;
 - [x] migration applied to target database;
 - [x] database verification returned `PASS`;
-- [ ] Git checkpoint committed and pushed.
+- [x] Git checkpoint committed and pushed — `0cc67e58a766d73c281ea6f078fd32f435684c7c`.
 
 #### 01C-B — Invitation issuance
 
-- [ ] cryptographically random raw token generation;
-- [ ] hash-only invitation persistence;
-- [ ] completed-booking integration;
-- [ ] expiry, resend and delivery lifecycle;
-- [ ] email invitation request.
+- [x] 256-bit random base64url bearer generation;
+- [x] hash-only invitation persistence;
+- [x] completed-booking database trigger;
+- [x] delayed outbox job from tenant settings;
+- [x] concurrent-safe job claim;
+- [x] stale worker recovery and bounded retry;
+- [x] fresh token rotation after failed unsent attempts;
+- [x] shared email delivery, dedupe and audit integration;
+- [x] seven-language invitation email;
+- [x] CRON_SECRET-protected worker route;
+- [x] migration and read-only verification source;
+- [x] unit and source-contract tests;
+- [x] final `npm run check`;
+- [x] migration applied to target database;
+- [x] database verification returned `PASS`;
+- [ ] Git checkpoint committed and pushed;
+- [ ] production cron enabled after 01C-C public form deployment.
 
 #### 01C-C — Public UX
 
