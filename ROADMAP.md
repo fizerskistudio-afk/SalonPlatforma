@@ -249,15 +249,16 @@ Originalni milestone redosled u nastavku ostaje važeći. Privremeno se pauzira 
 
 1. `DEMO-I18N-01` — zajednički UI jezici i uklanjanje legacy translation slojeva;
 2. `DEMO-THEME-ARCHITECTURE-01` — isti modularni desktop/mobile contract za svaku temu;
-3. `DEMO-THEME-LUMIERE-01` — detaljan closeout referentne teme;
-4. `DEMO-THEME-EDITORIAL-01` — modularizacija i završetak;
-5. `DEMO-THEME-BARBER-01` — modularizacija, polish i izlazak iz beta statusa;
-6. `DEMO-THEME-NAILS-01`;
-7. `DEMO-THEME-WELLNESS-01`;
-8. `DEMO-THEME-BEAUTY-01`;
-9. `STUDIOBIBI-PILOT-01` — prvi realni hair-salon tenant na zajedničkoj infrastrukturi;
-10. `DEMO-DATA-LANDING-01`;
-11. `DEMO-DEPLOY-QA-01`.
+3. `DEMO-REVIEWS-FOUNDATION-01` — shared platform, Google, testimonial i preview review sistem;
+4. `DEMO-THEME-LUMIERE-01` — detaljan closeout referentne teme;
+5. `DEMO-THEME-EDITORIAL-01` — modularizacija i završetak;
+6. `DEMO-THEME-BARBER-01` — modularizacija, polish i izlazak iz beta statusa;
+7. `DEMO-THEME-NAILS-01`;
+8. `DEMO-THEME-WELLNESS-01`;
+9. `DEMO-THEME-BEAUTY-01`;
+10. `STUDIOBIBI-PILOT-01` — prvi realni hair-salon tenant na zajedničkoj infrastrukturi;
+11. `DEMO-DATA-LANDING-01`;
+12. `DEMO-DEPLOY-QA-01`.
 
 Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
 
@@ -314,10 +315,32 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] StudioBiBi planiran kao clean tenant launch posle svih tema;
 - [x] završni `npm run check`.
 
-### DEMO-THEME-LUMIERE-01 — sledeći
+### DEMO-REVIEWS-FOUNDATION-01A — DOMAIN CONTRACT završen
+
+- [x] zaključani izvori: platform, Google, manual testimonial i demo;
+- [x] zaključani moderation statusi;
+- [x] direktan platform review dozvoljen bez booking veze;
+- [x] verified-visit dozvoljen samo za platform review sa booking vezom;
+- [x] Google ostaje externally managed provider;
+- [x] manual testimonial ima poseban trust badge;
+- [x] generisani demo review ograničen na preview;
+- [x] source capability i invariant unit testovi;
+- [x] detaljan contract i milestone dokument;
+- [x] završni `npm run check`.
+
+### DEMO-REVIEWS-FOUNDATION-01B — sledeći
+
+- [ ] potvrditi postojeći booking lifecycle i identitete;
+- [ ] dodati review i review settings šemu;
+- [ ] dodati booking review invitation token model;
+- [ ] zaključati tenant RLS i owner/manager permissions;
+- [ ] dodati indekse, uniqueness i migration verification.
+
+### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
 
 - [ ] potvrditi desktop kompoziciju i sekcije;
 - [ ] potvrditi mobile app-shell kompoziciju i navigaciju;
+- [ ] povezati shared reviews catalog i mobile parity;
 - [ ] proveriti booking entry point-e i state coverage;
 - [ ] izvršiti sedmojezični vizuelni i responsive closeout;
 - [ ] zaključati Lumière kao acceptance baseline za naredne teme.
@@ -597,12 +620,13 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre THEME ARCHITECTURE CONTRACT paketa: 2284d1297de27874f731663193feaecaceb95377
-Poslednji završen milestone: DEMO-I18N-01
-Aktivni milestone: DEMO-THEME-LUMIERE-01
+Poslednji potvrđeni remote commit pre REVIEWS DOMAIN CONTRACT paketa: 58975973554322d68561493d1c1e7307516be790
+Poslednji završen milestone: DEMO-THEME-ARCHITECTURE-01A
+Aktivni milestone: DEMO-REVIEWS-FOUNDATION-01B
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: formalni template contract, architecture registry status, acceptance matrica i StudioBiBi clean pilot plan
-Prvi sledeći zadatak: detaljan Lumière desktop/mobile, booking, state i responsive closeout
+Implementirano u paketu: multi-source review domen, trust pravila, invariant validacija i preview-only demo granica
+Prvi sledeći zadatak: review database, invitation token, RLS i migration verification
+Lumière: nastavlja se posle shared reviews foundation-a
 StudioBiBi: posle svih theme milestone-ova, pre DEMO-DATA-LANDING-01
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
 ```

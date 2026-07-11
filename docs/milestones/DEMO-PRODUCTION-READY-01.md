@@ -73,11 +73,29 @@ Mobile prikaz nije samo sužen desktop layout.
 - [ ] Hair Editorial razbijen iz desktop/mobile monolita u `DEMO-THEME-EDITORIAL-01`;
 - [ ] Barber Heritage razbijen iz desktop/mobile monolita u `DEMO-THEME-BARBER-01`.
 
+### DEMO-REVIEWS-FOUNDATION-01
+
+- [x] multi-source review domain contract;
+- [x] platform, Google, manual testimonial i demo sources;
+- [x] moderation status contract;
+- [x] verified-visit invariant vezan za platform booking;
+- [x] preview-only granica za generisani demo sadržaj;
+- [x] source capability i badge testovi;
+- [ ] database, settings, invitation token i RLS;
+- [ ] direct i verified public submission;
+- [ ] owner/manager moderation queue;
+- [ ] Google provider i official review CTA;
+- [ ] shared catalog i theme integracija;
+- [ ] sedmojezični QA i cross-tenant regression.
+
+Detaljan scope: `docs/milestones/DEMO-REVIEWS-FOUNDATION-01.md`.
+
 ### DEMO-THEME-LUMIERE-01
 
 - [ ] detaljan desktop pregled;
 - [ ] detaljan mobile pregled;
 - [ ] svi UI jezici i fallback ponašanje;
+- [ ] shared reviews catalog i mobile parity;
 - [ ] booking, empty, loading i error stanja;
 - [ ] finalni responsive polish.
 
