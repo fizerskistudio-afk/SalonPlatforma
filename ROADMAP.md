@@ -288,14 +288,25 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] source audit potvrđuje 40 labela × 7 jezika i odsustvo lokalnog helpera;
 - [x] završni `npm run check`.
 
-### DEMO-I18N-01D — sledeći
+### DEMO-I18N-01D — RUNTIME LANGUAGE SMOKE završen
 
-- [ ] audit preostalih hardkodovanih javnih UI tekstova;
-- [ ] booking modal smoke na svih sedam jezika;
-- [ ] Lumière desktop/mobile jezički smoke;
-- [ ] Editorial desktop/mobile jezički smoke;
-- [ ] Barber desktop/mobile jezički smoke;
-- [ ] locale fallback i language switcher runtime provera.
+- [x] svih 105 globalnih UI leaf-ova runtime provereno na sedam jezika;
+- [x] booking i customer translation contract runtime provereni;
+- [x] Lumière desktop/mobile wrapper source contract provereni;
+- [x] Editorial desktop/mobile label i centralni `t()` contract provereni;
+- [x] Barber desktop/mobile label i centralni `t()` contract provereni;
+- [x] language switcher filtrira samo UI-ready tenant jezike;
+- [x] stabilan SR/MK/HR/SQ/EN/DE/FR redosled i compact select prag provereni;
+- [x] fallback redosled i current-locale fallback provereni;
+- [x] preostali Barber logo/gallery hardkodovani accessibility fallback uklonjen;
+- [x] automatizovani source audit i završni `npm run check`.
+
+### DEMO-THEME-ARCHITECTURE-01 — sledeći
+
+- [ ] dokumentovati zajednički desktop/mobile template contract;
+- [ ] potvrditi Lumière kao referentnu modularnu arhitekturu;
+- [ ] definisati acceptance matricu za sve teme;
+- [ ] pripremiti Editorial i Barber modularizaciju bez vizuelne regresije.
 
 ---
 
@@ -572,11 +583,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre TEMPLATE I18N 7 paketa: a7e0051c2b721fe0fc1123033845246b6de35817
-Poslednji završen milestone: DEMO-I18N-01B
-Aktivni milestone: DEMO-I18N-01D
+Poslednji potvrđeni remote commit pre RUNTIME LANGUAGE SMOKE paketa: a71d80b6ce5246da6901b7de3cd43005a3f5b2d4
+Poslednji završen milestone: DEMO-I18N-01C
+Aktivni milestone: DEMO-THEME-ARCHITECTURE-01
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: Editorial i Barber labele na sedam jezika i centralni t() fallback
-Prvi sledeći zadatak: runtime jezički smoke i audit preostalih hardkodovanih javnih UI tekstova
+Implementirano u paketu: automatizovani sedmojezični runtime contract, ready-only switcher i accessibility fallback closeout
+Prvi sledeći zadatak: zajednički modularni desktop/mobile template contract i acceptance matrica
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
 ```

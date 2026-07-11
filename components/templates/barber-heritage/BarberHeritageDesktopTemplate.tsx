@@ -65,7 +65,7 @@ export default function BarberHeritageDesktopTemplate({
             {business.logoUrl ? (
               <Image
                 src={business.logoUrl}
-                alt={`${business.name} logo`}
+                alt={`${business.name} — ${t(barberLabels.logoAlt, locale)}`}
                 width={32}
                 height={32}
                 className="h-8 w-8 object-contain"
@@ -433,7 +433,7 @@ export default function BarberHeritageDesktopTemplate({
                       src={item.url}
                       alt={
                         t(item.alt, locale) ||
-                        `${business.name} galerija`
+                        `${business.name} — ${t(barberLabels.galleryImageAlt, locale)}`
                       }
                       fill
                       sizes="(max-width: 768px) 50vw, 33vw"

@@ -83,7 +83,7 @@ export default function BarberHeritageMobileTemplate({
             {business.logoUrl ? (
               <Image
                 src={business.logoUrl}
-                alt={`${business.name} logo`}
+                alt={`${business.name} — ${t(barberLabels.logoAlt, locale)}`}
                 width={28}
                 height={28}
                 className="h-7 w-7 flex-shrink-0 object-contain"
@@ -408,7 +408,7 @@ export default function BarberHeritageMobileTemplate({
                     src={item.url}
                     alt={
                       t(item.alt, locale) ||
-                      `${business.name} galerija`
+                      `${business.name} — ${t(barberLabels.galleryImageAlt, locale)}`
                     }
                     fill
                     sizes="(max-width: 768px) 50vw, 33vw"

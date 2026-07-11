@@ -56,8 +56,12 @@ Mobile prikaz nije samo sužen desktop layout.
 - [x] Editorial i Barber duplicate translate helperi uklonjeni;
 - [x] svi postojeći template renderer/util pozivi koriste centralni `t()`;
 - [x] template translation readiness test i source audit;
-- [ ] audit preostalih hardkodovanih javnih UI tekstova;
-- [ ] booking modal i sve tri teme ručno provereni na sedam jezika.
+- [x] automatizovani audit preostalih sistemskih i accessibility fallback tekstova;
+- [x] booking/customer runtime translation smoke na sedam jezika;
+- [x] Lumière, Editorial i Barber desktop/mobile source contract smoke;
+- [x] locale fallback i ready-only language switcher runtime test;
+- [x] detaljan QA zapis u `docs/qa/DEMO-I18N-01D-RUNTIME-SMOKE.md`;
+- [ ] vizuelni browser pregled teksta i realno klikanje ostaju u pojedinačnim theme closeout-ima i `DEMO-DEPLOY-QA-01`.
 
 ### DEMO-THEME-ARCHITECTURE-01
 

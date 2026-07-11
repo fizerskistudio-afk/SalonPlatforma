@@ -3,8 +3,10 @@
 import { useCatalogData } from "@/lib/catalogContext";
 import {
   getLocaleDefinition,
-  isLocaleCode,
 } from "@/lib/i18n/locales";
+import {
+  getLanguageSwitcherState,
+} from "@/lib/i18n/language-switcher";
 import {
   t,
   translations,
@@ -32,11 +34,20 @@ export default function LanguageSwitcher({
     business,
   } = useCatalogData();
 
-  const supportedLocales =
-    business.supportedContentLocales;
+  const {
+    supportedLocales,
+    selectedLocale,
+    useCompactSelect,
+  } =
+    getLanguageSwitcherState(
+      business
+        .supportedContentLocales,
+      currentLocale
+    );
 
   if (
-    supportedLocales.length <= 1
+    supportedLocales.length <= 1 ||
+    !selectedLocale
   ) {
     return null;
   }
@@ -47,25 +58,19 @@ export default function LanguageSwitcher({
     currentLocale
   );
 
-  const useCompactSelect =
-    supportedLocales.length > 3;
-
-  const selectedLocale =
-    isLocaleCode(currentLocale) &&
-    supportedLocales.includes(
-      currentLocale
-    )
-      ? currentLocale
-      : supportedLocales[0];
-
   const handleSelectChange = (
     value: string
   ) => {
-    if (
-      isLocaleCode(value) &&
-      supportedLocales.includes(value)
-    ) {
-      onLocaleChange(value);
+    const nextLocale =
+      supportedLocales.find(
+        (locale) =>
+          locale === value
+      );
+
+    if (nextLocale) {
+      onLocaleChange(
+        nextLocale
+      );
     }
   };
 

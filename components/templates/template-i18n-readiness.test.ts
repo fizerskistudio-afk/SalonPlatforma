@@ -87,7 +87,7 @@ describe(
         expectCompleteLabelSet(
           "barber",
           barberLabels,
-          26
+          28
         );
       }
     );
