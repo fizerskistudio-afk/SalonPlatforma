@@ -255,8 +255,9 @@ Originalni milestone redosled u nastavku ostaje važeći. Privremeno se pauzira 
 6. `DEMO-THEME-NAILS-01`;
 7. `DEMO-THEME-WELLNESS-01`;
 8. `DEMO-THEME-BEAUTY-01`;
-9. `DEMO-DATA-LANDING-01`;
-10. `DEMO-DEPLOY-QA-01`.
+9. `STUDIOBIBI-PILOT-01` — prvi realni hair-salon tenant na zajedničkoj infrastrukturi;
+10. `DEMO-DATA-LANDING-01`;
+11. `DEMO-DEPLOY-QA-01`.
 
 Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
 
@@ -301,12 +302,25 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] preostali Barber logo/gallery hardkodovani accessibility fallback uklonjen;
 - [x] automatizovani source audit i završni `npm run check`.
 
-### DEMO-THEME-ARCHITECTURE-01 — sledeći
+### DEMO-THEME-ARCHITECTURE-01A — CONTRACT završen
 
-- [ ] dokumentovati zajednički desktop/mobile template contract;
-- [ ] potvrditi Lumière kao referentnu modularnu arhitekturu;
-- [ ] definisati acceptance matricu za sve teme;
-- [ ] pripremiti Editorial i Barber modularizaciju bez vizuelne regresije.
+- [x] dokumentovan zajednički desktop/mobile file i renderer contract;
+- [x] formalizovan architecture status u template registry-ju;
+- [x] Lumière označen kao referentna modularna arhitektura;
+- [x] Editorial i Barber iskreno označeni kao desktop/mobile monoliti;
+- [x] definisana zajednička acceptance matrica;
+- [x] zaključan shared booking, i18n i tenant boundary;
+- [x] dodat architecture unit test;
+- [x] StudioBiBi planiran kao clean tenant launch posle svih tema;
+- [x] završni `npm run check`.
+
+### DEMO-THEME-LUMIERE-01 — sledeći
+
+- [ ] potvrditi desktop kompoziciju i sekcije;
+- [ ] potvrditi mobile app-shell kompoziciju i navigaciju;
+- [ ] proveriti booking entry point-e i state coverage;
+- [ ] izvršiti sedmojezični vizuelni i responsive closeout;
+- [ ] zaključati Lumière kao acceptance baseline za naredne teme.
 
 ---
 
@@ -583,11 +597,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre RUNTIME LANGUAGE SMOKE paketa: a71d80b6ce5246da6901b7de3cd43005a3f5b2d4
-Poslednji završen milestone: DEMO-I18N-01C
-Aktivni milestone: DEMO-THEME-ARCHITECTURE-01
+Poslednji potvrđeni remote commit pre THEME ARCHITECTURE CONTRACT paketa: 2284d1297de27874f731663193feaecaceb95377
+Poslednji završen milestone: DEMO-I18N-01
+Aktivni milestone: DEMO-THEME-LUMIERE-01
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: automatizovani sedmojezični runtime contract, ready-only switcher i accessibility fallback closeout
-Prvi sledeći zadatak: zajednički modularni desktop/mobile template contract i acceptance matrica
+Implementirano u paketu: formalni template contract, architecture registry status, acceptance matrica i StudioBiBi clean pilot plan
+Prvi sledeći zadatak: detaljan Lumière desktop/mobile, booking, state i responsive closeout
+StudioBiBi: posle svih theme milestone-ova, pre DEMO-DATA-LANDING-01
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
 ```

@@ -65,11 +65,13 @@ Mobile prikaz nije samo sužen desktop layout.
 
 ### DEMO-THEME-ARCHITECTURE-01
 
-- [ ] dokumentovan file/folder template contract;
-- [ ] Hair Luxury/Lumière potvrđen kao referentna arhitektura;
-- [ ] Hair Editorial razbijen iz desktop/mobile monolita;
-- [ ] Barber Heritage razbijen iz desktop/mobile monolita;
-- [ ] zajednička acceptance matrica za sve teme.
+- [x] dokumentovan file/folder i renderer contract;
+- [x] Hair Luxury/Lumière potvrđen kao referentna arhitektura;
+- [x] architecture status formalizovan u template registry-ju;
+- [x] zajednička acceptance matrica za sve teme;
+- [x] Editorial i Barber registrovani kao stvarni monoliti dok ne prođu svoje milestone-ove;
+- [ ] Hair Editorial razbijen iz desktop/mobile monolita u `DEMO-THEME-EDITORIAL-01`;
+- [ ] Barber Heritage razbijen iz desktop/mobile monolita u `DEMO-THEME-BARBER-01`.
 
 ### DEMO-THEME-LUMIERE-01
 
@@ -114,6 +116,20 @@ Mobile prikaz nije samo sužen desktop layout.
 - [ ] lashes, brows, facial i beauty studio baza;
 - [ ] preset pristup za različite beauty niše;
 - [ ] isti desktop/mobile contract.
+
+### STUDIOBIBI-PILOT-01
+
+- [ ] novi Studio Bi&Bi tenant na zajedničkoj platformi;
+- [ ] izabrana jedna završena platform theme;
+- [ ] usluge prepisane i organizovane u zasebne kategorije;
+- [ ] zaposleni, radno vreme, sadržaj i galerija uneseni kroz zajednički model;
+- [ ] shared admin, booking, Calendar, email, monitoring i RLS;
+- [ ] production baza bez automatskog pauziranja;
+- [ ] preview QA pre povezivanja domena;
+- [ ] `studiobibi.mk` DNS cutover sa rollback prozorom;
+- [ ] najmanje nedelju dana realnog pilot rada.
+
+Detaljan scope: `docs/milestones/STUDIOBIBI-PILOT-01.md`.
 
 ### DEMO-DATA-LANDING-01
 

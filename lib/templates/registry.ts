@@ -34,6 +34,30 @@ export type TemplateAvailability =
   | "live"
   | "beta";
 
+export type TemplateDesktopArchitecture =
+  | "modular"
+  | "monolith";
+
+export type TemplateMobileArchitecture =
+  | "app-shell"
+  | "modular"
+  | "monolith";
+
+export type TemplateArchitectureAcceptance =
+  | "reference"
+  | "pending"
+  | "passed";
+
+export type TemplateArchitecture = {
+  contractVersion: 1;
+  desktop:
+    TemplateDesktopArchitecture;
+  mobile:
+    TemplateMobileArchitecture;
+  acceptance:
+    TemplateArchitectureAcceptance;
+};
+
 export type TemplatePalette = {
   primary: string;
   secondary: string;
@@ -54,6 +78,8 @@ export type TemplateManifest = {
   availability:
     TemplateAvailability;
   version: number;
+  architecture:
+    TemplateArchitecture;
   viewports:
     readonly TemplateViewport[];
   sections:
@@ -102,6 +128,17 @@ export const TEMPLATE_REGISTRY:
     version:
       1,
 
+    architecture: {
+      contractVersion:
+        1,
+      desktop:
+        "modular",
+      mobile:
+        "app-shell",
+      acceptance:
+        "reference",
+    },
+
     viewports: [
       "desktop",
       "mobile",
@@ -142,6 +179,17 @@ export const TEMPLATE_REGISTRY:
     version:
       1,
 
+    architecture: {
+      contractVersion:
+        1,
+      desktop:
+        "monolith",
+      mobile:
+        "monolith",
+      acceptance:
+        "pending",
+    },
+
     viewports: [
       "desktop",
       "mobile",
@@ -180,6 +228,17 @@ export const TEMPLATE_REGISTRY:
       "beta",
     version:
       1,
+
+    architecture: {
+      contractVersion:
+        1,
+      desktop:
+        "monolith",
+      mobile:
+        "monolith",
+      acceptance:
+        "pending",
+    },
 
     viewports: [
       "desktop",
