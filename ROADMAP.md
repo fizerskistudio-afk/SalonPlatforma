@@ -328,13 +328,29 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] detaljan contract i milestone dokument;
 - [x] završni `npm run check`.
 
-### DEMO-REVIEWS-FOUNDATION-01B — sledeći
+### DEMO-REVIEWS-FOUNDATION-01B — MIGRATION SOURCE spreman
 
-- [ ] potvrditi postojeći booking lifecycle i identitete;
-- [ ] dodati review i review settings šemu;
-- [ ] dodati booking review invitation token model;
-- [ ] zaključati tenant RLS i owner/manager permissions;
-- [ ] dodati indekse, uniqueness i migration verification.
+- [x] potvrđen postojeći booking lifecycle i `completed` status;
+- [x] potvrđen postojeći `business_members` owner/manager model;
+- [x] dodat `review_settings` tenant model;
+- [x] dodat multi-source `reviews` model;
+- [x] dodat hash-only booking review invitation model;
+- [x] dodat Google provider metadata model bez OAuth tajni;
+- [x] dodati same-business i completed-booking triggeri;
+- [x] zaključani RLS, public published-only read i owner/manager read;
+- [x] dodati indeksi i uniqueness pravila;
+- [x] dodat migration contract test;
+- [x] dodat read-only database verification SQL;
+- [x] migration source: `supabase/migrations/025_reviews_foundation.sql`;
+- [x] završni `npm run check`.
+
+### DEMO-REVIEWS-FOUNDATION-01B — DATABASE APPLY završen — GIT CHECKPOINT aktivan
+
+- [ ] commitovati i pushovati migration source;
+- [x] primeniti migraciju 025 na ciljnu Supabase bazu preko Supabase CLI-ja;
+- [ ] pokrenuti `supabase/verification/verify_reviews_foundation.sql`;
+- [ ] sačuvati PASS izlaz i potvrditi backfill svih tenant-a;
+- [ ] tek tada otvoriti public submission segment 01C.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
 
@@ -620,12 +636,12 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre REVIEWS DOMAIN CONTRACT paketa: 58975973554322d68561493d1c1e7307516be790
-Poslednji završen milestone: DEMO-THEME-ARCHITECTURE-01A
-Aktivni milestone: DEMO-REVIEWS-FOUNDATION-01B
+Poslednji potvrđeni remote commit pre REVIEWS DATABASE SOURCE paketa: 4f7571fcb23dfd10ac1d89f5def627a884c58bdf
+Poslednji završen milestone: DEMO-REVIEWS-FOUNDATION-01A
+Aktivni milestone: DEMO-REVIEWS-FOUNDATION-01B DATABASE VERIFICATION
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: multi-source review domen, trust pravila, invariant validacija i preview-only demo granica
-Prvi sledeći zadatak: review database, invitation token, RLS i migration verification
+Implementirano u paketu: review settings, reviews, invitation hashes, provider metadata, trust triggeri, RLS i verification SQL
+Prvi sledeći zadatak: commit/push, primena migracije i read-only database PASS verifikacija
 Lumière: nastavlja se posle shared reviews foundation-a
 StudioBiBi: posle svih theme milestone-ova, pre DEMO-DATA-LANDING-01
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01

@@ -59,13 +59,18 @@ Finishing individual themes before the shared review contract would create dupli
 
 ### 01B — Database and RLS
 
-- [ ] review table;
-- [ ] tenant review settings;
-- [ ] provider metadata;
-- [ ] booking invitation tokens;
-- [ ] indexes and uniqueness;
-- [ ] RLS and role permissions;
-- [ ] migration verification.
+- [x] review table source;
+- [x] tenant review settings source and existing-business backfill;
+- [x] provider metadata without stored OAuth secrets;
+- [x] booking invitation SHA-256 token hashes without raw tokens;
+- [x] indexes and uniqueness;
+- [x] same-business and completed-booking validation triggers;
+- [x] public published-only and owner/manager RLS source;
+- [x] migration contract test;
+- [x] read-only verification SQL;
+- [x] source file `supabase/migrations/025_reviews_foundation.sql`;
+- [x] migration applied to target Supabase database through Supabase CLI;
+- [ ] database verification returned `PASS`.
 
 ### 01C — Public submission
 
