@@ -52,8 +52,11 @@ Mobile prikaz nije samo sužen desktop layout.
 - [x] navigation, booking, contact, empty state i accessibility globalni tekstovi pokriveni;
 - [x] readiness test zahteva sedam jezika za svaki globalni translation leaf;
 - [x] HR/DE/FR označeni kao `uiTranslationReady`;
-- [ ] audit template-specifičnih hardkodovanih labela;
-- [ ] konsolidacija `t()`, editorial i barber translate helpera;
+- [x] 14 Editorial i 26 Barber template labela prevedeno na sedam jezika;
+- [x] Editorial i Barber duplicate translate helperi uklonjeni;
+- [x] svi postojeći template renderer/util pozivi koriste centralni `t()`;
+- [x] template translation readiness test i source audit;
+- [ ] audit preostalih hardkodovanih javnih UI tekstova;
 - [ ] booking modal i sve tri teme ručno provereni na sedam jezika.
 
 ### DEMO-THEME-ARCHITECTURE-01

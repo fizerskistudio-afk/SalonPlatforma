@@ -277,14 +277,25 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] source audit potvrđuje 105 translation leaf-ova po jeziku;
 - [x] završni `npm run check`.
 
-### DEMO-I18N-01C — sledeći
+### DEMO-I18N-01C — TEMPLATE I18N 7 završen
 
-- [ ] Editorial template labele na svih sedam jezika;
-- [ ] Barber template labele na svih sedam jezika;
-- [ ] ukloniti duplicate template `translate()` helper funkcije;
-- [ ] prebaciti teme na zajednički `t()` fallback;
-- [ ] audit hardkodovanih javnih UI tekstova;
-- [ ] kompletan jezički smoke kroz booking i sve tri postojeće teme.
+- [x] 14 Editorial template labela na SR/MK/HR/SQ/EN/DE/FR;
+- [x] 26 Barber template labela na SR/MK/HR/SQ/EN/DE/FR;
+- [x] uklonjena oba duplicate template `translate()` helpera;
+- [x] Editorial i Barber desktop/mobile rendereri koriste centralni `t()`;
+- [x] util funkcije za cenu, kategoriju i lokaciju koriste centralni fallback;
+- [x] dodat template translation readiness test;
+- [x] source audit potvrđuje 40 labela × 7 jezika i odsustvo lokalnog helpera;
+- [x] završni `npm run check`.
+
+### DEMO-I18N-01D — sledeći
+
+- [ ] audit preostalih hardkodovanih javnih UI tekstova;
+- [ ] booking modal smoke na svih sedam jezika;
+- [ ] Lumière desktop/mobile jezički smoke;
+- [ ] Editorial desktop/mobile jezički smoke;
+- [ ] Barber desktop/mobile jezički smoke;
+- [ ] locale fallback i language switcher runtime provera.
 
 ---
 
@@ -561,11 +572,11 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre CORE UI 7 paketa: f08a2fc29ec3f9e3955e05eec64c0fe166670601
-Poslednji završen milestone: DEMO-I18N-01A
-Aktivni milestone: DEMO-I18N-01C
+Poslednji potvrđeni remote commit pre TEMPLATE I18N 7 paketa: a7e0051c2b721fe0fc1123033845246b6de35817
+Poslednji završen milestone: DEMO-I18N-01B
+Aktivni milestone: DEMO-I18N-01D
 Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: zajednički sistemski UI na SR/MK/HR/SQ/EN/DE/FR
-Prvi sledeći zadatak: template-specifične Editorial i Barber labele i zajednički t() helper
+Implementirano u paketu: Editorial i Barber labele na sedam jezika i centralni t() fallback
+Prvi sledeći zadatak: runtime jezički smoke i audit preostalih hardkodovanih javnih UI tekstova
 Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
 ```

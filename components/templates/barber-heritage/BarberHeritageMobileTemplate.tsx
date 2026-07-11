@@ -11,11 +11,13 @@ import {
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+} from "@/lib/translations";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import InstagramIcon from "@/components/shared/icons/InstagramIcon";
 import type { PublicTemplateProps } from "../template-props";
 import {
-  translate,
   barberLabels,
   formatServicePrice,
   getCategoryLabel,
@@ -140,19 +142,19 @@ export default function BarberHeritageMobileTemplate({
               className="mb-2 text-xs uppercase tracking-widest"
               style={{ color: "var(--brand-primary)" }}
             >
-              {translate(barberLabels.heroEyebrow, locale)}
+              {t(barberLabels.heroEyebrow, locale)}
             </p>
             <h1
               className="mb-3 text-4xl font-bold leading-tight"
               style={{ fontFamily: "serif", color: "var(--brand-text)" }}
             >
-              {translate(barberLabels.heroHeadline1, locale)}
+              {t(barberLabels.heroHeadline1, locale)}
               <br />
-              {translate(barberLabels.heroHeadline2, locale)}
+              {t(barberLabels.heroHeadline2, locale)}
             </h1>
             {business.tagline && (
               <p className="mb-4 text-sm" style={{ color: "var(--brand-muted)" }}>
-                {translate(business.tagline, locale)}
+                {t(business.tagline, locale)}
               </p>
             )}
             <button
@@ -164,7 +166,7 @@ export default function BarberHeritageMobileTemplate({
                 color: "var(--brand-background)",
               }}
             >
-              {translate(barberLabels.bookAppointment, locale)}
+              {t(barberLabels.bookAppointment, locale)}
             </button>
           </div>
         </div>
@@ -197,7 +199,7 @@ export default function BarberHeritageMobileTemplate({
             className="mb-6 text-center text-2xl font-bold"
             style={{ fontFamily: "serif", color: "var(--brand-text)" }}
           >
-            {translate(barberLabels.servicesTitle, locale)}
+            {t(barberLabels.servicesTitle, locale)}
           </h2>
           <div className="space-y-3">
             {displayServices.map((service) => (
@@ -221,7 +223,7 @@ export default function BarberHeritageMobileTemplate({
                       className="text-base font-semibold"
                       style={{ color: "var(--brand-text)" }}
                     >
-                      {translate(service.name, locale)}
+                      {t(service.name, locale)}
                     </h3>
                   </div>
                   <div className="ml-4 text-right">
@@ -234,14 +236,14 @@ export default function BarberHeritageMobileTemplate({
                     {service.durationMinutes && (
                       <div className="text-xs" style={{ color: "var(--brand-muted)" }}>
                         {service.durationMinutes}{" "}
-                        {translate(barberLabels.minutes, locale)}
+                        {t(barberLabels.minutes, locale)}
                       </div>
                     )}
                   </div>
                 </div>
                 {service.description && (
                   <p className="mb-3 text-sm" style={{ color: "var(--brand-muted)" }}>
-                    {translate(service.description, locale)}
+                    {t(service.description, locale)}
                   </p>
                 )}
                 <button
@@ -253,7 +255,7 @@ export default function BarberHeritageMobileTemplate({
                     color: "var(--brand-background)",
                   }}
                 >
-                  {translate(barberLabels.bookService, locale)}
+                  {t(barberLabels.bookService, locale)}
                 </button>
               </div>
             ))}
@@ -268,7 +270,7 @@ export default function BarberHeritageMobileTemplate({
             className="mb-6 text-center text-2xl font-bold"
             style={{ fontFamily: "serif", color: "var(--brand-text)" }}
           >
-            {translate(barberLabels.barbersTitle, locale)}
+            {t(barberLabels.barbersTitle, locale)}
           </h2>
           <div className="relative">
             <div
@@ -323,12 +325,12 @@ export default function BarberHeritageMobileTemplate({
                           className="mb-2 text-xs"
                           style={{ color: "var(--brand-primary)" }}
                         >
-                          {translate(employee.role, locale)}
+                          {t(employee.role, locale)}
                         </p>
                       )}
                       {employee.bio && (
                         <p className="mb-3 text-xs" style={{ color: "var(--brand-muted)" }}>
-                          {translate(employee.bio, locale)}
+                          {t(employee.bio, locale)}
                         </p>
                       )}
                       <button
@@ -340,7 +342,7 @@ export default function BarberHeritageMobileTemplate({
                           color: "var(--brand-primary)",
                         }}
                       >
-                        {translate(barberLabels.bookBarber, locale)}
+                        {t(barberLabels.bookBarber, locale)}
                       </button>
                     </div>
                   </div>
@@ -358,7 +360,7 @@ export default function BarberHeritageMobileTemplate({
                     color: "var(--brand-text)",
                   }}
                   disabled={carouselIndex === 0}
-                  aria-label={translate(barberLabels.previousBarber, locale)}
+                  aria-label={t(barberLabels.previousBarber, locale)}
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -371,7 +373,7 @@ export default function BarberHeritageMobileTemplate({
                     color: "var(--brand-text)",
                   }}
                   disabled={carouselIndex === displayEmployees.length - 1}
-                  aria-label={translate(barberLabels.nextBarber, locale)}
+                  aria-label={t(barberLabels.nextBarber, locale)}
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
@@ -391,7 +393,7 @@ export default function BarberHeritageMobileTemplate({
             className="mb-6 text-center text-2xl font-bold"
             style={{ fontFamily: "serif", color: "var(--brand-text)" }}
           >
-            {translate(barberLabels.galleryTitle, locale)}
+            {t(barberLabels.galleryTitle, locale)}
           </h2>
           {displayGallery.length > 0 ? (
             <div className="grid grid-cols-2 gap-2">
@@ -405,7 +407,7 @@ export default function BarberHeritageMobileTemplate({
                   <Image
                     src={item.url}
                     alt={
-                      translate(item.alt, locale) ||
+                      t(item.alt, locale) ||
                       `${business.name} galerija`
                     }
                     fill
@@ -424,7 +426,7 @@ export default function BarberHeritageMobileTemplate({
               }}
             >
               <p className="text-sm">
-                {translate(barberLabels.galleryEmpty, locale)}
+                {t(barberLabels.galleryEmpty, locale)}
               </p>
             </div>
           )}
@@ -441,7 +443,7 @@ export default function BarberHeritageMobileTemplate({
             className="mb-6 text-2xl font-bold lg:text-3xl"
             style={{ fontFamily: "serif", color: "var(--brand-background)" }}
           >
-            {translate(barberLabels.contactTitle, locale)}
+            {t(barberLabels.contactTitle, locale)}
           </h2>
           <div className="mb-6 space-y-3">
             {locationLine && (
@@ -509,7 +511,7 @@ export default function BarberHeritageMobileTemplate({
               color: "var(--brand-primary)",
             }}
           >
-            {translate(barberLabels.bookAppointment, locale)}
+            {t(barberLabels.bookAppointment, locale)}
           </button>
           <button
             type="button"
@@ -517,7 +519,7 @@ export default function BarberHeritageMobileTemplate({
             className="mt-4 text-xs underline hover:opacity-80"
             style={{ color: "var(--brand-background)" }}
           >
-            {translate(barberLabels.openDesktop, locale)}
+            {t(barberLabels.openDesktop, locale)}
           </button>
         </div>
       </section>
@@ -536,10 +538,10 @@ export default function BarberHeritageMobileTemplate({
           </p>
           <p className="mb-2 text-xs" style={{ color: "var(--brand-muted)" }}>
             © {new Date().getFullYear()} {business.name}.{" "}
-            {translate(barberLabels.allRightsReserved, locale)}
+            {t(barberLabels.allRightsReserved, locale)}
           </p>
           <p className="text-xs" style={{ color: "var(--brand-muted)" }}>
-            {translate(barberLabels.footerTheme, locale)}
+            {t(barberLabels.footerTheme, locale)}
           </p>
         </div>
       </footer>
@@ -562,7 +564,7 @@ export default function BarberHeritageMobileTemplate({
             color: "var(--brand-background)",
           }}
         >
-          {translate(barberLabels.bookAppointment, locale)}
+          {t(barberLabels.bookAppointment, locale)}
         </button>
       </div>
     </div>

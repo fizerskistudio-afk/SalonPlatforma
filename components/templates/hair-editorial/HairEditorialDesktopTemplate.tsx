@@ -17,6 +17,7 @@ import {
   useCatalogData,
 } from "@/lib/catalogContext";
 import {
+  t,
   translations,
 } from "@/lib/translations";
 
@@ -28,7 +29,6 @@ import {
   formatServicePrice,
   getCategoryLabel,
   getLocationLine,
-  translate,
 } from "./editorial-utils";
 
 const galleryLayouts = [
@@ -97,7 +97,7 @@ export default function HairEditorialDesktopTemplate({
 
           <nav
             className="flex items-center gap-7 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand-muted)]"
-            aria-label={translate(
+            aria-label={t(
               translations.common
                 .mainNavigation,
               locale
@@ -107,7 +107,7 @@ export default function HairEditorialDesktopTemplate({
               href="#editorial-services"
               className="transition-colors hover:text-[var(--brand-text)]"
             >
-              {translate(
+              {t(
                 translations.nav.services,
                 locale
               )}
@@ -117,7 +117,7 @@ export default function HairEditorialDesktopTemplate({
               href="#editorial-team"
               className="transition-colors hover:text-[var(--brand-text)]"
             >
-              {translate(
+              {t(
                 translations.nav.team,
                 locale
               )}
@@ -127,7 +127,7 @@ export default function HairEditorialDesktopTemplate({
               href="#editorial-gallery"
               className="transition-colors hover:text-[var(--brand-text)]"
             >
-              {translate(
+              {t(
                 translations.nav.gallery,
                 locale
               )}
@@ -137,7 +137,7 @@ export default function HairEditorialDesktopTemplate({
               href="#editorial-contact"
               className="transition-colors hover:text-[var(--brand-text)]"
             >
-              {translate(
+              {t(
                 translations.nav.contact,
                 locale
               )}
@@ -157,7 +157,7 @@ export default function HairEditorialDesktopTemplate({
               onClick={onBook}
               className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand-primary)] px-5 text-sm font-semibold text-[var(--brand-background)] transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transform-none motion-reduce:transition-none"
             >
-              {translate(
+              {t(
                 translations.hero.bookNow,
                 locale
               )}
@@ -179,14 +179,14 @@ export default function HairEditorialDesktopTemplate({
           <div className="flex flex-col justify-between border-r border-[var(--brand-border)] px-8 py-14 xl:px-12 xl:py-20">
             <div className="flex items-center justify-between gap-5">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand-primary)]">
-                {translate(
+                {t(
                   editorialLabels.eyebrow,
                   locale
                 )}
               </p>
 
               <span className="text-xs uppercase tracking-[0.16em] text-[var(--brand-muted)]">
-                {translate(
+                {t(
                   business.city,
                   locale
                 )}
@@ -199,7 +199,7 @@ export default function HairEditorialDesktopTemplate({
               </h1>
 
               <p className="mt-10 max-w-xl text-[clamp(1.2rem,1.7vw,1.85rem)] leading-snug text-[var(--brand-muted)]">
-                {translate(
+                {t(
                   business.tagline,
                   locale
                 )}
@@ -211,7 +211,7 @@ export default function HairEditorialDesktopTemplate({
                   onClick={onBook}
                   className="inline-flex min-h-14 items-center gap-3 rounded-full bg-[var(--brand-text)] px-7 text-sm font-semibold text-[var(--brand-background)] transition hover:bg-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-[var(--brand-background)] motion-reduce:transition-none"
                 >
-                  {translate(
+                  {t(
                     translations.hero.bookNow,
                     locale
                   )}
@@ -226,7 +226,7 @@ export default function HairEditorialDesktopTemplate({
                   href="#editorial-services"
                   className="inline-flex min-h-14 items-center gap-3 rounded-full border border-[var(--brand-border)] px-7 text-sm font-semibold transition hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
                 >
-                  {translate(
+                  {t(
                     translations.hero
                       .viewServices,
                     locale
@@ -241,7 +241,7 @@ export default function HairEditorialDesktopTemplate({
             </div>
 
             <p className="max-w-2xl text-sm leading-7 text-[var(--brand-muted)]">
-              {translate(
+              {t(
                 business.description,
                 locale
               )}
@@ -269,7 +269,7 @@ export default function HairEditorialDesktopTemplate({
             <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between gap-8 rounded-[2rem] border border-white/15 bg-black/25 p-6 text-white backdrop-blur-md xl:bottom-10 xl:left-10 xl:right-10">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/65">
-                  {translate(
+                  {t(
                     editorialLabels
                       .visitStudio,
                     locale
@@ -284,7 +284,7 @@ export default function HairEditorialDesktopTemplate({
               <a
                 href="#editorial-contact"
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black/40 motion-reduce:transform-none motion-reduce:transition-none"
-                aria-label={translate(
+                aria-label={t(
                   translations.nav.contact,
                   locale
                 )}
@@ -307,14 +307,14 @@ export default function HairEditorialDesktopTemplate({
               <div className="sticky top-32">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--brand-primary)]">
                   01 /{" "}
-                  {translate(
+                  {t(
                     translations.nav.services,
                     locale
                   )}
                 </p>
 
                 <h2 className="font-display mt-6 max-w-lg text-6xl font-medium leading-[0.92] tracking-[-0.04em]">
-                  {translate(
+                  {t(
                     editorialLabels
                       .signatureServices,
                     locale
@@ -322,7 +322,7 @@ export default function HairEditorialDesktopTemplate({
                 </h2>
 
                 <p className="mt-8 max-w-md text-base leading-7 text-[var(--brand-muted)]">
-                  {translate(
+                  {t(
                     editorialLabels
                       .servicesIntro,
                     locale
@@ -357,7 +357,7 @@ export default function HairEditorialDesktopTemplate({
                       </p>
 
                       <h3 className="font-display mt-2 text-3xl font-medium tracking-[-0.02em] transition-colors group-hover:text-[var(--brand-primary)] motion-reduce:transition-none">
-                        {translate(
+                        {t(
                           service.name,
                           locale
                         )}
@@ -373,7 +373,7 @@ export default function HairEditorialDesktopTemplate({
                           {
                             service.durationMinutes
                           }{" "}
-                          {translate(
+                          {t(
                             translations.booking
                               .minutes,
                             locale
@@ -382,7 +382,7 @@ export default function HairEditorialDesktopTemplate({
 
                         {service.description && (
                           <span className="line-clamp-1 max-w-xl">
-                            {translate(
+                            {t(
                               service.description,
                               locale
                             )}
@@ -408,11 +408,11 @@ export default function HairEditorialDesktopTemplate({
                           )
                         }
                         className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--brand-border)] transition group-hover:border-[var(--brand-primary)] group-hover:bg-[var(--brand-primary)] group-hover:text-[var(--brand-background)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] motion-reduce:transition-none"
-                        aria-label={`${translate(
+                        aria-label={`${t(
                           editorialLabels
                             .bookService,
                           locale
-                        )}: ${translate(
+                        )}: ${t(
                           service.name,
                           locale
                         )}`}
@@ -430,7 +430,7 @@ export default function HairEditorialDesktopTemplate({
               {visibleServices.length ===
                 0 && (
                 <div className="px-8 py-24 text-center text-[var(--brand-muted)] xl:px-12">
-                  {translate(
+                  {t(
                     translations.common
                       .noServicesDescription,
                     locale
@@ -449,14 +449,14 @@ export default function HairEditorialDesktopTemplate({
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--brand-primary)]">
                 02 /{" "}
-                {translate(
+                {t(
                   translations.nav.team,
                   locale
                 )}
               </p>
 
               <h2 className="font-display mt-6 max-w-3xl text-6xl font-medium leading-[0.92] tracking-[-0.04em]">
-                {translate(
+                {t(
                   editorialLabels
                     .meetArtists,
                   locale
@@ -465,7 +465,7 @@ export default function HairEditorialDesktopTemplate({
             </div>
 
             <p className="max-w-md text-right text-base leading-7 text-[var(--brand-muted)]">
-              {translate(
+              {t(
                 editorialLabels
                   .teamIntro,
                 locale
@@ -510,7 +510,7 @@ export default function HairEditorialDesktopTemplate({
                         )
                       }
                       className="absolute bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-text)] text-[var(--brand-background)] shadow-xl transition hover:scale-105 hover:bg-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2 focus:ring-offset-black/40 motion-reduce:transform-none motion-reduce:transition-none"
-                      aria-label={`${translate(
+                      aria-label={`${t(
                         editorialLabels
                           .bookArtist,
                         locale
@@ -530,7 +530,7 @@ export default function HairEditorialDesktopTemplate({
                       </h3>
 
                       <p className="mt-1 text-sm text-[var(--brand-primary)]">
-                        {translate(
+                        {t(
                           employee.role,
                           locale
                         )}
@@ -545,7 +545,7 @@ export default function HairEditorialDesktopTemplate({
                   </div>
 
                   <p className="mt-4 line-clamp-3 max-w-md px-1 text-sm leading-6 text-[var(--brand-muted)]">
-                    {translate(
+                    {t(
                       employee.bio,
                       locale
                     )}
@@ -565,14 +565,14 @@ export default function HairEditorialDesktopTemplate({
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--brand-primary)]">
                   03 /{" "}
-                  {translate(
+                  {t(
                     translations.nav.gallery,
                     locale
                   )}
                 </p>
 
                 <h2 className="font-display mt-6 text-6xl font-medium leading-[0.92] tracking-[-0.04em]">
-                  {translate(
+                  {t(
                     editorialLabels
                       .selectedWork,
                     locale
@@ -581,7 +581,7 @@ export default function HairEditorialDesktopTemplate({
               </div>
 
               <p className="max-w-xl justify-self-end text-right text-base leading-7 text-[var(--brand-muted)]">
-                {translate(
+                {t(
                   editorialLabels
                     .galleryIntro,
                   locale
@@ -608,7 +608,7 @@ export default function HairEditorialDesktopTemplate({
                     >
                       <Image
                         src={item.url}
-                        alt={translate(
+                        alt={t(
                           item.alt,
                           locale
                         )}
@@ -628,7 +628,7 @@ export default function HairEditorialDesktopTemplate({
               </div>
             ) : (
               <div className="mt-16 rounded-[2rem] border border-dashed border-[var(--brand-border)] px-8 py-20 text-center text-[var(--brand-muted)]">
-                {translate(
+                {t(
                   editorialLabels.noGallery,
                   locale
                 )}
@@ -646,14 +646,14 @@ export default function HairEditorialDesktopTemplate({
               <div className="border-r border-black/15 p-10 xl:p-16">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] opacity-60">
                   04 /{" "}
-                  {translate(
+                  {t(
                     translations.nav.contact,
                     locale
                   )}
                 </p>
 
                 <h2 className="font-display mt-8 max-w-3xl text-7xl font-medium leading-[0.88] tracking-[-0.05em]">
-                  {translate(
+                  {t(
                     editorialLabels
                       .visitStudio,
                     locale
@@ -661,7 +661,7 @@ export default function HairEditorialDesktopTemplate({
                 </h2>
 
                 <p className="mt-8 max-w-xl text-lg leading-8 opacity-70">
-                  {translate(
+                  {t(
                     editorialLabels
                       .contactIntro,
                     locale
@@ -673,7 +673,7 @@ export default function HairEditorialDesktopTemplate({
                   onClick={onBook}
                   className="mt-12 inline-flex min-h-14 items-center gap-3 rounded-full bg-[var(--brand-background)] px-7 text-sm font-semibold text-[var(--brand-text)] transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[var(--brand-background)] focus:ring-offset-2 focus:ring-offset-[var(--brand-primary)] motion-reduce:transform-none motion-reduce:transition-none"
                 >
-                  {translate(
+                  {t(
                     translations.hero.bookNow,
                     locale
                   )}
@@ -744,7 +744,7 @@ export default function HairEditorialDesktopTemplate({
                     />
 
                     {business.instagramHandle ||
-                      translate(
+                      t(
                         editorialLabels
                           .followStudio,
                         locale
@@ -767,7 +767,7 @@ export default function HairEditorialDesktopTemplate({
           <p>
             © {currentYear}{" "}
             {business.name}.{" "}
-            {translate(
+            {t(
               translations.common
                 .allRightsReserved,
               locale

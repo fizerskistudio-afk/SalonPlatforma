@@ -10,11 +10,13 @@ import {
   Award,
 } from "lucide-react";
 import { useCatalogData } from "@/lib/catalogContext";
+import {
+  t,
+} from "@/lib/translations";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import InstagramIcon from "@/components/shared/icons/InstagramIcon";
 import type { PublicTemplateProps } from "../template-props";
 import {
-  translate,
   barberLabels,
   formatServicePrice,
   getCategoryLabel,
@@ -88,28 +90,28 @@ export default function BarberHeritageDesktopTemplate({
               className="text-sm transition-colors hover:opacity-80"
               style={{ color: "var(--brand-text)" }}
             >
-              {translate(barberLabels.navServices, locale)}
+              {t(barberLabels.navServices, locale)}
             </a>
             <a
               href="#barbers"
               className="text-sm transition-colors hover:opacity-80"
               style={{ color: "var(--brand-text)" }}
             >
-              {translate(barberLabels.navBarbers, locale)}
+              {t(barberLabels.navBarbers, locale)}
             </a>
             <a
               href="#gallery"
               className="text-sm transition-colors hover:opacity-80"
               style={{ color: "var(--brand-text)" }}
             >
-              {translate(barberLabels.navGallery, locale)}
+              {t(barberLabels.navGallery, locale)}
             </a>
             <a
               href="#contact"
               className="text-sm transition-colors hover:opacity-80"
               style={{ color: "var(--brand-text)" }}
             >
-              {translate(barberLabels.navContact, locale)}
+              {t(barberLabels.navContact, locale)}
             </a>
           </nav>
 
@@ -127,7 +129,7 @@ export default function BarberHeritageDesktopTemplate({
                 color: "var(--brand-background)",
               }}
             >
-              {translate(barberLabels.bookAppointment, locale)}
+              {t(barberLabels.bookAppointment, locale)}
             </button>
           </div>
         </div>
@@ -141,22 +143,22 @@ export default function BarberHeritageDesktopTemplate({
               className="mb-4 text-sm uppercase tracking-widest"
               style={{ color: "var(--brand-primary)" }}
             >
-              {translate(barberLabels.heroEyebrow, locale)}
+              {t(barberLabels.heroEyebrow, locale)}
             </p>
             <h1
               className="mb-6 text-6xl font-bold leading-tight lg:text-7xl"
               style={{ fontFamily: "serif", color: "var(--brand-text)" }}
             >
-              {translate(barberLabels.heroHeadline1, locale)}
+              {t(barberLabels.heroHeadline1, locale)}
               <br />
-              {translate(barberLabels.heroHeadline2, locale)}
+              {t(barberLabels.heroHeadline2, locale)}
             </h1>
             {business.description && (
               <p
                 className="mb-8 max-w-lg text-lg"
                 style={{ color: "var(--brand-muted)" }}
               >
-                {translate(business.description, locale)}
+                {t(business.description, locale)}
               </p>
             )}
             <div className="flex gap-4">
@@ -169,7 +171,7 @@ export default function BarberHeritageDesktopTemplate({
                   color: "var(--brand-background)",
                 }}
               >
-                {translate(barberLabels.bookAppointment, locale)}
+                {t(barberLabels.bookAppointment, locale)}
               </button>
               <a
                 href="#services"
@@ -179,7 +181,7 @@ export default function BarberHeritageDesktopTemplate({
                   color: "var(--brand-text)",
                 }}
               >
-                {translate(barberLabels.viewServices, locale)}
+                {t(barberLabels.viewServices, locale)}
               </a>
             </div>
             <div className="mt-12 flex gap-8">
@@ -189,7 +191,7 @@ export default function BarberHeritageDesktopTemplate({
                   style={{ color: "var(--brand-primary)" }}
                 />
                 <span className="text-sm" style={{ color: "var(--brand-muted)" }}>
-                  {translate(barberLabels.heroTrust1, locale)}
+                  {t(barberLabels.heroTrust1, locale)}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -198,7 +200,7 @@ export default function BarberHeritageDesktopTemplate({
                   style={{ color: "var(--brand-primary)" }}
                 />
                 <span className="text-sm" style={{ color: "var(--brand-muted)" }}>
-                  {translate(barberLabels.heroTrust2, locale)}
+                  {t(barberLabels.heroTrust2, locale)}
                 </span>
               </div>
             </div>
@@ -260,7 +262,7 @@ export default function BarberHeritageDesktopTemplate({
             className="mb-12 text-center text-4xl font-bold"
             style={{ fontFamily: "serif", color: "var(--brand-text)" }}
           >
-            {translate(barberLabels.servicesTitle, locale)}
+            {t(barberLabels.servicesTitle, locale)}
           </h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {displayServices.map((service) => (
@@ -282,14 +284,14 @@ export default function BarberHeritageDesktopTemplate({
                   className="mb-2 text-xl font-semibold"
                   style={{ color: "var(--brand-text)" }}
                 >
-                  {translate(service.name, locale)}
+                  {t(service.name, locale)}
                 </h3>
                 {service.description && (
                   <p
                     className="mb-4 flex-grow text-sm"
                     style={{ color: "var(--brand-muted)" }}
                   >
-                    {translate(service.description, locale)}
+                    {t(service.description, locale)}
                   </p>
                 )}
                 <div className="mb-4 flex items-baseline gap-2">
@@ -302,7 +304,7 @@ export default function BarberHeritageDesktopTemplate({
                   {service.durationMinutes && (
                     <span className="text-sm" style={{ color: "var(--brand-muted)" }}>
                       {service.durationMinutes}{" "}
-                      {translate(barberLabels.minutes, locale)}
+                      {t(barberLabels.minutes, locale)}
                     </span>
                   )}
                 </div>
@@ -315,7 +317,7 @@ export default function BarberHeritageDesktopTemplate({
                     color: "var(--brand-background)",
                   }}
                 >
-                  {translate(barberLabels.bookService, locale)}
+                  {t(barberLabels.bookService, locale)}
                 </button>
               </div>
             ))}
@@ -330,7 +332,7 @@ export default function BarberHeritageDesktopTemplate({
             className="mb-12 text-center text-4xl font-bold"
             style={{ fontFamily: "serif", color: "var(--brand-text)" }}
           >
-            {translate(barberLabels.barbersTitle, locale)}
+            {t(barberLabels.barbersTitle, locale)}
           </h2>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
             {displayEmployees.map((employee) => (
@@ -377,7 +379,7 @@ export default function BarberHeritageDesktopTemplate({
                       className="mb-3 text-sm"
                       style={{ color: "var(--brand-primary)" }}
                     >
-                      {translate(employee.role, locale)}
+                      {t(employee.role, locale)}
                     </p>
                   )}
                   {employee.bio && (
@@ -385,7 +387,7 @@ export default function BarberHeritageDesktopTemplate({
                       className="mb-4 flex-grow text-sm"
                       style={{ color: "var(--brand-muted)" }}
                     >
-                      {translate(employee.bio, locale)}
+                      {t(employee.bio, locale)}
                     </p>
                   )}
                   <button
@@ -397,7 +399,7 @@ export default function BarberHeritageDesktopTemplate({
                       color: "var(--brand-primary)",
                     }}
                   >
-                    {translate(barberLabels.bookBarber, locale)}
+                    {t(barberLabels.bookBarber, locale)}
                   </button>
                 </div>
               </div>
@@ -417,7 +419,7 @@ export default function BarberHeritageDesktopTemplate({
             className="mb-12 text-center text-4xl font-bold"
             style={{ fontFamily: "serif", color: "var(--brand-text)" }}
           >
-            {translate(barberLabels.galleryTitle, locale)}
+            {t(barberLabels.galleryTitle, locale)}
           </h2>
           {displayGallery.length > 0 ? (
             <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
@@ -430,7 +432,7 @@ export default function BarberHeritageDesktopTemplate({
                     <Image
                       src={item.url}
                       alt={
-                        translate(item.alt, locale) ||
+                        t(item.alt, locale) ||
                         `${business.name} galerija`
                       }
                       fill
@@ -450,7 +452,7 @@ export default function BarberHeritageDesktopTemplate({
               }}
             >
               <p className="text-lg">
-                {translate(barberLabels.galleryEmpty, locale)}
+                {t(barberLabels.galleryEmpty, locale)}
               </p>
             </div>
           )}
@@ -468,7 +470,7 @@ export default function BarberHeritageDesktopTemplate({
             className="mb-8 text-4xl font-bold lg:text-5xl"
             style={{ fontFamily: "serif", color: "var(--brand-background)" }}
           >
-            {translate(barberLabels.contactTitle, locale)}
+            {t(barberLabels.contactTitle, locale)}
           </h2>
           <div className="mb-8 flex flex-col items-center justify-center gap-4 md:flex-row">
             {locationLine && (
@@ -536,7 +538,7 @@ export default function BarberHeritageDesktopTemplate({
               color: "var(--brand-primary)",
             }}
           >
-            {translate(barberLabels.bookAppointment, locale)}
+            {t(barberLabels.bookAppointment, locale)}
           </button>
         </div>
       </section>
@@ -556,11 +558,11 @@ export default function BarberHeritageDesktopTemplate({
             </p>
             <p className="text-sm" style={{ color: "var(--brand-muted)" }}>
               © {new Date().getFullYear()} {business.name}.{" "}
-              {translate(barberLabels.allRightsReserved, locale)}
+              {t(barberLabels.allRightsReserved, locale)}
             </p>
           </div>
           <p className="text-sm" style={{ color: "var(--brand-muted)" }}>
-            {translate(barberLabels.footerTheme, locale)}
+            {t(barberLabels.footerTheme, locale)}
           </p>
         </div>
       </footer>
