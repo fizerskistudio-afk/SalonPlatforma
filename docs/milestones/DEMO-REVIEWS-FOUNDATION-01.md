@@ -74,12 +74,36 @@ Finishing individual themes before the shared review contract would create dupli
 
 ### 01C — Public submission
 
+#### 01C-A — Secure submission core
+
+- [x] direct and verified request validation;
+- [x] hash-only bearer token processing;
+- [x] direct review API source;
+- [x] verified invitation context and submit API source;
+- [x] service-role-only database RPCs;
+- [x] atomic invitation row lock and consume;
+- [x] body, honeypot, rate-limit and monitoring boundaries;
+- [x] migration and read-only verification source;
+- [x] unit and source-contract tests;
+- [x] final `npm run check`;
+- [x] migration applied to target database;
+- [x] database verification returned `PASS`;
+- [ ] Git checkpoint committed and pushed.
+
+#### 01C-B — Invitation issuance
+
+- [ ] cryptographically random raw token generation;
+- [ ] hash-only invitation persistence;
+- [ ] completed-booking integration;
+- [ ] expiry, resend and delivery lifecycle;
+- [ ] email invitation request.
+
+#### 01C-C — Public UX
+
 - [ ] direct site review form;
-- [ ] verified post-booking link;
-- [ ] token expiry and single use;
-- [ ] validation and rate limits;
-- [ ] spam/abuse boundary;
-- [ ] localized success and error states.
+- [ ] verified post-booking form;
+- [ ] localized success and error states;
+- [ ] responsive and accessibility QA.
 
 ### 01D — Admin moderation
 

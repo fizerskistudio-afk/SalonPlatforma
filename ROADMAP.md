@@ -350,7 +350,42 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] primeniti migraciju 025 na ciljnu Supabase bazu preko Supabase CLI-ja;
 - [x] pokrenut `supabase/verification/verify_reviews_foundation.sql`;
 - [x] database verification vratila `PASS` i tenant settings backfill je potvrđen;
-- [x] database i Git closeout završeni;`r`n`r`n### DEMO-REVIEWS-FOUNDATION-01C — sledeći`r`n`r`n- [ ] direktan public review submission;`r`n- [ ] verified post-booking invitation flow;`r`n- [ ] token expiry i single-use obrada;`r`n- [ ] validation, rate limiting i abuse granica;`r`n- [ ] lokalizovana success/error stanja.
+- [x] database i Git closeout završeni;
+
+### DEMO-REVIEWS-FOUNDATION-01C — aktivan
+
+#### DEMO-REVIEWS-FOUNDATION-01C-A — SECURE SUBMISSION CORE source spreman
+
+- [x] direct i verified request validacija;
+- [x] sedam dozvoljenih review language kodova;
+- [x] hash-only bearer token obrada;
+- [x] direct public review API ruta;
+- [x] verified invitation context i submission API ruta;
+- [x] server-only SECURITY DEFINER RPC granica;
+- [x] atomic invitation row lock i single-use consume;
+- [x] request body, honeypot i dual rate-limit granica;
+- [x] PII-safe monitoring i request ID;
+- [x] unit i source-contract testovi;
+- [x] migration source: `supabase/migrations/026_reviews_public_submission.sql`;
+- [x] read-only database verification source;
+- [x] završni `npm run check`.
+- [x] migracija 026 primenjena i database verification vratila `PASS`;
+- [ ] Git checkpoint, commit i push.
+
+#### DEMO-REVIEWS-FOUNDATION-01C-B — INVITATION ISSUANCE sledeći
+
+- [ ] generisanje kriptografski slučajnog raw tokena;
+- [ ] hash-only invitation insert;
+- [ ] booking-completion hook;
+- [ ] expiry, resend i delivery lifecycle;
+- [ ] email invitation request.
+
+#### DEMO-REVIEWS-FOUNDATION-01C-C — PUBLIC UX čeka
+
+- [ ] direct review forma;
+- [ ] verified review forma;
+- [ ] lokalizovana success/error stanja;
+- [ ] responsive i accessibility QA.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
 
