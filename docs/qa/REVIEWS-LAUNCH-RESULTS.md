@@ -111,6 +111,52 @@ Do not record:
 - Resend API keys;
 - private customer data beyond what is strictly needed for the test.
 
+## Controlled local E2E evidence — 2026-07-12
+
+- Environment: local development host only (`http://localhost:3000`)
+- Branch: `backup/theme-core-barber-beta`
+- Baseline commit before this evidence update: `29a0edb168019d36d81864edf7965a7ad40f9cff`
+- Tenant: `lumiere-studio`
+- Supabase project reference: `uvhwrmaaecjjgtayufcj`
+- Email mode: delivery enabled, test mode enabled, controlled test recipient configured
+- Secrets, recipient address and raw invitation token: intentionally not recorded
+
+### Read-only preflight result
+
+- [x] platform root returned 200
+- [x] tenant public page returned 200
+- [x] catalog review contract returned 200
+- [x] direct review page returned 200 and noindex metadata was present
+- [x] invalid invitation page returned 200 and noindex metadata was present
+- [x] cron without credentials returned 401
+- [x] cron with intentionally wrong credentials returned 401
+- [x] authorized cron was not called by the preflight script
+- [x] preflight script sent no email and performed no database mutation
+
+### Controlled invitation E2E result
+
+- [x] booking notification emails were delivered in test mode
+- [x] completed booking created an eligible review invitation job
+- [x] one authorized worker invocation processed the controlled job
+- [x] review invitation email arrived at the controlled test mailbox
+- [x] invitation form opened successfully
+- [x] review submission consumed the invitation once
+- [x] repeated token use was rejected
+- [x] submitted review entered moderation as a platform verified-visit review
+- [x] moderation published the review
+- [x] public Lumière page displayed the review with the verified-visit badge
+
+### Not yet claimed
+
+- [ ] public production-host smoke
+- [ ] direct-review production E2E
+- [ ] cross-tenant production regression
+- [ ] runtime retry/backoff evidence
+- [ ] stale-worker recovery evidence
+- [ ] production cron schedule
+
+Decision: **LOCAL CORE PASS / PRODUCTION ACTIVATION DEFERRED**. The scheduler remains part of `PRODUCTION-DOMAINS-ENV-01` after domain and Vercel Pro activation.
+
 ## Issues
 
 | ID | Severity | Area | Description | Status |

@@ -518,7 +518,7 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [ ] browser i responsive smoke popunjen u results dokumentu;
 - [x] Git checkpoint, commit i push — `da8816d737e7fda118b31d9f7d3c012449e3491f`.
 
-### DEMO-REVIEWS-FOUNDATION-01G-B1 — READ-ONLY DEPLOYED PREFLIGHT source spreman
+### DEMO-REVIEWS-FOUNDATION-01G-B1 — READ-ONLY PREFLIGHT završen lokalno
 
 - [x] read-only deployed smoke CLI;
 - [x] platform root i tenant page provera;
@@ -530,32 +530,35 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] README review cron env dokumentacija;
 - [x] source-contract test;
 - [x] završni `npm run check`;
-- [ ] Git checkpoint, commit i push;
-- [ ] deploy B1 commita;
-- [ ] pokrenuti green deployed preflight report.
+- [x] Git checkpoint, commit i push — `29a0edb168019d36d81864edf7965a7ad40f9cff`;
+- [x] green preflight report prošao na `http://localhost:3000` za `lumiere-studio`;
+- [ ] isti preflight ponoviti na javnom production hostu u `PRODUCTION-DOMAINS-ENV-01`.
 
-### DEMO-REVIEWS-FOUNDATION-01G-B2 — CONTROLLED TEST-MODE INVITATION E2E
+### DEMO-REVIEWS-FOUNDATION-01G-B2 — CONTROLLED LOCAL TEST-MODE INVITATION E2E core PASS
 
-- [ ] test-mode email env potvrđen;
-- [ ] batch limit postavljen na 1;
-- [ ] tačno jedan eligible completed test booking;
-- [ ] jedan autorizovan cron poziv;
-- [ ] tačno jedan Resend delivery;
-- [ ] invitation token forma i single-use potvrđeni;
-- [ ] verified review submit → pending → moderation → published;
-- [ ] dedupe i retry ponašanje potvrđeni.
+- [x] test-mode email env potvrđen bez upisivanja tajni u evidence;
+- [x] batch limit postavljen na 1;
+- [x] tačno jedan eligible completed test booking;
+- [x] jedan autorizovan cron poziv;
+- [x] tačno jedan Resend test-mode delivery;
+- [x] invitation token forma i single-use potvrđeni;
+- [x] verified review submit → pending → moderation → published;
+- [x] javni verified-visit badge potvrđen;
+- [ ] runtime dedupe, retry/backoff i stale recovery evidence ostaje za production/master QA.
 
-### DEMO-REVIEWS-FOUNDATION-01G-B — DEPLOYED E2E I PRODUCTION AKTIVACIJA
+### DEMO-REVIEWS-FOUNDATION-01G-B3 — PRODUCTION AKTIVACIJA odložena do infrastrukture
 
 - [ ] deployovan public tenant i review routes smoke;
-- [ ] direct review E2E;
-- [ ] completed booking → outbox → Resend email → token forma → verified review E2E;
+- [ ] direct review production E2E;
+- [ ] completed booking → outbox → Resend email → token forma → verified review production E2E;
 - [ ] moderation i cross-tenant production smoke;
-- [ ] protected cron single-run smoke;
+- [ ] protected cron single-run production smoke;
 - [ ] deduplikacija, retry/backoff i stale recovery potvrđeni;
 - [ ] production invitation schedule aktiviran;
 - [ ] activation evidence upisan bez tajni;
-- [ ] finalni review foundation closeout.
+- [ ] finalni production review foundation closeout;
+- [x] scheduler aktivacija prebačena u `PRODUCTION-DOMAINS-ENV-01` posle domena i Vercel Pro plana;
+- [x] `vercel.json` se ne dodaje prerano na Hobby planu.
 
 ### DEMO-THEME-LUMIERE-01 — spreman za closeout
 

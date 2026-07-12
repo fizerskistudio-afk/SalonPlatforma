@@ -222,7 +222,7 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 - [ ] browser and responsive results completed;
 - [x] Git checkpoint committed and pushed — `da8816d737e7fda118b31d9f7d3c012449e3491f`.
 
-#### 01G-B1 — Read-only deployed preflight
+#### 01G-B1 — Read-only preflight completed locally
 
 - [x] deployed smoke CLI;
 - [x] public tenant and catalog contract checks;
@@ -232,28 +232,33 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 - [x] plan-aware Vercel activation runbook;
 - [x] source-contract test;
 - [x] final `npm run check`;
-- [ ] Git checkpoint committed and pushed;
-- [ ] deployed preflight report passed.
+- [x] Git checkpoint committed and pushed — `29a0edb168019d36d81864edf7965a7ad40f9cff`;
+- [x] local report passed against `http://localhost:3000` and tenant `lumiere-studio`;
+- [ ] repeat the same report against the future public production host.
 
-#### 01G-B2 — Controlled test-mode invitation E2E
+#### 01G-B2 — Controlled local test-mode invitation E2E core PASS
 
-- [ ] one eligible completed test booking;
-- [ ] one authorized cron invocation with batch limit 1;
-- [ ] one test-mode Resend delivery;
-- [ ] single-use verified invitation submission;
-- [ ] moderation and public verified badge;
-- [ ] deduplication and retry evidence.
+- [x] one eligible completed test booking;
+- [x] one authorized cron invocation with batch limit 1;
+- [x] one test-mode Resend delivery;
+- [x] single-use verified invitation submission;
+- [x] pending → moderation → published flow;
+- [x] public verified-visit badge;
+- [ ] runtime deduplication, retry/backoff and stale-recovery evidence remains in master/production QA.
 
-#### 01G-B — Deployed E2E and production activation
+#### 01G-B3 — Production activation deferred
+
+The review feature is functionally proven on localhost, but production activation is intentionally not claimed. Domain setup, Vercel Pro scheduling and public-host smoke belong to `PRODUCTION-DOMAINS-ENV-01`.
 
 - [ ] deployed direct review smoke;
 - [ ] deployed verified invitation smoke;
-- [ ] completed booking to Resend delivery E2E;
+- [ ] completed booking to Resend delivery production E2E;
 - [ ] moderation and cross-tenant production smoke;
-- [ ] protected cron smoke;
+- [ ] protected production cron smoke;
 - [ ] retry, deduplication and stale recovery;
 - [ ] production invitation schedule enabled;
-- [ ] final launch evidence and closeout.
+- [ ] final production launch evidence and closeout;
+- [x] no premature `vercel.json` or Hobby-grade once-daily scheduler activation.
 
 
 ### 01G — QA closeout
