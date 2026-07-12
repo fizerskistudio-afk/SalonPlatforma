@@ -464,6 +464,26 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] legacy statički Review tip ostaje samo do 01F-C migracije tema;
 - [x] unit i source-contract testovi;
 - [x] završni `npm run check`;
+- [x] Git checkpoint, commit i push — `0e554a7405fd1e801fba9a40a22f10cbd6c7bdc3`.
+
+### DEMO-REVIEWS-FOUNDATION-01F-B — SHARED REVIEW PRESENTATION source spreman
+
+- [x] shared fractional ReviewStars;
+- [x] shared source i verified-visit trust badge;
+- [x] shared responsive ReviewCard;
+- [x] originalni customer tekst bez prevođenja ili prepisivanja;
+- [x] platform owner reply u odvojenom salon-response bloku;
+- [x] bezbedan Google external attribution link;
+- [x] locale-aware rating i UTC-stable date formatting;
+- [x] shared rating average i 1–5 distribution;
+- [x] unrated testimonial prikaz bez lažnih zvezdica;
+- [x] localized empty state;
+- [x] direct platform i official Google review CTA;
+- [x] preview mode ne aktivira review CTA;
+- [x] dvadeset review translation leaf-ova na sedam UI jezika;
+- [x] brand-token responsive shared section;
+- [x] helper unit i source-contract testovi;
+- [x] završni `npm run check`;
 - [ ] Git checkpoint, commit i push.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation

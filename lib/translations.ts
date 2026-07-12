@@ -263,6 +263,209 @@ export const translations = {
     },
   },
 
+  // Shared Reviews
+  reviews: {
+    verifiedVisit: {
+      "sr-Latn": "Potvrđena poseta",
+      mk: "Потврдена посета",
+      hr: "Potvrđen posjet",
+      sq: "Vizitë e verifikuar",
+      en: "Verified visit",
+      de: "Bestätigter Besuch",
+      fr: "Visite vérifiée",
+    },
+
+    googleReview: {
+      "sr-Latn": "Google recenzija",
+      mk: "Google рецензија",
+      hr: "Google recenzija",
+      sq: "Vlerësim në Google",
+      en: "Google review",
+      de: "Google-Bewertung",
+      fr: "Avis Google",
+    },
+
+    salonTestimonial: {
+      "sr-Latn": "Utisak unet od salona",
+      mk: "Препорака внесена од салонот",
+      hr: "Izjava koju je unio salon",
+      sq: "Dëshmi e shtuar nga salloni",
+      en: "Salon-entered testimonial",
+      de: "Vom Salon eingetragen",
+      fr: "Témoignage saisi par le salon",
+    },
+
+    demoReview: {
+      "sr-Latn": "Demo sadržaj",
+      mk: "Демо содржина",
+      hr: "Demo sadržaj",
+      sq: "Përmbajtje demo",
+      en: "Demo content",
+      de: "Demo-Inhalt",
+      fr: "Contenu de démonstration",
+    },
+
+    platformReview: {
+      "sr-Latn": "Recenzija platforme",
+      mk: "Рецензија на платформата",
+      hr: "Recenzija platforme",
+      sq: "Vlerësim i platformës",
+      en: "Platform review",
+      de: "Plattform-Bewertung",
+      fr: "Avis de la plateforme",
+    },
+
+    ownerReply: {
+      "sr-Latn": "Odgovor salona",
+      mk: "Одговор од салонот",
+      hr: "Odgovor salona",
+      sq: "Përgjigjja e sallonit",
+      en: "Salon reply",
+      de: "Antwort des Salons",
+      fr: "Réponse du salon",
+    },
+
+    viewOnGoogle: {
+      "sr-Latn": "Prikaži na Google-u",
+      mk: "Прикажи на Google",
+      hr: "Prikaži na Googleu",
+      sq: "Shiko në Google",
+      en: "View on Google",
+      de: "Auf Google ansehen",
+      fr: "Voir sur Google",
+    },
+
+    reviewOnGoogle: {
+      "sr-Latn": "Ostavi Google recenziju",
+      mk: "Остави Google рецензија",
+      hr: "Ostavi Google recenziju",
+      sq: "Lër një vlerësim në Google",
+      en: "Review on Google",
+      de: "Auf Google bewerten",
+      fr: "Laisser un avis Google",
+    },
+
+    leaveReview: {
+      "sr-Latn": "Ostavi recenziju",
+      mk: "Остави рецензија",
+      hr: "Ostavi recenziju",
+      sq: "Lër një vlerësim",
+      en: "Leave a review",
+      de: "Bewertung abgeben",
+      fr: "Laisser un avis",
+    },
+
+    emptyTitle: {
+      "sr-Latn": "Još nema objavljenih recenzija",
+      mk: "Сè уште нема објавени рецензии",
+      hr: "Još nema objavljenih recenzija",
+      sq: "Nuk ka ende vlerësime të publikuara",
+      en: "No published reviews yet",
+      de: "Noch keine veröffentlichten Bewertungen",
+      fr: "Aucun avis publié pour le moment",
+    },
+
+    emptyDescription: {
+      "sr-Latn": "Budite prvi koji će podeliti svoje iskustvo.",
+      mk: "Бидете први што ќе го споделите вашето искуство.",
+      hr: "Budite prvi koji će podijeliti svoje iskustvo.",
+      sq: "Bëhuni i pari që ndani përvojën tuaj.",
+      en: "Be the first to share your experience.",
+      de: "Teilen Sie als Erste oder Erster Ihre Erfahrung.",
+      fr: "Soyez la première personne à partager votre expérience.",
+    },
+
+    ratingOutOfFive: {
+      "sr-Latn": "{rating} od 5 zvezdica",
+      mk: "{rating} од 5 ѕвезди",
+      hr: "{rating} od 5 zvjezdica",
+      sq: "{rating} nga 5 yje",
+      en: "{rating} out of 5 stars",
+      de: "{rating} von 5 Sternen",
+      fr: "{rating} étoiles sur 5",
+    },
+
+    anonymousAuthor: {
+      "sr-Latn": "Anonimni klijent",
+      mk: "Анонимен клиент",
+      hr: "Anonimni klijent",
+      sq: "Klient anonim",
+      en: "Anonymous client",
+      de: "Anonymer Kunde",
+      fr: "Client anonyme",
+    },
+
+    reviewByAuthor: {
+      "sr-Latn": "Recenzija korisnika {author}",
+      mk: "Рецензија од {author}",
+      hr: "Recenzija korisnika {author}",
+      sq: "Vlerësim nga {author}",
+      en: "Review by {author}",
+      de: "Bewertung von {author}",
+      fr: "Avis de {author}",
+    },
+
+    basedOnRatings: {
+      "sr-Latn": "Na osnovu {count} ocena",
+      mk: "Врз основа на {count} оценки",
+      hr: "Na temelju {count} ocjena",
+      sq: "Bazuar në {count} vlerësime",
+      en: "Based on {count} ratings",
+      de: "Basierend auf {count} Bewertungen",
+      fr: "Basé sur {count} notes",
+    },
+
+    ratingSummary: {
+      "sr-Latn": "Pregled ocena",
+      mk: "Преглед на оценките",
+      hr: "Pregled ocjena",
+      sq: "Përmbledhja e vlerësimeve",
+      en: "Rating summary",
+      de: "Bewertungsübersicht",
+      fr: "Résumé des notes",
+    },
+
+    ratingDistribution: {
+      "sr-Latn": "Raspodela ocena",
+      mk: "Распределба на оценките",
+      hr: "Raspodjela ocjena",
+      sq: "Shpërndarja e vlerësimeve",
+      en: "Rating distribution",
+      de: "Bewertungsverteilung",
+      fr: "Répartition des notes",
+    },
+
+    starCount: {
+      "sr-Latn": "{stars} zvezdica: {count}",
+      mk: "{stars} ѕвезди: {count}",
+      hr: "{stars} zvjezdica: {count}",
+      sq: "{stars} yje: {count}",
+      en: "{stars} stars: {count}",
+      de: "{stars} Sterne: {count}",
+      fr: "{stars} étoiles : {count}",
+    },
+
+    reviewList: {
+      "sr-Latn": "Lista recenzija",
+      mk: "Листа на рецензии",
+      hr: "Popis recenzija",
+      sq: "Lista e vlerësimeve",
+      en: "Review list",
+      de: "Bewertungsliste",
+      fr: "Liste des avis",
+    },
+
+    unratedTestimonial: {
+      "sr-Latn": "Bez numeričke ocene",
+      mk: "Без бројчена оценка",
+      hr: "Bez brojčane ocjene",
+      sq: "Pa vlerësim numerik",
+      en: "No numeric rating",
+      de: "Ohne numerische Bewertung",
+      fr: "Sans note numérique",
+    },
+  },
+
   // Days of Week
   days: {
     sunday: {

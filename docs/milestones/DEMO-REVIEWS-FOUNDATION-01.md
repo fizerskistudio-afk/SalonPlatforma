@@ -175,15 +175,24 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 - [x] backward-compatible optional fields during staged theme migration;
 - [x] unit and source-contract tests;
 - [x] final `npm run check`;
-- [ ] Git checkpoint committed and pushed.
+- [x] Git checkpoint committed and pushed — `0e554a7405fd1e801fba9a40a22f10cbd6c7bdc3`.
 
 #### 01F-B — Shared review presentation
 
-- [ ] shared rating summary;
-- [ ] shared review card and owner reply;
-- [ ] source and verified-visit badges;
-- [ ] Google external attribution and CTA;
-- [ ] empty, long-copy and accessibility states.
+- [x] shared fractional star rating;
+- [x] shared review card and platform owner reply;
+- [x] source and verified-visit badges;
+- [x] Google external attribution and official CTA;
+- [x] rating average and 1–5 distribution;
+- [x] unrated testimonial state;
+- [x] empty and long-copy states;
+- [x] UTC-stable localized date formatting;
+- [x] seven-language central UI labels;
+- [x] responsive brand-token shared section;
+- [x] accessibility labels, list semantics and progress bars;
+- [x] helper unit and source-contract tests;
+- [x] final `npm run check`;
+- [ ] Git checkpoint committed and pushed.
 
 #### 01F-C — Theme integration
 

@@ -172,7 +172,7 @@ describe(
 
         expect(
           leaves.length
-        ).toBe(105);
+        ).toBe(125);
 
         for (
           const leaf of
