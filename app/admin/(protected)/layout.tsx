@@ -8,6 +8,9 @@ import type {
 
 import AdminShell from "@/components/admin/AdminShell";
 import {
+  getAdminReviewAttentionCount,
+} from "@/lib/admin/reviews";
+import {
   getAdminContext,
   requireAdmin,
 } from "@/lib/auth/admin";
@@ -45,8 +48,16 @@ export default async function ProtectedAdminLayout({
   const admin =
     await requireAdmin();
 
+  const reviewAttentionCount =
+    await getAdminReviewAttentionCount(
+      admin.business.id
+    );
+
   return (
     <AdminShell
+      reviewAttentionCount={
+        reviewAttentionCount
+      }
       admin={{
         email: admin.email,
         role: admin.role,

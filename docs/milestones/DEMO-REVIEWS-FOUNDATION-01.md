@@ -127,17 +127,28 @@ Finishing individual themes before the shared review contract would create dupli
 - [x] unit and source-contract tests;
 - [x] final `npm run check`;
 - [ ] deployed direct and verified browser smoke;
-- [ ] Git checkpoint committed and pushed;
+- [x] Git checkpoint committed and pushed — `715a00f296b57343c7e1fbc2fbd6d2bbff289f05`;
 - [ ] production invitation cron enabled after deployed smoke.
 
 ### 01D — Admin moderation
 
-- [ ] moderation queue;
-- [ ] publish/reject/flag/archive;
-- [ ] owner replies for platform reviews;
-- [ ] source-safe edit restrictions;
-- [ ] owner/manager permissions;
-- [ ] attention counters.
+- [x] moderation queue and status filters;
+- [x] publish/reject/flag/archive lifecycle;
+- [x] moderation reason requirement and audit trail;
+- [x] owner replies for published platform reviews;
+- [x] Google replies remain provider-managed;
+- [x] customer author/rating/body excluded from admin mutations;
+- [x] authenticated owner/manager RPC permission boundary;
+- [x] row locks and transition validation;
+- [x] sidebar attention counter for pending and flagged;
+- [x] responsive loading and empty states;
+- [x] migration and read-only verification source;
+- [x] unit and source-contract tests;
+- [x] final `npm run check`;
+- [x] migration applied to target database;
+- [x] database verification returned `PASS`;
+- [x] moderation browser smoke;
+- [ ] Git checkpoint committed and pushed.
 
 ### 01E — Google provider — deferred post-launch
 

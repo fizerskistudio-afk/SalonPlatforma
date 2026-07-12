@@ -409,8 +409,32 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] unit i source-contract testovi;
 - [x] završni `npm run check`;
 - [ ] direct i verified browser smoke na deployovanom hostu;
-- [ ] Git checkpoint, commit i push;
+- [x] Git checkpoint, commit i push — `715a00f296b57343c7e1fbc2fbd6d2bbff289f05`;
 - [ ] production cron aktivacija tek posle deploy/browser smoke potvrde.
+
+### DEMO-REVIEWS-FOUNDATION-01D — ADMIN MODERATION source spreman
+
+- [x] moderation audit tabela bez kopiranja customer review teksta;
+- [x] owner/manager permission provera u SECURITY DEFINER RPC sloju;
+- [x] row-lock status moderation;
+- [x] pending/published/rejected/flagged/archived transition matrica;
+- [x] obavezan razlog za reject/flag/archive;
+- [x] zabrana direktnog published → rejected prelaza;
+- [x] platform owner reply set/remove;
+- [x] Google reply ostaje provider-managed;
+- [x] originalni author/rating/body nisu deo admin mutation operacija;
+- [x] admin moderation queue i status filteri;
+- [x] source i verified-visit trust badge prikaz;
+- [x] latest moderation reason i booking/service/employee kontekst;
+- [x] sidebar attention badge za pending + flagged;
+- [x] responsive loading i empty states;
+- [x] migration source: `supabase/migrations/028_review_moderation.sql`;
+- [x] read-only database verification source;
+- [x] unit i source-contract testovi;
+- [x] završni `npm run check`;
+- [x] migracija 028 primenjena i database verification vratila `PASS`;
+- [x] moderation browser smoke prošao;
+- [ ] Git checkpoint, commit i push.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
 

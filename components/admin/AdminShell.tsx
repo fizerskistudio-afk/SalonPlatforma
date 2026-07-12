@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquareText,
   Scissors,
   Settings,
   ShieldCheck,
@@ -29,6 +30,7 @@ type AdminRole = "owner" | "manager";
 
 type AdminShellProps = {
   children: ReactNode;
+  reviewAttentionCount: number;
   admin: {
     email: string | null;
     role: AdminRole;
@@ -105,6 +107,13 @@ const navigationItems: NavigationItem[] = [
     enabled: true,
   },
   {
+    label: "Recenzije",
+    description: "Moderacija i odgovori",
+    href: "/admin/reviews",
+    icon: MessageSquareText,
+    enabled: true,
+  },
+  {
     label: "Notifikacije",
     description: "Email pravila i delivery log",
     href: "/admin/notifications",
@@ -170,6 +179,7 @@ function SidebarContent({
   businessSlug,
   email,
   role,
+  reviewAttentionCount,
   onNavigate,
 }: {
   pathname: string;
@@ -177,6 +187,7 @@ function SidebarContent({
   businessSlug: string;
   email: string | null;
   role: AdminRole;
+  reviewAttentionCount: number;
   onNavigate?: () => void;
 }) {
   return (
@@ -222,6 +233,12 @@ function SidebarContent({
                   pathname,
                   item.href
                 );
+
+              const badgeCount =
+                item.href ===
+                  "/admin/reviews"
+                  ? reviewAttentionCount
+                  : 0;
 
               if (!item.enabled) {
                 return (
@@ -284,8 +301,32 @@ function SidebarContent({
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold">
-                      {item.label}
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold">
+                        {item.label}
+                      </span>
+
+                      {badgeCount > 0 && (
+                        <span
+                          className={
+                            isActive
+                              ? "rounded-full bg-zinc-950/10 px-2 py-0.5 text-[10px] font-bold text-zinc-950"
+                              : "rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold text-amber-300"
+                          }
+                          aria-label={
+                            badgeCount === 1
+                              ? "1 recenzija traži pažnju"
+                              : String(
+                                  badgeCount
+                                ) +
+                                " recenzija traži pažnju"
+                          }
+                        >
+                          {badgeCount > 99
+                            ? "99+"
+                            : badgeCount}
+                        </span>
+                      )}
                     </div>
                     <div
                       className={`mt-0.5 truncate text-xs ${
@@ -370,6 +411,7 @@ function SidebarContent({
 export default function AdminShell({
   children,
   admin,
+  reviewAttentionCount,
 }: AdminShellProps) {
   const pathname = usePathname();
 
@@ -404,6 +446,9 @@ export default function AdminShell({
           }
           email={admin.email}
           role={admin.role}
+          reviewAttentionCount={
+            reviewAttentionCount
+          }
         />
       </aside>
 
@@ -443,6 +488,9 @@ export default function AdminShell({
               }
               email={admin.email}
               role={admin.role}
+              reviewAttentionCount={
+                reviewAttentionCount
+              }
               onNavigate={() =>
                 setMobileMenuOpen(false)
               }
