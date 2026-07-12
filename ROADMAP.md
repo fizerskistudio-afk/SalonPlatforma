@@ -516,7 +516,34 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] source-level launch-readiness contract;
 - [x] završni `npm run check`;
 - [ ] browser i responsive smoke popunjen u results dokumentu;
-- [ ] Git checkpoint, commit i push.
+- [x] Git checkpoint, commit i push — `da8816d737e7fda118b31d9f7d3c012449e3491f`.
+
+### DEMO-REVIEWS-FOUNDATION-01G-B1 — READ-ONLY DEPLOYED PREFLIGHT source spreman
+
+- [x] read-only deployed smoke CLI;
+- [x] platform root i tenant page provera;
+- [x] deployed catalog review contract provera;
+- [x] direct review i invalid-token noindex provera;
+- [x] missing/wrong cron credential mora dati 401;
+- [x] sanitized lokalni JSON evidence;
+- [x] Vercel plan-aware activation runbook;
+- [x] README review cron env dokumentacija;
+- [x] source-contract test;
+- [x] završni `npm run check`;
+- [ ] Git checkpoint, commit i push;
+- [ ] deploy B1 commita;
+- [ ] pokrenuti green deployed preflight report.
+
+### DEMO-REVIEWS-FOUNDATION-01G-B2 — CONTROLLED TEST-MODE INVITATION E2E
+
+- [ ] test-mode email env potvrđen;
+- [ ] batch limit postavljen na 1;
+- [ ] tačno jedan eligible completed test booking;
+- [ ] jedan autorizovan cron poziv;
+- [ ] tačno jedan Resend delivery;
+- [ ] invitation token forma i single-use potvrđeni;
+- [ ] verified review submit → pending → moderation → published;
+- [ ] dedupe i retry ponašanje potvrđeni.
 
 ### DEMO-REVIEWS-FOUNDATION-01G-B — DEPLOYED E2E I PRODUCTION AKTIVACIJA
 

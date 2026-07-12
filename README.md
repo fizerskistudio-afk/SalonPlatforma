@@ -444,6 +444,39 @@ Generisanje cron secret-a:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
+### Review invitation cron
+
+| Promenljiva | Namena | Podrazumevano ponašanje |
+|---|---|---|
+| `REVIEW_PUBLIC_BASE_URL` | HTTPS base URL za invitation linkove | obavezno u production-u ako drugi URL env nije dostupan |
+| `REVIEW_INVITATION_CRON_BATCH_LIMIT` | Maksimalan broj invitation job-ova po pozivu | 50, dozvoljeno 1–250 |
+
+Endpoint:
+
+```text
+/api/cron/review-invitations
+```
+
+Endpoint koristi isti `CRON_SECRET` Bearer ili `x-cron-secret` contract kao reminder cron.
+
+Bezbedan deployed preflight bez slanja emaila:
+
+```cmd
+npm run qa:reviews:deployed -- --base-url https://YOUR-DEPLOYMENT --business-slug YOUR-TENANT-SLUG
+```
+
+Pre prvog autorizovanog smoke-a postavi:
+
+```env
+EMAIL_DELIVERY_ENABLED=true
+EMAIL_TEST_MODE=true
+EMAIL_TEST_RECIPIENT=
+REVIEW_PUBLIC_BASE_URL=https://YOUR-DEPLOYMENT
+REVIEW_INVITATION_CRON_BATCH_LIMIT=1
+```
+
+Ne registruj aktivni Vercel cron schedule pre uspešnog read-only preflight-a i jednog kontrolisanog test-mode invitation E2E toka.
+
 ### Primer objedinjene `.env.local` konfiguracije
 
 ```env
@@ -484,6 +517,8 @@ RESEND_WEBHOOK_TOLERANCE_SECONDS=300
 # Cron
 CRON_SECRET=
 REMINDER_CRON_BATCH_LIMIT=250
+REVIEW_PUBLIC_BASE_URL=http://localhost:3000
+REVIEW_INVITATION_CRON_BATCH_LIMIT=1
 ```
 
 ## Supabase i migracije

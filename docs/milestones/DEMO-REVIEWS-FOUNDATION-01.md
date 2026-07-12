@@ -220,7 +220,29 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 - [x] launch-readiness source-contract test;
 - [x] final `npm run check`;
 - [ ] browser and responsive results completed;
-- [ ] Git checkpoint committed and pushed.
+- [x] Git checkpoint committed and pushed — `da8816d737e7fda118b31d9f7d3c012449e3491f`.
+
+#### 01G-B1 — Read-only deployed preflight
+
+- [x] deployed smoke CLI;
+- [x] public tenant and catalog contract checks;
+- [x] review form and invalid-token checks;
+- [x] cron authentication boundary checks;
+- [x] sanitized evidence report;
+- [x] plan-aware Vercel activation runbook;
+- [x] source-contract test;
+- [x] final `npm run check`;
+- [ ] Git checkpoint committed and pushed;
+- [ ] deployed preflight report passed.
+
+#### 01G-B2 — Controlled test-mode invitation E2E
+
+- [ ] one eligible completed test booking;
+- [ ] one authorized cron invocation with batch limit 1;
+- [ ] one test-mode Resend delivery;
+- [ ] single-use verified invitation submission;
+- [ ] moderation and public verified badge;
+- [ ] deduplication and retry evidence.
 
 #### 01G-B — Deployed E2E and production activation
 

@@ -57,3 +57,6 @@ lint-report.txt
 /*-01*.zip
 /apply-*.mjs
 /scripts/apply-*.mjs
+
+# Local deployed review QA evidence
+/tmp/reviews-qa/
