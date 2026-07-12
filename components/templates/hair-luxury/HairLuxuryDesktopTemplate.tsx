@@ -8,6 +8,7 @@ import type {
 
 export default function HairLuxuryDesktopTemplate({
   locale,
+  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -16,6 +17,9 @@ export default function HairLuxuryDesktopTemplate({
   return (
     <DesktopLanding
       locale={locale}
+      previewMode={
+        previewMode
+      }
       onLocaleChange={
         onLocaleChange
       }

@@ -192,16 +192,21 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 - [x] accessibility labels, list semantics and progress bars;
 - [x] helper unit and source-contract tests;
 - [x] final `npm run check`;
-- [ ] Git checkpoint committed and pushed.
+- [x] Git checkpoint committed and pushed — `4d056cc642f1f969ea83c8e5145dcf3a5f2ca21c`.
 
 #### 01F-C — Theme integration
 
-- [ ] remove static review imports;
-- [ ] make catalog review fields mandatory;
-- [ ] Lumière desktop/mobile integration;
-- [ ] Editorial desktop/mobile integration;
-- [ ] Barber desktop/mobile integration;
-- [ ] responsive and seven-language closeout.
+- [x] remove static review imports and legacy review type;
+- [x] make catalog review fields mandatory;
+- [x] pass preview mode through the shared template contract;
+- [x] Lumière desktop/mobile integration;
+- [x] Editorial desktop/mobile integration;
+- [x] Barber desktop/mobile integration;
+- [x] desktop review navigation anchors where supported;
+- [x] shared mobile content parity without duplicate datasets;
+- [x] theme-integration source-contract tests;
+- [x] final `npm run check`;
+- [ ] Git checkpoint committed and pushed.
 
 ### 01G — QA closeout
 

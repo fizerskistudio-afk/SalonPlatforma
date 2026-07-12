@@ -4,6 +4,7 @@ import type {
 
 export type PublicTemplateProps = {
   locale: Locale;
+  previewMode: boolean;
 
   onLocaleChange: (
     locale: Locale

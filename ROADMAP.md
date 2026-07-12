@@ -484,13 +484,31 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] brand-token responsive shared section;
 - [x] helper unit i source-contract testovi;
 - [x] završni `npm run check`;
+- [x] Git checkpoint, commit i push — `4d056cc642f1f969ea83c8e5145dcf3a5f2ca21c`.
+
+### DEMO-REVIEWS-FOUNDATION-01F-C — THEME INTEGRATION source spreman
+
+- [x] CatalogReviewsSection theme adapter;
+- [x] previewMode prosleđen kroz PublicTemplateProps;
+- [x] Lumière desktop real catalog reviews;
+- [x] Lumière mobile review parity;
+- [x] Editorial desktop/mobile real catalog reviews;
+- [x] Editorial desktop reviews navigation anchor;
+- [x] Barber desktop/mobile real catalog reviews;
+- [x] Barber desktop reviews navigation anchor;
+- [x] uklonjen legacy static contentData;
+- [x] uklonjen legacy desktop ReviewsSection;
+- [x] uklonjen legacy Review tip;
+- [x] CatalogData review polja postala obavezna;
+- [x] theme-integration source contract;
+- [x] završni `npm run check`;
 - [ ] Git checkpoint, commit i push.
 
-### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
+### DEMO-THEME-LUMIERE-01 — spreman za closeout
 
 - [ ] potvrditi desktop kompoziciju i sekcije;
 - [ ] potvrditi mobile app-shell kompoziciju i navigaciju;
-- [ ] povezati shared reviews catalog i mobile parity;
+- [x] povezati shared reviews catalog i mobile parity;
 - [ ] proveriti booking entry point-e i state coverage;
 - [ ] izvršiti sedmojezični vizuelni i responsive closeout;
 - [ ] zaključati Lumière kao acceptance baseline za naredne teme.

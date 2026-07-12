@@ -14,6 +14,7 @@ import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
 } from "@/lib/translations";
+import CatalogReviewsSection from "@/components/reviews/CatalogReviewsSection";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import InstagramIcon from "@/components/shared/icons/InstagramIcon";
 import type { PublicTemplateProps } from "../template-props";
@@ -26,6 +27,7 @@ import {
 
 export default function BarberHeritageMobileTemplate({
   locale,
+  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -432,6 +434,15 @@ export default function BarberHeritageMobileTemplate({
           )}
         </div>
       </section>
+
+      <CatalogReviewsSection
+        locale={locale}
+        previewMode={
+          previewMode
+        }
+        id="barber-mobile-reviews"
+        className="border-y border-[var(--brand-border)] pb-32"
+      />
 
       {/* Mobile Contact */}
       <section

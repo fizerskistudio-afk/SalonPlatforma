@@ -11,6 +11,7 @@ import {
   Scissors,
 } from "lucide-react";
 
+import CatalogReviewsSection from "@/components/reviews/CatalogReviewsSection";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import InstagramIcon from "@/components/shared/icons/InstagramIcon";
 import {
@@ -42,6 +43,7 @@ const galleryLayouts = [
 
 export default function HairEditorialDesktopTemplate({
   locale,
+  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -129,6 +131,16 @@ export default function HairEditorialDesktopTemplate({
             >
               {t(
                 translations.nav.gallery,
+                locale
+              )}
+            </a>
+
+            <a
+              href="#editorial-reviews"
+              className="transition-colors hover:text-[var(--brand-text)]"
+            >
+              {t(
+                translations.nav.reviews,
                 locale
               )}
             </a>
@@ -636,6 +648,16 @@ export default function HairEditorialDesktopTemplate({
             )}
           </div>
         </section>
+
+        <CatalogReviewsSection
+          locale={locale}
+          previewMode={
+            previewMode
+          }
+          id="editorial-reviews"
+          className="border-b border-[var(--brand-border)]"
+          contentClassName="max-w-[1500px]"
+        />
 
         <section
           id="editorial-contact"

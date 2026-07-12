@@ -609,6 +609,7 @@ function SalonPlatformContent({
 
   const templateProps = {
     locale,
+    previewMode,
 
     onLocaleChange:
       handleLocaleChange,

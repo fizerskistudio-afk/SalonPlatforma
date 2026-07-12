@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 
+import CatalogReviewsSection from "@/components/reviews/CatalogReviewsSection";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import InstagramIcon from "@/components/shared/icons/InstagramIcon";
 import {
@@ -36,6 +37,7 @@ import {
 
 export default function HairEditorialMobileTemplate({
   locale,
+  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -476,6 +478,15 @@ export default function HairEditorialMobileTemplate({
             </div>
           )}
         </section>
+
+        <CatalogReviewsSection
+          locale={locale}
+          previewMode={
+            previewMode
+          }
+          id="editorial-mobile-reviews"
+          className="border-b border-[var(--brand-border)] pb-32"
+        />
 
         <section
           id="editorial-mobile-contact"

@@ -38,9 +38,9 @@ describe(
       "export type CatalogReview =",
       "export type CatalogReviewSummary =",
       "export type CatalogReviewConfig =",
-      "reviews?: CatalogReview[]",
-      "reviewSummary?: CatalogReviewSummary",
-      "reviewConfig?: CatalogReviewConfig",
+      "reviews: CatalogReview[]",
+      "reviewSummary: CatalogReviewSummary",
+      "reviewConfig: CatalogReviewConfig",
     ])(
       "adds catalog type marker %s",
       (
@@ -50,6 +50,29 @@ describe(
           types
         ).toContain(
           marker
+        );
+      }
+    );
+
+    it(
+      "rejects the staged optional review fields",
+      () => {
+        expect(
+          types
+        ).not.toContain(
+          "reviews?: CatalogReview[]"
+        );
+
+        expect(
+          types
+        ).not.toContain(
+          "reviewSummary?: CatalogReviewSummary"
+        );
+
+        expect(
+          types
+        ).not.toContain(
+          "reviewConfig?: CatalogReviewConfig"
         );
       }
     );

@@ -12,7 +12,9 @@ import {
 import { useCatalogData } from "@/lib/catalogContext";
 import {
   t,
+  translations,
 } from "@/lib/translations";
+import CatalogReviewsSection from "@/components/reviews/CatalogReviewsSection";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import InstagramIcon from "@/components/shared/icons/InstagramIcon";
 import type { PublicTemplateProps } from "../template-props";
@@ -25,6 +27,7 @@ import {
 
 export default function BarberHeritageDesktopTemplate({
   locale,
+  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -105,6 +108,16 @@ export default function BarberHeritageDesktopTemplate({
               style={{ color: "var(--brand-text)" }}
             >
               {t(barberLabels.navGallery, locale)}
+            </a>
+            <a
+              href="#reviews"
+              className="text-sm transition-colors hover:opacity-80"
+              style={{ color: "var(--brand-text)" }}
+            >
+              {t(
+                translations.nav.reviews,
+                locale
+              )}
             </a>
             <a
               href="#contact"
@@ -458,6 +471,15 @@ export default function BarberHeritageDesktopTemplate({
           )}
         </div>
       </section>
+
+      <CatalogReviewsSection
+        locale={locale}
+        previewMode={
+          previewMode
+        }
+        id="reviews"
+        className="border-y border-[var(--brand-border)]"
+      />
 
       {/* Contact CTA Section */}
       <section

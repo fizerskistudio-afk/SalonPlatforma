@@ -261,20 +261,6 @@ export type Employee = {
 // CONTENT TYPES
 // ============================================
 
-/**
- * Legacy static theme review shape.
- *
- * It remains temporarily during the staged 01F theme migration.
- * Public catalog data uses CatalogReview below.
- */
-export type Review = {
-  id: string;
-  author: string;
-  rating: number;
-  text: LocalizedText;
-  date: string;
-};
-
 export type CatalogReview = {
   id: string;
   source: ReviewSource;
@@ -335,13 +321,9 @@ export type CatalogData = {
   employees: Employee[];
   gallery: GalleryItem[];
 
-  /**
-   * Optional only during the staged 01F migration.
-   * The real public catalog loader always populates these fields.
-   */
-  reviews?: CatalogReview[];
-  reviewSummary?: CatalogReviewSummary;
-  reviewConfig?: CatalogReviewConfig;
+  reviews: CatalogReview[];
+  reviewSummary: CatalogReviewSummary;
+  reviewConfig: CatalogReviewConfig;
 };
 
 // ============================================
