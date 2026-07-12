@@ -502,7 +502,33 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] CatalogData review polja postala obavezna;
 - [x] theme-integration source contract;
 - [x] završni `npm run check`;
+- [x] Git checkpoint, commit i push — `4a701cd142db8ee19468464a6e2fd7f6990afdab`.
+
+### DEMO-REVIEWS-FOUNDATION-01G-A — LOCAL LAUNCH READINESS source spreman
+
+- [x] review launch QA matrica;
+- [x] evidence/results template bez tajni;
+- [x] Lumière, Editorial i Barber desktop/mobile coverage;
+- [x] sedam UI jezika u QA contractu;
+- [x] disabled, empty, verified, testimonial, Google, demo, owner reply i long-content scenariji;
+- [x] direct i verified submission smoke procedura;
+- [x] moderation i cross-tenant smoke procedura;
+- [x] source-level launch-readiness contract;
+- [x] završni `npm run check`;
+- [ ] browser i responsive smoke popunjen u results dokumentu;
 - [ ] Git checkpoint, commit i push.
+
+### DEMO-REVIEWS-FOUNDATION-01G-B — DEPLOYED E2E I PRODUCTION AKTIVACIJA
+
+- [ ] deployovan public tenant i review routes smoke;
+- [ ] direct review E2E;
+- [ ] completed booking → outbox → Resend email → token forma → verified review E2E;
+- [ ] moderation i cross-tenant production smoke;
+- [ ] protected cron single-run smoke;
+- [ ] deduplikacija, retry/backoff i stale recovery potvrđeni;
+- [ ] production invitation schedule aktiviran;
+- [ ] activation evidence upisan bez tajni;
+- [ ] finalni review foundation closeout.
 
 ### DEMO-THEME-LUMIERE-01 — spreman za closeout
 

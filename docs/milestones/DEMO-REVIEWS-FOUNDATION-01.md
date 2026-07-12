@@ -206,7 +206,33 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 - [x] shared mobile content parity without duplicate datasets;
 - [x] theme-integration source-contract tests;
 - [x] final `npm run check`;
+- [x] Git checkpoint committed and pushed — `4a701cd142db8ee19468464a6e2fd7f6990afdab`.
+
+### 01G — QA and launch activation
+
+#### 01G-A — Local launch readiness
+
+- [x] review launch QA matrix;
+- [x] evidence/results template;
+- [x] six theme/viewport integration paths;
+- [x] seven-locale acceptance matrix;
+- [x] public, moderation and tenant-isolation smoke procedures;
+- [x] launch-readiness source-contract test;
+- [x] final `npm run check`;
+- [ ] browser and responsive results completed;
 - [ ] Git checkpoint committed and pushed.
+
+#### 01G-B — Deployed E2E and production activation
+
+- [ ] deployed direct review smoke;
+- [ ] deployed verified invitation smoke;
+- [ ] completed booking to Resend delivery E2E;
+- [ ] moderation and cross-tenant production smoke;
+- [ ] protected cron smoke;
+- [ ] retry, deduplication and stale recovery;
+- [ ] production invitation schedule enabled;
+- [ ] final launch evidence and closeout.
+
 
 ### 01G — QA closeout
 
