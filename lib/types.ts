@@ -2,6 +2,10 @@ import type {
   LocaleCode,
   UiLocaleCode,
 } from "@/lib/i18n/locales";
+import type {
+  ReviewBadgeKind,
+  ReviewSource,
+} from "@/lib/reviews/domain";
 
 // ============================================
 // LOCALE & TRANSLATIONS
@@ -257,12 +261,59 @@ export type Employee = {
 // CONTENT TYPES
 // ============================================
 
+/**
+ * Legacy static theme review shape.
+ *
+ * It remains temporarily during the staged 01F theme migration.
+ * Public catalog data uses CatalogReview below.
+ */
 export type Review = {
   id: string;
   author: string;
   rating: number;
   text: LocalizedText;
   date: string;
+};
+
+export type CatalogReview = {
+  id: string;
+  source: ReviewSource;
+  badge: ReviewBadgeKind;
+  authorName: string;
+  authorAvatarUrl: string | null;
+  rating: number | null;
+  body: string;
+  languageCode: string | null;
+  isVerifiedVisit: boolean;
+  serviceId: string | null;
+  employeeId: string | null;
+  externalUrl: string | null;
+  ownerReply: string | null;
+  ownerReplyAt: string | null;
+  publishedAt: string;
+};
+
+export type CatalogReviewSummary = {
+  total: number;
+  ratedCount: number;
+  averageRating: number | null;
+  distribution: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
+};
+
+export type CatalogReviewConfig = {
+  enabled: boolean;
+  directSubmissionEnabled: boolean;
+  verifiedSubmissionEnabled: boolean;
+  testimonialsEnabled: boolean;
+  googleReviewsEnabled: boolean;
+  showRatingSummary: boolean;
+  googleReviewUrl: string | null;
 };
 
 export type GalleryItem = {
@@ -283,6 +334,14 @@ export type CatalogData = {
   services: Service[];
   employees: Employee[];
   gallery: GalleryItem[];
+
+  /**
+   * Optional only during the staged 01F migration.
+   * The real public catalog loader always populates these fields.
+   */
+  reviews?: CatalogReview[];
+  reviewSummary?: CatalogReviewSummary;
+  reviewConfig?: CatalogReviewConfig;
 };
 
 // ============================================

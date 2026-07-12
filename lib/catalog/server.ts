@@ -5,6 +5,12 @@ import {
 } from "react";
 
 import {
+  buildCatalogReviewData,
+  type CatalogReviewLoadMode,
+  type CatalogReviewRow,
+  type CatalogReviewSettingsRow,
+} from "@/lib/catalog/reviews";
+import {
   isLocaleCode,
   normalizeLocaleList,
 } from "@/lib/i18n/locales";
@@ -317,8 +323,7 @@ function toNumber(
 }
 
 type PublicCatalogLoadMode =
-  | "public"
-  | "platform-preview";
+  CatalogReviewLoadMode;
 
 async function loadPublicCatalogUncached(
   rawBusinessSlug: string,
@@ -463,17 +468,30 @@ async function loadPublicCatalogUncached(
 
   const [
     settingsResult,
+    reviewSettingsResult,
     categoriesResult,
     servicesResult,
     employeesResult,
     employeeServicesResult,
     workingHoursResult,
     galleryResult,
+    reviewsResult,
   ] = await Promise.all([
     supabase
       .from("booking_settings")
       .select(
         "slot_interval_minutes, booking_window_days, min_advance_minutes, allow_any_employee, require_email, require_phone, allow_notes, auto_confirm"
+      )
+      .eq(
+        "business_id",
+        business.id
+      )
+      .maybeSingle(),
+
+    supabase
+      .from("review_settings")
+      .select(
+        "reviews_enabled, direct_reviews_enabled, verified_reviews_enabled, testimonials_enabled, google_reviews_enabled, show_rating_summary, allow_demo_content, google_review_url"
       )
       .eq(
         "business_id",
@@ -564,16 +582,46 @@ async function loadPublicCatalogUncached(
       .order("created_at", {
         ascending: true,
       }),
+
+    supabase
+      .from("reviews")
+      .select(
+        "id, source, status, service_id, employee_id, author_name, author_avatar_url, rating, body, language_code, is_verified_visit, external_url, owner_reply, owner_reply_at, provider_published_at, published_at, created_at"
+      )
+      .eq(
+        "business_id",
+        business.id
+      )
+      .eq(
+        "status",
+        "published"
+      )
+      .order(
+        "published_at",
+        {
+          ascending: false,
+          nullsFirst: false,
+        }
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      )
+      .limit(100),
   ]);
 
   const queryErrors = [
     settingsResult.error,
+    reviewSettingsResult.error,
     categoriesResult.error,
     servicesResult.error,
     employeesResult.error,
     employeeServicesResult.error,
     workingHoursResult.error,
     galleryResult.error,
+    reviewsResult.error,
   ].filter(Boolean);
 
   if (queryErrors.length > 0) {
@@ -600,6 +648,26 @@ async function loadPublicCatalogUncached(
   const settings =
     settingsResult.data as unknown as
       BookingSettingsRow;
+
+  const reviewSettings =
+    reviewSettingsResult.data
+      ? reviewSettingsResult.data as unknown as
+          CatalogReviewSettingsRow
+      : null;
+
+  const reviewRows =
+    (reviewsResult.data ??
+      []) as unknown as
+      CatalogReviewRow[];
+
+  const reviewCatalog =
+    buildCatalogReviewData({
+      mode,
+      settings:
+        reviewSettings,
+      rows:
+        reviewRows,
+    });
 
   const categoryRows =
     (categoriesResult.data ??
@@ -861,6 +929,12 @@ async function loadPublicCatalogUncached(
     services,
     employees,
     gallery,
+    reviews:
+      reviewCatalog.reviews,
+    reviewSummary:
+      reviewCatalog.summary,
+    reviewConfig:
+      reviewCatalog.config,
   };
 
   return {

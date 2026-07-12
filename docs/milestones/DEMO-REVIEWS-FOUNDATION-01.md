@@ -148,7 +148,7 @@ Finishing individual themes before the shared review contract would create dupli
 - [x] migration applied to target database;
 - [x] database verification returned `PASS`;
 - [x] moderation browser smoke;
-- [ ] Git checkpoint committed and pushed.
+- [x] Git checkpoint committed and pushed — `41f42c93937a836b808c0ad32e8836cf4f7e2f06`.
 
 ### 01E — Google provider — deferred post-launch
 
@@ -163,12 +163,36 @@ Launch baseline: manually configured official Google review URL and QR CTA. Full
 
 ### 01F — Catalog and theme integration
 
-- [ ] published reviews in `CatalogData`;
-- [ ] remove static review import;
-- [ ] shared review card/list;
-- [ ] desktop/mobile parity;
-- [ ] source filters and badges;
-- [ ] Lumière, Editorial and Barber integration.
+#### 01F-A — Catalog review contract
+
+- [x] published review query in the shared public catalog loader;
+- [x] second published-only boundary in the pure mapper;
+- [x] tenant review settings and source switches;
+- [x] public demo exclusion and authenticated preview rule;
+- [x] review item, summary and configuration catalog types;
+- [x] platform-only local owner reply output;
+- [x] manual Google review URL catalog configuration;
+- [x] backward-compatible optional fields during staged theme migration;
+- [x] unit and source-contract tests;
+- [x] final `npm run check`;
+- [ ] Git checkpoint committed and pushed.
+
+#### 01F-B — Shared review presentation
+
+- [ ] shared rating summary;
+- [ ] shared review card and owner reply;
+- [ ] source and verified-visit badges;
+- [ ] Google external attribution and CTA;
+- [ ] empty, long-copy and accessibility states.
+
+#### 01F-C — Theme integration
+
+- [ ] remove static review imports;
+- [ ] make catalog review fields mandatory;
+- [ ] Lumière desktop/mobile integration;
+- [ ] Editorial desktop/mobile integration;
+- [ ] Barber desktop/mobile integration;
+- [ ] responsive and seven-language closeout.
 
 ### 01G — QA closeout
 

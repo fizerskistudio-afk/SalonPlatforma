@@ -434,6 +434,36 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] završni `npm run check`;
 - [x] migracija 028 primenjena i database verification vratila `PASS`;
 - [x] moderation browser smoke prošao;
+- [x] Git checkpoint, commit i push — `41f42c93937a836b808c0ad32e8836cf4f7e2f06`.
+
+### REVIEW-INVITATION-LAUNCH-01 — pre-launch aktivacija
+
+Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivacija nakon deploy smoke potvrde.
+
+- [x] completed booking trigger i invitation outbox source;
+- [x] Resend review invitation template i delivery pipeline;
+- [x] single-use hash-only token forma i submission tok;
+- [ ] deployovan direct i verified review form smoke;
+- [ ] aktivirati production review-invitations cron;
+- [ ] end-to-end smoke: completed booking → outbox → Resend email → token forma → review submit → moderation;
+- [ ] potvrditi delivery log, deduplikaciju i retry ponašanje.
+
+### DEMO-REVIEWS-FOUNDATION-01F-A — CATALOG REVIEW CONTRACT source spreman
+
+- [x] backward-compatible CatalogReview contract;
+- [x] review summary i 1–5 distribution contract;
+- [x] review settings i Google URL catalog config;
+- [x] public loader query zahteva status=published;
+- [x] pure mapper ponovo zahteva published status;
+- [x] public katalog isključuje demo sadržaj;
+- [x] platform preview demo zahteva allow_demo_content;
+- [x] testimonials i Google source settings se poštuju;
+- [x] owner reply izlazi samo za platform reviews;
+- [x] unrated testimonials ne ulaze u rating prosek;
+- [x] realni public loader uvek popunjava review contract;
+- [x] legacy statički Review tip ostaje samo do 01F-C migracije tema;
+- [x] unit i source-contract testovi;
+- [x] završni `npm run check`;
 - [ ] Git checkpoint, commit i push.
 
 ### DEMO-THEME-LUMIERE-01 — čeka shared reviews foundation
