@@ -12,6 +12,7 @@ import {
 } from "@/lib/supabase/server";
 import {
   getAuthFailureLoginPath,
+  getSafeAuthNextPath,
 } from "@/lib/auth/platform-admin-policy";
 
 const EMAIL_OTP_TYPES =
@@ -23,24 +24,6 @@ const EMAIL_OTP_TYPES =
     "recovery",
     "email_change",
   ]);
-
-function getSafeNextPath(
-  value: string | null
-): string {
-  if (
-    !value ||
-    !value.startsWith(
-      "/"
-    ) ||
-    value.startsWith(
-      "//"
-    )
-  ) {
-    return "/admin";
-  }
-
-  return value;
-}
 
 function isInviteActivationPath(
   value: string
@@ -77,7 +60,7 @@ export async function GET(
   request: NextRequest
 ) {
   const next =
-    getSafeNextPath(
+    getSafeAuthNextPath(
       request
         .nextUrl
         .searchParams

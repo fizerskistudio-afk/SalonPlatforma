@@ -11,7 +11,6 @@ import Link from "next/link";
 import {
   ExternalLink,
   LogOut,
-  Scissors,
   Settings2,
   ShieldCheck,
 } from "lucide-react";
@@ -62,12 +61,12 @@ export default async function PlatformAdminLayout({
       }}
     >
       <div
-      className="
-        min-h-screen
-        bg-zinc-950
-        text-zinc-100
-      "
-    >
+        className="
+          min-h-screen
+          bg-zinc-950
+          text-zinc-100
+        "
+      >
       <aside
         className="
           border-b
@@ -140,43 +139,6 @@ export default async function PlatformAdminLayout({
 
           <PlatformAdminNavigation />
 
-          <Link
-            href="/admin"
-            className="
-              mt-2
-              flex
-              items-center
-              justify-between
-              rounded-xl
-              px-4
-              py-3
-              text-sm
-              font-medium
-              text-zinc-400
-              transition
-              hover:bg-white/5
-              hover:text-white
-            "
-          >
-            <span
-              className="
-                flex
-                items-center
-                gap-3
-              "
-            >
-              <Scissors
-                size={18}
-              />
-
-              Salon admin
-            </span>
-
-            <ExternalLink
-              size={15}
-            />
-          </Link>
-
           <div
             className="
               mt-6
@@ -220,6 +182,21 @@ export default async function PlatformAdminLayout({
               "
             >
               {platformAdmin.email}
+            </p>
+
+            <p
+              className="
+                mt-2
+                text-xs
+                text-zinc-500
+              "
+            >
+              {
+                platformAdmin.roleSource ===
+                  "database_membership"
+                  ? "Database membership"
+                  : "Legacy bootstrap pristup"
+              }
             </p>
 
             <form

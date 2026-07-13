@@ -251,21 +251,22 @@ Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je 
 
 1. `PLATFORM-ADMIN-PUBLIC-URL-01` — završen;
 2. `PLATFORM-ADMIN-AUTH-BOUNDARY-01` — završen;
-3. `PLATFORM-ADMIN-RBAC-FOUNDATION-01` — aktivan;
-4. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01`;
-5. `PLATFORM-ADMIN-WORKSPACE-01`;
-6. `PLATFORM-ADMIN-ACCESS-RECOVERY-01`;
-7. `PLATFORM-ADMIN-OPERATIONS-01`;
-8. `CONTENT-STARTER-PACKS-01A`;
-9. `CLIENT-CONTENT-INTAKE-01`;
-10. `CLIENT-PREVIEW-SHARING-01`;
-11. `DEMO-THEME-EDITORIAL-01`;
-12. `DEMO-THEME-BARBER-01`;
-13. `DEMO-THEME-NAILS-01`;
-14. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
-15. `DEMO-DATA-LANDING-01`;
-16. `MASTER-SYSTEM-QA-01`;
-17. `PREVIEW-SOFT-LAUNCH-GATE-01`.
+3. `PLATFORM-ADMIN-RBAC-FOUNDATION-01` — završen;
+4. `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01` — aktivan;
+5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01`;
+6. `PLATFORM-ADMIN-WORKSPACE-01`;
+7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01`;
+8. `PLATFORM-ADMIN-OPERATIONS-01`;
+9. `CONTENT-STARTER-PACKS-01A`;
+10. `CLIENT-CONTENT-INTAKE-01`;
+11. `CLIENT-PREVIEW-SHARING-01`;
+12. `DEMO-THEME-EDITORIAL-01`;
+13. `DEMO-THEME-BARBER-01`;
+14. `DEMO-THEME-NAILS-01`;
+15. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
+16. `DEMO-DATA-LANDING-01`;
+17. `MASTER-SYSTEM-QA-01`;
+18. `PREVIEW-SOFT-LAUNCH-GATE-01`.
 
 `DEMO-THEME-WELLNESS-01` i `DEMO-THEME-BEAUTY-01` premešteni su posle preview soft launch-a, kako nove vertikale ne bi blokirale proveru stvarnog client-preview prodajnog toka. `STUDIOBIBI-PILOT-01` ostaje production pilot posle backup, legal, domain i production environment gate-ova.
 
@@ -606,7 +607,8 @@ Post-launch backlog: `POST-LAUNCH-MOBILE-SOCIAL-PROOF-01` — opcioni diskretni 
 - [x] `PLATFORM-ADMIN-PUBLIC-URL-01` i korektivni `01A` završeni;
 - [x] canonical public linkovi više ne zavise od hydration resolvera;
 - [x] `PLATFORM-ADMIN-AUTH-BOUNDARY-01` runtime smoke PASS;
-- [ ] aktivan capability-based `PLATFORM-ADMIN-RBAC-FOUNDATION-01`;
+- [x] capability-based `PLATFORM-ADMIN-RBAC-FOUNDATION-01` installer i runtime PASS;
+- [ ] aktivan `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01`;
 - [ ] database membership aktivacija ostaje zaseban eksplicitno odobren korak.
 
 ### Client-preview soft launch granica
@@ -932,9 +934,10 @@ Poslednji završen audit: PLATFORM-ADMIN-REVIEW-01
 Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
 Lumière: završena referentna tema; galerijski layout zaključan
 Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
-Aktivni milestone: PLATFORM-ADMIN-RBAC-FOUNDATION-01
-Sledeći redosled: RBAC foundation → lifecycle/readiness → workspace → access/recovery → operations → starter packs → content intake → shareable preview
+Aktivni milestone: PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01
+Sledeći redosled: auth/RBAC closeout → lifecycle/readiness → workspace → access/recovery → operations → starter packs → content intake → shareable preview
 Teme posle platform-admin preview osnove: Editorial → Barber → Nails
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
+Main gate: kompletan platform-admin + Lumière/Editorial/Barber/Nails + domen + RBAC DB aktivacija + master QA + eksplicitna dozvola
 Production track posle preview gate-a: backup → legal → brand → domains/env → StudioBiBi pilot
 ```

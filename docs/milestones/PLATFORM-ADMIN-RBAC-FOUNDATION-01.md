@@ -55,8 +55,10 @@ Sales zato može da napravi i pregleda preview, ali direktan API poziv ne može 
 3. pretvaranje pending SQL-a u numerisanu migraciju i verification paket;
 4. bootstrap postojećeg platform vlasnika kao `super_admin`, bez deljenja credentiala;
 5. login i API smoke sa postojećim nalogom;
-6. tek zatim prebacivanje role resolvera sa legacy allowlist-a na membership RPC;
-7. test Sales zabrane publish-a i zaštite poslednjeg super-admina;
-8. kasnije team/department UI i immutable audit log.
+6. prebacivanje `PLATFORM_ADMIN_MEMBERSHIP_MODE` sa `legacy` na `hybrid`;
+7. login i permission smoke za database Sales/IT naloge, uz potvrdu bootstrap fallback-a;
+8. tek posle stabilnog smoke-a prelazak sa `hybrid` na `database`;
+9. test Sales zabrane publish-a i zaštite poslednjeg super-admina;
+10. kasnije team/department UI i immutable audit log.
 
 Ako bilo koji bootstrap ili smoke korak ne prođe, aplikacija ostaje u legacy allowlist režimu.

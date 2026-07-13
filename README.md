@@ -183,7 +183,15 @@ Server Components + Route Handlers + Server Actions
 
 ### Platform admin
 
-Platform admin pristup je dozvoljen samo autentifikovanim email adresama iz `PLATFORM_ADMIN_EMAILS`.
+Platform admin koristi sopstveni login route i capability-based role: `super_admin`, `sales`, `launch_manager` i `it`. Dok database membership migracija nije aktivirana, `PLATFORM_ADMIN_EMAILS` predstavlja legacy bootstrap allowlistu i svaki dozvoljeni nalog dobija `super_admin` rolu.
+
+`PLATFORM_ADMIN_MEMBERSHIP_MODE` kontroliše bezbedan rollout:
+
+- `legacy` — samo bootstrap allowlista, bez database RPC poziva;
+- `hybrid` — database membership ima prioritet, a allowlista ostaje break-glass fallback;
+- `database` — isključivo aktivno database članstvo, bez allowlist fallback-a.
+
+Podrazumevani režim je `legacy`. `hybrid` i `database` se ne uključuju pre odobrene migracije, bootstrap-a postojećeg super-admina i runtime smoke testa.
 
 ### Owner
 
@@ -344,6 +352,7 @@ Ne commituj `.env.local`, service-role/secret ključeve, OAuth secrets, encrypti
 | `PLATFORM_ROOT_DOMAIN` | Root authority, npr. `localhost:3000` ili budući domen |
 | `PLATFORM_ROOT_PROTOCOL` | `http` ili `https`; lokalno obično `http` |
 | `PLATFORM_ADMIN_EMAILS` | Zarezom odvojena allowlista platform-admin email adresa |
+| `PLATFORM_ADMIN_MEMBERSHIP_MODE` | `legacy`, `hybrid` ili `database`; podrazumevano `legacy` |
 
 Lokalni primer:
 
@@ -351,6 +360,7 @@ Lokalni primer:
 PLATFORM_ROOT_DOMAIN=localhost:3000
 PLATFORM_ROOT_PROTOCOL=http
 PLATFORM_ADMIN_EMAILS=admin@example.com
+PLATFORM_ADMIN_MEMBERSHIP_MODE=legacy
 ```
 
 ### Rate limiting
@@ -489,6 +499,7 @@ SUPABASE_SECRET_KEY=
 PLATFORM_ROOT_DOMAIN=localhost:3000
 PLATFORM_ROOT_PROTOCOL=http
 PLATFORM_ADMIN_EMAILS=
+PLATFORM_ADMIN_MEMBERSHIP_MODE=legacy
 
 # Security
 PUBLIC_RATE_LIMIT_SECRET=

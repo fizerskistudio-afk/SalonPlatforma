@@ -215,6 +215,42 @@ export function getAuthFailureLoginPath(
     : "/admin/login";
 }
 
+export function getSafeAuthNextPath(
+  value: unknown
+): string {
+  if (
+    typeof value !==
+      "string" ||
+    !value.startsWith(
+      "/"
+    ) ||
+    value.startsWith(
+      "//"
+    )
+  ) {
+    return "/admin";
+  }
+
+  try {
+    const parsedUrl =
+      new URL(
+        value,
+        "http://localhost"
+      );
+
+    if (
+      parsedUrl.origin !==
+      "http://localhost"
+    ) {
+      return "/admin";
+    }
+
+    return `${parsedUrl.pathname}${parsedUrl.search}`;
+  } catch {
+    return "/admin";
+  }
+}
+
 export function getSafePlatformAdminNextPath(
   value: unknown
 ): string {

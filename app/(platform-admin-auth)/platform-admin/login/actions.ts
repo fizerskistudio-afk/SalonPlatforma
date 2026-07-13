@@ -4,9 +4,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
-  getPlatformAdminRoleForEmail,
   getSafePlatformAdminNextPath,
 } from "@/lib/auth/platform-admin-policy";
+import {
+  resolvePlatformAdminMembershipForClient,
+} from "@/lib/auth/platform-admin";
 import {
   createRequestId,
   logServerError,
@@ -182,14 +184,17 @@ export async function platformAdminLoginAction(
     };
   }
 
-  const role =
-    getPlatformAdminRoleForEmail(
-      data.user.email,
-      process.env
-        .PLATFORM_ADMIN_EMAILS
+  const membership =
+    await resolvePlatformAdminMembershipForClient(
+      supabase,
+      data.user.email ??
+        email,
     );
 
-  if (!role) {
+  if (
+    membership.status !==
+    "authorized"
+  ) {
     logServerEvent(
       "warn",
       "auth.platform_admin.access.denied",
@@ -197,6 +202,8 @@ export async function platformAdminLoginAction(
         requestId,
         userId:
           data.user.id,
+        reason:
+          membership.reason,
       }
     );
 
@@ -232,7 +239,12 @@ export async function platformAdminLoginAction(
       requestId,
       userId:
         data.user.id,
-      role,
+      role:
+        membership.role,
+      roleSource:
+        membership.source,
+      membershipMode:
+        membership.mode,
     }
   );
 

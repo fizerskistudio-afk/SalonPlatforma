@@ -8,6 +8,7 @@ import {
   getAuthFailureLoginPath,
   getPlatformAdminPermissions,
   getPlatformAdminRoleForEmail,
+  getSafeAuthNextPath,
   getSafePlatformAdminNextPath,
   hasPlatformAdminPermission,
   isPlatformAdminRole,
@@ -236,6 +237,35 @@ describe(
           )
         ).toBe(
           "/admin/login"
+        );
+      }
+    );
+
+    it(
+      "keeps only a same-origin auth callback destination",
+      () => {
+        expect(
+          getSafeAuthNextPath(
+            "/admin/change-password?source=recovery"
+          )
+        ).toBe(
+          "/admin/change-password?source=recovery"
+        );
+
+        expect(
+          getSafeAuthNextPath(
+            "/\\evil.example/path"
+          )
+        ).toBe(
+          "/admin"
+        );
+
+        expect(
+          getSafeAuthNextPath(
+            "https://evil.example/platform-admin"
+          )
+        ).toBe(
+          "/admin"
         );
       }
     );

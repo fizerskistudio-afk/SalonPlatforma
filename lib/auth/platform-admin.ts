@@ -8,11 +8,16 @@ import {
 } from "@/lib/supabase/server";
 
 import {
-  getPlatformAdminRoleForEmail,
   hasPlatformAdminPermission,
   type PlatformAdminPermission,
   type PlatformAdminRole,
 } from "@/lib/auth/platform-admin-policy";
+import {
+  parsePlatformAdminMembershipMode,
+  resolvePlatformAdminMembership,
+  type PlatformAdminMembershipMode,
+  type PlatformAdminRoleSource,
+} from "@/lib/auth/platform-admin-membership";
 
 export type {
   PlatformAdminRole,
@@ -22,7 +27,18 @@ export type PlatformAdminContext = {
   userId: string;
   email: string;
   role: PlatformAdminRole;
+  roleSource:
+    PlatformAdminRoleSource;
+  membershipMode:
+    PlatformAdminMembershipMode;
 };
+
+type PlatformAdminSupabaseClient =
+  Awaited<
+    ReturnType<
+      typeof createClient
+    >
+  >;
 
 type PlatformAdminAccess =
   | {
@@ -36,8 +52,58 @@ type PlatformAdminAccess =
         | "forbidden";
       reason?:
         | "membership"
-        | "permission";
+        | "permission"
+        | "membership_unavailable"
+        | "configuration";
     };
+
+export async function resolvePlatformAdminMembershipForClient(
+  supabase:
+    PlatformAdminSupabaseClient,
+  email: string
+) {
+  const membershipMode =
+    parsePlatformAdminMembershipMode(
+      process.env
+        .PLATFORM_ADMIN_MEMBERSHIP_MODE
+    );
+
+  if (
+    !membershipMode
+  ) {
+    return {
+      status:
+        "forbidden" as const,
+      reason:
+        "configuration" as const,
+    };
+  }
+
+  return resolvePlatformAdminMembership({
+    mode:
+      membershipMode,
+    email,
+    configuredEmails:
+      process.env
+        .PLATFORM_ADMIN_EMAILS,
+    loadDatabaseRole:
+      async () => {
+        const {
+          data,
+          error,
+        } =
+          await supabase
+            .rpc(
+              "get_my_platform_admin_role"
+            );
+
+        return {
+          data,
+          error,
+        };
+      },
+  });
+}
 
 export const getPlatformAdminAccess =
   cache(
@@ -93,23 +159,26 @@ export const getPlatformAdminAccess =
           .trim()
           .toLowerCase();
 
-      const role =
-        getPlatformAdminRoleForEmail(
+      const membership =
+        await resolvePlatformAdminMembershipForClient(
+          supabase,
           email,
-          process.env
-            .PLATFORM_ADMIN_EMAILS
         );
 
       if (
-        !role
+        membership.status !==
+        "authorized"
       ) {
         return {
           status:
             "forbidden",
           reason:
-            "membership",
+            membership.reason,
         };
       }
+
+      const role =
+        membership.role;
 
       if (
         requiredPermission &&
@@ -134,6 +203,10 @@ export const getPlatformAdminAccess =
           userId,
           email,
           role,
+          roleSource:
+            membership.source,
+          membershipMode:
+            membership.mode,
         },
       };
     }
