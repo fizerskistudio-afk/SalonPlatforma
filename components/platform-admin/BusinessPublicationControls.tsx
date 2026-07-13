@@ -53,10 +53,12 @@ const STATUS_ICONS = {
 export default function BusinessPublicationControls({
   businessSlug,
   initialStatus,
+  previewUrl,
 }: {
   businessSlug: string;
   initialStatus:
     BusinessPublicationStatus;
+  previewUrl: string;
 }) {
   const router =
     useRouter();
@@ -241,7 +243,9 @@ export default function BusinessPublicationControls({
         </div>
 
         <Link
-          href={`/salon/${businessSlug}?preview=1`}
+          href={
+            previewUrl
+          }
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-xl border border-sky-300/20 bg-sky-300/10 px-4 py-2.5 text-sm font-semibold text-sky-200 transition hover:border-sky-300/35 hover:bg-sky-300/15"

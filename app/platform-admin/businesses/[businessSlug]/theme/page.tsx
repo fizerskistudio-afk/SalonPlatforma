@@ -19,6 +19,10 @@ import {
   loadBusinessThemeData,
 } from "@/lib/platform-admin/business-theme-server";
 
+import {
+  buildBusinessPublicLinks,
+} from "@/lib/platform-admin/business-public-links";
+
 export const dynamic =
   "force-dynamic";
 
@@ -68,6 +72,11 @@ export default async function BusinessThemePage({
     notFound();
   }
 
+  const publicLinks =
+    buildBusinessPublicLinks(
+      data.business.slug
+    );
+
   return (
     <div className="mx-auto max-w-7xl">
       <Link
@@ -101,6 +110,9 @@ export default async function BusinessThemePage({
         <BusinessThemeManager
           initialData={
             data
+          }
+          publicUrl={
+            publicLinks.publicUrl
           }
         />
       </div>

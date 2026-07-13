@@ -10,6 +10,9 @@ import {
 
 import { staffSignOutAction } from "@/app/staff/(protected)/actions";
 import type { StaffContext } from "@/lib/auth/staff";
+import {
+  buildBusinessPublicLinks,
+} from "@/lib/platform-admin/business-public-links";
 
 type StaffShellProps = {
   children: ReactNode;
@@ -24,6 +27,11 @@ export default function StaffShell({
   children,
   staff,
 }: StaffShellProps) {
+  const publicLinks =
+    buildBusinessPublicLinks(
+      staff.business.slug
+    );
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-zinc-950/85 backdrop-blur-xl">
@@ -59,7 +67,9 @@ export default function StaffShell({
             </Link>
 
             <a
-              href={`/salon/${staff.business.slug}`}
+              href={
+                publicLinks.publicUrl
+              }
               target="_blank"
               rel="noreferrer"
               className="hidden min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-xs font-medium text-zinc-400 transition hover:bg-white/[0.08] hover:text-white sm:inline-flex"

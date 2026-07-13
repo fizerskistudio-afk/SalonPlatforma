@@ -24,10 +24,12 @@ import type {
 type BusinessThemeManagerProps = {
   initialData:
     BusinessThemeData;
+  publicUrl: string;
 };
 
 export default function BusinessThemeManager({
   initialData,
+  publicUrl,
 }: BusinessThemeManagerProps) {
   const [
     selectedKey,
@@ -214,7 +216,9 @@ export default function BusinessThemeManager({
           </div>
 
           <a
-            href={`/salon/${initialData.business.slug}`}
+            href={
+              publicUrl
+            }
             target="_blank"
             rel="noreferrer"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white"

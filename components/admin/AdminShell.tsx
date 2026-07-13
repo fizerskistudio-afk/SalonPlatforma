@@ -37,6 +37,7 @@ type AdminShellProps = {
     business: {
       name: string;
       slug: string;
+      publicUrl: string;
     };
   };
 };
@@ -177,6 +178,7 @@ function SidebarContent({
   pathname,
   businessName,
   businessSlug,
+  publicUrl,
   email,
   role,
   reviewAttentionCount,
@@ -185,6 +187,7 @@ function SidebarContent({
   pathname: string;
   businessName: string;
   businessSlug: string;
+  publicUrl: string;
   email: string | null;
   role: AdminRole;
   reviewAttentionCount: number;
@@ -354,7 +357,9 @@ function SidebarContent({
 
       <div className="border-t border-white/[0.07] p-3">
         <a
-          href={`/salon/${businessSlug}`}
+          href={
+            publicUrl
+          }
           target="_blank"
           rel="noreferrer"
           className="mb-3 flex items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 text-sm text-zinc-400 transition hover:border-white/15 hover:bg-white/[0.05] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -444,6 +449,9 @@ export default function AdminShell({
           businessSlug={
             admin.business.slug
           }
+          publicUrl={
+            admin.business.publicUrl
+          }
           email={admin.email}
           role={admin.role}
           reviewAttentionCount={
@@ -485,6 +493,9 @@ export default function AdminShell({
               }
               businessSlug={
                 admin.business.slug
+              }
+              publicUrl={
+                admin.business.publicUrl
               }
               email={admin.email}
               role={admin.role}

@@ -42,6 +42,10 @@ import {
 } from "@/lib/supabase/admin";
 
 import {
+  buildBusinessPublicLinks,
+} from "@/lib/platform-admin/business-public-links";
+
+import {
   resolveTemplateKey,
 } from "@/lib/templates/registry";
 
@@ -825,6 +829,11 @@ export default async function BusinessManagementPage({
       business.is_active
     );
 
+  const publicLinks =
+    buildBusinessPublicLinks(
+      business.slug
+    );
+
   const supportedLocales =
     normalizeSupportedLocales(
       business
@@ -1137,8 +1146,11 @@ export default async function BusinessManagementPage({
         </div>
 
         <BusinessPublicLinkActions
-          publicPath={
-            `/salon/${business.slug}`
+          businessSlug={
+            business.slug
+          }
+          publicUrl={
+            publicLinks.publicUrl
           }
           isActive={
             publiclyAvailable
@@ -1152,6 +1164,9 @@ export default async function BusinessManagementPage({
         }
         initialStatus={
           publicationStatus
+        }
+        previewUrl={
+          publicLinks.previewUrl
         }
       />
 

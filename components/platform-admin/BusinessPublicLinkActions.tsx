@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useEffect,
   useRef,
   useState,
 } from "react";
@@ -23,13 +22,9 @@ import {
 } from "lucide-react";
 
 type BusinessPublicLinkActionsProps = {
-  publicPath: string;
+  businessSlug: string;
+  publicUrl: string;
   isActive: boolean;
-};
-
-type PublicUrlApiResponse = {
-  ok?: boolean;
-  publicUrl?: string;
 };
 
 function copyWithFallback(
@@ -72,29 +67,9 @@ function copyWithFallback(
   return copied;
 }
 
-function getBusinessSlug(
-  publicPath: string
-): string {
-  const segments =
-    publicPath
-      .split(
-        "/"
-      )
-      .filter(
-        Boolean
-      );
-
-  return (
-    segments[
-      segments.length -
-        1
-    ] ??
-    ""
-  );
-}
-
 export default function BusinessPublicLinkActions({
-  publicPath,
+  businessSlug,
+  publicUrl,
   isActive,
 }: BusinessPublicLinkActionsProps) {
   const [
@@ -105,14 +80,6 @@ export default function BusinessPublicLinkActions({
       false
     );
 
-  const [
-    resolvedPublicUrl,
-    setResolvedPublicUrl,
-  ] =
-    useState<
-      string | null
-    >(null);
-
   const resetTimerRef =
     useRef<
       ReturnType<
@@ -122,96 +89,22 @@ export default function BusinessPublicLinkActions({
       null
     );
 
-  const businessSlug =
-    getBusinessSlug(
-      publicPath
-    );
-
   const businessBasePath =
     businessSlug
       ? `/platform-admin/businesses/${businessSlug}`
       : "/platform-admin/businesses";
 
-  useEffect(
-    () => {
-      if (
-        !businessSlug
-      ) {
-        return;
-      }
-
-      let isActiveRequest =
-        true;
-
-      const loadPublicUrl =
-        async () => {
-          try {
-            const response =
-              await fetch(
-                `/api/platform-admin/businesses/public-url?businessSlug=${encodeURIComponent(
-                  businessSlug
-                )}`,
-                {
-                  cache:
-                    "no-store",
-                }
-              );
-
-            if (
-              !response.ok
-            ) {
-              return;
-            }
-
-            const payload =
-              await response.json() as
-                PublicUrlApiResponse;
-
-            if (
-              isActiveRequest &&
-              typeof payload.publicUrl ===
-                "string" &&
-              payload.publicUrl
-            ) {
-              setResolvedPublicUrl(
-                payload.publicUrl
-              );
-            }
-          } catch {
-            /*
-             * Path fallback ostaje upotrebljiv i kada URL resolver
-             * privremeno nije dostupan.
-             */
-          }
-        };
-
-      void loadPublicUrl();
-
-      return () => {
-        isActiveRequest =
-          false;
-      };
-    },
-    [
-      businessSlug,
-    ]
-  );
-
-  const effectivePublicUrl =
-    resolvedPublicUrl ??
-    publicPath;
-
   const getAbsolutePublicUrl =
     () =>
-      effectivePublicUrl.startsWith(
+      publicUrl.startsWith(
         "http://"
       ) ||
-      effectivePublicUrl.startsWith(
+      publicUrl.startsWith(
         "https://"
       )
-        ? effectivePublicUrl
+        ? publicUrl
         : new URL(
-            effectivePublicUrl,
+            publicUrl,
             window
               .location
               .origin
@@ -407,7 +300,7 @@ export default function BusinessPublicLinkActions({
               : "text-zinc-500"
           }`}
         >
-          {effectivePublicUrl}
+          {publicUrl}
         </p>
       </div>
 
@@ -467,7 +360,7 @@ export default function BusinessPublicLinkActions({
 
           <a
             href={
-              effectivePublicUrl
+              publicUrl
             }
             target="_blank"
             rel="noreferrer"

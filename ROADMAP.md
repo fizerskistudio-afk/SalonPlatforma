@@ -1,10 +1,10 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 10. jul 2026.  
+**Ažurirano:** 13. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** funkcionalni multi-tenant core je završen; aktivna je privremena DEMO-PRODUCTION-READY obilaznica pre nastavka originalnog production roadmapa.
+**Status:** funkcionalni multi-tenant core, Reviews foundation i referentna Lumière tema su završeni; aktivna je platform-admin i client-preview faza DEMO-PRODUCTION-READY obilaznice.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -245,20 +245,27 @@ fix(ssr): stabilize localized review formatting
 
 Originalni milestone redosled u nastavku ostaje važeći. Privremeno se pauzira pre `BACKUP-RECOVERY-01` kako bi se završio production-like demo koji može pouzdano da predstavi kompletan proizvod.
 
-### Zaključani redosled obilaznice
+### Realignovan redosled obilaznice od 13. jula 2026.
 
-1. `DEMO-I18N-01` — zajednički UI jezici i uklanjanje legacy translation slojeva;
-2. `DEMO-THEME-ARCHITECTURE-01` — isti modularni desktop/mobile contract za svaku temu;
-3. `DEMO-REVIEWS-FOUNDATION-01` — shared platform, Google, testimonial i preview review sistem;
-4. `DEMO-THEME-LUMIERE-01` — detaljan closeout referentne teme;
-5. `DEMO-THEME-EDITORIAL-01` — modularizacija i završetak;
-6. `DEMO-THEME-BARBER-01` — modularizacija, polish i izlazak iz beta statusa;
-7. `DEMO-THEME-NAILS-01`;
-8. `DEMO-THEME-WELLNESS-01`;
-9. `DEMO-THEME-BEAUTY-01`;
-10. `STUDIOBIBI-PILOT-01` — prvi realni hair-salon tenant na zajedničkoj infrastrukturi;
-11. `DEMO-DATA-LANDING-01`;
-12. `DEMO-DEPLOY-QA-01`.
+Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je preciziran: platform-admin mora omogućiti da se od pripremljenih podataka i slika napravi bezbedan klijentski preview za najviše 30–45 minuta, bez ručnog database rada.
+
+1. `PLATFORM-ADMIN-PUBLIC-URL-01`;
+2. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01`;
+3. `PLATFORM-ADMIN-WORKSPACE-01`;
+4. `PLATFORM-ADMIN-ACCESS-RECOVERY-01`;
+5. `PLATFORM-ADMIN-OPERATIONS-01`;
+6. `CONTENT-STARTER-PACKS-01A`;
+7. `CLIENT-CONTENT-INTAKE-01`;
+8. `CLIENT-PREVIEW-SHARING-01`;
+9. `DEMO-THEME-EDITORIAL-01`;
+10. `DEMO-THEME-BARBER-01`;
+11. `DEMO-THEME-NAILS-01`;
+12. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
+13. `DEMO-DATA-LANDING-01`;
+14. `MASTER-SYSTEM-QA-01`;
+15. `PREVIEW-SOFT-LAUNCH-GATE-01`.
+
+`DEMO-THEME-WELLNESS-01` i `DEMO-THEME-BEAUTY-01` premešteni su posle preview soft launch-a, kako nove vertikale ne bi blokirale proveru stvarnog client-preview prodajnog toka. `STUDIOBIBI-PILOT-01` ostaje production pilot posle backup, legal, domain i production environment gate-ova.
 
 Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
 
@@ -312,7 +319,7 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] definisana zajednička acceptance matrica;
 - [x] zaključan shared booking, i18n i tenant boundary;
 - [x] dodat architecture unit test;
-- [x] StudioBiBi planiran kao clean tenant launch posle svih tema;
+- [x] StudioBiBi planiran kao clean production pilot posle preview soft launch-a i production infrastructure gate-ova;
 - [x] završni `npm run check`.
 
 ### DEMO-REVIEWS-FOUNDATION-01A — DOMAIN CONTRACT završen
@@ -352,7 +359,7 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] database verification vratila `PASS` i tenant settings backfill je potvrđen;
 - [x] database i Git closeout završeni;
 
-### DEMO-REVIEWS-FOUNDATION-01C — aktivan
+### DEMO-REVIEWS-FOUNDATION-01C — source i lokalni launch tok završeni
 
 #### DEMO-REVIEWS-FOUNDATION-01C-A — SECURE SUBMISSION CORE source spreman
 
@@ -560,7 +567,7 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] scheduler aktivacija prebačena u `PRODUCTION-DOMAINS-ENV-01` posle domena i Vercel Pro plana;
 - [x] `vercel.json` se ne dodaje prerano na Hobby planu.
 
-### DEMO-THEME-LUMIERE-01B — FINAL POLISH source spreman
+### DEMO-THEME-LUMIERE-01B — FINAL POLISH završen
 
 - [x] desktop kompozicija i redosled sekcija zaključani source contractom;
 - [x] mobile app-shell, tabovi i bottom navigation zaključani source contractom;
@@ -573,11 +580,50 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] SR/DE/FR content worksheet dokumentovan;
 - [x] funkcionalni browser QA pre polish-a potvrđen;
 - [x] završni `npm run check`;
-- [ ] uneti SR/DE/FR slogan, hero opis, kategorije i sve aktivne usluge kroz admin;
-- [ ] kratki post-polish desktop gallery i mobile app-shell smoke;
-- [ ] finalni Lumière commit i acceptance baseline PASS.
+- [x] SR/DE/FR i ostali podržani Lumière sadržaj unet kroz tenant-aware admin locale sistem;
+- [x] kratki post-polish desktop gallery i mobile app-shell smoke;
+- [x] finalni Lumière commit i acceptance baseline PASS;
+- [x] Lumière demo tema zvanično završena;
+- [x] galerijski layout zaključan i ne menja se tokom platform-admin rada;
+- [x] mobile app-shell ostaje bez pune reviews sekcije;
+- [x] desktop/full public site zadržava kompletan reviews sistem.
 
 Post-launch backlog: `POST-LAUNCH-MOBILE-SOCIAL-PROOF-01` — opcioni diskretni review teaser ili `Više` tab, tek nakon launch-a.
+
+### PLATFORM-ADMIN-REVIEW-01 — READ-ONLY audit završen
+
+- [x] mapirane sve platform-admin stranice, API rute, loaderi i shared komponente;
+- [x] auditovani tenant lifecycle, readiness, publication, access i mutation tokovi;
+- [x] auditovani authorization, tenant scoping, noindex, responsive i accessibility slojevi;
+- [x] potvrđen uzrok Lumière public URL problema bez trećeg naslepog patcha;
+- [x] potvrđeno da inicijalni platform-admin DOM koristi relativni `/salon/[slug]` fallback pre hydration resolvera;
+- [x] potvrđeno da tenant-host platform-admin zato može otvoriti `/salon/[slug]` na pogrešnom hostu;
+- [x] potvrđeno da publish API trenutno ne sprovodi readiness gate;
+- [x] potvrđena duplirana lifecycle kontrola preko `publication_status` i `is_active`;
+- [x] predložena tenant information architecture: Pregled, Branding, Tema, Pristup i Operacije;
+- [x] prvi odobreni implementacioni milestone: `PLATFORM-ADMIN-PUBLIC-URL-01`.
+
+### Client-preview soft launch granica
+
+Preview soft launch nije production booking launch. Pre ovog gate-a sistem mora da omogući:
+
+- kreiranje draft tenant-a bez ručnog database rada;
+- idempotentan starter-pack import;
+- unos klijentskog brandinga, slika, usluga, cena, trajanja, zaposlenih i radnog vremena;
+- canonical tenant URL;
+- expiring i revocable eksterni preview pristup;
+- `noindex`, `nofollow` i `noarchive` preview granicu;
+- onemogućen booking i review submit u preview režimu;
+- desktop/mobile preview za Lumière, Editorial, Barber i Nails;
+- završni platform-admin funkcionalni pregled i `MASTER-SYSTEM-QA-01`.
+
+Do preview soft launch-a ostaju zaključane odluke:
+
+- `EMAIL_TEST_MODE=true`;
+- production email i review invitation cron nisu aktivirani;
+- Lumière galerijski layout se ne menja;
+- `POST-LAUNCH-MOBILE-SOCIAL-PROOF-01` ostaje odložen;
+- legacy `LocalizedText` u `lib/types.ts` ostaje zbog kompatibilnosti.
 
 ---
 
@@ -599,7 +645,9 @@ Aktivirati tek nakon stabilnog StudioBiBi launch-a i prodaje prva 2–3 sajta, k
 - [ ] puni Business Profile OAuth sync i replies tek posle prvih prihoda;
 - [ ] bez review gating-a, podsticaja ili lažnih recenzija.
 
-## 6. Sledeći milestone-ovi — realan redosled do prvog launch-a
+## 6. Originalni production roadmap posle preview soft launch-a
+
+Stavke u ovom odeljku ostaju važeće kao istorijski i production hardening plan. Aktivni redosled do preview soft launch-a definisan je u odeljku 5B. Posle `PREVIEW-SOFT-LAUNCH-GATE-01` rad se vraća na obavezne backup, legal, brand, production environment i pilot gate-ove.
 
 ### 1. CI-FOUNDATION-01 — implementiran
 
@@ -872,13 +920,15 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji potvrđeni remote commit pre REVIEWS 01B CLOSEOUT-a: 3b46863dbf51ac598fd8727970553a407ed9dc08
-Poslednji završen milestone: DEMO-REVIEWS-FOUNDATION-01B
-Aktivni milestone: DEMO-REVIEWS-FOUNDATION-01C PUBLIC SUBMISSION
-Obilaznica: DEMO-PRODUCTION-READY-01, bez brisanja originalnog roadmapa
-Implementirano u paketu: review settings, reviews, invitation hashes, provider metadata, trust triggeri, RLS i verification SQL
-Prvi sledeći zadatak: direct i verified public review submission API
-Lumière: nastavlja se posle shared reviews foundation-a
-StudioBiBi: posle svih theme milestone-ova, pre DEMO-DATA-LANDING-01
-Povratak na originalni roadmap: posle DEMO-DEPLOY-QA-01, od BACKUP-RECOVERY-01
+Checkpoint: 9d6ff6cfa0dec51ede96106b246223e16fed6fde
+Checkpoint tag: checkpoint/pre-platform-admin-review-2026-07-13
+Poslednji završen audit: PLATFORM-ADMIN-REVIEW-01
+Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
+Lumière: završena referentna tema; galerijski layout zaključan
+Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
+Aktivni milestone: PLATFORM-ADMIN-PUBLIC-URL-01
+Sledeći redosled: public URL → lifecycle/readiness → workspace → access/recovery → operations → starter packs → content intake → shareable preview
+Teme posle platform-admin preview osnove: Editorial → Barber → Nails
+Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
+Production track posle preview gate-a: backup → legal → brand → domains/env → StudioBiBi pilot
 ```

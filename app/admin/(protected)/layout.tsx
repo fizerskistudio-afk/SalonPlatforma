@@ -14,6 +14,9 @@ import {
   getAdminContext,
   requireAdmin,
 } from "@/lib/auth/admin";
+import {
+  buildBusinessPublicLinks,
+} from "@/lib/platform-admin/business-public-links";
 
 export async function generateMetadata():
   Promise<Metadata> {
@@ -53,6 +56,11 @@ export default async function ProtectedAdminLayout({
       admin.business.id
     );
 
+  const publicLinks =
+    buildBusinessPublicLinks(
+      admin.business.slug
+    );
+
   return (
     <AdminShell
       reviewAttentionCount={
@@ -67,6 +75,8 @@ export default async function ProtectedAdminLayout({
             admin.business.name,
           slug:
             admin.business.slug,
+          publicUrl:
+            publicLinks.publicUrl,
         },
       }}
     >
