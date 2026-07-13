@@ -20,6 +20,12 @@ import {
 } from "lucide-react";
 
 import {
+  LOCALE_CODES,
+  LOCALE_REGISTRY,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
+
+import {
   saveServiceAction,
   saveServiceCategoryAction,
   type LocalizedTextInput,
@@ -32,6 +38,8 @@ import type {
 
 type ServiceCatalogActionsProps = {
   categories: AdminServiceCategory[];
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
 };
 
 type DialogType = "category" | "service" | null;
@@ -65,71 +73,81 @@ type ServiceFormState = {
   isActive: boolean;
 };
 
-type LanguageKey = "mk" | "sq" | "en";
-
 type ServiceOption = {
   service: AdminServiceItem;
   category: AdminServiceCategory;
 };
 
-const languages: {
-  key: LanguageKey;
+type LanguageDefinition = {
+  key: LocaleCode;
   label: string;
   placeholder: string;
-}[] = [
-  {
-    key: "mk",
-    label: "Makedonski",
-    placeholder: "Назив на македонски",
-  },
-  {
-    key: "sq",
-    label: "Albanski",
-    placeholder: "Emri në shqip",
-  },
-  {
-    key: "en",
-    label: "Engleski",
-    placeholder: "Name in English",
-  },
-];
+};
+
+function createLanguageDefinitions(
+  supportedLocales:
+    readonly LocaleCode[]
+): LanguageDefinition[] {
+  return supportedLocales.map(
+    (locale) => {
+      const definition =
+        LOCALE_REGISTRY[locale];
+
+      return {
+        key: locale,
+        label:
+          definition.adminName,
+        placeholder:
+          `Naziv — ${definition.nativeName}`,
+      };
+    }
+  );
+}
 
 function createEmptyLocalizedText(): LocalizedTextInput {
-  return {
-    mk: "",
-    sq: "",
-    en: "",
-  };
+  return Object.fromEntries(
+    LOCALE_CODES.map(
+      (locale) => [
+        locale,
+        "",
+      ]
+    )
+  ) as LocalizedTextInput;
 }
 
 function normalizeLocalizedText(
-  value: {
-    mk?: string;
-    sq?: string;
-    en?: string;
-  } | null
+  value:
+    Partial<
+      Record<
+        LocaleCode,
+        string
+      >
+    > | null
 ): LocalizedTextInput {
-  return {
-    mk: value?.mk ?? "",
-    sq: value?.sq ?? "",
-    en: value?.en ?? "",
-  };
+  return Object.fromEntries(
+    LOCALE_CODES.map(
+      (locale) => [
+        locale,
+        value?.[locale] ?? "",
+      ]
+    )
+  ) as LocalizedTextInput;
 }
 
 function getDisplayName(
-  value: {
-    mk?: string;
-    sq?: string;
-    en?: string;
-  },
+  value: LocalizedTextInput,
   fallback: string
 ): string {
-  return (
-    value.en?.trim() ||
-    value.mk?.trim() ||
-    value.sq?.trim() ||
-    fallback
-  );
+  for (const locale of LOCALE_CODES) {
+    const translatedValue =
+      value[locale]?.trim();
+
+    if (translatedValue) {
+      return translatedValue;
+    }
+  }
+
+  return fallback;
 }
 
 function getNextCategorySortOrder(
@@ -264,17 +282,23 @@ function slugify(value: string): string {
 function getSlugSource(
   value: LocalizedTextInput
 ): string {
-  return (
-    value.en.trim() ||
-    value.sq.trim() ||
-    value.mk.trim()
-  );
+  for (const locale of LOCALE_CODES) {
+    const translatedValue =
+      value[locale]?.trim();
+
+    if (translatedValue) {
+      return translatedValue;
+    }
+  }
+
+  return "";
 }
 
 function LocalizedEditor({
   title,
   description,
   values,
+  languages,
   onChange,
   multiline = false,
   maxLength,
@@ -282,8 +306,9 @@ function LocalizedEditor({
   title: string;
   description: string;
   values: LocalizedTextInput;
+  languages: LanguageDefinition[];
   onChange: (
-    language: LanguageKey,
+    language: LocaleCode,
     value: string
   ) => void;
   multiline?: boolean;
@@ -313,7 +338,7 @@ function LocalizedEditor({
 
             {multiline ? (
               <textarea
-                value={values[language.key]}
+                value={values[language.key] ?? ""}
                 onChange={(event) =>
                   onChange(
                     language.key,
@@ -328,7 +353,7 @@ function LocalizedEditor({
             ) : (
               <input
                 type="text"
-                value={values[language.key]}
+                value={values[language.key] ?? ""}
                 onChange={(event) =>
                   onChange(
                     language.key,
@@ -342,7 +367,7 @@ function LocalizedEditor({
             )}
 
             <span className="mt-1 block text-right text-[10px] text-zinc-700">
-              {values[language.key].length}/
+              {(values[language.key] ?? "").length}/
               {maxLength}
             </span>
           </label>
@@ -354,8 +379,41 @@ function LocalizedEditor({
 
 export default function ServiceCatalogActions({
   categories,
+  defaultLocale,
+  supportedLocales,
 }: ServiceCatalogActionsProps) {
   const router = useRouter();
+
+  const orderedLocales =
+    useMemo(
+      () => {
+        const locales =
+          supportedLocales.length > 0
+            ? supportedLocales
+            : [defaultLocale];
+
+        return [
+          defaultLocale,
+          ...locales.filter(
+            (locale) =>
+              locale !== defaultLocale
+          ),
+        ];
+      },
+      [
+        defaultLocale,
+        supportedLocales,
+      ]
+    );
+
+  const languages =
+    useMemo(
+      () =>
+        createLanguageDefinitions(
+          orderedLocales
+        ),
+      [orderedLocales]
+    );
 
   const [isPending, startTransition] =
     useTransition();
@@ -1101,6 +1159,7 @@ export default function ServiceCatalogActions({
                 )}
 
                 <LocalizedEditor
+                    languages={languages}
                   title="Naziv kategorije"
                   description="Unesi naziv na najmanje jednom jeziku."
                   values={categoryForm.name}
@@ -1119,6 +1178,7 @@ export default function ServiceCatalogActions({
                 />
 
                 <LocalizedEditor
+                    languages={languages}
                   title="Opis kategorije"
                   description="Opis nije obavezan, ali se može koristiti na javnom sajtu."
                   values={
@@ -1310,6 +1370,7 @@ export default function ServiceCatalogActions({
                 )}
 
                 <LocalizedEditor
+                    languages={languages}
                   title="Naziv usluge"
                   description="Unesi naziv na najmanje jednom jeziku."
                   values={serviceForm.name}
@@ -1328,6 +1389,7 @@ export default function ServiceCatalogActions({
                 />
 
                 <LocalizedEditor
+                    languages={languages}
                   title="Opis usluge"
                   description="Kratko objasni šta usluga uključuje."
                   values={

@@ -19,6 +19,12 @@ export default async function AdminBookingsPage() {
       generatedAt={
         new Date().toISOString()
       }
+      defaultLocale={
+        result.business.defaultLocale
+      }
+      supportedLocales={
+        result.business.supportedLocales
+      }
       bookings={result.bookings}
     />
   );

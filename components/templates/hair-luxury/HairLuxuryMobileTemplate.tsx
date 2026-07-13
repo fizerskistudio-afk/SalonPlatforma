@@ -8,7 +8,6 @@ import type {
 
 export default function HairLuxuryMobileTemplate({
   locale,
-  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -18,9 +17,6 @@ export default function HairLuxuryMobileTemplate({
   return (
     <MobileAppShell
       locale={locale}
-      previewMode={
-        previewMode
-      }
       onLocaleChange={
         onLocaleChange
       }

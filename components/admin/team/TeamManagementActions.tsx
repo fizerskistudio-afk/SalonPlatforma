@@ -24,6 +24,12 @@ import {
 } from "lucide-react";
 
 import {
+  LOCALE_CODES,
+  LOCALE_REGISTRY,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
+
+import {
   saveEmployeeAction,
   setEmployeeActiveAction,
   type TeamLocalizedTextInput,
@@ -32,6 +38,8 @@ import type { AdminEmployee } from "@/lib/admin/team";
 
 type TeamManagementActionsProps = {
   employees: AdminEmployee[];
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
 };
 
 type DialogMode = "create" | "edit";
@@ -40,8 +48,6 @@ type ActionMessage = {
   type: "success" | "error";
   text: string;
 };
-
-type LanguageKey = "mk" | "sq" | "en";
 
 type EmployeeFormState = {
   name: string;
@@ -58,59 +64,75 @@ type EmployeeFormState = {
   isActive: boolean;
 };
 
-const languages: {
-  key: LanguageKey;
+type LanguageDefinition = {
+  key: LocaleCode;
   label: string;
   titlePlaceholder: string;
-}[] = [
-  {
-    key: "mk",
-    label: "Makedonski",
-    titlePlaceholder: "Фризер, стилист...",
-  },
-  {
-    key: "sq",
-    label: "Albanski",
-    titlePlaceholder: "Parukier, stilist...",
-  },
-  {
-    key: "en",
-    label: "Engleski",
-    titlePlaceholder: "Hair stylist, barber...",
-  },
-];
+};
+
+function createLanguageDefinitions(
+  supportedLocales:
+    readonly LocaleCode[]
+): LanguageDefinition[] {
+  return supportedLocales.map(
+    (locale) => {
+      const definition =
+        LOCALE_REGISTRY[locale];
+
+      return {
+        key: locale,
+        label:
+          definition.adminName,
+        titlePlaceholder:
+          `Titula — ${definition.nativeName}`,
+      };
+    }
+  );
+}
 
 function createEmptyLocalizedText(): TeamLocalizedTextInput {
-  return {
-    mk: "",
-    sq: "",
-    en: "",
-  };
+  return Object.fromEntries(
+    LOCALE_CODES.map(
+      (locale) => [
+        locale,
+        "",
+      ]
+    )
+  ) as TeamLocalizedTextInput;
 }
 
 function normalizeLocalizedText(
-  value: {
-    mk?: string;
-    sq?: string;
-    en?: string;
-  } | null
+  value:
+    Partial<
+      Record<
+        LocaleCode,
+        string
+      >
+    > | null
 ): TeamLocalizedTextInput {
-  return {
-    mk: value?.mk ?? "",
-    sq: value?.sq ?? "",
-    en: value?.en ?? "",
-  };
+  return Object.fromEntries(
+    LOCALE_CODES.map(
+      (locale) => [
+        locale,
+        value?.[locale] ?? "",
+      ]
+    )
+  ) as TeamLocalizedTextInput;
 }
 
 function getDisplayTitle(
   employee: AdminEmployee
 ): string {
-  return (
-    employee.title.en?.trim() ||
-    employee.title.mk?.trim() ||
-    employee.title.sq?.trim() ||
-    "Bez titule"
-  );
+  for (const locale of LOCALE_CODES) {
+    const translatedValue =
+      employee.title[locale]?.trim();
+
+    if (translatedValue) {
+      return translatedValue;
+    }
+  }
+
+  return "Bez titule";
 }
 
 function getInitials(value: string): string {
@@ -209,6 +231,7 @@ function LocalizedEmployeeEditor({
   title,
   description,
   values,
+  languages,
   onChange,
   multiline = false,
   maxLength,
@@ -216,8 +239,9 @@ function LocalizedEmployeeEditor({
   title: string;
   description: string;
   values: TeamLocalizedTextInput;
+  languages: LanguageDefinition[];
   onChange: (
-    language: LanguageKey,
+    language: LocaleCode,
     value: string
   ) => void;
   multiline?: boolean;
@@ -247,7 +271,7 @@ function LocalizedEmployeeEditor({
 
             {multiline ? (
               <textarea
-                value={values[language.key]}
+                value={values[language.key] ?? ""}
                 onChange={(event) =>
                   onChange(
                     language.key,
@@ -262,7 +286,7 @@ function LocalizedEmployeeEditor({
             ) : (
               <input
                 type="text"
-                value={values[language.key]}
+                value={values[language.key] ?? ""}
                 onChange={(event) =>
                   onChange(
                     language.key,
@@ -278,7 +302,7 @@ function LocalizedEmployeeEditor({
             )}
 
             <span className="mt-1 block text-right text-[10px] text-zinc-700">
-              {values[language.key].length}/
+              {(values[language.key] ?? "").length}/
               {maxLength}
             </span>
           </label>
@@ -290,8 +314,41 @@ function LocalizedEmployeeEditor({
 
 export default function TeamManagementActions({
   employees,
+  defaultLocale,
+  supportedLocales,
 }: TeamManagementActionsProps) {
   const router = useRouter();
+
+  const orderedLocales =
+    useMemo(
+      () => {
+        const locales =
+          supportedLocales.length > 0
+            ? supportedLocales
+            : [defaultLocale];
+
+        return [
+          defaultLocale,
+          ...locales.filter(
+            (locale) =>
+              locale !== defaultLocale
+          ),
+        ];
+      },
+      [
+        defaultLocale,
+        supportedLocales,
+      ]
+    );
+
+  const languages =
+    useMemo(
+      () =>
+        createLanguageDefinitions(
+          orderedLocales
+        ),
+      [orderedLocales]
+    );
 
   const [isPending, startTransition] =
     useTransition();
@@ -1017,6 +1074,7 @@ export default function TeamManagementActions({
               </section>
 
               <LocalizedEmployeeEditor
+                    languages={languages}
                 title="Titula zaposlenog"
                 description="Na primer: hair stylist, barber, color specialist."
                 values={employeeForm.title}
@@ -1036,6 +1094,7 @@ export default function TeamManagementActions({
               />
 
               <LocalizedEmployeeEditor
+                    languages={languages}
                 title="Biografija"
                 description="Kratak javni opis iskustva, specijalnosti i pristupa klijentima."
                 values={employeeForm.bio}

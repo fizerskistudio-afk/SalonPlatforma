@@ -1,6 +1,11 @@
 import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import {
+  isLocaleCode,
+  normalizeLocaleList,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { LocalizedText } from "@/lib/types";
 
@@ -18,6 +23,8 @@ type BusinessRow = {
   name: string;
   slug: string;
   timezone: string;
+  default_locale: string;
+  supported_locales: unknown;
 };
 
 type EmployeeRow = {
@@ -148,6 +155,8 @@ export type AdminTeamResult = {
     name: string;
     slug: string;
     timezone: string;
+    defaultLocale: LocaleCode;
+    supportedLocales: LocaleCode[];
   };
 
   employees: AdminEmployee[];
@@ -168,6 +177,36 @@ export type AdminTeamResult = {
     customPriceOverrides: number;
   };
 };
+
+function normalizeContentLocale(
+  value: string
+): LocaleCode {
+  return isLocaleCode(value)
+    ? value
+    : "en";
+}
+
+function normalizeSupportedLocales(
+  value: unknown,
+  fallback: LocaleCode
+): LocaleCode[] {
+  const values =
+    Array.isArray(value)
+      ? value
+      : [];
+
+  const locales =
+    normalizeLocaleList(
+      values,
+      fallback
+    );
+
+  if (!locales.includes(fallback)) {
+    locales.unshift(fallback);
+  }
+
+  return locales;
+}
 
 function parseNumericValue(
   value: number | string | null
@@ -200,7 +239,9 @@ export async function getAdminTeam(): Promise<AdminTeamResult> {
   ] = await Promise.all([
     adminClient
       .from("businesses")
-      .select("id, name, slug, timezone")
+      .select(
+        "id, name, slug, timezone, default_locale, supported_locales"
+      )
       .eq("id", admin.business.id)
       .single(),
 
@@ -328,6 +369,17 @@ export async function getAdminTeam(): Promise<AdminTeamResult> {
 
   const business =
     businessResult.data as unknown as BusinessRow;
+
+  const defaultLocale =
+    normalizeContentLocale(
+      business.default_locale
+    );
+
+  const supportedLocales =
+    normalizeSupportedLocales(
+      business.supported_locales,
+      defaultLocale
+    );
 
   const employeeRows =
     (employeesResult.data ??
@@ -653,6 +705,8 @@ export async function getAdminTeam(): Promise<AdminTeamResult> {
       name: business.name,
       slug: business.slug,
       timezone: business.timezone,
+      defaultLocale,
+      supportedLocales,
     },
 
     employees,

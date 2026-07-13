@@ -33,35 +33,25 @@ import type {
   AdminEmployeeService,
   AdminTeamCatalogService,
 } from "@/lib/admin/team";
+import {
+  getAdminLocalizedText,
+  type AdminLocalizedTextValue,
+} from "@/lib/admin/localized-text";
+import type {
+  LocaleCode,
+} from "@/lib/i18n/locales";
 
 type EmployeeServiceManagementProps = {
   employees: AdminEmployee[];
   catalogServices: AdminTeamCatalogService[];
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
 };
 
 type ActionMessage = {
   type: "success" | "error";
   text: string;
 };
-
-function getPrimaryText(
-  value: {
-    en?: string;
-    mk?: string;
-    sq?: string;
-  } | null
-): string {
-  if (!value) {
-    return "";
-  }
-
-  return (
-    value.en?.trim() ||
-    value.mk?.trim() ||
-    value.sq?.trim() ||
-    ""
-  );
-}
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("sr-Latn-RS", {
@@ -109,8 +99,20 @@ function findAssignment(
 export default function EmployeeServiceManagement({
   employees,
   catalogServices,
+  defaultLocale,
+  supportedLocales,
 }: EmployeeServiceManagementProps) {
   const router = useRouter();
+
+  const getPrimaryText = (
+    value:
+      AdminLocalizedTextValue
+  ) =>
+    getAdminLocalizedText(
+      value,
+      defaultLocale,
+      supportedLocales
+    );
 
   const [isPending, startTransition] =
     useTransition();

@@ -24,65 +24,17 @@ import {
 } from "lucide-react";
 
 import type {
-  AdminDefaultLocale,
   AdminSettingsResult,
 } from "@/lib/admin/settings";
+import {
+  getAdminLocaleOptions,
+  getAdminLocalizedText,
+  getAdminLocalizedValue,
+} from "@/lib/admin/localized-text";
 
 type AdminSettingsViewProps = {
   data: AdminSettingsResult;
 };
-
-type LocalizedValue = {
-  mk?: string;
-  sq?: string;
-  en?: string;
-};
-
-const localeLabels: Record<
-  AdminDefaultLocale,
-  string
-> = {
-  mk: "Makedonski",
-  sq: "Albanski",
-  en: "Engleski",
-};
-
-const localeShortLabels: Record<
-  AdminDefaultLocale,
-  string
-> = {
-  mk: "MK",
-  sq: "SQ",
-  en: "EN",
-};
-
-const locales: AdminDefaultLocale[] = [
-  "mk",
-  "sq",
-  "en",
-];
-
-function getLocalizedValue(
-  value: LocalizedValue,
-  locale: AdminDefaultLocale
-): string {
-  return value[locale]?.trim() ?? "";
-}
-
-function getPrimaryLocalizedValue(
-  value: LocalizedValue,
-  preferredLocale: AdminDefaultLocale
-): string {
-  return (
-    getLocalizedValue(
-      value,
-      preferredLocale
-    ) ||
-    getLocalizedValue(value, "mk") ||
-    getLocalizedValue(value, "sq") ||
-    getLocalizedValue(value, "en")
-  );
-}
 
 function formatMinutes(
   value: number
@@ -212,34 +164,48 @@ export default function AdminSettingsView({
     summary,
   } = data;
 
+  const locales =
+    getAdminLocaleOptions(
+      business.defaultContentLocale,
+      business.supportedLocales
+    );
+
+  const defaultLocaleOption =
+    locales[0];
+
   const primaryTagline =
-    getPrimaryLocalizedValue(
+    getAdminLocalizedText(
       business.tagline,
-      business.defaultLocale
+      business.defaultContentLocale,
+      business.supportedLocales
     );
 
   const primaryDescription =
-    getPrimaryLocalizedValue(
+    getAdminLocalizedText(
       business.description,
-      business.defaultLocale
+      business.defaultContentLocale,
+      business.supportedLocales
     );
 
   const primaryAddress =
-    getPrimaryLocalizedValue(
+    getAdminLocalizedText(
       business.address,
-      business.defaultLocale
+      business.defaultContentLocale,
+      business.supportedLocales
     );
 
   const primaryCity =
-    getPrimaryLocalizedValue(
+    getAdminLocalizedText(
       business.city,
-      business.defaultLocale
+      business.defaultContentLocale,
+      business.supportedLocales
     );
 
   const primaryCountry =
-    getPrimaryLocalizedValue(
+    getAdminLocalizedText(
       business.country,
-      business.defaultLocale
+      business.defaultContentLocale,
+      business.supportedLocales
     );
 
   return (
@@ -284,11 +250,7 @@ export default function AdminSettingsView({
           </div>
 
           <div className="mt-3 text-2xl font-semibold text-white">
-            {
-              localeLabels[
-                business.defaultLocale
-              ]
-            }
+            {defaultLocaleOption?.label ?? business.defaultContentLocale}
           </div>
 
           <div className="mt-2 text-xs text-zinc-600">
@@ -431,15 +393,15 @@ export default function AdminSettingsView({
             <div className="mt-6 flex flex-wrap gap-2">
               {locales.map((locale) => {
                 const hasTagline =
-                  getLocalizedValue(
+                  getAdminLocalizedValue(
                     business.tagline,
-                    locale
+                    locale.key
                   ).length > 0;
 
                 const hasDescription =
-                  getLocalizedValue(
+                  getAdminLocalizedValue(
                     business.description,
-                    locale
+                    locale.key
                   ).length > 0;
 
                 const isComplete =
@@ -448,18 +410,14 @@ export default function AdminSettingsView({
 
                 return (
                   <span
-                    key={locale}
+                    key={locale.key}
                     className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
                       isComplete
                         ? "border-emerald-400/15 bg-emerald-400/[0.06] text-emerald-300"
                         : "border-amber-300/15 bg-amber-300/[0.06] text-amber-200/70"
                     }`}
                   >
-                    {
-                      localeShortLabels[
-                        locale
-                      ]
-                    }
+                    {locale.shortName}
                     {" · "}
                     {isComplete
                       ? "popunjeno"
@@ -562,30 +520,26 @@ export default function AdminSettingsView({
             <div className="mt-4 space-y-3">
               {locales.map((locale) => (
                 <div
-                  key={locale}
+                  key={locale.key}
                   className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
                 >
                   <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-700">
-                    {
-                      localeLabels[
-                        locale
-                      ]
-                    }
+                    {locale.label}
                   </div>
 
                   <div className="mt-2 text-sm text-zinc-400">
                     {[
-                      getLocalizedValue(
+                      getAdminLocalizedValue(
                         business.address,
-                        locale
+                        locale.key
                       ),
-                      getLocalizedValue(
+                      getAdminLocalizedValue(
                         business.city,
-                        locale
+                        locale.key
                       ),
-                      getLocalizedValue(
+                      getAdminLocalizedValue(
                         business.country,
-                        locale
+                        locale.key
                       ),
                     ]
                       .filter(Boolean)
@@ -682,11 +636,7 @@ export default function AdminSettingsView({
             <span className="rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-1.5 text-xs text-zinc-500">
               Jezik:{" "}
               <strong className="text-zinc-300">
-                {
-                  localeShortLabels[
-                    business.defaultLocale
-                  ]
-                }
+                {defaultLocaleOption?.shortName ?? business.defaultContentLocale.toUpperCase()}
               </strong>
             </span>
 
@@ -711,11 +661,7 @@ export default function AdminSettingsView({
             </div>
 
             <div className="mt-1 text-lg font-semibold text-white">
-              {
-                localeLabels[
-                  business.defaultLocale
-                ]
-              }
+              {defaultLocaleOption?.label ?? business.defaultContentLocale}
             </div>
           </article>
 

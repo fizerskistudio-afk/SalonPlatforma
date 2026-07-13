@@ -40,6 +40,11 @@ const ALL_TEMPLATE_PATHS = [
   ...DIRECT_THEME_PATHS,
 ] as const;
 
+const REVIEW_ACTION_TEMPLATE_PATHS = [
+  "components/templates/hair-luxury/HairLuxuryDesktopTemplate.tsx",
+  ...DIRECT_THEME_PATHS,
+] as const;
+
 describe(
   "review theme integration contract",
   () => {
@@ -154,9 +159,9 @@ describe(
     );
 
     it.each(
-      ALL_TEMPLATE_PATHS
+      REVIEW_ACTION_TEMPLATE_PATHS
     )(
-      "passes preview mode and contains no static review import in %s",
+      "passes preview mode where review actions render and contains no static review import in %s",
       (
         path
       ) => {
@@ -206,14 +211,65 @@ describe(
 
         expect(
           mobile
-        ).toContain(
+        ).not.toContain(
           "CatalogReviewsSection"
         );
 
         expect(
           mobile
-        ).toContain(
+        ).not.toContain(
           'id="mobile-reviews"'
+        );
+      }
+    );
+
+    it(
+      "keeps Lumiere mobile review-free while preview booking enforcement stays centralized",
+      () => {
+        const mobileTemplate =
+          readSource(
+            "components/templates/hair-luxury/HairLuxuryMobileTemplate.tsx"
+          );
+
+        expect(
+          mobileTemplate
+        ).toContain(
+          "<MobileAppShell"
+        );
+
+        expect(
+          mobileTemplate
+        ).not.toContain(
+          "CatalogReviewsSection"
+        );
+
+        expect(
+          mobileTemplate
+        ).not.toContain(
+          "@/lib/contentData"
+        );
+
+        const platform =
+          readSource(
+            "components/SalonPlatform.tsx"
+          );
+
+        expect(
+          platform
+        ).toContain(
+          "previewMode"
+        );
+
+        expect(
+          platform
+        ).toContain(
+          "<TemplateRenderer"
+        );
+
+        expect(
+          platform
+        ).toContain(
+          "<MobileBookingModal"
         );
       }
     );

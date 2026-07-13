@@ -12,12 +12,24 @@ export default async function AdminTeamPage() {
     <>
       <TeamManagementActions
         employees={result.employees}
+        defaultLocale={
+          result.business.defaultLocale
+        }
+        supportedLocales={
+          result.business.supportedLocales
+        }
       />
 
       <EmployeeServiceManagement
         employees={result.employees}
         catalogServices={
           result.catalogServices
+        }
+        defaultLocale={
+          result.business.defaultLocale
+        }
+        supportedLocales={
+          result.business.supportedLocales
         }
       />
 
@@ -27,6 +39,12 @@ export default async function AdminTeamPage() {
         metrics={result.metrics}
         catalogServiceCount={
           result.catalogServices.length
+        }
+        defaultLocale={
+          result.business.defaultLocale
+        }
+        supportedLocales={
+          result.business.supportedLocales
         }
       />
     </>

@@ -13,6 +13,7 @@ import {
 import {
   isLocaleCode,
   normalizeLocaleList,
+  UI_LOCALE_CODES,
 } from "@/lib/i18n/locales";
 import {
   createAdminClient,
@@ -217,10 +218,8 @@ function toContentLocale(
 function isUiLocale(
   value: ContentLocale
 ): value is UiLocale {
-  return (
-    value === "mk" ||
-    value === "sq" ||
-    value === "en"
+  return UI_LOCALE_CODES.includes(
+    value as UiLocale
   );
 }
 

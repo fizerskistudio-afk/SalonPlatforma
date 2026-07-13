@@ -1,6 +1,11 @@
 import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import {
+  isLocaleCode,
+  normalizeLocaleList,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { LocalizedText } from "@/lib/types";
 
@@ -30,6 +35,8 @@ type BusinessRow = {
   name: string;
   slug: string;
   timezone: string;
+  default_locale: string;
+  supported_locales: unknown;
 };
 
 type BookingRow = {
@@ -108,10 +115,42 @@ export type AdminBookingsResult = {
     name: string;
     slug: string;
     timezone: string;
+    defaultLocale: LocaleCode;
+    supportedLocales: LocaleCode[];
   };
 
   bookings: AdminBookingListItem[];
 };
+
+function normalizeContentLocale(
+  value: string
+): LocaleCode {
+  return isLocaleCode(value)
+    ? value
+    : "en";
+}
+
+function normalizeSupportedLocales(
+  value: unknown,
+  fallback: LocaleCode
+): LocaleCode[] {
+  const values =
+    Array.isArray(value)
+      ? value
+      : [];
+
+  const locales =
+    normalizeLocaleList(
+      values,
+      fallback
+    );
+
+  if (!locales.includes(fallback)) {
+    locales.unshift(fallback);
+  }
+
+  return locales;
+}
 
 function parsePriceAmount(
   value: number | string
@@ -139,7 +178,7 @@ export async function getAdminBookings(): Promise<AdminBookingsResult> {
   } = await adminClient
     .from("businesses")
     .select(
-      "id, name, slug, timezone"
+      "id, name, slug, timezone, default_locale, supported_locales"
     )
     .eq("id", admin.business.id)
     .single();
@@ -158,6 +197,17 @@ export async function getAdminBookings(): Promise<AdminBookingsResult> {
 
   const business =
     businessData as unknown as BusinessRow;
+
+  const defaultLocale =
+    normalizeContentLocale(
+      business.default_locale
+    );
+
+  const supportedLocales =
+    normalizeSupportedLocales(
+      business.supported_locales,
+      defaultLocale
+    );
 
   const {
     data: bookingData,
@@ -218,6 +268,8 @@ export async function getAdminBookings(): Promise<AdminBookingsResult> {
         slug: business.slug,
         timezone:
           business.timezone,
+        defaultLocale,
+        supportedLocales,
       },
 
       bookings: [],
@@ -402,6 +454,8 @@ export async function getAdminBookings(): Promise<AdminBookingsResult> {
       slug: business.slug,
       timezone:
         business.timezone,
+      defaultLocale,
+      supportedLocales,
     },
 
     bookings,

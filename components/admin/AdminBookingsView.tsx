@@ -44,11 +44,19 @@ import type {
   BookingSource,
   BookingStatus,
 } from "@/lib/admin/bookings";
+import {
+  getAdminLocalizedText,
+} from "@/lib/admin/localized-text";
+import type {
+  LocaleCode,
+} from "@/lib/i18n/locales";
 
 type AdminBookingsViewProps = {
   businessName: string;
   timezone: string;
   generatedAt: string;
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
   bookings: AdminBookingListItem[];
 };
 
@@ -101,23 +109,6 @@ const periodLabels: Record<PeriodFilter, string> = {
   upcoming: "Predstojeće",
   past: "Prošle",
 };
-
-function getServiceName(
-  booking: AdminBookingListItem
-): string {
-  const name = booking.serviceName;
-
-  if (!name) {
-    return "Nepoznata usluga";
-  }
-
-  return (
-    name.en ||
-    name.mk ||
-    name.sq ||
-    "Nepoznata usluga"
-  );
-}
 
 function getZonedParts(
   value: string,
@@ -263,9 +254,22 @@ export default function AdminBookingsView({
   businessName,
   timezone,
   generatedAt,
+  defaultLocale,
+  supportedLocales,
   bookings,
 }: AdminBookingsViewProps) {
   const router = useRouter();
+
+  const getServiceName = (
+    booking:
+      AdminBookingListItem
+  ) =>
+    getAdminLocalizedText(
+      booking.serviceName,
+      defaultLocale,
+      supportedLocales,
+      "Nepoznata usluga"
+    );
 
   const [isPending, startTransition] = useTransition();
 

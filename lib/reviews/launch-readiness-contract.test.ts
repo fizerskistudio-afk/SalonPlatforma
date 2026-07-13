@@ -48,9 +48,8 @@ const ADMIN_AND_WORKER_PATHS = [
   "app/api/cron/review-invitations/route.ts",
 ] as const;
 
-const THEME_PATHS = [
+const REVIEW_THEME_PATHS = [
   "components/desktop/DesktopLanding.tsx",
-  "components/mobile/MobileAppShell.tsx",
   "components/templates/hair-editorial/HairEditorialDesktopTemplate.tsx",
   "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
@@ -95,7 +94,7 @@ describe(
     );
 
     it.each(
-      THEME_PATHS
+      REVIEW_THEME_PATHS
     )(
       "keeps shared catalog review integration in %s",
       (
@@ -114,6 +113,34 @@ describe(
 
         expect(
           source
+        ).not.toContain(
+          "@/lib/contentData"
+        );
+      }
+    );
+
+    it(
+      "keeps Lumiere mobile app shell booking-first without the full review section",
+      () => {
+        const mobile =
+          readSource(
+            "components/mobile/MobileAppShell.tsx"
+          );
+
+        expect(
+          mobile
+        ).not.toContain(
+          "CatalogReviewsSection"
+        );
+
+        expect(
+          mobile
+        ).not.toContain(
+          'id="mobile-reviews"'
+        );
+
+        expect(
+          mobile
         ).not.toContain(
           "@/lib/contentData"
         );

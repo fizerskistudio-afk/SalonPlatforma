@@ -19,9 +19,7 @@ import type {
 } from "@/lib/types";
 
 export type AdminDefaultLocale =
-  | "mk"
-  | "sq"
-  | "en";
+  LocaleCode;
 
 export type AdminContentLocale =
   LocaleCode;
@@ -293,29 +291,9 @@ function normalizeSupportedLocales(
 
 function normalizeDefaultLocale(
   defaultContentLocale:
-    AdminContentLocale,
-  supportedLocales:
-    readonly AdminContentLocale[]
+    AdminContentLocale
 ): AdminDefaultLocale {
-  if (
-    defaultContentLocale === "mk" ||
-    defaultContentLocale === "sq" ||
-    defaultContentLocale === "en"
-  ) {
-    return defaultContentLocale;
-  }
-
-  const firstUiLocale =
-    supportedLocales.find(
-      (
-        locale
-      ): locale is AdminDefaultLocale =>
-        locale === "mk" ||
-        locale === "sq" ||
-        locale === "en"
-    );
-
-  return firstUiLocale ?? "en";
+  return defaultContentLocale;
 }
 
 function normalizeCurrency(
@@ -587,8 +565,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
 
     defaultLocale:
       normalizeDefaultLocale(
-        defaultContentLocale,
-        supportedLocales
+        defaultContentLocale
       ),
 
     defaultContentLocale,

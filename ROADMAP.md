@@ -560,14 +560,24 @@ Postojeći invitation sistem se ne razvija ponovo. Preostaje production aktivaci
 - [x] scheduler aktivacija prebačena u `PRODUCTION-DOMAINS-ENV-01` posle domena i Vercel Pro plana;
 - [x] `vercel.json` se ne dodaje prerano na Hobby planu.
 
-### DEMO-THEME-LUMIERE-01 — spreman za closeout
+### DEMO-THEME-LUMIERE-01B — FINAL POLISH source spreman
 
-- [ ] potvrditi desktop kompoziciju i sekcije;
-- [ ] potvrditi mobile app-shell kompoziciju i navigaciju;
-- [x] povezati shared reviews catalog i mobile parity;
-- [ ] proveriti booking entry point-e i state coverage;
-- [ ] izvršiti sedmojezični vizuelni i responsive closeout;
-- [ ] zaključati Lumière kao acceptance baseline za naredne teme.
+- [x] desktop kompozicija i redosled sekcija zaključani source contractom;
+- [x] mobile app-shell, tabovi i bottom navigation zaključani source contractom;
+- [x] desktop/full-site shared reviews ostaju aktivne;
+- [x] puna review sekcija uklonjena iz booking-first mobile app-shella;
+- [x] mobile social-proof teaser odložen u post-launch backlog;
+- [x] desktop galerija balansirana za sedam slika — samo prva pločica je featured;
+- [x] desktop i mobile booking entry point-i zaključani source contractom;
+- [x] sedam podržanih locale kodova uključeno u closeout contract;
+- [x] SR/DE/FR content worksheet dokumentovan;
+- [x] funkcionalni browser QA pre polish-a potvrđen;
+- [x] završni `npm run check`;
+- [ ] uneti SR/DE/FR slogan, hero opis, kategorije i sve aktivne usluge kroz admin;
+- [ ] kratki post-polish desktop gallery i mobile app-shell smoke;
+- [ ] finalni Lumière commit i acceptance baseline PASS.
+
+Post-launch backlog: `POST-LAUNCH-MOBILE-SOCIAL-PROOF-01` — opcioni diskretni review teaser ili `Više` tab, tek nakon launch-a.
 
 ---
 

@@ -2,6 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
+import {
+  LOCALE_CODES,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,11 +15,13 @@ export type TeamActionResult = {
   entityId?: string;
 };
 
-export type TeamLocalizedTextInput = {
-  en: string;
-  mk: string;
-  sq: string;
-};
+export type TeamLocalizedTextInput =
+  Partial<
+    Record<
+      LocaleCode,
+      string
+    >
+  >;
 
 export type SaveEmployeeInput = {
   employeeId?: string;
@@ -86,19 +92,41 @@ function normalizeOptionalText(
 function normalizeLocalizedText(
   value: TeamLocalizedTextInput
 ): TeamLocalizedTextInput {
-  return {
-    en: normalizeText(value.en),
-    mk: normalizeText(value.mk),
-    sq: normalizeText(value.sq),
-  };
+  const normalized:
+    TeamLocalizedTextInput = {
+      en: "",
+      mk: "",
+      sq: "",
+    };
+
+  for (const locale of LOCALE_CODES) {
+    const translatedValue =
+      value[locale];
+
+    if (
+      typeof translatedValue ===
+      "string"
+    ) {
+      normalized[locale] =
+        normalizeText(
+          translatedValue
+        );
+    }
+  }
+
+  return normalized;
 }
 
 function localizedTextIsTooLong(
   value: TeamLocalizedTextInput,
   maximumLength: number
 ): boolean {
-  return Object.values(value).some(
-    (text) => text.length > maximumLength
+  return Object.values(
+    value
+  ).some(
+    (text) =>
+      typeof text === "string" &&
+      text.length > maximumLength
   );
 }
 

@@ -6,6 +6,10 @@ import {
   SERVICE_PRICE_TYPES,
   type ServicePriceType,
 } from "@/lib/admin/services";
+import {
+  LOCALE_CODES,
+  type LocaleCode,
+} from "@/lib/i18n/locales";
 import { requireAdmin } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,11 +19,13 @@ export type ServiceCatalogActionResult = {
   entityId?: string;
 };
 
-export type LocalizedTextInput = {
-  en: string;
-  mk: string;
-  sq: string;
-};
+export type LocalizedTextInput =
+  Partial<
+    Record<
+      LocaleCode,
+      string
+    >
+  >;
 
 export type SaveServiceCategoryInput = {
   categoryId?: string;
@@ -79,25 +85,53 @@ function normalizeText(value: string): string {
 function normalizeLocalizedText(
   value: LocalizedTextInput
 ): LocalizedTextInput {
-  return {
-    en: normalizeText(value.en),
-    mk: normalizeText(value.mk),
-    sq: normalizeText(value.sq),
-  };
+  const normalized:
+    LocalizedTextInput = {
+      en: "",
+      mk: "",
+      sq: "",
+    };
+
+  for (const locale of LOCALE_CODES) {
+    const translatedValue =
+      value[locale];
+
+    if (
+      typeof translatedValue ===
+      "string"
+    ) {
+      normalized[locale] =
+        normalizeText(
+          translatedValue
+        );
+    }
+  }
+
+  return normalized;
 }
 
 function hasLocalizedName(
   value: LocalizedTextInput
 ): boolean {
-  return Boolean(value.en || value.mk || value.sq);
+  return Object.values(
+    value
+  ).some(
+    (text) =>
+      typeof text === "string" &&
+      text.trim().length > 0
+  );
 }
 
 function localizedTextIsTooLong(
   value: LocalizedTextInput,
   maximumLength: number
 ): boolean {
-  return Object.values(value).some(
-    (text) => text.length > maximumLength
+  return Object.values(
+    value
+  ).some(
+    (text) =>
+      typeof text === "string" &&
+      text.length > maximumLength
   );
 }
 

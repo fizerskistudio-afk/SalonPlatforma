@@ -19,6 +19,9 @@ import {
   type AdminBookingListItem,
   type BookingStatus,
 } from "@/lib/admin/bookings";
+import {
+  getAdminLocalizedText,
+} from "@/lib/admin/localized-text";
 
 import DashboardBookingQuickActions from "@/components/admin/DashboardBookingQuickActions";
 import DashboardPendingBookings from "@/components/admin/DashboardPendingBookings";
@@ -45,23 +48,6 @@ const statusClasses: Record<BookingStatus, string> = {
   no_show:
     "border-orange-400/20 bg-orange-400/10 text-orange-300",
 };
-
-function getServiceName(
-  booking: AdminBookingListItem
-): string {
-  const name = booking.serviceName;
-
-  if (!name) {
-    return "Nepoznata usluga";
-  }
-
-  return (
-    name.en ||
-    name.mk ||
-    name.sq ||
-    "Nepoznata usluga"
-  );
-}
 
 function getZonedParts(
   value: string,
@@ -234,6 +220,17 @@ export default async function AdminDashboardPage() {
   const result = await getAdminBookings();
 
   const { bookings, business } = result;
+
+  const getServiceName = (
+    booking:
+      AdminBookingListItem
+  ) =>
+    getAdminLocalizedText(
+      booking.serviceName,
+      business.defaultLocale,
+      business.supportedLocales,
+      "Nepoznata usluga"
+    );
 
   const now = new Date();
   const nowIso = now.toISOString();
@@ -480,6 +477,12 @@ export default async function AdminDashboardPage() {
       <DashboardPendingBookings
         bookings={pendingBookings}
         timezone={business.timezone}
+        defaultLocale={
+          business.defaultLocale
+        }
+        supportedLocales={
+          business.supportedLocales
+        }
       />
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">

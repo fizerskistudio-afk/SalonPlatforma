@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import CatalogReviewsSection from "@/components/reviews/CatalogReviewsSection";
 import type { Locale } from "@/lib/types";
 import MobileHeader from "./MobileHeader";
 import BottomNav, { type MobileTab } from "./BottomNav";
@@ -12,7 +11,6 @@ import MobileContact from "./MobileContact";
 
 type MobileAppShellProps = {
   locale: Locale;
-  previewMode: boolean;
   onLocaleChange: (locale: Locale) => void;
   onBook: () => void;
   onBookService: (serviceId: string) => void;
@@ -26,7 +24,6 @@ type MobileAppShellProps = {
  */
 export default function MobileAppShell({
   locale,
-  previewMode,
   onLocaleChange,
   onBook,
   onBookService,
@@ -48,22 +45,11 @@ export default function MobileAppShell({
     switch (activeTab) {
       case "home":
         return (
-          <>
-            <MobileHome
-              locale={locale}
-              onBook={onBook}
-              onExploreServices={handleExploreServices}
-            />
-
-            <CatalogReviewsSection
-              locale={locale}
-              previewMode={
-                previewMode
-              }
-              id="mobile-reviews"
-              className="border-t border-[var(--brand-border)] pb-28"
-            />
-          </>
+          <MobileHome
+            locale={locale}
+            onBook={onBook}
+            onExploreServices={handleExploreServices}
+          />
         );
       case "services":
         return (

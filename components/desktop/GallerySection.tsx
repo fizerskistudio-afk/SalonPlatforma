@@ -47,8 +47,7 @@ export default function GallerySection({
         {gallery.map(
           (item, index) => {
             const isLarge =
-              index === 0 ||
-              index === 5;
+              index === 0;
 
             return (
               <div

@@ -28,12 +28,24 @@ import type {
   AdminEmployeeService,
   AdminTeamResult,
 } from "@/lib/admin/team";
+import {
+  getAdminLocaleOptions,
+  getAdminLocalizedSearchValues,
+  getAdminLocalizedText,
+  getAdminLocalizedValue,
+  type AdminLocalizedTextValue,
+} from "@/lib/admin/localized-text";
+import type {
+  LocaleCode,
+} from "@/lib/i18n/locales";
 
 type AdminTeamViewProps = {
   businessName: string;
   employees: AdminEmployee[];
   metrics: AdminTeamResult["metrics"];
   catalogServiceCount: number;
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
 };
 
 type EmployeeStatusFilter =
@@ -66,21 +78,6 @@ const assignmentFilterLabels: Record<
   overrides: "Posebna cena ili trajanje",
 };
 
-const languages = [
-  {
-    key: "mk",
-    label: "Makedonski",
-  },
-  {
-    key: "sq",
-    label: "Albanski",
-  },
-  {
-    key: "en",
-    label: "Engleski",
-  },
-] as const;
-
 function getInitials(value: string): string {
   const words = value
     .trim()
@@ -100,36 +97,6 @@ function getInitials(value: string): string {
   return `${words[0][0]}${
     words[words.length - 1][0]
   }`.toUpperCase();
-}
-
-function getPrimaryText(
-  value: {
-    en?: string;
-    mk?: string;
-    sq?: string;
-  } | null
-): string {
-  if (!value) {
-    return "";
-  }
-
-  return (
-    value.en?.trim() ||
-    value.mk?.trim() ||
-    value.sq?.trim() ||
-    ""
-  );
-}
-
-function getLocalizedText(
-  value: {
-    en?: string;
-    mk?: string;
-    sq?: string;
-  },
-  language: "en" | "mk" | "sq"
-): string {
-  return value[language]?.trim() ?? "";
 }
 
 function normalizeSearchValue(
@@ -300,7 +267,41 @@ export default function AdminTeamView({
   employees,
   metrics,
   catalogServiceCount,
+  defaultLocale,
+  supportedLocales,
 }: AdminTeamViewProps) {
+  const languages =
+    useMemo(
+      () =>
+        getAdminLocaleOptions(
+          defaultLocale,
+          supportedLocales
+        ),
+      [
+        defaultLocale,
+        supportedLocales,
+      ]
+    );
+
+  const getPrimaryText = (
+    value:
+      AdminLocalizedTextValue
+  ) =>
+    getAdminLocalizedText(
+      value,
+      defaultLocale,
+      supportedLocales
+    );
+
+  const getLocalizedText = (
+    value:
+      AdminLocalizedTextValue,
+    locale: LocaleCode
+  ) =>
+    getAdminLocalizedValue(
+      value,
+      locale
+    );
   const [query, setQuery] =
     useState("");
 
@@ -381,17 +382,15 @@ export default function AdminTeamView({
               employee.services.flatMap(
                 (assignment) => [
                   assignment.service.slug,
-                  assignment.service.name.en,
-                  assignment.service.name.mk,
-                  assignment.service.name.sq,
+                  ...getAdminLocalizedSearchValues(
+                    assignment.service.name
+                  ),
                   assignment.service
                     .categorySlug,
-                  assignment.service
-                    .categoryName.en,
-                  assignment.service
-                    .categoryName.mk,
-                  assignment.service
-                    .categoryName.sq,
+                  ...getAdminLocalizedSearchValues(
+                    assignment.service
+                      .categoryName
+                  ),
                 ]
               );
 
@@ -400,12 +399,12 @@ export default function AdminTeamView({
               employee.slug,
               employee.email,
               employee.phone,
-              employee.title.en,
-              employee.title.mk,
-              employee.title.sq,
-              employee.bio.en,
-              employee.bio.mk,
-              employee.bio.sq,
+              ...getAdminLocalizedSearchValues(
+                employee.title
+              ),
+              ...getAdminLocalizedSearchValues(
+                employee.bio
+              ),
               ...serviceSearchValues,
             ]
               .map(

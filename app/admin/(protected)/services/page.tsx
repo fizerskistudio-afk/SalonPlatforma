@@ -15,6 +15,12 @@ export default async function AdminServicesPage() {
         categories={
           result.categories
         }
+        defaultLocale={
+          result.business.defaultLocale
+        }
+        supportedLocales={
+          result.business.supportedLocales
+        }
       />
 
       <AdminServicesView
@@ -29,6 +35,12 @@ export default async function AdminServicesPage() {
         }
         metrics={
           result.metrics
+        }
+        defaultLocale={
+          result.business.defaultLocale
+        }
+        supportedLocales={
+          result.business.supportedLocales
         }
       />
     </>

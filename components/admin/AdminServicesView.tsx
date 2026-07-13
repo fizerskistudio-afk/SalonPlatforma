@@ -30,6 +30,16 @@ import {
   setServiceActiveAction,
   setServiceCategoryActiveAction,
 } from "@/app/admin/(protected)/services/actions";
+import {
+  getAdminLocaleOptions,
+  getAdminLocalizedSearchValues,
+  getAdminLocalizedText,
+  getAdminLocalizedValue,
+  type AdminLocalizedTextValue,
+} from "@/lib/admin/localized-text";
+import type {
+  LocaleCode,
+} from "@/lib/i18n/locales";
 import type {
   AdminServiceCategory,
   AdminServiceItem,
@@ -42,6 +52,8 @@ type AdminServicesViewProps = {
   categories: AdminServiceCategory[];
   uncategorizedServices: AdminServiceItem[];
   metrics: AdminServicesResult["metrics"];
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
 };
 
 type StatusFilter =
@@ -67,36 +79,6 @@ const priceTypeLabels: Record<
   from: "Cena od",
   range: "Raspon cena",
 };
-
-function getPrimaryText(
-  value: {
-    en?: string;
-    mk?: string;
-    sq?: string;
-  } | null
-): string {
-  if (!value) {
-    return "";
-  }
-
-  return (
-    value.en?.trim() ||
-    value.mk?.trim() ||
-    value.sq?.trim() ||
-    ""
-  );
-}
-
-function getLocalizedText(
-  value: {
-    en?: string;
-    mk?: string;
-    sq?: string;
-  },
-  language: "en" | "mk" | "sq"
-): string {
-  return value[language]?.trim() ?? "";
-}
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("sr-Latn-RS", {
@@ -171,8 +153,43 @@ export default function AdminServicesView({
   categories,
   uncategorizedServices,
   metrics,
+  defaultLocale,
+  supportedLocales,
 }: AdminServicesViewProps) {
   const router = useRouter();
+
+  const languages =
+    useMemo(
+      () =>
+        getAdminLocaleOptions(
+          defaultLocale,
+          supportedLocales
+        ),
+      [
+        defaultLocale,
+        supportedLocales,
+      ]
+    );
+
+  const getPrimaryText = (
+    value:
+      AdminLocalizedTextValue
+  ) =>
+    getAdminLocalizedText(
+      value,
+      defaultLocale,
+      supportedLocales
+    );
+
+  const getLocalizedText = (
+    value:
+      AdminLocalizedTextValue,
+    locale: LocaleCode
+  ) =>
+    getAdminLocalizedValue(
+      value,
+      locale
+    );
 
   const [isPending, startTransition] =
     useTransition();
@@ -255,16 +272,16 @@ export default function AdminServicesView({
         if (normalizedQuery) {
           const searchableValues = [
             service.slug,
-            service.name.en,
-            service.name.mk,
-            service.name.sq,
-            service.description.en,
-            service.description.mk,
-            service.description.sq,
+            ...getAdminLocalizedSearchValues(
+              service.name
+            ),
+            ...getAdminLocalizedSearchValues(
+              service.description
+            ),
             category?.slug,
-            category?.name.en,
-            category?.name.mk,
-            category?.name.sq,
+            ...getAdminLocalizedSearchValues(
+              category?.name
+            ),
           ]
             .map(normalizeSearchValue)
             .join(" ");
@@ -1266,22 +1283,7 @@ export default function AdminServicesView({
                 </div>
 
                 <div className="space-y-4">
-                  {(
-                    [
-                      {
-                        key: "mk",
-                        label: "Makedonski",
-                      },
-                      {
-                        key: "sq",
-                        label: "Albanski",
-                      },
-                      {
-                        key: "en",
-                        label: "Engleski",
-                      },
-                    ] as const
-                  ).map((language) => (
+                  {languages.map((language) => (
                     <article
                       key={language.key}
                       className="rounded-xl border border-white/[0.06] bg-black/10 p-4"

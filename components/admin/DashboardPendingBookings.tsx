@@ -10,29 +10,19 @@ import DashboardBookingQuickActions from "@/components/admin/DashboardBookingQui
 import type {
   AdminBookingListItem,
 } from "@/lib/admin/bookings";
+import {
+  getAdminLocalizedText,
+} from "@/lib/admin/localized-text";
+import type {
+  LocaleCode,
+} from "@/lib/i18n/locales";
 
 type DashboardPendingBookingsProps = {
   bookings: AdminBookingListItem[];
   timezone: string;
+  defaultLocale: LocaleCode;
+  supportedLocales: LocaleCode[];
 };
-
-function getServiceName(
-  booking: AdminBookingListItem
-): string {
-  const name =
-    booking.serviceName;
-
-  if (!name) {
-    return "Nepoznata usluga";
-  }
-
-  return (
-    name.en ||
-    name.mk ||
-    name.sq ||
-    "Nepoznata usluga"
-  );
-}
 
 function formatDateTime(
   value: string,
@@ -73,7 +63,19 @@ function formatDateTime(
 export default function DashboardPendingBookings({
   bookings,
   timezone,
+  defaultLocale,
+  supportedLocales,
 }: DashboardPendingBookingsProps) {
+  const getServiceName = (
+    booking:
+      AdminBookingListItem
+  ) =>
+    getAdminLocalizedText(
+      booking.serviceName,
+      defaultLocale,
+      supportedLocales,
+      "Nepoznata usluga"
+    );
   const pendingBookings =
     [...bookings]
       .filter(
