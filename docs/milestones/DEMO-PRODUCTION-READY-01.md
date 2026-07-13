@@ -178,7 +178,7 @@ Korektivni `PLATFORM-ADMIN-PUBLIC-URL-01A` je uklonio dev-only canonical redirec
 
 Application closeout je prošao lokalni installer i pushovan je na radnu granu kao `1f059c3`. Database membership aktivacija ostaje odložena do četiri završene teme i spremnog domena.
 
-#### 5. PLATFORM-ADMIN-LIFECYCLE-READINESS-01 — aktivan
+#### 5. PLATFORM-ADMIN-LIFECYCLE-READINESS-01 — završeno
 
 - jedan lifecycle servis;
 - technical, content, booking, owner-access, preview i production readiness;
@@ -188,13 +188,16 @@ Application closeout je prošao lokalni installer i pushovan je na radnu granu k
 - optimistička konkurentnost i minimalni lifecycle audit event.
 - trajni database audit trail nije deo ove aplikacione faze i zahteva zasebno odobrenu migraciju.
 
-#### 6. PLATFORM-ADMIN-WORKSPACE-01
+Milestone je prošao lokalni installer, read-only runtime pregled i pushovan je na radnu granu kao `79952de`.
+
+#### 6. PLATFORM-ADMIN-WORKSPACE-01 — aktivan
 
 - tenant shell i responsive navigacija;
 - Pregled, Branding, Tema, Pristup i Operacije;
 - Operacije podmeni: Katalog, Tim, Radno vreme i booking, Blokade, Rezervacije i Reviews;
 - tanji Overview sa jednim sledećim korakom;
 - očuvanje svih postojećih akcija tokom migracije.
+- Reviews ostaje jasno označen kao planirana stavka dok `PLATFORM-ADMIN-OPERATIONS-01` ne uvede pravu platform-admin rutu; nema linka ka tenant-admin panelu.
 
 #### 7. PLATFORM-ADMIN-ACCESS-RECOVERY-01
 

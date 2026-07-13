@@ -5,31 +5,13 @@ import {
   useState,
 } from "react";
 
-import Link from "next/link";
-
 import {
-  CalendarCheck2,
-  CalendarClock,
-  CalendarX2,
   Check,
   Copy,
   ExternalLink,
-  Images,
-  KeyRound,
-  Pencil,
-  Tags,
-  UsersRound,
 } from "lucide-react";
 
-import {
-  usePlatformAdminAccess,
-} from "@/components/platform-admin/PlatformAdminAccessProvider";
-import type {
-  PlatformAdminPermission,
-} from "@/lib/auth/platform-admin-policy";
-
 type BusinessPublicLinkActionsProps = {
-  businessSlug: string;
   publicUrl: string;
   isActive: boolean;
 };
@@ -41,25 +23,18 @@ function copyWithFallback(
     document.createElement(
       "textarea"
     );
-
-  textarea.value =
-    value;
-
+  textarea.value = value;
   textarea.setAttribute(
     "readonly",
     ""
   );
-
   textarea.style.position =
     "fixed";
-
   textarea.style.opacity =
     "0";
-
   document.body.appendChild(
     textarea
   );
-
   textarea.select();
 
   const copied =
@@ -70,67 +45,40 @@ function copyWithFallback(
   document.body.removeChild(
     textarea
   );
-
   return copied;
 }
 
 export default function BusinessPublicLinkActions({
-  businessSlug,
   publicUrl,
   isActive,
 }: BusinessPublicLinkActionsProps) {
-  const platformAccess =
-    usePlatformAdminAccess();
-
   const [
     copied,
     setCopied,
-  ] =
-    useState(
-      false
-    );
-
+  ] = useState(false);
   const resetTimerRef =
-    useRef<
-      ReturnType<
-        typeof setTimeout
-      > | null
-    >(
+    useRef<ReturnType<typeof setTimeout> | null>(
       null
     );
 
-  const businessBasePath =
-    businessSlug
-      ? `/platform-admin/businesses/${businessSlug}`
-      : "/platform-admin/businesses";
-
   const getAbsolutePublicUrl =
     () =>
-      publicUrl.startsWith(
-        "http://"
-      ) ||
-      publicUrl.startsWith(
-        "https://"
-      )
+      publicUrl.startsWith("http://") ||
+      publicUrl.startsWith("https://")
         ? publicUrl
         : new URL(
             publicUrl,
-            window
-              .location
-              .origin
+            window.location.origin
           ).toString();
 
   const handleCopy =
     async () => {
-      if (
-        !isActive
-      ) {
+      if (!isActive) {
         return;
       }
 
-      const publicUrl =
+      const resolvedUrl =
         getAbsolutePublicUrl();
-
       let copySucceeded =
         false;
 
@@ -139,40 +87,31 @@ export default function BusinessPublicLinkActions({
           navigator.clipboard &&
           window.isSecureContext
         ) {
-          await navigator
-            .clipboard
+          await navigator.clipboard
             .writeText(
-              publicUrl
+              resolvedUrl
             );
-
-          copySucceeded =
-            true;
+          copySucceeded = true;
         } else {
           copySucceeded =
             copyWithFallback(
-              publicUrl
+              resolvedUrl
             );
         }
       } catch {
         copySucceeded =
           copyWithFallback(
-            publicUrl
+            resolvedUrl
           );
       }
 
-      if (
-        !copySucceeded
-      ) {
+      if (!copySucceeded) {
         return;
       }
 
-      setCopied(
-        true
-      );
+      setCopied(true);
 
-      if (
-        resetTimerRef.current
-      ) {
+      if (resetTimerRef.current) {
         clearTimeout(
           resetTimerRef.current
         );
@@ -180,264 +119,74 @@ export default function BusinessPublicLinkActions({
 
       resetTimerRef.current =
         setTimeout(
-          () => {
-            setCopied(
-              false
-            );
-          },
+          () =>
+            setCopied(false),
           1800
         );
     };
 
-  const managementLinks = [
-    {
-      href:
-        `${businessBasePath}/edit`,
-
-      label:
-        "Osnovni podaci",
-
-      icon:
-        Pencil,
-
-      permission:
-        "tenant.profile.write",
-
-      className:
-        "border-amber-300/20 bg-amber-300/10 text-amber-200 hover:border-amber-300/35 hover:bg-amber-300/15 focus:ring-amber-300",
-    },
-    {
-      href:
-        `${businessBasePath}/settings`,
-
-      label:
-        "Booking i vreme",
-
-      icon:
-        CalendarClock,
-
-      permission:
-        "tenant.settings.write",
-
-      className:
-        "border-sky-300/20 bg-sky-300/10 text-sky-200 hover:border-sky-300/35 hover:bg-sky-300/15 focus:ring-sky-300",
-    },
-    {
-      href:
-        `${businessBasePath}/employees`,
-
-      label:
-        "Zaposleni",
-
-      icon:
-        UsersRound,
-
-      permission:
-        "tenant.team.write",
-
-      className:
-        "border-violet-300/20 bg-violet-300/10 text-violet-200 hover:border-violet-300/35 hover:bg-violet-300/15 focus:ring-violet-300",
-    },
-    {
-      href:
-        `${businessBasePath}/access`,
-
-      label:
-        "Owner pristup",
-
-      icon:
-        KeyRound,
-
-      permission:
-        "tenant.owner_access.read",
-
-      className:
-        "border-orange-300/20 bg-orange-300/10 text-orange-200 hover:border-orange-300/35 hover:bg-orange-300/15 focus:ring-orange-300",
-    },
-    {
-      href:
-        `${businessBasePath}/catalog`,
-
-      label:
-        "Katalog",
-
-      icon:
-        Tags,
-
-      permission:
-        "tenant.catalog.write",
-
-      className:
-        "border-emerald-300/20 bg-emerald-300/10 text-emerald-200 hover:border-emerald-300/35 hover:bg-emerald-300/15 focus:ring-emerald-300",
-    },
-    {
-      href:
-        `${businessBasePath}/time-off`,
-
-      label:
-        "Blokade",
-
-      icon:
-        CalendarX2,
-
-      permission:
-        "tenant.schedule.write",
-
-      className:
-        "border-rose-300/20 bg-rose-300/10 text-rose-200 hover:border-rose-300/35 hover:bg-rose-300/15 focus:ring-rose-300",
-    },
-    {
-      href:
-        `${businessBasePath}/bookings`,
-
-      label:
-        "Rezervacije",
-
-      icon:
-        CalendarCheck2,
-
-      permission:
-        "tenant.bookings.read",
-
-      className:
-        "border-indigo-300/20 bg-indigo-300/10 text-indigo-200 hover:border-indigo-300/35 hover:bg-indigo-300/15 focus:ring-indigo-300",
-    },
-    {
-      href:
-        `${businessBasePath}/branding`,
-
-      label:
-        "Branding",
-
-      icon:
-        Images,
-
-      permission:
-        "tenant.branding.write",
-
-      className:
-        "border-fuchsia-300/20 bg-fuchsia-300/10 text-fuchsia-200 hover:border-fuchsia-300/35 hover:bg-fuchsia-300/15 focus:ring-fuchsia-300",
-    },
-  ] as const satisfies
-    readonly {
-      href: string;
-      label: string;
-      icon: typeof Pencil;
-      permission:
-        PlatformAdminPermission;
-      className: string;
-    }[];
-
-  const visibleManagementLinks =
-    managementLinks.filter(
-      (item) =>
-        platformAccess
-          .permissions
-          .includes(
-            item.permission
-          )
-    );
-
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-3 xl:w-auto">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-        <p className="text-xs uppercase tracking-wider text-zinc-600">
-          Javni booking link
-        </p>
+    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-600">
+        Canonical javni URL
+      </p>
+      <p
+        className={[
+          "mt-2 break-all text-sm",
+          isActive
+            ? "text-zinc-300"
+            : "text-zinc-500",
+        ].join(" ")}
+      >
+        {publicUrl}
+      </p>
 
-        <p
-          className={`mt-1 break-all text-sm ${
-            isActive
-              ? "text-zinc-300"
-              : "text-zinc-500"
-          }`}
-        >
-          {publicUrl}
-        </p>
-      </div>
+      {
+        isActive ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={
+                handleCopy
+              }
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+            >
+              {
+                copied ? (
+                  <Check
+                    size={17}
+                    className="text-emerald-300"
+                  />
+                ) : (
+                  <Copy size={17} />
+                )
+              }
+              {copied ? "Kopirano" : "Kopiraj link"}
+            </button>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-        {visibleManagementLinks.map(
-          (
-            item
-          ) => {
-            const Icon =
-              item.icon;
+            <a
+              href={publicUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-950"
+            >
+              <ExternalLink size={17} />
+              Otvori javni sajt
+            </a>
+          </div>
+        ) : (
+          <p className="mt-4 rounded-xl border border-amber-300/15 bg-amber-300/[0.06] px-4 py-3 text-sm text-amber-100">
+            Javni URL postoji, ali sajt nije dostupan dok lifecycle status nije Published.
+          </p>
+        )
+      }
 
-            return (
-              <Link
-                key={
-                  item.href
-                }
-                href={
-                  item.href
-                }
-                className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 ${item.className}`}
-              >
-                <Icon
-                  size={17}
-                />
-
-                {item.label}
-              </Link>
-            );
-          }
-        )}
-      </div>
-
-      {isActive ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={
-              handleCopy
-            }
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
-          >
-            {copied ? (
-              <Check
-                size={17}
-                className="text-emerald-300"
-              />
-            ) : (
-              <Copy
-                size={17}
-              />
-            )}
-
-            {copied
-              ? "Kopirano"
-              : "Kopiraj link"}
-          </button>
-
-          <a
-            href={
-              publicUrl
-            }
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-950"
-          >
-            <ExternalLink
-              size={17}
-            />
-
-            Otvori profil
-          </a>
-        </div>
-      ) : (
-        <button
-          type="button"
-          disabled
-          className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-600"
-        >
-          <ExternalLink
-            size={17}
-          />
-
-          Profil nije objavljen
-        </button>
-      )}
-    </div>
+      <span
+        aria-live="polite"
+        className="sr-only"
+      >
+        {copied ? "Javni URL je kopiran." : ""}
+      </span>
+    </section>
   );
 }

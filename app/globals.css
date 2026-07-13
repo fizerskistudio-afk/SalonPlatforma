@@ -68,6 +68,31 @@ a {
   text-decoration: none;
 }
 
+/*
+ * Platform-admin uses light surfaces as primary and selected controls. The
+ * global anchor reset above intentionally inherits the dark-shell foreground,
+ * so links rendered as light buttons need an explicit, scoped on-light color.
+ * Keep these rules inside the platform-admin shell so public tenant themes are
+ * unaffected.
+ */
+.platform-admin-shell .bg-white {
+  color: #09090b;
+}
+
+.platform-admin-shell select {
+  color-scheme: dark;
+}
+
+.platform-admin-shell select option,
+.platform-admin-shell select optgroup {
+  background-color: #18181b;
+  color: #f4f4f5;
+}
+
+.platform-admin-shell select option:disabled {
+  color: #a1a1aa;
+}
+
 img {
   display: block;
   max-width: 100%;
@@ -277,4 +302,3 @@ img {
     transform: translateY(-4px);
   }
 }
-

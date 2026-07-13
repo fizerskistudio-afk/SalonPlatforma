@@ -62,6 +62,7 @@ export default async function PlatformAdminLayout({
     >
       <div
         className="
+          platform-admin-shell
           min-h-screen
           bg-zinc-950
           text-zinc-100

@@ -1,6 +1,6 @@
 # PLATFORM-ADMIN-LIFECYCLE-READINESS-01
 
-**Status:** application implementation prepared; installer and real local output required before PASS.
+**Status:** PASS; installer, runtime pregled i radna grana potvrđeni u commitu `79952de`.
 
 ## Cilj
 
@@ -69,14 +69,14 @@ Ovo nije trajni database audit trail. Nova audit tabela, retention i pristup log
 
 ## Acceptance
 
-- [ ] installer preflight potvrđuje granu, commit tree i čist working tree/index;
-- [ ] targeted lifecycle/readiness behavior testovi prolaze;
-- [ ] Sales je odbijen pre lifecycle data access-a;
-- [ ] incomplete tenant dobija `TENANT_NOT_READY` i direktne blocker CTA podatke;
-- [ ] stale lifecycle request dobija `LIFECYCLE_CHANGED` bez mutation-a;
-- [ ] archived direct publish je odbijen;
-- [ ] validan publish atomarno usklađuje `publication_status` i `is_active`;
-- [ ] legacy profile `isActive` write je odbijen pre database access-a;
-- [ ] TypeScript, lint, svi testovi i production build prolaze;
-- [ ] desktop i mobile tenant overview smoke potvrđuju akcije, blocker linkove i confirmation;
-- [ ] stvarni installer output je pregledan pre PASS oznake.
+- [x] installer preflight potvrđuje granu, commit tree i čist working tree/index;
+- [x] targeted lifecycle/readiness behavior testovi prolaze;
+- [x] Sales je odbijen pre lifecycle data access-a;
+- [x] incomplete tenant dobija `TENANT_NOT_READY` i direktne blocker CTA podatke;
+- [x] stale lifecycle request dobija `LIFECYCLE_CHANGED` bez mutation-a;
+- [x] archived direct publish je odbijen;
+- [x] validan publish atomarno usklađuje `publication_status` i `is_active`;
+- [x] legacy profile `isActive` write je odbijen pre database access-a;
+- [x] TypeScript, lint, svi testovi i production build prolaze;
+- [x] desktop i mobile tenant overview smoke potvrđuju akcije, blocker linkove i confirmation;
+- [x] stvarni installer output je pregledan pre PASS oznake.

@@ -102,8 +102,6 @@ describe(
               React.createElement(
                 BusinessPublicLinkActions,
                 {
-                  businessSlug:
-                    "lumiere-studio",
                   publicUrl,
                   isActive:
                     true,

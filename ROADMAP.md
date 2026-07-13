@@ -253,8 +253,8 @@ Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je 
 2. `PLATFORM-ADMIN-AUTH-BOUNDARY-01` — završen;
 3. `PLATFORM-ADMIN-RBAC-FOUNDATION-01` — završen;
 4. `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01` — završen;
-5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` — aktivan;
-6. `PLATFORM-ADMIN-WORKSPACE-01`;
+5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` — završen;
+6. `PLATFORM-ADMIN-WORKSPACE-01` — aktivan;
 7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01`;
 8. `PLATFORM-ADMIN-OPERATIONS-01`;
 9. `CONTENT-STARTER-PACKS-01A`;
@@ -609,7 +609,8 @@ Post-launch backlog: `POST-LAUNCH-MOBILE-SOCIAL-PROOF-01` — opcioni diskretni 
 - [x] `PLATFORM-ADMIN-AUTH-BOUNDARY-01` runtime smoke PASS;
 - [x] capability-based `PLATFORM-ADMIN-RBAC-FOUNDATION-01` installer i runtime PASS;
 - [x] `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01` završen i pushovan na radnu granu (`1f059c3`);
-- [ ] aktivan `PLATFORM-ADMIN-LIFECYCLE-READINESS-01`;
+- [x] `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` završen i pushovan na radnu granu (`79952de`);
+- [ ] aktivan `PLATFORM-ADMIN-WORKSPACE-01`;
 - [ ] database membership aktivacija ostaje zaseban eksplicitno odobren korak.
 
 ### Client-preview soft launch granica
@@ -935,8 +936,8 @@ Poslednji završen audit: PLATFORM-ADMIN-REVIEW-01
 Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
 Lumière: završena referentna tema; galerijski layout zaključan
 Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
-Aktivni milestone: PLATFORM-ADMIN-LIFECYCLE-READINESS-01
-Sledeći redosled: lifecycle/readiness → workspace → access/recovery → operations → starter packs → content intake → shareable preview
+Aktivni milestone: PLATFORM-ADMIN-WORKSPACE-01
+Sledeći redosled: workspace → access/recovery → operations → starter packs → content intake → shareable preview
 Teme posle platform-admin preview osnove: Editorial → Barber → Nails
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
 Main gate: kompletan platform-admin + Lumière/Editorial/Barber/Nails + domen + RBAC DB aktivacija + master QA + eksplicitna dozvola
