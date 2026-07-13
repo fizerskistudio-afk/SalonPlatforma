@@ -25,7 +25,9 @@ export async function GET(
   request: NextRequest
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.preview.read"
+    );
 
   if (
     !(

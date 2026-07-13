@@ -194,7 +194,9 @@ export async function PUT(
   request: NextRequest
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.profile.write"
+    );
 
   if (
     !(

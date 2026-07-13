@@ -453,7 +453,9 @@ async function handleRequest(
   mode: "create" | "update"
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.team.write"
+    );
 
   if (
     !(

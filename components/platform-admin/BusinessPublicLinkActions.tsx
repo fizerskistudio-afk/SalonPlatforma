@@ -21,6 +21,13 @@ import {
   UsersRound,
 } from "lucide-react";
 
+import {
+  usePlatformAdminAccess,
+} from "@/components/platform-admin/PlatformAdminAccessProvider";
+import type {
+  PlatformAdminPermission,
+} from "@/lib/auth/platform-admin-policy";
+
 type BusinessPublicLinkActionsProps = {
   businessSlug: string;
   publicUrl: string;
@@ -72,6 +79,9 @@ export default function BusinessPublicLinkActions({
   publicUrl,
   isActive,
 }: BusinessPublicLinkActionsProps) {
+  const platformAccess =
+    usePlatformAdminAccess();
+
   const [
     copied,
     setCopied,
@@ -190,6 +200,9 @@ export default function BusinessPublicLinkActions({
       icon:
         Pencil,
 
+      permission:
+        "tenant.profile.write",
+
       className:
         "border-amber-300/20 bg-amber-300/10 text-amber-200 hover:border-amber-300/35 hover:bg-amber-300/15 focus:ring-amber-300",
     },
@@ -202,6 +215,9 @@ export default function BusinessPublicLinkActions({
 
       icon:
         CalendarClock,
+
+      permission:
+        "tenant.settings.write",
 
       className:
         "border-sky-300/20 bg-sky-300/10 text-sky-200 hover:border-sky-300/35 hover:bg-sky-300/15 focus:ring-sky-300",
@@ -216,6 +232,9 @@ export default function BusinessPublicLinkActions({
       icon:
         UsersRound,
 
+      permission:
+        "tenant.team.write",
+
       className:
         "border-violet-300/20 bg-violet-300/10 text-violet-200 hover:border-violet-300/35 hover:bg-violet-300/15 focus:ring-violet-300",
     },
@@ -228,6 +247,9 @@ export default function BusinessPublicLinkActions({
 
       icon:
         KeyRound,
+
+      permission:
+        "tenant.owner_access.read",
 
       className:
         "border-orange-300/20 bg-orange-300/10 text-orange-200 hover:border-orange-300/35 hover:bg-orange-300/15 focus:ring-orange-300",
@@ -242,6 +264,9 @@ export default function BusinessPublicLinkActions({
       icon:
         Tags,
 
+      permission:
+        "tenant.catalog.write",
+
       className:
         "border-emerald-300/20 bg-emerald-300/10 text-emerald-200 hover:border-emerald-300/35 hover:bg-emerald-300/15 focus:ring-emerald-300",
     },
@@ -254,6 +279,9 @@ export default function BusinessPublicLinkActions({
 
       icon:
         CalendarX2,
+
+      permission:
+        "tenant.schedule.write",
 
       className:
         "border-rose-300/20 bg-rose-300/10 text-rose-200 hover:border-rose-300/35 hover:bg-rose-300/15 focus:ring-rose-300",
@@ -268,6 +296,9 @@ export default function BusinessPublicLinkActions({
       icon:
         CalendarCheck2,
 
+      permission:
+        "tenant.bookings.read",
+
       className:
         "border-indigo-300/20 bg-indigo-300/10 text-indigo-200 hover:border-indigo-300/35 hover:bg-indigo-300/15 focus:ring-indigo-300",
     },
@@ -281,10 +312,31 @@ export default function BusinessPublicLinkActions({
       icon:
         Images,
 
+      permission:
+        "tenant.branding.write",
+
       className:
         "border-fuchsia-300/20 bg-fuchsia-300/10 text-fuchsia-200 hover:border-fuchsia-300/35 hover:bg-fuchsia-300/15 focus:ring-fuchsia-300",
     },
-  ] as const;
+  ] as const satisfies
+    readonly {
+      href: string;
+      label: string;
+      icon: typeof Pencil;
+      permission:
+        PlatformAdminPermission;
+      className: string;
+    }[];
+
+  const visibleManagementLinks =
+    managementLinks.filter(
+      (item) =>
+        platformAccess
+          .permissions
+          .includes(
+            item.permission
+          )
+    );
 
   return (
     <div className="flex w-full max-w-6xl flex-col gap-3 xl:w-auto">
@@ -305,7 +357,7 @@ export default function BusinessPublicLinkActions({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-        {managementLinks.map(
+        {visibleManagementLinks.map(
           (
             item
           ) => {

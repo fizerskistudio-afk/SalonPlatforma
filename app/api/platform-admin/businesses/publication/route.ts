@@ -10,6 +10,12 @@ import {
 import {
   getPlatformAdminAccess,
 } from "@/lib/auth/platform-admin";
+import {
+  hasPlatformAdminPermission,
+} from "@/lib/auth/platform-admin-policy";
+import {
+  getPublicationPermission,
+} from "@/lib/platform-admin/publication-permissions";
 
 import {
   isBusinessPublicationStatus,
@@ -131,6 +137,24 @@ export async function PATCH(
 
   const publicationStatus =
     body.status;
+
+  const requiredPermission =
+    getPublicationPermission(
+      publicationStatus
+    );
+
+  if (
+    !hasPlatformAdminPermission(
+      access.context.role,
+      requiredPermission
+    )
+  ) {
+    return jsonError(
+      403,
+      "Tvoja platformska rola nema dozvolu za ovu lifecycle akciju.",
+      "PLATFORM_ADMIN_PERMISSION_DENIED"
+    );
+  }
 
   const isActive =
     shouldBusinessBeOperational(

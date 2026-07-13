@@ -201,7 +201,9 @@ export async function PUT(
   request: NextRequest
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.schedule.write"
+    );
 
   if (!("context" in access)) {
     if (

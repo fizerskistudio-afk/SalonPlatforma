@@ -51,7 +51,9 @@ export function jsonError(
 
 export async function authorizePlatformAdmin() {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.owner_access.write"
+    );
 
   if (
     "context" in

@@ -10,6 +10,10 @@ import {
 } from "vitest";
 
 import BusinessPublicLinkActions from "@/components/platform-admin/BusinessPublicLinkActions";
+import PlatformAdminAccessProvider from "@/components/platform-admin/PlatformAdminAccessProvider";
+import {
+  getPlatformAdminPermissions,
+} from "@/lib/auth/platform-admin-policy";
 
 import {
   buildBusinessPublicLinks,
@@ -84,14 +88,27 @@ describe(
         const html =
           renderToStaticMarkup(
             React.createElement(
-              BusinessPublicLinkActions,
+              PlatformAdminAccessProvider,
               {
-                businessSlug:
-                  "lumiere-studio",
-                publicUrl,
-                isActive:
-                  true,
-              }
+                access: {
+                  role:
+                    "super_admin",
+                  permissions:
+                    getPlatformAdminPermissions(
+                      "super_admin"
+                    ),
+                },
+              },
+              React.createElement(
+                BusinessPublicLinkActions,
+                {
+                  businessSlug:
+                    "lumiere-studio",
+                  publicUrl,
+                  isActive:
+                    true,
+                }
+              )
             )
           );
 

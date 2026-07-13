@@ -116,7 +116,9 @@ function errorResponse(
 
 async function requireAccess() {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.branding.write"
+    );
 
   if (
     "context" in access

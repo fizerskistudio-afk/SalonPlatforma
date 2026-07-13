@@ -7,8 +7,16 @@ import {
   createClient,
 } from "@/lib/supabase/server";
 
-export type PlatformAdminRole =
-  "super_admin";
+import {
+  getPlatformAdminRoleForEmail,
+  hasPlatformAdminPermission,
+  type PlatformAdminPermission,
+  type PlatformAdminRole,
+} from "@/lib/auth/platform-admin-policy";
+
+export type {
+  PlatformAdminRole,
+} from "@/lib/auth/platform-admin-policy";
 
 export type PlatformAdminContext = {
   userId: string;
@@ -26,37 +34,17 @@ type PlatformAdminAccess =
       status:
         | "unauthenticated"
         | "forbidden";
+      reason?:
+        | "membership"
+        | "permission";
     };
-
-function normalizeEmail(
-  value: string
-): string {
-  return value
-    .trim()
-    .toLowerCase();
-}
-
-function getConfiguredPlatformAdminEmails():
-  ReadonlySet<string> {
-  const configuredEmails =
-    process.env
-      .PLATFORM_ADMIN_EMAILS ??
-    "";
-
-  return new Set(
-    configuredEmails
-      .split(",")
-      .map(normalizeEmail)
-      .filter(
-        (email) =>
-          email.length > 0
-      )
-  );
-}
 
 export const getPlatformAdminAccess =
   cache(
-    async (): Promise<PlatformAdminAccess> => {
+    async (
+      requiredPermission?:
+        PlatformAdminPermission
+    ): Promise<PlatformAdminAccess> => {
       const supabase =
         await createClient();
 
@@ -101,21 +89,40 @@ export const getPlatformAdminAccess =
       }
 
       const email =
-        normalizeEmail(
-          emailClaim
+        emailClaim
+          .trim()
+          .toLowerCase();
+
+      const role =
+        getPlatformAdminRoleForEmail(
+          email,
+          process.env
+            .PLATFORM_ADMIN_EMAILS
         );
 
-      const allowedEmails =
-        getConfiguredPlatformAdminEmails();
+      if (
+        !role
+      ) {
+        return {
+          status:
+            "forbidden",
+          reason:
+            "membership",
+        };
+      }
 
       if (
-        !allowedEmails.has(
-          email
+        requiredPermission &&
+        !hasPlatformAdminPermission(
+          role,
+          requiredPermission
         )
       ) {
         return {
           status:
             "forbidden",
+          reason:
+            "permission",
         };
       }
 
@@ -126,8 +133,7 @@ export const getPlatformAdminAccess =
         context: {
           userId,
           email,
-          role:
-            "super_admin",
+          role,
         },
       };
     }
@@ -150,11 +156,49 @@ export async function requirePlatformAdmin():
       "unauthenticated"
   ) {
     redirect(
-      "/admin/login"
+      "/platform-admin/login"
     );
   }
 
   redirect(
-    "/admin"
+    "/platform-admin/forbidden"
+  );
+}
+
+export async function requirePlatformAdminPermission(
+  permission: PlatformAdminPermission
+): Promise<PlatformAdminContext> {
+  const access =
+    await getPlatformAdminAccess(
+      permission
+    );
+
+  if (
+    access.status ===
+      "authorized"
+  ) {
+    return access.context;
+  }
+
+  if (
+    access.status ===
+      "unauthenticated"
+  ) {
+    redirect(
+      "/platform-admin/login"
+    );
+  }
+
+  if (
+    access.reason ===
+      "permission"
+  ) {
+    redirect(
+      "/platform-admin/denied"
+    );
+  }
+
+  redirect(
+    "/platform-admin/forbidden"
   );
 }

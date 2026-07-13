@@ -193,7 +193,9 @@ function getRescheduleErrorMessage(error: {
 }
 
 async function authorizeRequest() {
-  const access = await getPlatformAdminAccess();
+  const access = await getPlatformAdminAccess(
+    "tenant.bookings.write"
+  );
 
   if (!("context" in access)) {
     return access.status === "unauthenticated"

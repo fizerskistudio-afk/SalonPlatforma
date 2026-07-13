@@ -13,6 +13,10 @@ import {
   PlusCircle,
 } from "lucide-react";
 
+import {
+  usePlatformAdminPermission,
+} from "@/components/platform-admin/PlatformAdminAccessProvider";
+
 const navigationItems = [
   {
     href:
@@ -90,6 +94,37 @@ export default function PlatformAdminNavigation() {
   const pathname =
     usePathname();
 
+  const canCreateTenant =
+    usePlatformAdminPermission(
+      "tenant.create"
+    );
+
+  const canViewPresets =
+    usePlatformAdminPermission(
+      "tenant.preview.read"
+    );
+
+  const visibleItems =
+    navigationItems.filter(
+      (item) => {
+        if (
+          item.href ===
+          "/platform-admin/businesses/new"
+        ) {
+          return canCreateTenant;
+        }
+
+        if (
+          item.href ===
+          "/platform-admin/business-presets"
+        ) {
+          return canViewPresets;
+        }
+
+        return true;
+      }
+    );
+
   return (
     <nav
       aria-label="Platform admin navigacija"
@@ -99,7 +134,7 @@ export default function PlatformAdminNavigation() {
       "
     >
       {
-        navigationItems.map(
+        visibleItems.map(
           (
             item
           ) => {

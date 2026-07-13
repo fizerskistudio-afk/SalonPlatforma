@@ -304,7 +304,9 @@ function successResponse(
 
 async function authorizePlatformAdmin() {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.preview.read"
+    );
 
   if (
     "context" in

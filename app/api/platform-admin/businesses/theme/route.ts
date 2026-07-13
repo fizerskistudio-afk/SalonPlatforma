@@ -49,7 +49,9 @@ export async function PUT(
   request: NextRequest
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.theme.write"
+    );
 
   if (
     access.status !==

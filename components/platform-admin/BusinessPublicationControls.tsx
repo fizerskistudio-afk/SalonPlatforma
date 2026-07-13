@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 
 import BusinessPublicationBadge from "./BusinessPublicationBadge";
+import {
+  usePlatformAdminAccess,
+} from "./PlatformAdminAccessProvider";
 
 import {
   BUSINESS_PUBLICATION_DESCRIPTIONS,
@@ -26,6 +29,9 @@ import {
   BUSINESS_PUBLICATION_STATUSES,
   type BusinessPublicationStatus,
 } from "@/lib/publishing/status";
+import {
+  getPublicationPermission,
+} from "@/lib/platform-admin/publication-permissions";
 
 type PublicationApiResponse = {
   ok?: boolean;
@@ -62,6 +68,9 @@ export default function BusinessPublicationControls({
 }) {
   const router =
     useRouter();
+
+  const platformAccess =
+    usePlatformAdminAccess();
 
   const [
     status,
@@ -279,6 +288,18 @@ export default function BusinessPublicationControls({
                 nextStatus ===
                 pendingStatus;
 
+              const requiredPermission =
+                getPublicationPermission(
+                  nextStatus
+                );
+
+              const isAllowed =
+                platformAccess
+                  .permissions
+                  .includes(
+                    requiredPermission
+                  );
+
               return (
                 <button
                   key={
@@ -286,6 +307,7 @@ export default function BusinessPublicationControls({
                   }
                   type="button"
                   disabled={
+                    !isAllowed ||
                     isCurrent ||
                     pendingStatus !==
                       null
@@ -294,6 +316,11 @@ export default function BusinessPublicationControls({
                     void updateStatus(
                       nextStatus
                     )
+                  }
+                  title={
+                    isAllowed
+                      ? undefined
+                      : "Tvoja platformska rola nema dozvolu za ovu lifecycle akciju."
                   }
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition enabled:hover:border-white/25 enabled:hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -325,6 +352,16 @@ export default function BusinessPublicationControls({
           )
         }
       </div>
+
+      {
+        !platformAccess.permissions.includes(
+          "tenant.publish"
+        ) ? (
+          <p className="mt-4 rounded-xl border border-amber-300/15 bg-amber-300/[0.06] px-4 py-3 text-sm text-amber-100">
+            Tvoja rola može da pregleda preview, ali nema dozvolu da objavi ili promeni lifecycle status tenant-a.
+          </p>
+        ) : null
+      }
 
       {
         message ? (

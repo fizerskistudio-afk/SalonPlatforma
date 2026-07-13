@@ -107,7 +107,7 @@ Audit je potvrdio:
 - nedostatak platform-admin behavior/integration testova;
 - potrebu za starter-pack i client-preview workflow-om.
 
-Prvi implementacioni milestone je `PLATFORM-ADMIN-PUBLIC-URL-01`.
+`PLATFORM-ADMIN-PUBLIC-URL-01` i korektivni `01A` su završeni. Sledeća bezbednosna granica je odvojen platform-admin login, pa capability-based RBAC infrastruktura pre lifecycle/publication enforcement-a.
 
 ## Zaključani template standard
 
@@ -131,7 +131,7 @@ Mobile prikaz nije samo sužen desktop layout.
 
 ### Faza A — platform-admin pouzdanost
 
-#### 1. PLATFORM-ADMIN-PUBLIC-URL-01
+#### 1. PLATFORM-ADMIN-PUBLIC-URL-01 — završeno
 
 - server-resolved canonical public i preview URL;
 - ispravan `href` u prvom renderu;
@@ -139,7 +139,32 @@ Mobile prikaz nije samo sužen desktop layout.
 - canonical private-route host politika;
 - root-host, tenant-host, pre/post hydration i API-failure test matrica.
 
-#### 2. PLATFORM-ADMIN-LIFECYCLE-READINESS-01
+Korektivni `PLATFORM-ADMIN-PUBLIC-URL-01A` je uklonio dev-only canonical redirect petlju bez vraćanja hydration zavisnosti ili relativnog public link fallback-a.
+
+#### 2. PLATFORM-ADMIN-AUTH-BOUNDARY-01 — završeno
+
+- zaseban `/platform-admin/login` bez `business_members` owner/manager provere;
+- odvojeni forbidden i local logout tokovi;
+- platformski auth redirecti više ne završavaju na tenant-admin `/admin` rutama;
+- bezbedan `next` parametar ograničen na `/platform-admin` rute;
+- poseban rate-limit i monitoring namespace;
+- postojeći `PLATFORM_ADMIN_EMAILS` ostaje privremeni fail-closed rollout izvor;
+- nema database migracije ni RBAC aktivacije u ovom milestone-u;
+- incognito login, `super_admin` prikaz i local logout runtime smoke PASS.
+
+#### 3. PLATFORM-ADMIN-RBAC-FOUNDATION-01 — aktivan
+
+- capability registry i server-side permission guard;
+- početne role: `super_admin`, `sales`, `launch_manager` i `it`;
+- Sales može da kreira, menja i deli preview, ali nema publish/unpublish dozvolu;
+- Launch manager ima eksplicitnu publish dozvolu uz readiness i confirmation gate;
+- IT ima monitoring, incident i tehnički read pristup bez podrazumevanog content/publish pristupa;
+- platform membership model odvojen od tenant `business_members`;
+- nema department UI-ja; kasniji department sloj grupiše role bez menjanja permission contracta;
+- zaštita poslednjeg aktivnog super-admina i zabrana self-elevation-a;
+- DB migracija, bootstrap članstva i aktivacija ostaju odvojeni koraci uz eksplicitno odobrenje.
+
+#### 4. PLATFORM-ADMIN-LIFECYCLE-READINESS-01
 
 - jedan lifecycle servis;
 - technical, content, booking, owner-access, preview i production readiness;
@@ -148,7 +173,7 @@ Mobile prikaz nije samo sužen desktop layout.
 - uklanjanje nezavisne `is_active` kontrole iz profile editora;
 - optimistička konkurentnost i minimalni lifecycle audit event.
 
-#### 3. PLATFORM-ADMIN-WORKSPACE-01
+#### 5. PLATFORM-ADMIN-WORKSPACE-01
 
 - tenant shell i responsive navigacija;
 - Pregled, Branding, Tema, Pristup i Operacije;
@@ -156,7 +181,7 @@ Mobile prikaz nije samo sužen desktop layout.
 - tanji Overview sa jednim sledećim korakom;
 - očuvanje svih postojećih akcija tokom migracije.
 
-#### 4. PLATFORM-ADMIN-ACCESS-RECOVERY-01
+#### 6. PLATFORM-ADMIN-ACCESS-RECOVERY-01
 
 - owner access state machine;
 - invited, password-pending, active i disabled stanja;
@@ -165,7 +190,7 @@ Mobile prikaz nije samo sužen desktop layout.
 - platform-admin login nezavisan od tenant owner membershipa;
 - izbor aktivnog tenant-a za legitimnog multi-tenant owner-a.
 
-#### 5. PLATFORM-ADMIN-OPERATIONS-01
+#### 7. PLATFORM-ADMIN-OPERATIONS-01
 
 - integracija ili uklanjanje legacy staff-setup toka;
 - zajednički tenant loader i mutation contract;
@@ -176,7 +201,7 @@ Mobile prikaz nije samo sužen desktop layout.
 
 ### Faza B — client-preview factory
 
-#### 6. CONTENT-STARTER-PACKS-01A
+#### 8. CONTENT-STARTER-PACKS-01A
 
 - verzionisani starter-pack format;
 - stabilni category/service ključevi;
@@ -189,7 +214,7 @@ Mobile prikaz nije samo sužen desktop layout.
 
 Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće theme closeout milestone-ove.
 
-#### 7. CLIENT-CONTENT-INTAKE-01
+#### 9. CLIENT-CONTENT-INTAKE-01
 
 - vođeni unos identiteta, kontakta, lokacije i društvenih mreža;
 - izbor sadržajnih jezika;
@@ -199,7 +224,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 - izbor teme i content completeness checklist;
 - prvi preview bez prolaska kroz nepovezane ekrane.
 
-#### 8. CLIENT-PREVIEW-SHARING-01
+#### 10. CLIENT-PREVIEW-SHARING-01
 
 - expiring i revocable eksterni preview pristup;
 - hash-only token ili ekvivalentna server-side sigurnosna granica;
@@ -211,7 +236,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 
 ### Faza C — završetak tema
 
-#### 9. DEMO-THEME-EDITORIAL-01
+#### 11. DEMO-THEME-EDITORIAL-01
 
 - modularni desktop i mobile;
 - shared reviews i sedam UI jezika;
@@ -221,7 +246,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 - Premium Editorial starter pack;
 - acceptance se menja iz `pending` tek posle stvarnog QA.
 
-#### 10. DEMO-THEME-BARBER-01
+#### 12. DEMO-THEME-BARBER-01
 
 - modularni desktop i mobile;
 - finalni Barber visual polish;
@@ -231,7 +256,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 - Classic Barber starter pack;
 - izlazak iz beta statusa tek posle acceptance-a.
 
-#### 11. DEMO-THEME-NAILS-01
+#### 13. DEMO-THEME-NAILS-01
 
 - zaseban nails vizuelni sistem;
 - portfolio-first galerija;
@@ -244,7 +269,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 
 ### Faza D — ponovni pregled i launch gate
 
-#### 12. PLATFORM-ADMIN-END-TO-END-REVIEW-02
+#### 14. PLATFORM-ADMIN-END-TO-END-REVIEW-02
 
 - prolazak stvarnog toka od novog klijenta do deljivog preview-a;
 - merenje vremena izrade;
@@ -253,7 +278,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 - finalna responsive/accessibility optimizacija;
 - potvrda da nije potrebna ručna database intervencija.
 
-#### 13. DEMO-DATA-LANDING-01
+#### 15. DEMO-DATA-LANDING-01
 
 - reprezentativni Lumière, Editorial, Barber i Nails tenant-i;
 - realistične usluge, zaposleni, galerije i dozvoljen demo review sadržaj;
@@ -261,7 +286,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 - jasan CTA za client preview;
 - demo sadržaj se ne predstavlja kao stvarni customer dokaz.
 
-#### 14. MASTER-SYSTEM-QA-01
+#### 16. MASTER-SYSTEM-QA-01
 
 - platform-admin, owner/admin i staff smoke;
 - desktop/mobile public i booking smoke;
@@ -273,7 +298,7 @@ Premium Editorial, Classic Barber i Nail Studio pack dodaju se uz odgovarajuće 
 - lint, test, TypeScript i production build;
 - pregled kompletnog diff-a.
 
-#### 15. PREVIEW-SOFT-LAUNCH-GATE-01
+#### 17. PREVIEW-SOFT-LAUNCH-GATE-01
 
 Gate je PASS samo kada:
 

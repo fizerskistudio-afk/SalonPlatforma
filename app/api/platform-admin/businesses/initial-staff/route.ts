@@ -286,7 +286,9 @@ export async function POST(
   request: NextRequest
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.team.write"
+    );
 
   if (
     !(

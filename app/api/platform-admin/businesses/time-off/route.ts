@@ -280,7 +280,9 @@ async function handleRequest(
   mode: RequestMode
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.schedule.write"
+    );
 
   if (!("context" in access)) {
     if (access.status === "unauthenticated") {

@@ -619,7 +619,9 @@ async function handleRequest(
     | "update"
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.catalog.write"
+    );
 
   if (
     !(

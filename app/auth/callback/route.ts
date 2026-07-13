@@ -10,6 +10,9 @@ import {
 import {
   createClient,
 } from "@/lib/supabase/server";
+import {
+  getAuthFailureLoginPath,
+} from "@/lib/auth/platform-admin-policy";
 
 const EMAIL_OTP_TYPES =
   new Set<EmailOtpType>([
@@ -192,9 +195,14 @@ export async function GET(
       errorMessage
     );
 
+    const errorPath =
+      getAuthFailureLoginPath(
+        next
+      );
+
     const errorUrl =
       new URL(
-        "/admin/login",
+        errorPath,
         request
           .nextUrl
           .origin

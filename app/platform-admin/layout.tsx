@@ -10,16 +10,25 @@ import Link from "next/link";
 
 import {
   ExternalLink,
+  LogOut,
   Scissors,
   Settings2,
   ShieldCheck,
 } from "lucide-react";
 
 import PlatformAdminNavigation from "@/components/platform-admin/PlatformAdminNavigation";
+import PlatformAdminAccessProvider from "@/components/platform-admin/PlatformAdminAccessProvider";
+import {
+  signOutPlatformAdminAction,
+} from "@/app/platform-admin/actions";
 
 import {
   requirePlatformAdmin,
 } from "@/lib/auth/platform-admin";
+import {
+  getPlatformAdminPermissions,
+  PLATFORM_ADMIN_ROLE_LABELS,
+} from "@/lib/auth/platform-admin-policy";
 
 export const metadata:
   Metadata = {
@@ -39,8 +48,20 @@ export default async function PlatformAdminLayout({
   const platformAdmin =
     await requirePlatformAdmin();
 
+  const permissions =
+    getPlatformAdminPermissions(
+      platformAdmin.role
+    );
+
   return (
-    <div
+    <PlatformAdminAccessProvider
+      access={{
+        role:
+          platformAdmin.role,
+        permissions,
+      }}
+    >
+      <div
       className="
         min-h-screen
         bg-zinc-950
@@ -183,7 +204,11 @@ export default async function PlatformAdminLayout({
                 size={15}
               />
 
-              Super admin
+              {
+                PLATFORM_ADMIN_ROLE_LABELS[
+                  platformAdmin.role
+                ]
+              }
             </div>
 
             <p
@@ -196,6 +221,25 @@ export default async function PlatformAdminLayout({
             >
               {platformAdmin.email}
             </p>
+
+            <form
+              action={
+                signOutPlatformAdminAction
+              }
+              className="mt-4"
+            >
+              <button
+                type="submit"
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm font-medium text-zinc-300 transition hover:border-white/20 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 focus:ring-offset-zinc-950"
+              >
+                <LogOut
+                  size={16}
+                  aria-hidden="true"
+                />
+
+                Odjavi se
+              </button>
+            </form>
           </div>
         </div>
       </aside>
@@ -282,6 +326,7 @@ export default async function PlatformAdminLayout({
           {children}
         </main>
       </div>
-    </div>
+      </div>
+    </PlatformAdminAccessProvider>
   );
 }

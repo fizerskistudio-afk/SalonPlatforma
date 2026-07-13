@@ -298,7 +298,9 @@ export async function PUT(
   request: NextRequest
 ) {
   const access =
-    await getPlatformAdminAccess();
+    await getPlatformAdminAccess(
+      "tenant.settings.write"
+    );
 
   if (!("context" in access)) {
     if (
