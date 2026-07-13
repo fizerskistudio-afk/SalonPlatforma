@@ -38,7 +38,6 @@ type BusinessProfileInput = {
   address?: unknown;
   city?: unknown;
   country?: unknown;
-  isActive?: unknown;
 };
 
 type BusinessRow = {
@@ -53,7 +52,6 @@ type BusinessRow = {
   phone: string | null;
   email: string | null;
   default_locale: string;
-  is_active: boolean;
   updated_at: string;
 };
 
@@ -343,8 +341,16 @@ export async function PUT(
       profile.country
     );
 
-  const isActive =
-    profile.isActive;
+  if (
+    "isActive" in
+    profile
+  ) {
+    return errorResponse(
+      400,
+      "Operativni status se menja isključivo kroz Publishing lifecycle kontrole.",
+      "LIFECYCLE_FIELD_NOT_ALLOWED"
+    );
+  }
 
   if (
     !name ||
@@ -440,17 +446,6 @@ export async function PUT(
     );
   }
 
-  if (
-    typeof isActive !==
-    "boolean"
-  ) {
-    return errorResponse(
-      400,
-      "Status salona nije ispravan.",
-      "INVALID_BUSINESS_STATUS"
-    );
-  }
-
   try {
     const supabase =
       createAdminClient();
@@ -475,7 +470,6 @@ export async function PUT(
           phone,
           email,
           default_locale,
-          is_active,
           updated_at
         `
       )
@@ -561,9 +555,6 @@ export async function PUT(
           business.default_locale,
           country
         ),
-
-      is_active:
-        isActive,
     };
 
     const {
@@ -591,7 +582,6 @@ export async function PUT(
           phone,
           email,
           default_locale,
-          is_active,
           updated_at
         `
       )

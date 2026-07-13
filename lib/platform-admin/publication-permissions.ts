@@ -6,9 +6,20 @@ import type {
 } from "@/lib/publishing/status";
 
 export function getPublicationPermission(
-  status: BusinessPublicationStatus
+  currentStatus: BusinessPublicationStatus,
+  nextStatus: BusinessPublicationStatus
 ): PlatformAdminPermission {
-  switch (status) {
+  if (
+    (
+      currentStatus === "suspended" ||
+      currentStatus === "archived"
+    ) &&
+    nextStatus === "draft"
+  ) {
+    return "tenant.reactivate";
+  }
+
+  switch (nextStatus) {
     case "published":
       return "tenant.publish";
 

@@ -14,7 +14,6 @@ import {
 
 import {
   AlertCircle,
-  CheckCircle2,
   Globe2,
   LoaderCircle,
   Mail,
@@ -32,7 +31,6 @@ type BusinessProfile = {
   address: string;
   city: string;
   country: string;
-  isActive: boolean;
 };
 
 type BusinessProfileEditorProps = {
@@ -259,9 +257,6 @@ export default function BusinessProfileEditor({
 
                   country:
                     profile.country.trim(),
-
-                  isActive:
-                    profile.isActive,
                 },
               }),
           }
@@ -649,61 +644,6 @@ export default function BusinessProfileEditor({
           </div>
         </section>
       </div>
-
-      <section
-        className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 md:p-6"
-      >
-        <label
-          className="flex cursor-pointer items-start justify-between gap-5"
-        >
-          <div>
-            <div
-              className="flex items-center gap-2"
-            >
-              {profile.isActive ? (
-                <CheckCircle2
-                  size={18}
-                  className="text-emerald-300"
-                />
-              ) : (
-                <AlertCircle
-                  size={18}
-                  className="text-amber-300"
-                />
-              )}
-
-              <span
-                className="font-semibold"
-              >
-                Aktivni javni profil
-              </span>
-            </div>
-
-            <p
-              className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500"
-            >
-              Kada je isključen, salon ostaje sačuvan u platformi, ali javna booking ruta vraća 404 i klijenti ne mogu da rezervišu termin.
-            </p>
-          </div>
-
-          <input
-            type="checkbox"
-            checked={
-              profile.isActive
-            }
-            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-              updateField(
-                "isActive",
-                event.target.checked
-              )
-            }
-            disabled={
-              isSubmitting
-            }
-            className="mt-1 h-5 w-5 shrink-0 accent-amber-300"
-          />
-        </label>
-      </section>
 
       {error ? (
         <div

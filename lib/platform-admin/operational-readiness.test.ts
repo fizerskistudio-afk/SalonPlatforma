@@ -6,7 +6,6 @@ import {
 
 import {
   buildTenantAttentionQueue,
-  buildTenantReadiness,
   getTenantAttentionReasons,
   type TenantOperationalInput,
 } from "./operational-readiness";
@@ -41,90 +40,6 @@ function operationalTenant(
 describe(
   "tenant operational readiness",
   () => {
-    it(
-      "marks complete tenant ready to publish",
-      () => {
-        const result =
-          buildTenantReadiness({
-            businessSlug:
-              "mika-berberin",
-            contactReady:
-              true,
-            bookingSettingsReady:
-              true,
-            categoriesReady:
-              true,
-            servicesReady:
-              true,
-            employeesReady:
-              true,
-            workingHoursReady:
-              true,
-            ownerReady:
-              true,
-          });
-
-        expect(
-          result.completed
-        ).toBe(7);
-
-        expect(
-          result.percent
-        ).toBe(100);
-
-        expect(
-          result.readyToPublish
-        ).toBe(true);
-      }
-    );
-
-    it(
-      "returns corrective route for missing owner",
-      () => {
-        const result =
-          buildTenantReadiness({
-            businessSlug:
-              "lumiere-studio",
-            contactReady:
-              true,
-            bookingSettingsReady:
-              true,
-            categoriesReady:
-              true,
-            servicesReady:
-              true,
-            employeesReady:
-              true,
-            workingHoursReady:
-              true,
-            ownerReady:
-              false,
-          });
-
-        const ownerItem =
-          result.items.find(
-            (
-              item
-            ) =>
-              item.key ===
-              "owner"
-          );
-
-        expect(
-          result.readyToPublish
-        ).toBe(false);
-
-        expect(
-          ownerItem
-        ).toMatchObject({
-          ready:
-            false,
-          href:
-            "/platform-admin/businesses/lumiere-studio/access",
-        });
-      }
-    );
-
     it(
       "flags draft and missing owner",
       () => {

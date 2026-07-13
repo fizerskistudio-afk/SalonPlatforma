@@ -41,7 +41,6 @@ type BusinessRow = {
   phone: string | null;
   email: string | null;
   default_locale: string;
-  is_active: boolean;
   updated_at: string;
 };
 
@@ -158,7 +157,6 @@ async function loadBusiness(
         phone,
         email,
         default_locale,
-        is_active,
         updated_at
       `
     )
@@ -322,9 +320,6 @@ export default async function BusinessEditPage({
                 business.country,
                 business.default_locale
               ),
-
-            isActive:
-              business.is_active,
           }}
         />
       </div>

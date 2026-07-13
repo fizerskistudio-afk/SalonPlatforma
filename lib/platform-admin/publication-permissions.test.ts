@@ -16,6 +16,7 @@ describe(
       () => {
         expect(
           getPublicationPermission(
+            "draft",
             "published"
           )
         ).toBe(
@@ -29,6 +30,7 @@ describe(
       () => {
         expect(
           getPublicationPermission(
+            "published",
             "draft"
           )
         ).toBe(
@@ -37,6 +39,7 @@ describe(
 
         expect(
           getPublicationPermission(
+            "published",
             "suspended"
           )
         ).toBe(
@@ -45,10 +48,34 @@ describe(
 
         expect(
           getPublicationPermission(
+            "published",
             "archived"
           )
         ).toBe(
           "tenant.deactivate"
+        );
+      }
+    );
+
+    it(
+      "requires reactivation permission when restoring a deactivated tenant",
+      () => {
+        expect(
+          getPublicationPermission(
+            "suspended",
+            "draft"
+          )
+        ).toBe(
+          "tenant.reactivate"
+        );
+
+        expect(
+          getPublicationPermission(
+            "archived",
+            "draft"
+          )
+        ).toBe(
+          "tenant.reactivate"
         );
       }
     );

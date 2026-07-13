@@ -11,8 +11,6 @@ import {
   ArrowLeft,
   Building2,
   CalendarClock,
-  CheckCircle2,
-  CircleOff,
   Clock3,
   Coins,
   Globe2,
@@ -34,7 +32,6 @@ import BusinessPublicLinkActions from "@/components/platform-admin/BusinessPubli
 import {
   BUSINESS_PUBLICATION_LABELS,
   isBusinessPubliclyAvailable,
-  resolveBusinessPublicationStatus,
 } from "@/lib/publishing/status";
 
 import {
@@ -44,6 +41,9 @@ import {
 import {
   buildBusinessPublicLinks,
 } from "@/lib/platform-admin/business-public-links";
+import {
+  loadTenantLifecycleContext,
+} from "@/lib/platform-admin/tenant-lifecycle-server";
 
 import {
   resolveTemplateKey,
@@ -798,12 +798,22 @@ export default async function BusinessManagementPage({
     notFound();
   }
 
-  const data =
-    await loadBusinessManagementData(
+  const [
+    data,
+    lifecycle,
+  ] = await Promise.all([
+    loadBusinessManagementData(
       businessSlug
-    );
+    ),
+    loadTenantLifecycleContext(
+      businessSlug
+    ),
+  ]);
 
-  if (!data) {
+  if (
+    !data ||
+    !lifecycle
+  ) {
     notFound();
   }
 
@@ -818,15 +828,14 @@ export default async function BusinessManagementPage({
   } = data;
 
   const publicationStatus =
-    resolveBusinessPublicationStatus(
-      business.publication_status,
-      business.is_active
-    );
+    lifecycle.business
+      .publicationStatus;
 
   const publiclyAvailable =
     isBusinessPubliclyAvailable(
       publicationStatus,
-      business.is_active
+      lifecycle.business
+        .isActive
     );
 
   const publicLinks =
@@ -1079,12 +1088,6 @@ export default async function BusinessManagementPage({
               Tenant kontrolni centar
             </p>
 
-            <StatusBadge
-              isActive={
-                business.is_active
-              }
-            />
-
             <BusinessPublicationBadge
               status={
                 publicationStatus
@@ -1165,51 +1168,24 @@ export default async function BusinessManagementPage({
         initialStatus={
           publicationStatus
         }
+        expectedUpdatedAt={
+          lifecycle.business
+            .updatedAt
+        }
+        readiness={
+          lifecycle.readiness
+        }
         previewUrl={
           publicLinks.previewUrl
         }
       />
 
       <TenantReadinessCard
-        businessId={
-          business.id
-        }
-        businessSlug={
-          business.slug
-        }
         publicationStatus={
           publicationStatus
         }
-        contactReady={
-          Boolean(
-            business.phone
-              ?.trim() ||
-            business.email
-              ?.trim()
-          )
-        }
-        bookingSettingsReady={
-          Boolean(
-            bookingSettings
-          )
-        }
-        categoriesReady={
-          activeCategories >
-          0
-        }
-        servicesReady={
-          activeServices >
-          0
-        }
-        employeesReady={
-          activeEmployees >
-          0
-        }
-        workingHoursReady={
-          getOpenDayCount(
-            salonHours
-          ) >
-          0
+        readiness={
+          lifecycle.readiness
         }
       />
 
@@ -2093,47 +2069,6 @@ export default async function BusinessManagementPage({
         </div>
       </section>
     </div>
-  );
-}
-
-function StatusBadge({
-  isActive,
-}: {
-  isActive: boolean;
-}) {
-  return (
-    <span
-      className={[
-        "inline-flex",
-        "items-center",
-        "gap-1.5",
-        "rounded-full",
-        "border",
-        "px-3",
-        "py-1",
-        "text-xs",
-        "font-semibold",
-        isActive
-          ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
-          : "border-zinc-400/20 bg-zinc-400/10 text-zinc-400",
-      ].join(
-        " "
-      )}
-    >
-      {isActive ? (
-        <CheckCircle2
-          size={13}
-        />
-      ) : (
-        <CircleOff
-          size={13}
-        />
-      )}
-
-      {isActive
-        ? "Aktivan"
-        : "Neaktivan"}
-    </span>
   );
 }
 

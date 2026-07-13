@@ -164,7 +164,7 @@ Korektivni `PLATFORM-ADMIN-PUBLIC-URL-01A` je uklonio dev-only canonical redirec
 - zaštita poslednjeg aktivnog super-admina i zabrana self-elevation-a;
 - DB migracija, bootstrap članstva i aktivacija ostaju odvojeni koraci uz eksplicitno odobrenje.
 
-#### 4. PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01 — aktivan
+#### 4. PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01 — završeno
 
 - centralni `legacy`, `hybrid` i `database` membership resolver;
 - `legacy` ostaje podrazumevan i ne poziva pending RPC;
@@ -176,7 +176,9 @@ Korektivni `PLATFORM-ADMIN-PUBLIC-URL-01A` je uklonio dev-only canonical redirec
 - behavior testovi za rollout i lockout zaštitu;
 - bez database, email, cron ili production aktivacije.
 
-#### 5. PLATFORM-ADMIN-LIFECYCLE-READINESS-01
+Application closeout je prošao lokalni installer i pushovan je na radnu granu kao `1f059c3`. Database membership aktivacija ostaje odložena do četiri završene teme i spremnog domena.
+
+#### 5. PLATFORM-ADMIN-LIFECYCLE-READINESS-01 — aktivan
 
 - jedan lifecycle servis;
 - technical, content, booking, owner-access, preview i production readiness;
@@ -184,6 +186,7 @@ Korektivni `PLATFORM-ADMIN-PUBLIC-URL-01A` je uklonio dev-only canonical redirec
 - blocker poruke sa direktnim CTA;
 - uklanjanje nezavisne `is_active` kontrole iz profile editora;
 - optimistička konkurentnost i minimalni lifecycle audit event.
+- trajni database audit trail nije deo ove aplikacione faze i zahteva zasebno odobrenu migraciju.
 
 #### 6. PLATFORM-ADMIN-WORKSPACE-01
 
