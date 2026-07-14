@@ -24,6 +24,9 @@ import {
 import type {
   BusinessOwnerAccessItem,
 } from "@/lib/platform-admin/business-access";
+import {
+  canResendOwnerActivation,
+} from "@/lib/platform-admin/owner-access-state";
 
 type BusinessOwnerAccessManagerProps = {
   businessSlug: string;
@@ -80,49 +83,61 @@ function getAccountStatus(
   label: string;
   className: string;
 } {
-  if (
-    !owner.isActive
-  ) {
-    return {
-      label:
-        "Deaktiviran",
+  switch (owner.state) {
+    case "disabled":
+      return {
+        label: "Deaktiviran",
+        className:
+          "border-zinc-700 bg-zinc-900 text-zinc-400",
+      };
 
-      className:
-        "border-zinc-700 bg-zinc-900 text-zinc-400",
-    };
+    case "invited":
+      return {
+        label: "Pozvan · čeka potvrdu",
+        className:
+          "border-amber-400/20 bg-amber-400/10 text-amber-200",
+      };
+
+    case "password_pending":
+      return {
+        label: "Čeka postavljanje lozinke",
+        className:
+          "border-sky-400/20 bg-sky-400/10 text-sky-200",
+      };
+
+    case "recovery_required":
+      return {
+        label: "Potreban recovery",
+        className:
+          "border-rose-400/20 bg-rose-400/10 text-rose-200",
+      };
+
+    case "active":
+      return {
+        label: "Aktivan",
+        className:
+          "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+      };
   }
+}
 
-  if (
-    owner.lastSignInAt
-  ) {
-    return {
-      label:
-        "Aktivno korišćen",
-
-      className:
-        "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
-    };
+function getAccountGuidance(
+  owner: BusinessOwnerAccessItem
+): string {
+  switch (owner.state) {
+    case "disabled":
+      return "Membership je isključen i tenant admin nije dostupan ovom nalogu.";
+    case "invited":
+      return "Owner mora da potvrdi email poziv pre prve prijave.";
+    case "password_pending":
+      return owner.mustChangePassword
+        ? "Privremeni credentials važe, ali owner još mora da postavi privatnu lozinku."
+        : "Email je potvrđen; owner još treba da završi postavljanje lozinke i prvu prijavu.";
+    case "recovery_required":
+      return "Membership postoji, ali Auth nalog nije moguće potvrditi. Ne objavljuj tenant dok se pristup ne oporavi.";
+    case "active":
+      return "Auth nalog i aktivni owner membership su spremni za tenant admin.";
   }
-
-  if (
-    owner.emailConfirmedAt
-  ) {
-    return {
-      label:
-        "Potvrđen · čeka prijavu",
-
-      className:
-        "border-sky-400/20 bg-sky-400/10 text-sky-200",
-    };
-  }
-
-  return {
-    label:
-      "Poziv na čekanju",
-
-    className:
-      "border-amber-400/20 bg-amber-400/10 text-amber-200",
-  };
 }
 
 async function readApiResponse(
@@ -694,11 +709,16 @@ export default function BusinessOwnerAccessManager({
                   owner.id;
 
                 const canResendActivation =
-                  owner.isActive &&
-                  Boolean(
-                    owner.email
-                  ) &&
-                  !owner.lastSignInAt;
+                  canResendOwnerActivation({
+                    state:
+                      owner.state,
+                    hasEmail:
+                      Boolean(
+                        owner.email
+                      ),
+                    mustChangePassword:
+                      owner.mustChangePassword,
+                  });
 
                 return (
                   <article
@@ -759,6 +779,12 @@ export default function BusinessOwnerAccessManager({
                           }
                         />
                       </div>
+
+                      <p className="mt-3 max-w-3xl text-xs leading-5 text-zinc-500">
+                        {getAccountGuidance(
+                          owner
+                        )}
+                      </p>
                     </div>
 
                     <div className="flex shrink-0 flex-col gap-2 sm:flex-row">

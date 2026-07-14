@@ -190,7 +190,7 @@ Application closeout je prošao lokalni installer i pushovan je na radnu granu k
 
 Milestone je prošao lokalni installer, read-only runtime pregled i pushovan je na radnu granu kao `79952de`.
 
-#### 6. PLATFORM-ADMIN-WORKSPACE-01 — aktivan
+#### 6. PLATFORM-ADMIN-WORKSPACE-01 — završeno
 
 - tenant shell i responsive navigacija;
 - Pregled, Branding, Tema, Pristup i Operacije;
@@ -199,7 +199,9 @@ Milestone je prošao lokalni installer, read-only runtime pregled i pushovan je 
 - očuvanje svih postojećih akcija tokom migracije.
 - Reviews ostaje jasno označen kao planirana stavka dok `PLATFORM-ADMIN-OPERATIONS-01` ne uvede pravu platform-admin rutu; nema linka ka tenant-admin panelu.
 
-#### 7. PLATFORM-ADMIN-ACCESS-RECOVERY-01
+Milestone, uključujući globalne platform-admin contrast safeguards, prošao je lokalni installer i browser smoke i pushovan je na radnu granu kao `11ef8ae`.
+
+#### 7. PLATFORM-ADMIN-ACCESS-RECOVERY-01 — aktivan
 
 - owner access state machine;
 - invited, password-pending, active i disabled stanja;
@@ -207,6 +209,8 @@ Milestone je prošao lokalni installer, read-only runtime pregled i pushovan je 
 - domen-idempotentan invitation resend;
 - platform-admin login nezavisan od tenant owner membershipa;
 - izbor aktivnog tenant-a za legitimnog multi-tenant owner-a.
+
+Implementacija je podeljena na dva rollback-safe paketa. `01A` uvodi autoritativni owner state contract, kontrolisani idempotentni resend i recovery obavezne promene lozinke. `01B` uvodi server-validirani active-tenant selector bez nove database migracije. Detaljan contract je u `docs/milestones/PLATFORM-ADMIN-ACCESS-RECOVERY-01.md`.
 
 #### 8. PLATFORM-ADMIN-OPERATIONS-01
 

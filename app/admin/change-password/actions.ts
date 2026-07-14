@@ -15,26 +15,13 @@ import {
 import {
   createClient,
 } from "@/lib/supabase/server";
+import {
+  completeTemporaryPasswordMetadata,
+} from "@/lib/auth/temporary-password";
 
 export type ChangePasswordActionState = {
   error: string | null;
 };
-
-function isJsonRecord(
-  value: unknown
-): value is Record<
-  string,
-  unknown
-> {
-  return (
-    typeof value ===
-      "object" &&
-    value !== null &&
-    !Array.isArray(
-      value
-    )
-  );
-}
 
 export async function changePasswordAction(
   _previousState:
@@ -89,25 +76,6 @@ export async function changePasswordAction(
     };
   }
 
-  const supabase =
-    await createClient();
-
-  const {
-    error:
-      passwordError,
-  } = await supabase
-    .auth
-    .updateUser({
-      password,
-    });
-
-  if (passwordError) {
-    return {
-      error:
-        "Nova lozinka nije sačuvana. Pokušaj ponovo.",
-    };
-  }
-
   const adminClient =
     createAdminClient();
 
@@ -129,44 +97,39 @@ export async function changePasswordAction(
   ) {
     return {
       error:
-        "Lozinka je promenjena, ali status prvog logina nije osvežen. Prijavi problem platform administratoru.",
+        "Nalog trenutno nije moguće proveriti. Lozinka nije menjana; pokušaj ponovo.",
     };
   }
 
-  const appMetadata =
-    isJsonRecord(
-      userData.user
-        .app_metadata
-    )
-      ? userData.user
-          .app_metadata
-      : {};
-
   const {
     error:
-      metadataError,
+      completionError,
   } = await adminClient
     .auth
     .admin
     .updateUserById(
       admin.userId,
       {
+        password,
         app_metadata: {
-          ...appMetadata,
-          must_change_password:
-            false,
-          credential_completed_at:
-            new Date().toISOString(),
+          ...completeTemporaryPasswordMetadata(
+            userData.user
+              .app_metadata,
+            new Date().toISOString()
+          ),
         },
       }
     );
 
-  if (metadataError) {
+  if (completionError) {
     return {
       error:
-        "Lozinka je promenjena, ali obavezna promena nije završena. Prijavi problem platform administratoru.",
+        "Promena nije potvrđena. Ostani na ovoj stranici i pošalji formu ponovo; isti postupak bezbedno završava i ranije prekinutu aktivaciju.",
     };
   }
+
+  const supabase =
+    await createClient();
 
   const {
     error:

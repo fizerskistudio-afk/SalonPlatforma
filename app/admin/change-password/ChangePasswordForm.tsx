@@ -92,6 +92,10 @@ export default function ChangePasswordForm() {
         Koristi najmanje 10 karaktera. Privremena lozinka prestaje da važi odmah nakon uspešne promene.
       </p>
 
+      <p className="rounded-xl border border-sky-400/15 bg-sky-400/[0.06] px-4 py-3 text-xs leading-5 text-sky-100/70">
+        Ako je prethodni pokušaj prekinut posle promene lozinke, bezbedno pošalji ovu formu ponovo sa privatnom lozinkom. Sistem završava lozinku i activation status u istoj Auth admin operaciji.
+      </p>
+
       {state.error ? (
         <div
           role="alert"

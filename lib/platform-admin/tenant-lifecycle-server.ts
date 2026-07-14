@@ -7,6 +7,9 @@ import {
   type BusinessPublicationStatus,
 } from "@/lib/publishing/status";
 import {
+  resolveOwnerAccessState,
+} from "@/lib/platform-admin/owner-access-state";
+import {
   createAdminClient,
 } from "@/lib/supabase/admin";
 
@@ -43,6 +46,22 @@ type WorkingHoursRow = {
   close_time: string | null;
   is_closed: boolean;
 };
+
+type OwnerMembershipRow = {
+  id: string;
+  user_id: string;
+  is_active: boolean;
+};
+
+function isJsonRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
 
 export type TenantLifecycleBusiness = {
   id: string;
@@ -221,11 +240,7 @@ export async function loadTenantLifecycleContext(
     supabase
       .from("business_members")
       .select(
-        "id",
-        {
-          count: "exact",
-          head: true,
-        }
+        "id, user_id, is_active"
       )
       .eq(
         "business_id",
@@ -277,6 +292,69 @@ export async function loadTenantLifecycleContext(
   const workingHours =
     (workingHoursResult.data ?? []) as unknown as
       WorkingHoursRow[];
+  const ownerMemberships =
+    (ownersResult.data ?? []) as unknown as
+      OwnerMembershipRow[];
+
+  const ownerStates =
+    await Promise.all(
+      ownerMemberships.map(
+        async (membership) => {
+          const {
+            data,
+            error,
+          } =
+            await supabase
+              .auth
+              .admin
+              .getUserById(
+                membership.user_id
+              );
+
+          if (error) {
+            console.error(
+              "Tenant lifecycle owner Auth lookup failed:",
+              {
+                businessId:
+                  business.id,
+                membershipId:
+                  membership.id,
+                error,
+              }
+            );
+          }
+
+          const user =
+            data?.user ??
+            null;
+          const appMetadata =
+            isJsonRecord(
+              user?.app_metadata
+            )
+              ? user.app_metadata
+              : {};
+
+          return resolveOwnerAccessState({
+            membershipActive:
+              membership.is_active,
+            authUserAvailable:
+              Boolean(user),
+            invitedAt:
+              user?.invited_at ??
+              null,
+            emailConfirmedAt:
+              user?.email_confirmed_at ??
+              null,
+            lastSignInAt:
+              user?.last_sign_in_at ??
+              null,
+            mustChangePassword:
+              appMetadata.must_change_password ===
+              true,
+          });
+        }
+      )
+    );
 
   const categoryIds =
     new Set(
@@ -359,7 +437,9 @@ export async function loadTenantLifecycleContext(
             )
         ),
       ownerReady:
-        (ownersResult.count ?? 0) > 0,
+        ownerStates.includes(
+          "active"
+        ),
     });
 
   return {

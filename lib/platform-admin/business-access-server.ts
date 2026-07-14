@@ -8,6 +8,9 @@ import type {
   BusinessAccessPageData,
   BusinessOwnerAccessItem,
 } from "@/lib/platform-admin/business-access";
+import {
+  resolveOwnerAccessState,
+} from "@/lib/platform-admin/owner-access-state";
 
 type BusinessRow = {
   id: string;
@@ -23,6 +26,28 @@ type MembershipRow = {
   created_at: string;
   updated_at: string;
 };
+
+function isJsonRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function getMetadataString(
+  metadata: Record<string, unknown>,
+  key: string
+): string | null {
+  const value = metadata[key];
+
+  return typeof value === "string" &&
+    value.trim()
+    ? value.trim()
+    : null;
+}
 
 export async function getBusinessAccessPageData(
   businessSlug: string
@@ -131,6 +156,29 @@ export async function getBusinessAccessPageData(
             userData?.user ??
             null;
 
+          const appMetadata =
+            isJsonRecord(
+              user?.app_metadata
+            )
+              ? user.app_metadata
+              : {};
+
+          const mustChangePassword =
+            appMetadata.must_change_password ===
+            true;
+
+          const invitedAt =
+            user?.invited_at ??
+            null;
+
+          const emailConfirmedAt =
+            user?.email_confirmed_at ??
+            null;
+
+          const lastSignInAt =
+            user?.last_sign_in_at ??
+            null;
+
           return {
             id:
               membership.id,
@@ -151,17 +199,43 @@ export async function getBusinessAccessPageData(
             updatedAt:
               membership.updated_at,
 
-            invitedAt:
-              user?.invited_at ??
-              null,
+            invitedAt,
 
-            emailConfirmedAt:
-              user?.email_confirmed_at ??
-              null,
+            emailConfirmedAt,
 
-            lastSignInAt:
-              user?.last_sign_in_at ??
-              null,
+            lastSignInAt,
+
+            mustChangePassword,
+
+            credentialSource:
+              getMetadataString(
+                appMetadata,
+                "credential_source"
+              ),
+
+            credentialIssuedAt:
+              getMetadataString(
+                appMetadata,
+                "credential_issued_at"
+              ),
+
+            credentialCompletedAt:
+              getMetadataString(
+                appMetadata,
+                "credential_completed_at"
+              ),
+
+            state:
+              resolveOwnerAccessState({
+                membershipActive:
+                  membership.is_active,
+                authUserAvailable:
+                  Boolean(user),
+                invitedAt,
+                emailConfirmedAt,
+                lastSignInAt,
+                mustChangePassword,
+              }),
           };
         }
       )

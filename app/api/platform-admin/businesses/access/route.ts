@@ -1,8 +1,4 @@
 import {
-  randomUUID,
-} from "node:crypto";
-
-import {
   revalidatePath,
 } from "next/cache";
 
@@ -20,12 +16,14 @@ import {
 } from "@/lib/auth/platform-admin";
 
 import {
-  getNotificationEmailConfig,
-} from "@/lib/notifications/config";
+  sendNotificationEmail,
+} from "@/lib/notifications/delivery";
 
 import {
-  sendResendEmail,
-} from "@/lib/notifications/resend";
+  buildOwnerActivationEmail,
+  getOwnerActivationDedupeKey,
+  type OwnerActivationLinkType,
+} from "@/lib/platform-admin/owner-activation";
 
 import {
   createAdminClient,
@@ -102,32 +100,6 @@ function getTrimmedString(
     "string"
     ? value.trim()
     : "";
-}
-
-function escapeHtml(
-  value: string
-): string {
-  return value
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
 }
 
 async function authorizePlatformAdmin() {
@@ -1219,8 +1191,7 @@ export async function PATCH(
   }
 
   const linkType:
-    | "invite"
-    | "recovery" =
+    OwnerActivationLinkType =
       authUser
         .email_confirmed_at
         ? "recovery"
@@ -1274,163 +1245,57 @@ export async function PATCH(
     );
   }
 
-  let emailConfig:
-    ReturnType<
-      typeof getNotificationEmailConfig
-    >;
+  const content =
+    buildOwnerActivationEmail({
+      businessName:
+        business.name,
+      email,
+      actionLink,
+      linkType,
+    });
 
-  try {
-    emailConfig =
-      getNotificationEmailConfig();
-  } catch (error) {
-    console.error(
-      "Unable to load email configuration for owner activation resend:",
-      error
-    );
+  const delivery =
+    await sendNotificationEmail({
+      scope: "business",
+      audience: "owner",
+      templateKey:
+        `owner_access_${linkType}`,
+      dedupeKey:
+        getOwnerActivationDedupeKey({
+          businessId:
+            business.id,
+          memberId,
+          linkType,
+        }),
+      recipient: email,
+      businessId:
+        business.id,
+      subject:
+        content.subject,
+      html: content.html,
+      text: content.text,
+      metadata: {
+        memberId,
+        linkType,
+      },
+    });
 
+  if (!delivery.ok) {
     return jsonError(
-      500,
-      "Email konfiguracija nije ispravna.",
-      "EMAIL_CONFIG_INVALID"
+      502,
+      "Aktivacioni email nije poslat. Pokušaj ponovo kasnije.",
+      "OWNER_ACTIVATION_EMAIL_FAILED"
     );
   }
 
   if (
-    !emailConfig.resendApiKey
+    delivery.status ===
+    "skipped"
   ) {
     return jsonError(
       503,
-      "RESEND_API_KEY nije podešen. Aktivacioni link nije poslat.",
-      "RESEND_NOT_CONFIGURED"
-    );
-  }
-
-  const recipient =
-    emailConfig.testMode &&
-    emailConfig.testRecipient
-      ? emailConfig
-          .testRecipient
-      : email;
-
-  const safeBusinessName =
-    escapeHtml(
-      business.name
-    );
-
-  const safeEmail =
-    escapeHtml(
-      email
-    );
-
-  const subject =
-    linkType ===
-      "invite"
-      ? `Ponovni poziv za ${business.name}`
-      : `Postavi lozinku za ${business.name}`;
-
-  const introText =
-    linkType ===
-      "invite"
-      ? "Ponovo ti šaljemo poziv za owner pristup."
-      : "Email je potvrđen, ali nalog još nije korišćen. Ovim linkom postavljaš lozinku.";
-
-  try {
-    await sendResendEmail({
-      from:
-        emailConfig
-          .platformFrom,
-
-      to:
-        recipient,
-
-      replyTo:
-        emailConfig
-          .platformReplyTo,
-
-      subject,
-
-      html:
-        `
-          <div style="margin:0;padding:32px;background:#09090b;color:#f4f4f5;font-family:Arial,sans-serif;">
-            <div style="max-width:560px;margin:0 auto;border:1px solid #27272a;border-radius:20px;background:#18181b;padding:28px;">
-              <p style="margin:0 0 10px;color:#fbbf24;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">
-                Salon Platforma
-              </p>
-
-              <h1 style="margin:0;color:#ffffff;font-size:26px;line-height:1.25;">
-                ${safeBusinessName}
-              </h1>
-
-              <p style="margin:18px 0 0;color:#a1a1aa;font-size:15px;line-height:1.7;">
-                ${escapeHtml(
-                  introText
-                )}
-              </p>
-
-              <p style="margin:12px 0 0;color:#71717a;font-size:13px;line-height:1.6;">
-                Owner nalog: ${safeEmail}
-              </p>
-
-              <a
-                href="${escapeHtml(
-                  actionLink
-                )}"
-                style="display:inline-block;margin-top:24px;border-radius:12px;background:#ffffff;color:#09090b;padding:13px 18px;text-decoration:none;font-size:14px;font-weight:700;"
-              >
-                Aktiviraj owner nalog
-              </a>
-
-              <p style="margin:24px 0 0;color:#52525b;font-size:12px;line-height:1.6;">
-                Ako nisi očekivao ovaj email, možeš ga ignorisati.
-              </p>
-            </div>
-          </div>
-        `,
-
-      text:
-        [
-          business.name,
-          "",
-          introText,
-          `Owner nalog: ${email}`,
-          "",
-          `Aktivacioni link: ${actionLink}`,
-          "",
-          "Ako nisi očekivao ovaj email, možeš ga ignorisati.",
-        ].join(
-          "\n"
-        ),
-
-      idempotencyKey:
-        `owner-activation-${memberId}-${randomUUID()}`,
-
-      tags: [
-        {
-          name:
-            "category",
-
-          value:
-            "owner-access",
-        },
-        {
-          name:
-            "business",
-
-          value:
-            businessSlug,
-        },
-      ],
-    });
-  } catch (error) {
-    console.error(
-      "Unable to resend owner activation email:",
-      error
-    );
-
-    return jsonError(
-      502,
-      "Aktivacioni email nije poslat preko Resend-a.",
-      "OWNER_ACTIVATION_EMAIL_FAILED"
+      "Email delivery trenutno nije uključen. Aktivacioni email nije poslat.",
+      "OWNER_ACTIVATION_DELIVERY_DISABLED"
     );
   }
 
@@ -1440,12 +1305,9 @@ export async function PATCH(
         true,
 
       message:
-        emailConfig
-          .testMode &&
-        emailConfig
-          .testRecipient
-          ? `Test aktivacioni email je poslat na ${recipient}.`
-          : `Aktivacioni email je ponovo poslat na ${email}.`,
+        delivery.skippedBecauseAlreadySent
+          ? "Aktivacioni email je već obrađen u poslednjih 15 minuta; duplikat nije poslat."
+          : "Aktivacioni email je obrađen kroz kontrolisani delivery tok.",
 
       delivery:
         linkType ===

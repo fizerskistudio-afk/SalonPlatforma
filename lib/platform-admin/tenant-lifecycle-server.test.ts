@@ -11,6 +11,8 @@ const mocks =
     () => ({
       createAdminClient:
         vi.fn(),
+      getUserById:
+        vi.fn(),
     })
   );
 
@@ -158,11 +160,34 @@ describe(
             error: null,
           },
           business_members: {
-            data: null,
+            data: [
+              {
+                id: "owner-membership-id",
+                user_id: "owner-user-id",
+                is_active: true,
+              },
+            ],
             error: null,
-            count: 1,
           },
         };
+
+        mocks.getUserById
+          .mockResolvedValue({
+            data: {
+              user: {
+                invited_at: null,
+                email_confirmed_at:
+                  "2026-07-13T19:00:00.000Z",
+                last_sign_in_at:
+                  "2026-07-13T19:05:00.000Z",
+                app_metadata: {
+                  must_change_password:
+                    false,
+                },
+              },
+            },
+            error: null,
+          });
 
         mocks.createAdminClient
           .mockReturnValue({
@@ -172,6 +197,12 @@ describe(
                   results[table]
                 )
             ),
+            auth: {
+              admin: {
+                getUserById:
+                  mocks.getUserById,
+              },
+            },
           });
 
         const lifecycle =
@@ -192,6 +223,48 @@ describe(
           lifecycle?.readiness
             .blockers
         ).toEqual([]);
+
+        mocks.getUserById
+          .mockResolvedValue({
+            data: {
+              user: {
+                invited_at: null,
+                email_confirmed_at:
+                  "2026-07-13T19:00:00.000Z",
+                last_sign_in_at:
+                  "2026-07-13T19:05:00.000Z",
+                app_metadata: {
+                  must_change_password:
+                    true,
+                },
+              },
+            },
+            error: null,
+          });
+
+        const pendingLifecycle =
+          await loadTenantLifecycleContext(
+            "demo-salon"
+          );
+
+        expect(
+          pendingLifecycle?.readiness
+            .ownerAccessReady
+        ).toBe(false);
+        expect(
+          pendingLifecycle?.readiness
+            .productionReady
+        ).toBe(false);
+        expect(
+          pendingLifecycle?.readiness
+            .blockers
+        ).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              key: "owner",
+            }),
+          ])
+        );
       }
     );
   }

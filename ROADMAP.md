@@ -1,6 +1,6 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 13. jul 2026.
+**Ažurirano:** 14. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
@@ -254,8 +254,8 @@ Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je 
 3. `PLATFORM-ADMIN-RBAC-FOUNDATION-01` — završen;
 4. `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01` — završen;
 5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` — završen;
-6. `PLATFORM-ADMIN-WORKSPACE-01` — aktivan;
-7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01`;
+6. `PLATFORM-ADMIN-WORKSPACE-01` — završen;
+7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — aktivan (`01A` owner state/recovery, zatim `01B` multi-tenant selector);
 8. `PLATFORM-ADMIN-OPERATIONS-01`;
 9. `CONTENT-STARTER-PACKS-01A`;
 10. `CLIENT-CONTENT-INTAKE-01`;
