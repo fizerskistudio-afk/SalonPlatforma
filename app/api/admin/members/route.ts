@@ -155,6 +155,16 @@ async function authorizeOwner() {
     } as const;
   }
 
+  if (admin.requiresTenantSelection) {
+    return {
+      error: jsonError(
+        409,
+        "Pre nastavka izaberi aktivni salon.",
+        "TENANT_SELECTION_REQUIRED"
+      ),
+    } as const;
+  }
+
   if (admin.role !== "owner") {
     return {
       error: jsonError(

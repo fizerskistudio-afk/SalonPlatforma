@@ -3,12 +3,16 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 
+import { getPreferredAdminBusinessId } from "@/lib/auth/admin-active-business";
+import {
+  resolveAdminTenantSelection,
+  type AdminTenantOption,
+  type AdminTenantRole,
+} from "@/lib/auth/admin-tenants";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export type AdminRole =
-  | "owner"
-  | "manager";
+export type AdminRole = AdminTenantRole;
 
 type MembershipRow = {
   id: string;
@@ -33,6 +37,8 @@ export type AdminContext = {
   membershipId: string;
   role: AdminRole;
   mustChangePassword: boolean;
+  tenants: AdminTenantOption[];
+  requiresTenantSelection: boolean;
 
   business: {
     id: string;
@@ -43,6 +49,7 @@ export type AdminContext = {
 
 type RequireAdminOptions = {
   allowPasswordChange?: boolean;
+  allowTenantSelection?: boolean;
 };
 
 function isJsonRecord(
@@ -144,26 +151,18 @@ export const getAdminContext = cache(
       ])
       .order("created_at", {
         ascending: true,
-      })
-      .limit(1)
-      .maybeSingle();
+      });
 
     if (
       membershipError ||
-      !membershipData
+      !membershipData ||
+      membershipData.length === 0
     ) {
       return null;
     }
 
-    const membership =
-      membershipData as unknown as MembershipRow;
-
-    if (
-      membership.role !== "owner" &&
-      membership.role !== "manager"
-    ) {
-      return null;
-    }
+    const memberships =
+      membershipData as unknown as MembershipRow[];
 
     const adminClient =
       createAdminClient();
@@ -176,22 +175,75 @@ export const getAdminContext = cache(
       .select(
         "id, name, slug, is_active"
       )
-      .eq(
+      .in(
         "id",
-        membership.business_id
+        memberships.map(
+          (membership) =>
+            membership.business_id
+        )
       )
-      .eq("is_active", true)
-      .maybeSingle();
+      .eq("is_active", true);
 
     if (
       businessError ||
-      !businessData
+      !businessData ||
+      businessData.length === 0
     ) {
       return null;
     }
 
-    const business =
-      businessData as unknown as BusinessRow;
+    const businesses =
+      businessData as unknown as BusinessRow[];
+
+    const businessById = new Map(
+      businesses.map((business) => [
+        business.id,
+        business,
+      ])
+    );
+
+    const tenants = memberships.flatMap(
+      (membership): AdminTenantOption[] => {
+        const business =
+          businessById.get(
+            membership.business_id
+          );
+
+        if (
+          !business ||
+          (membership.role !== "owner" &&
+            membership.role !== "manager")
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            membershipId: membership.id,
+            businessId: business.id,
+            businessName: business.name,
+            businessSlug: business.slug,
+            role: membership.role,
+          },
+        ];
+      }
+    );
+
+    const selection =
+      resolveAdminTenantSelection(
+        tenants,
+        await getPreferredAdminBusinessId()
+      );
+
+    if (
+      !selection.selected &&
+      !selection.requiresSelection
+    ) {
+      return null;
+    }
+
+    const selected =
+      selection.selected ?? tenants[0];
 
     const emailClaim =
       claims.email;
@@ -206,20 +258,24 @@ export const getAdminContext = cache(
           : null,
 
       membershipId:
-        membership.id,
+        selected.membershipId,
 
       role:
-        membership.role,
+        selected.role,
 
       mustChangePassword:
         getMustChangePassword(
           claims
         ),
 
+      tenants,
+      requiresTenantSelection:
+        selection.requiresSelection,
+
       business: {
-        id: business.id,
-        name: business.name,
-        slug: business.slug,
+        id: selected.businessId,
+        name: selected.businessName,
+        slug: selected.businessSlug,
       },
     };
   }
@@ -250,6 +306,15 @@ export async function requireAdmin(
   ) {
     redirect(
       "/admin/change-password"
+    );
+  }
+
+  if (
+    context.requiresTenantSelection &&
+    !options.allowTenantSelection
+  ) {
+    redirect(
+      "/admin/select-business"
     );
   }
 

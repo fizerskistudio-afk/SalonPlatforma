@@ -14,6 +14,7 @@ import {
   getClientAddress,
 } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
+import { clearPreferredAdminBusinessId } from "@/lib/auth/admin-active-business";
 
 export type LoginActionState = {
   error: string | null;
@@ -165,7 +166,7 @@ export async function loginAction(
   }
 
   const {
-    data: membership,
+    data: memberships,
     error: membershipError,
   } = await supabase
     .from("business_members")
@@ -180,9 +181,7 @@ export async function loginAction(
     .in("role", [
       "owner",
       "manager",
-    ])
-    .limit(1)
-    .maybeSingle();
+    ]);
 
   if (membershipError) {
     logServerError(
@@ -203,7 +202,10 @@ export async function loginAction(
     };
   }
 
-  if (!membership) {
+  if (
+    !memberships ||
+    memberships.length === 0
+  ) {
     logServerEvent(
       "warn",
       "auth.admin.membership.denied",
@@ -221,6 +223,8 @@ export async function loginAction(
         "Ovaj nalog nema aktivan administratorski pristup.",
     };
   }
+
+  await clearPreferredAdminBusinessId();
 
   if (
     data.user

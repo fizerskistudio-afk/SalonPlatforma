@@ -210,7 +210,7 @@ Milestone, uključujući globalne platform-admin contrast safeguards, prošao je
 - platform-admin login nezavisan od tenant owner membershipa;
 - izbor aktivnog tenant-a za legitimnog multi-tenant owner-a.
 
-Implementacija je podeljena na dva rollback-safe paketa. `01A` uvodi autoritativni owner state contract, kontrolisani idempotentni resend i recovery obavezne promene lozinke. `01B` uvodi server-validirani active-tenant selector bez nove database migracije. Detaljan contract je u `docs/milestones/PLATFORM-ADMIN-ACCESS-RECOVERY-01.md`.
+Implementacija je podeljena na dva rollback-safe paketa. `01A` je prošao lokalni installer i browser smoke i pushovan je kao `b857432`; uvodi autoritativni owner state contract, kontrolisani idempotentni resend i recovery obavezne promene lozinke. `01B` je pripremljen za lokalnu proveru i uvodi server-validirani active-tenant selector bez nove database migracije. Detaljan contract je u `docs/milestones/PLATFORM-ADMIN-ACCESS-RECOVERY-01.md`.
 
 #### 8. PLATFORM-ADMIN-OPERATIONS-01
 

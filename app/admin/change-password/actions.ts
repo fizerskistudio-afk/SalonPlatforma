@@ -32,6 +32,8 @@ export async function changePasswordAction(
     await requireAdmin({
       allowPasswordChange:
         true,
+      allowTenantSelection:
+        true,
     });
 
   if (
@@ -149,6 +151,8 @@ export async function changePasswordAction(
   }
 
   redirect(
-    "/admin"
+    admin.requiresTenantSelection
+      ? "/admin/select-business"
+      : "/admin"
   );
 }

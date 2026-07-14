@@ -32,13 +32,17 @@ export default async function ChangePasswordPage() {
     await requireAdmin({
       allowPasswordChange:
         true,
+      allowTenantSelection:
+        true,
     });
 
   if (
     !admin.mustChangePassword
   ) {
     redirect(
-      "/admin"
+      admin.requiresTenantSelection
+        ? "/admin/select-business"
+        : "/admin"
     );
   }
 

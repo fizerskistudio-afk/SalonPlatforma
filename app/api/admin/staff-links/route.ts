@@ -51,6 +51,14 @@ export async function PUT(
     );
   }
 
+  if (admin.requiresTenantSelection) {
+    return jsonError(
+      409,
+      "Pre nastavka izaberi aktivni salon.",
+      "TENANT_SELECTION_REQUIRED"
+    );
+  }
+
   if (admin.role !== "owner") {
     return jsonError(
       403,

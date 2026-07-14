@@ -18,6 +18,7 @@ import {
   Scissors,
   Settings,
   ShieldCheck,
+  Repeat2,
   UserRoundCog,
   UsersRound,
   X,
@@ -34,6 +35,7 @@ type AdminShellProps = {
   admin: {
     email: string | null;
     role: AdminRole;
+    tenantCount: number;
     business: {
       name: string;
       slug: string;
@@ -182,6 +184,7 @@ function SidebarContent({
   email,
   role,
   reviewAttentionCount,
+  tenantCount,
   onNavigate,
 }: {
   pathname: string;
@@ -191,6 +194,7 @@ function SidebarContent({
   email: string | null;
   role: AdminRole;
   reviewAttentionCount: number;
+  tenantCount: number;
   onNavigate?: () => void;
 }) {
   return (
@@ -356,6 +360,20 @@ function SidebarContent({
       </nav>
 
       <div className="border-t border-white/[0.07] p-3">
+        {tenantCount > 1 ? (
+          <Link
+            href="/admin/select-business"
+            onClick={onNavigate}
+            className="mb-3 flex min-h-11 items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 text-sm text-zinc-400 transition hover:border-amber-300/30 hover:bg-amber-300/[0.06] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
+          >
+            <span>Promeni salon</span>
+            <Repeat2
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+          </Link>
+        ) : null}
+
         <a
           href={
             publicUrl
@@ -457,6 +475,9 @@ export default function AdminShell({
           reviewAttentionCount={
             reviewAttentionCount
           }
+          tenantCount={
+            admin.tenantCount
+          }
         />
       </aside>
 
@@ -501,6 +522,9 @@ export default function AdminShell({
               role={admin.role}
               reviewAttentionCount={
                 reviewAttentionCount
+              }
+              tenantCount={
+                admin.tenantCount
               }
               onNavigate={() =>
                 setMobileMenuOpen(false)

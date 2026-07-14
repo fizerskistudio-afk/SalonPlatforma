@@ -255,7 +255,7 @@ Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je 
 4. `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01` — završen;
 5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` — završen;
 6. `PLATFORM-ADMIN-WORKSPACE-01` — završen;
-7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — aktivan (`01A` owner state/recovery, zatim `01B` multi-tenant selector);
+7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — aktivan (`01A` PASS i pushovan kao `b857432`; `01B` multi-tenant selector pripremljen za lokalnu proveru);
 8. `PLATFORM-ADMIN-OPERATIONS-01`;
 9. `CONTENT-STARTER-PACKS-01A`;
 10. `CLIENT-CONTENT-INTAKE-01`;

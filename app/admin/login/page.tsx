@@ -45,7 +45,11 @@ export default async function AdminLoginPage() {
     await getAdminContext();
 
   if (existingAdmin) {
-    redirect("/admin");
+    redirect(
+      existingAdmin.requiresTenantSelection
+        ? "/admin/select-business"
+        : "/admin"
+    );
   }
 
   return (

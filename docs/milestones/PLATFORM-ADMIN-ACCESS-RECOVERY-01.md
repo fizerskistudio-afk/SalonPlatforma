@@ -1,6 +1,6 @@
 # PLATFORM-ADMIN-ACCESS-RECOVERY-01
 
-**Status:** 01A application implementation prepared; root installer, stvarni lokalni output i browser smoke su obavezni pre PASS. 01B multi-tenant selector sledi kao zaseban rollback-safe paket.
+**Status:** 01A je prošao lokalni installer, browser smoke i pushovan je na radnu granu kao `b857432`. 01B application implementation je pripremljen; root installer, stvarni lokalni output i browser smoke su obavezni pre završnog PASS-a.
 
 ## Audit rezultat
 
@@ -46,7 +46,7 @@ Direktni temporary-password nalog ne dobija email resend CTA. Njegov recovery os
 
 ## 01B — multi-tenant owner selector
 
-Sledeći paket uvodi:
+Paket uvodi:
 
 - eksplicitan izbor salona kada owner/manager ima više aktivnih membership-a;
 - `HttpOnly`, `SameSite=Lax` active-business cookie;
@@ -56,6 +56,27 @@ Sledeći paket uvodi:
 - čišćenje active-business cookie-ja na logout-u.
 
 Cookie nije authorization izvor. Izmenjen ili zastareo cookie nikada ne daje pristup tenant-u bez aktivnog membership-a.
+
+### Serverski selection contract
+
+- lista opcija nastaje samo iz aktivnih owner/manager membership-a i aktivnih business zapisa;
+- kada postoji jedan važeći tenant, server ga bezbedno koristi bez obaveznog selector ekrana;
+- kada postoji više tenant-a i nema validne preference, zaštićene stranice idu na `/admin/select-business`;
+- selector action proverava UUID i ponovo ga uparuje sa server-validiranom listom trenutnog korisnika pre postavljanja cookie-ja;
+- promenjen, stran ili zastareo cookie ne bira tenant i zahteva novi eksplicitan izbor;
+- direktni admin API mutation tokovi vraćaju `TENANT_SELECTION_REQUIRED` dok izbor nije završen;
+- logout briše i Supabase sesiju i active-business cookie;
+- promena privremene lozinke ima prioritet, a multi-tenant selector sledi tek posle uspešnog završetka.
+
+### 01B browser smoke
+
+1. single-tenant owner posle login-a ide direktno na `/admin`;
+2. multi-tenant owner bez preference ide na `/admin/select-business`;
+3. izbor svakog salona otvara odgovarajući dashboard i podatke tog salona;
+4. `Promeni salon` ponovo otvara selector na desktopu i mobilnom;
+5. ručno izmenjen cookie na strani business ID ne daje pristup i vraća selector;
+6. logout, pa novi login, ne zadržava prethodni izbor;
+7. owner sa privremenom lozinkom prvo završava `/admin/change-password`, zatim bira salon.
 
 ## Granice milestone-a
 
@@ -68,12 +89,23 @@ Cookie nije authorization izvor. Izmenjen ili zastareo cookie nikada ne daje pri
 
 ## 01A acceptance
 
-- [ ] invited, password-pending, active, disabled i recovery-required se renderuju iz server state contract-a;
-- [ ] direct credential pending owner nema invitation resend CTA;
-- [ ] pending ili recovery-required owner više ne zadovoljava production readiness/publish gate;
-- [ ] invitation resend je deduplikovan u istom 15-minutnom domenu;
-- [ ] delivery disabled stanje ne tvrdi da je email poslat;
-- [ ] password completion može da oporavi ranije prekinut `must_change_password` tok;
+- [x] invited, password-pending, active, disabled i recovery-required se renderuju iz server state contract-a;
+- [x] direct credential pending owner nema invitation resend CTA;
+- [x] pending ili recovery-required owner više ne zadovoljava production readiness/publish gate;
+- [x] invitation resend je deduplikovan u istom 15-minutnom domenu;
+- [x] delivery disabled stanje ne tvrdi da je email poslat;
+- [x] password completion može da oporavi ranije prekinut `must_change_password` tok;
+- [x] TypeScript, lint, svi testovi i production build prolaze;
+- [x] installer briše `.next`, radi `npm run check`, rollbackuje na bilo koji failure i stage-uje samo svoje fajlove;
+- [x] stvarni lokalni installer output i browser smoke su pregledani pre PASS.
+
+## 01B acceptance
+
+- [ ] single-tenant fallback i multi-tenant obavezni izbor prolaze stvarni browser smoke;
+- [ ] cookie je `HttpOnly`, `SameSite=Lax`, secure u produkciji i nije authorization izvor;
+- [ ] strani, neaktivan ili zastareo business ID ne može da promeni tenant scope;
+- [ ] selector, switch CTA, post-password redirect i logout cleanup rade na desktopu i mobilnom;
+- [ ] direktne admin API mutacije su blokirane pre završenog tenant izbora;
 - [ ] TypeScript, lint, svi testovi i production build prolaze;
 - [ ] installer briše `.next`, radi `npm run check`, rollbackuje na bilo koji failure i stage-uje samo svoje fajlove;
 - [ ] stvarni lokalni installer output i browser smoke su pregledani pre PASS.

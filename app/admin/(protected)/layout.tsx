@@ -69,6 +69,8 @@ export default async function ProtectedAdminLayout({
       admin={{
         email: admin.email,
         role: admin.role,
+        tenantCount:
+          admin.tenants.length,
 
         business: {
           name:
