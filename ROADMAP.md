@@ -1,12 +1,31 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 15. jul 2026.
+**Ažurirano:** 16. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates i platform-admin Operations su završeni; aktivan je `AI-CONTENT-ASSIST-FOUNDATION-01`.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates i platform-admin Operations su završeni; `AI-CONTENT-ASSIST-FOUNDATION-01A` i `01B` su završeni i pushovani, a `AI-CONTENT-ASSIST-FOUNDATION-01C` je sledeći aktivni podmilestone.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
+
+## 0. Trenutni operativni checkpoint — 16. jul 2026.
+
+- [x] `PRODUCT-PACKAGES-ENTITLEMENTS-01` završen i pushovan;
+- [x] `PLATFORM-ADMIN-OPERATIONS-01` završen i pushovan;
+- [x] `AI-CONTENT-ASSIST-FOUNDATION-01A` domain/provider boundary završen i pushovan;
+- [x] `AI-CONTENT-ASSIST-FOUNDATION-01B` guarded invocation i rollout surface policy završeni i pushovani;
+- [x] AI prevodi zaključani kao Platform Admin assisted-content alat;
+- [x] tenant AI zaključan na Google review reply draft uz povezanu integraciju;
+- [x] ciljani AI testovi, kompletan Vitest suite, TypeScript i production build prošli;
+- [ ] `AI-CONTENT-ASSIST-FOUNDATION-01C — AUTH ADAPTERS AND INTERNAL API` je sledeći korak;
+- [ ] nema opšteg tenant AI endpointa niti automatskog content/review apply-a.
+
+### Poslednji potvrđeni implementation checkpoint
+
+```text
+13494f95a9b55aeb59f83c267c28d35fd5d5a4ba
+feat(ai): add guarded content assist foundation
+```
 
 ---
 
@@ -137,7 +156,7 @@ Prve vertikale su hair i barber. Arhitektura je predviđena i za nails, lashes/b
 
 ---
 
-## 4. Poslednji završeni milestone
+## 4. Istorijski milestone zapis
 
 # PUBLIC-CATALOG-SSR-01 — završen
 
@@ -258,7 +277,7 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — završen;
 8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — završen i pushovan;
 9. `PLATFORM-ADMIN-OPERATIONS-01` — završen i pushovan;
-10. `AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan;
+10. `AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan; 01A + 01B završeni i pushovani, 01C sledeći;
 11. `CONTENT-STARTER-PACKS-01A`;
 12. `CLIENT-CONTENT-INTAKE-01`;
 13. `CLIENT-PREVIEW-SHARING-01`;
@@ -313,8 +332,8 @@ Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMO
 
 ### AI-CONTENT-ASSIST-FOUNDATION-01 — aktivan
 
-- [x] 01A domain i provider boundary lokalno završen;
-- [x] 01B guarded invocation service lokalno završen;
+- [x] 01A domain i provider boundary završen i pushovan;
+- [x] 01B guarded invocation i surface policy završeni i pushovani;
 - [x] AI prevodi su u prvom rollout-u samo Platform Admin alat;
 - [x] tenant AI je u prvom rollout-u samo Google review reply draft uz povezanu integraciju;
 - [x] tenant content translation i non-Google AI reply surface ostaju blokirani;
@@ -328,11 +347,15 @@ Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMO
 - [x] provider sloj bez Supabase write operacija;
 - [x] 01A završen bez API rute, quota persistence-a i automatskog upisa;
 - [x] ciljani testovi, TypeScript i `npm run check`;
-- [ ] 01A + 01B ciljani Git commit i push — 01B commit i push čekaju eksplicitnu autorizaciju.
+- [x] 01A + 01B ciljani Git commit i push završeni na radnoj grani.
 
-Detaljan zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md`.
+Detaljan 01A zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md`.
 
+Detaljan 01B zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01B-GUARDED-INVOCATION.md`.
 
+Sledeći korak: `AI-CONTENT-ASSIST-FOUNDATION-01C — AUTH ADAPTERS AND INTERNAL API`.
+
+01C uvodi dva odvojena interna toka — Platform Admin translation i tenant Google review reply — bez opšteg tenant AI endpointa i bez automatskog apply-a.
 
 ### DEMO-I18N-01A — završen
 

@@ -66,7 +66,7 @@ describe(
     );
 
     it(
-      "records the completed Operations Git checkpoint and active AI foundation",
+      "records the completed Operations and AI 01A/01B Git checkpoints",
       () => {
         expect(
           ROADMAP
@@ -83,13 +83,13 @@ describe(
         expect(
           ROADMAP
         ).toContain(
-          "01A domain i provider boundary lokalno završen"
+          "01A domain i provider boundary završen i pushovan"
         );
 
         expect(
           ROADMAP
         ).toContain(
-          "commit i push čekaju eksplicitnu autorizaciju"
+          "01A + 01B ciljani Git commit i push završeni"
         );
       }
     );

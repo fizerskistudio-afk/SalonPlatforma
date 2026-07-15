@@ -88,7 +88,13 @@ describe(
         expect(
           ROADMAP
         ).toContain(
-          "01B commit i push čekaju eksplicitnu autorizaciju"
+          "01A + 01B ciljani Git commit i push završeni"
+        );
+
+        expect(
+          ROADMAP
+        ).toContain(
+          "AI-CONTENT-ASSIST-FOUNDATION-01C — AUTH ADAPTERS AND INTERNAL API"
         );
       }
     );
