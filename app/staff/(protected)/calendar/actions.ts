@@ -5,6 +5,9 @@ import {
 } from "next/cache";
 
 import { requireStaff } from "@/lib/auth/staff";
+import {
+  loadStaffProductFeatureServerAccessForBusinessId,
+} from "@/lib/product-packages/staff-gates-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type StaffCalendarActionResult = {
@@ -15,6 +18,23 @@ export type StaffCalendarActionResult = {
 export async function disconnectStaffGoogleCalendarAction(): Promise<StaffCalendarActionResult> {
   const staff =
     await requireStaff();
+
+  const featureAccess =
+    await loadStaffProductFeatureServerAccessForBusinessId(
+      staff.business.id,
+      "staff.calendar_connection"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
 
   const adminClient =
     createAdminClient();
@@ -65,6 +85,23 @@ export async function disconnectStaffGoogleCalendarAction(): Promise<StaffCalend
 export async function syncUpcomingStaffBookingsAction(): Promise<StaffCalendarActionResult> {
   const staff =
     await requireStaff();
+
+  const featureAccess =
+    await loadStaffProductFeatureServerAccessForBusinessId(
+      staff.business.id,
+      "staff.employee_calendar_sync"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
 
   const adminClient =
     createAdminClient();

@@ -6,7 +6,9 @@ import {
   NextResponse,
 } from "next/server";
 
-import { requireAdmin } from "@/lib/auth/admin";
+import {
+  loadAdminProductFeatureMutationAccess,
+} from "@/lib/product-packages/admin-gates-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic =
@@ -61,8 +63,26 @@ export async function POST(
   request: Request
 ) {
   try {
+    const featureAccess =
+      await loadAdminProductFeatureMutationAccess(
+        "admin.gallery"
+      );
+
+    if (
+      !featureAccess
+        .allowed
+    ) {
+      return errorResponse(
+        403,
+        featureAccess.message,
+        featureAccess.code
+      );
+    }
+
     const admin =
-      await requireAdmin();
+      featureAccess
+        .context
+        .admin;
 
     const body =
       (await request.json()) as UploadRequestBody;

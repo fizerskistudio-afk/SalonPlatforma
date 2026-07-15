@@ -18,6 +18,13 @@ import {
   logServerError,
 } from "@/lib/monitoring/server";
 import {
+  resolveProductFeatureGate,
+} from "@/lib/product-packages/gates";
+import {
+  resolveProductPackageAccess,
+  type ProductPackageAssignmentRow,
+} from "@/lib/product-packages/resolver";
+import {
   createAdminClient,
 } from "@/lib/supabase/admin";
 
@@ -53,14 +60,15 @@ type BookingRow = {
   internal_note: string | null;
 };
 
-type BusinessRow = {
-  id: string;
-  name: string;
-  timezone: string;
-  default_locale: string;
-  address: unknown;
-  city: unknown;
-};
+type BusinessRow =
+  ProductPackageAssignmentRow & {
+    id: string;
+    name: string;
+    timezone: string;
+    default_locale: string;
+    address: unknown;
+    city: unknown;
+  };
 
 type ServiceRow = {
   id: string;
@@ -618,7 +626,7 @@ async function loadContext(
     adminClient
       .from("businesses")
       .select(
-        "id, name, timezone, default_locale, address, city"
+        "id, name, timezone, default_locale, address, city, package_key, package_contract_version, package_assigned_at, package_assigned_by_user_id"
       )
       .eq(
         "id",
@@ -1283,6 +1291,41 @@ export async function syncBookingToEmployeeGoogleCalendar(
     booking,
     mappings,
   } = context;
+
+  const packageDecision =
+    context.business
+      ? resolveProductFeatureGate({
+          access:
+            resolveProductPackageAccess(
+              context.business
+            ),
+          featureKey:
+            "staff.employee_calendar_sync",
+          permissionGranted:
+            true,
+          integrationConnected:
+            true,
+        })
+      : null;
+
+  if (
+    packageDecision &&
+    !packageDecision
+      .entitled
+  ) {
+    return {
+      ok: true,
+      action:
+        "skipped",
+      message:
+        `Employee Google Calendar sync requires ${
+          packageDecision
+            .minimumPackage
+            ?.name ??
+          "Operations Pro"
+        }.`,
+    };
+  }
 
   if (
     booking.status ===

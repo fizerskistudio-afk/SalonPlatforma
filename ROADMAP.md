@@ -1,10 +1,10 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 14. jul 2026.
+**Ažurirano:** 15. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** funkcionalni multi-tenant core, Reviews foundation i referentna Lumière tema su završeni; aktivna je platform-admin i client-preview faza DEMO-PRODUCTION-READY obilaznice.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery i runtime product package gates su završeni lokalno; sledeći aktivni milestone je `PLATFORM-ADMIN-OPERATIONS-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -245,9 +245,9 @@ fix(ssr): stabilize localized review formatting
 
 Originalni milestone redosled u nastavku ostaje važeći. Privremeno se pauzira pre `BACKUP-RECOVERY-01` kako bi se završio production-like demo koji može pouzdano da predstavi kompletan proizvod.
 
-### Realignovan redosled obilaznice od 13. jula 2026.
+### Realignovan redosled obilaznice od 15. jula 2026.
 
-Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je preciziran: platform-admin mora omogućiti da se od pripremljenih podataka i slika napravi bezbedan klijentski preview za najviše 30–45 minuta, bez ručnog database rada.
+Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da platform-admin od pripremljenih podataka i slika napravi bezbedan klijentski preview za najviše 30–45 minuta, bez ručnog database rada.
 
 1. `PLATFORM-ADMIN-PUBLIC-URL-01` — završen;
 2. `PLATFORM-ADMIN-AUTH-BOUNDARY-01` — završen;
@@ -255,22 +255,41 @@ Završeni foundation milestone-ovi ostaju važeći, ali novi operativni cilj je 
 4. `PLATFORM-ADMIN-AUTH-RBAC-CLOSEOUT-01` — završen;
 5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` — završen;
 6. `PLATFORM-ADMIN-WORKSPACE-01` — završen;
-7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — aktivan (`01A` PASS i pushovan kao `b857432`; `01B` multi-tenant selector pripremljen za lokalnu proveru);
-8. `PLATFORM-ADMIN-OPERATIONS-01`;
-9. `CONTENT-STARTER-PACKS-01A`;
-10. `CLIENT-CONTENT-INTAKE-01`;
-11. `CLIENT-PREVIEW-SHARING-01`;
-12. `DEMO-THEME-EDITORIAL-01`;
-13. `DEMO-THEME-BARBER-01`;
-14. `DEMO-THEME-NAILS-01`;
-15. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
-16. `DEMO-DATA-LANDING-01`;
-17. `MASTER-SYSTEM-QA-01`;
-18. `PREVIEW-SOFT-LAUNCH-GATE-01`.
+7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — završen;
+8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — lokalni closeout završen; commit i push čekaju eksplicitnu autorizaciju;
+9. `PLATFORM-ADMIN-OPERATIONS-01` — sledeći aktivni milestone;
+10. `AI-CONTENT-ASSIST-FOUNDATION-01`;
+11. `CONTENT-STARTER-PACKS-01A`;
+12. `CLIENT-CONTENT-INTAKE-01`;
+13. `CLIENT-PREVIEW-SHARING-01`;
+14. `DEMO-THEME-EDITORIAL-01`;
+15. `DEMO-THEME-BARBER-01`;
+16. `DEMO-THEME-NAILS-01`;
+17. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
+18. `DEMO-DATA-LANDING-01`;
+19. `MASTER-SYSTEM-QA-01`;
+20. `PREVIEW-SOFT-LAUNCH-GATE-01`.
 
-`DEMO-THEME-WELLNESS-01` i `DEMO-THEME-BEAUTY-01` premešteni su posle preview soft launch-a, kako nove vertikale ne bi blokirale proveru stvarnog client-preview prodajnog toka. `STUDIOBIBI-PILOT-01` ostaje production pilot posle backup, legal, domain i production environment gate-ova.
+`DEMO-THEME-WELLNESS-01` i `DEMO-THEME-BEAUTY-01` ostaju posle preview soft launch-a, kako nove vertikale ne bi blokirale proveru stvarnog client-preview prodajnog toka. `STUDIOBIBI-PILOT-01` ostaje production pilot posle backup, legal, domain i production environment gate-ova.
 
 Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
+
+### PRODUCT-PACKAGES-ENTITLEMENTS-01 — lokalni closeout završen
+
+- [x] zaključano pet kumulativnih paketa: Booking Page, Digital Studio, Operations Pro, Reputation Pro i Signature;
+- [x] centralni entitlement registry, persistence contract i server resolver;
+- [x] package assignment kroz platform-admin uz optimistic concurrency;
+- [x] tenant-admin route, navigation, mutation i signed-upload gate;
+- [x] staff route, OAuth, callback, action i automatic employee sync gate;
+- [x] package, permission i integration ostaju odvojene odluke;
+- [x] legacy full access i invalid assignment ostaju fail-open tokom rollout-a;
+- [x] shared upgrade guidance bez mrtvih billing/upgrade linkova;
+- [x] svih pet paketa pokriveno runtime test matricom;
+- [x] platform-admin preview ostaje javni tenant preview sa `?preview=1`;
+- [x] završni TypeScript, ciljani package smoke i `npm run check`;
+- [ ] ciljani Git commit i push — čekaju eksplicitnu autorizaciju.
+
+Detaljan closeout zapis: `docs/milestones/PRODUCT-PACKAGES-ENTITLEMENTS-CLOSEOUT-01.md`.
 
 ### DEMO-I18N-01A — završen
 

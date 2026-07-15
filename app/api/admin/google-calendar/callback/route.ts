@@ -16,6 +16,9 @@ import {
   verifyGoogleOAuthState,
   type GoogleOAuthTarget,
 } from "@/lib/google-calendar/oauth";
+import {
+  loadStaffProductFeatureServerAccessForBusinessId,
+} from "@/lib/product-packages/staff-gates-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -439,6 +442,28 @@ export async function GET(
         stateTarget,
         "business_error"
       );
+    }
+
+    if (
+      stateTarget ===
+        "employee"
+    ) {
+      const featureAccess =
+        await loadStaffProductFeatureServerAccessForBusinessId(
+          statePayload.businessId,
+          "staff.calendar_connection"
+        );
+
+      if (
+        !featureAccess
+          .allowed
+      ) {
+        return redirectToDestination(
+          request,
+          stateTarget,
+          "package_required"
+        );
+      }
     }
 
     const tokens =

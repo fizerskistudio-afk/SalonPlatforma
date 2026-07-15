@@ -15,6 +15,12 @@ import {
   requireAdmin,
 } from "@/lib/auth/admin";
 import {
+  loadProductPackageAccessForBusinessId,
+} from "@/lib/product-packages/access-server";
+import {
+  resolveProductFeatureGate,
+} from "@/lib/product-packages/gates";
+import {
   buildBusinessPublicLinks,
 } from "@/lib/platform-admin/business-public-links";
 
@@ -51,10 +57,35 @@ export default async function ProtectedAdminLayout({
   const admin =
     await requireAdmin();
 
-  const reviewAttentionCount =
-    await getAdminReviewAttentionCount(
+  const productAccess =
+    await loadProductPackageAccessForBusinessId(
       admin.business.id
     );
+
+  if (!productAccess) {
+    throw new Error(
+      "Paket aktivnog salona nije moguće učitati."
+    );
+  }
+
+  const reviewsDecision =
+    resolveProductFeatureGate({
+      access:
+        productAccess.access,
+      featureKey:
+        "admin.reviews",
+      permissionGranted:
+        true,
+      integrationConnected:
+        true,
+    });
+
+  const reviewAttentionCount =
+    reviewsDecision.allowed
+      ? await getAdminReviewAttentionCount(
+          admin.business.id
+        )
+      : 0;
 
   const publicLinks =
     buildBusinessPublicLinks(
@@ -63,6 +94,9 @@ export default async function ProtectedAdminLayout({
 
   return (
     <AdminShell
+      productAccess={
+        productAccess.access
+      }
       reviewAttentionCount={
         reviewAttentionCount
       }

@@ -5,8 +5,8 @@ import {
 } from "next/cache";
 
 import {
-  requireAdmin,
-} from "@/lib/auth/admin";
+  loadAdminProductFeatureMutationAccess,
+} from "@/lib/product-packages/admin-gates-server";
 import {
   REVIEW_STATUSES,
   type ReviewStatus,
@@ -124,7 +124,21 @@ export async function moderateReviewAction(
 ): Promise<
   ReviewManagementActionResult
 > {
-  await requireAdmin();
+  const featureAccess =
+    await loadAdminProductFeatureMutationAccess(
+      "admin.reviews"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
 
   const reviewId =
     input.reviewId.trim();
@@ -261,7 +275,21 @@ export async function updateReviewOwnerReplyAction(
 ): Promise<
   ReviewManagementActionResult
 > {
-  await requireAdmin();
+  const featureAccess =
+    await loadAdminProductFeatureMutationAccess(
+      "admin.reviews"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
 
   const reviewId =
     input.reviewId.trim();

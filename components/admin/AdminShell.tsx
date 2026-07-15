@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Images,
   LayoutDashboard,
+  LockKeyhole,
   LogOut,
   Menu,
   MessageSquareText,
@@ -26,11 +27,20 @@ import {
 } from "lucide-react";
 
 import { signOutAction } from "@/app/admin/(protected)/actions";
+import {
+  resolveProductFeatureGate,
+  type ProductFeatureKey,
+} from "@/lib/product-packages/gates";
+import type {
+  ProductPackageAccess,
+} from "@/lib/product-packages/resolver";
 
 type AdminRole = "owner" | "manager";
 
 type AdminShellProps = {
   children: ReactNode;
+  productAccess:
+    ProductPackageAccess;
   reviewAttentionCount: number;
   admin: {
     email: string | null;
@@ -48,6 +58,8 @@ type NavigationItem = {
   label: string;
   description: string;
   href: string;
+  featureKey:
+    ProductFeatureKey;
   icon: LucideIcon;
   enabled: boolean;
 };
@@ -57,6 +69,8 @@ const navigationItems: NavigationItem[] = [
     label: "Dashboard",
     description: "Pregled poslovanja",
     href: "/admin",
+    featureKey:
+      "admin.dashboard",
     icon: LayoutDashboard,
     enabled: true,
   },
@@ -64,6 +78,8 @@ const navigationItems: NavigationItem[] = [
     label: "Rezervacije",
     description: "Termini i raspored",
     href: "/admin/bookings",
+    featureKey:
+      "admin.bookings",
     icon: CalendarDays,
     enabled: true,
   },
@@ -71,6 +87,8 @@ const navigationItems: NavigationItem[] = [
     label: "Klijenti",
     description: "Kontakti i istorija",
     href: "/admin/customers",
+    featureKey:
+      "admin.customers",
     icon: UsersRound,
     enabled: true,
   },
@@ -78,6 +96,8 @@ const navigationItems: NavigationItem[] = [
     label: "Usluge",
     description: "Katalog i cene",
     href: "/admin/services",
+    featureKey:
+      "admin.services",
     icon: Scissors,
     enabled: true,
   },
@@ -85,6 +105,8 @@ const navigationItems: NavigationItem[] = [
     label: "Tim",
     description: "Zaposleni i njihove usluge",
     href: "/admin/team",
+    featureKey:
+      "admin.team",
     icon: UserRoundCog,
     enabled: true,
   },
@@ -92,6 +114,8 @@ const navigationItems: NavigationItem[] = [
     label: "Galerija",
     description: "Fotografije javnog sajta",
     href: "/admin/gallery",
+    featureKey:
+      "admin.gallery",
     icon: Images,
     enabled: true,
   },
@@ -99,6 +123,8 @@ const navigationItems: NavigationItem[] = [
     label: "Raspored",
     description: "Radno vreme i odsustva",
     href: "/admin/schedule",
+    featureKey:
+      "admin.schedule",
     icon: CalendarClock,
     enabled: true,
   },
@@ -106,6 +132,8 @@ const navigationItems: NavigationItem[] = [
     label: "Članovi",
     description: "Korisnici, pristup i uloge",
     href: "/admin/members",
+    featureKey:
+      "admin.members",
     icon: ShieldCheck,
     enabled: true,
   },
@@ -113,6 +141,8 @@ const navigationItems: NavigationItem[] = [
     label: "Recenzije",
     description: "Moderacija i odgovori",
     href: "/admin/reviews",
+    featureKey:
+      "admin.reviews",
     icon: MessageSquareText,
     enabled: true,
   },
@@ -120,6 +150,8 @@ const navigationItems: NavigationItem[] = [
     label: "Notifikacije",
     description: "Email pravila i delivery log",
     href: "/admin/notifications",
+    featureKey:
+      "admin.notifications",
     icon: Bell,
     enabled: true,
   },
@@ -127,6 +159,8 @@ const navigationItems: NavigationItem[] = [
     label: "Podešavanja",
     description: "Salon i booking pravila",
     href: "/admin/settings",
+    featureKey:
+      "admin.settings",
     icon: Settings,
     enabled: true,
   },
@@ -183,6 +217,7 @@ function SidebarContent({
   publicUrl,
   email,
   role,
+  productAccess,
   reviewAttentionCount,
   tenantCount,
   onNavigate,
@@ -193,6 +228,8 @@ function SidebarContent({
   publicUrl: string;
   email: string | null;
   role: AdminRole;
+  productAccess:
+    ProductPackageAccess;
   reviewAttentionCount: number;
   tenantCount: number;
   onNavigate?: () => void;
@@ -241,7 +278,24 @@ function SidebarContent({
                   item.href
                 );
 
+              const gateDecision =
+                resolveProductFeatureGate({
+                  access:
+                    productAccess,
+                  featureKey:
+                    item.featureKey,
+                  permissionGranted:
+                    true,
+                  integrationConnected:
+                    true,
+                });
+
+              const packageLocked =
+                gateDecision.blockedBy ===
+                  "package";
+
               const badgeCount =
+                !packageLocked &&
                 item.href ===
                   "/admin/reviews"
                   ? reviewAttentionCount
@@ -312,6 +366,16 @@ function SidebarContent({
                       <span className="truncate text-sm font-semibold">
                         {item.label}
                       </span>
+
+                      {packageLocked ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/15 bg-amber-300/[0.08] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-amber-300">
+                          <LockKeyhole
+                            className="h-2.5 w-2.5"
+                            aria-hidden="true"
+                          />
+                          Paket
+                        </span>
+                      ) : null}
 
                       {badgeCount > 0 && (
                         <span
@@ -434,6 +498,7 @@ function SidebarContent({
 export default function AdminShell({
   children,
   admin,
+  productAccess,
   reviewAttentionCount,
 }: AdminShellProps) {
   const pathname = usePathname();
@@ -472,6 +537,9 @@ export default function AdminShell({
           }
           email={admin.email}
           role={admin.role}
+          productAccess={
+            productAccess
+          }
           reviewAttentionCount={
             reviewAttentionCount
           }
@@ -520,6 +588,9 @@ export default function AdminShell({
               }
               email={admin.email}
               role={admin.role}
+              productAccess={
+                productAccess
+              }
               reviewAttentionCount={
                 reviewAttentionCount
               }

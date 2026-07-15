@@ -3,6 +3,10 @@ import type {
 } from "next";
 
 import StaffGoogleCalendarManager from "@/components/staff/StaffGoogleCalendarManager";
+import StaffProductFeatureUpgradeNotice from "@/components/staff/StaffProductFeatureUpgradeNotice";
+import {
+  loadStaffProductFeatureContext,
+} from "@/lib/product-packages/staff-gates-server";
 import { getStaffGoogleCalendarConnection } from "@/lib/staff/google-calendar";
 
 export const dynamic =
@@ -25,6 +29,29 @@ type StaffCalendarPageProps = {
 export default async function StaffCalendarPage({
   searchParams,
 }: StaffCalendarPageProps) {
+  const featureContext =
+    await loadStaffProductFeatureContext(
+      "staff.calendar_connection"
+    );
+
+  if (
+    !featureContext
+      .decision
+      .entitled
+  ) {
+    return (
+      <StaffProductFeatureUpgradeNotice
+        featureKey="staff.calendar_connection"
+        currentPackageKey={
+          featureContext
+            .productAccess
+            .access
+            .packageKey
+        }
+      />
+    );
+  }
+
   const [
     connection,
     params,

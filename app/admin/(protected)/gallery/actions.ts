@@ -8,7 +8,9 @@ import {
   LOCALE_CODES,
   type LocaleCode,
 } from "@/lib/i18n/locales";
-import { requireAdmin } from "@/lib/auth/admin";
+import {
+  loadAdminProductFeatureMutationAccess,
+} from "@/lib/product-packages/admin-gates-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   LocalizedText,
@@ -214,8 +216,26 @@ async function removeUploadedFile(
 export async function createGalleryItemAction(
   input: CreateGalleryItemInput
 ): Promise<GalleryActionResult> {
+  const featureAccess =
+    await loadAdminProductFeatureMutationAccess(
+      "admin.gallery"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
+
   const admin =
-    await requireAdmin();
+    featureAccess
+      .context
+      .admin;
 
   if (
     typeof input.path !==
@@ -404,8 +424,26 @@ export async function createGalleryItemAction(
 export async function updateGalleryItemAction(
   input: UpdateGalleryItemInput
 ): Promise<GalleryActionResult> {
+  const featureAccess =
+    await loadAdminProductFeatureMutationAccess(
+      "admin.gallery"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
+
   const admin =
-    await requireAdmin();
+    featureAccess
+      .context
+      .admin;
 
   if (
     !UUID_PATTERN.test(
@@ -533,8 +571,26 @@ export async function updateGalleryItemAction(
 export async function moveGalleryItemAction(
   input: MoveGalleryItemInput
 ): Promise<GalleryActionResult> {
+  const featureAccess =
+    await loadAdminProductFeatureMutationAccess(
+      "admin.gallery"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
+
   const admin =
-    await requireAdmin();
+    featureAccess
+      .context
+      .admin;
 
   if (
     !UUID_PATTERN.test(
@@ -716,8 +772,26 @@ export async function moveGalleryItemAction(
 export async function deleteGalleryItemAction(
   id: string
 ): Promise<GalleryActionResult> {
+  const featureAccess =
+    await loadAdminProductFeatureMutationAccess(
+      "admin.gallery"
+    );
+
+  if (
+    !featureAccess
+      .allowed
+  ) {
+    return {
+      ok: false,
+      message:
+        featureAccess.message,
+    };
+  }
+
   const admin =
-    await requireAdmin();
+    featureAccess
+      .context
+      .admin;
 
   if (
     !UUID_PATTERN.test(id)

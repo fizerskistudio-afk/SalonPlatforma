@@ -7,6 +7,9 @@ import {
   createGoogleOAuthState,
   generateGoogleAuthorizationUrl,
 } from "@/lib/google-calendar/oauth";
+import {
+  loadStaffProductFeatureServerAccessForBusinessId,
+} from "@/lib/product-packages/staff-gates-server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -182,6 +185,22 @@ export async function GET(
       return redirectToCalendar(
         request,
         "employee_not_found"
+      );
+    }
+
+    const featureAccess =
+      await loadStaffProductFeatureServerAccessForBusinessId(
+        membership.business_id,
+        "staff.calendar_connection"
+      );
+
+    if (
+      !featureAccess
+        .allowed
+    ) {
+      return redirectToCalendar(
+        request,
+        "package_required"
       );
     }
 

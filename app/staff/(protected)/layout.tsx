@@ -11,6 +11,9 @@ import {
   getStaffContext,
   requireStaff,
 } from "@/lib/auth/staff";
+import {
+  loadProductPackageAccessForBusinessId,
+} from "@/lib/product-packages/access-server";
 
 export async function generateMetadata():
   Promise<Metadata> {
@@ -45,8 +48,24 @@ export default async function StaffLayout({
   const staff =
     await requireStaff();
 
+  const productAccess =
+    await loadProductPackageAccessForBusinessId(
+      staff.business.id
+    );
+
+  if (!productAccess) {
+    throw new Error(
+      "Paket aktivnog salona nije moguće učitati."
+    );
+  }
+
   return (
-    <StaffShell staff={staff}>
+    <StaffShell
+      staff={staff}
+      productAccess={
+        productAccess.access
+      }
+    >
       {children}
     </StaffShell>
   );

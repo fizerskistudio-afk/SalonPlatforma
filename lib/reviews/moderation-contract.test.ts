@@ -69,8 +69,13 @@ describe(
         "app/admin/(protected)/reviews/actions.ts"
       );
 
+    const adminGate =
+      readSource(
+        "lib/product-packages/admin-gates-server.ts"
+      );
+
     it.each([
-      "requireAdmin",
+      "loadAdminProductFeatureMutationAccess",
       "moderate_review",
       "set_review_owner_reply",
       "createClient",
@@ -82,6 +87,23 @@ describe(
           actions
         ).toContain(
           marker
+        );
+      }
+    );
+
+    it(
+      "keeps authentication inside the shared product package gate",
+      () => {
+        expect(
+          adminGate
+        ).toMatch(
+          /const admin\s*=\s*await requireAdmin\(\)/
+        );
+
+        expect(
+          adminGate
+        ).toContain(
+          "loadAdminProductFeatureMutationAccess"
         );
       }
     );

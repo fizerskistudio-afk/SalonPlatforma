@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   CalendarDays,
   ExternalLink,
+  LockKeyhole,
   LogOut,
   Scissors,
   UserRound,
@@ -11,11 +12,19 @@ import {
 import { staffSignOutAction } from "@/app/staff/(protected)/actions";
 import type { StaffContext } from "@/lib/auth/staff";
 import {
+  resolveProductFeatureGate,
+} from "@/lib/product-packages/gates";
+import type {
+  ProductPackageAccess,
+} from "@/lib/product-packages/resolver";
+import {
   buildBusinessPublicLinks,
 } from "@/lib/platform-admin/business-public-links";
 
 type StaffShellProps = {
   children: ReactNode;
+  productAccess:
+    ProductPackageAccess;
   staff: StaffContext & {
     employee: NonNullable<
       StaffContext["employee"]
@@ -25,12 +34,29 @@ type StaffShellProps = {
 
 export default function StaffShell({
   children,
+  productAccess,
   staff,
 }: StaffShellProps) {
   const publicLinks =
     buildBusinessPublicLinks(
       staff.business.slug
     );
+
+  const calendarDecision =
+    resolveProductFeatureGate({
+      access:
+        productAccess,
+      featureKey:
+        "staff.calendar_connection",
+      permissionGranted:
+        true,
+      integrationConnected:
+        true,
+    });
+
+  const calendarLocked =
+    calendarDecision.blockedBy ===
+      "package";
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -60,10 +86,21 @@ export default function StaffShell({
               href="/staff/calendar"
               className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-400/15 bg-blue-400/[0.06] px-3 text-xs font-medium text-blue-200 transition hover:border-blue-400/25 hover:bg-blue-400/10"
             >
-              <CalendarDays className="h-4 w-4" />
+              {calendarLocked ? (
+                <LockKeyhole className="h-4 w-4" />
+              ) : (
+                <CalendarDays className="h-4 w-4" />
+              )}
+
               <span className="hidden sm:inline">
                 Moj kalendar
               </span>
+
+              {calendarLocked ? (
+                <span className="hidden rounded-full border border-blue-300/20 bg-blue-300/10 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-blue-100 lg:inline">
+                  Paket · Operations Pro
+                </span>
+              ) : null}
             </Link>
 
             <a
