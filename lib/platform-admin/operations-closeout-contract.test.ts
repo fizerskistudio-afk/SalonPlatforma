@@ -185,13 +185,13 @@ describe(
         expect(
           ROADMAP
         ).toContain(
-          "PLATFORM-ADMIN-OPERATIONS-01 — lokalni closeout završen"
+          "PLATFORM-ADMIN-OPERATIONS-01 — završen i pushovan"
         );
 
         expect(
           ROADMAP
         ).toContain(
-          "`AI-CONTENT-ASSIST-FOUNDATION-01` — sledeći aktivni milestone"
+          "`AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan"
         );
 
         expect(
@@ -203,7 +203,7 @@ describe(
         expect(
           ROADMAP
         ).toContain(
-          "commit i push čekaju eksplicitnu autorizaciju"
+          "ciljani Git commit i push završeni na radnoj grani."
         );
       }
     );

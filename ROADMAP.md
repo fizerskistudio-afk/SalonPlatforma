@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery i runtime product package gates su završeni; platform-admin Operations je lokalno zatvoren, a sledeći aktivni milestone je `AI-CONTENT-ASSIST-FOUNDATION-01`.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates i platform-admin Operations su završeni; aktivan je `AI-CONTENT-ASSIST-FOUNDATION-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -257,8 +257,8 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 6. `PLATFORM-ADMIN-WORKSPACE-01` — završen;
 7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — završen;
 8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — završen i pushovan;
-9. `PLATFORM-ADMIN-OPERATIONS-01` — lokalni closeout završen; commit i push čekaju eksplicitnu autorizaciju;
-10. `AI-CONTENT-ASSIST-FOUNDATION-01` — sledeći aktivni milestone;
+9. `PLATFORM-ADMIN-OPERATIONS-01` — završen i pushovan;
+10. `AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan;
 11. `CONTENT-STARTER-PACKS-01A`;
 12. `CLIENT-CONTENT-INTAKE-01`;
 13. `CLIENT-PREVIEW-SHARING-01`;
@@ -291,7 +291,7 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 
 Detaljan closeout zapis: `docs/milestones/PRODUCT-PACKAGES-ENTITLEMENTS-CLOSEOUT-01.md`.
 
-### PLATFORM-ADMIN-OPERATIONS-01 — lokalni closeout završen
+### PLATFORM-ADMIN-OPERATIONS-01 — završen i pushovan
 
 - [x] server-only operational read model bez direktnih dashboard Supabase upita;
 - [x] owner, contact, template, package i upcoming booking signali;
@@ -305,11 +305,33 @@ Detaljan closeout zapis: `docs/milestones/PRODUCT-PACKAGES-ENTITLEMENTS-CLOSEOUT
 - [x] automatizovani runtime permission/transition smoke;
 - [x] završni TypeScript, ciljani Operations testovi i `npm run check`;
 - [ ] browser lifecycle smoke ostaje eksplicitan kontrolisani test jer menja tenant podatke;
-- [ ] ciljani Git commit i push — commit i push čekaju eksplicitnu autorizaciju.
+- [x] ciljani Git commit i push završeni na radnoj grani.
 
 Detaljan closeout zapis: `docs/milestones/PLATFORM-ADMIN-OPERATIONS-01D-CLOSEOUT.md`.
 
 Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMOKE.md`.
+
+### AI-CONTENT-ASSIST-FOUNDATION-01 — aktivan
+
+- [x] 01A domain i provider boundary lokalno završen;
+- [x] 01B guarded invocation service lokalno završen;
+- [x] AI prevodi su u prvom rollout-u samo Platform Admin alat;
+- [x] tenant AI je u prvom rollout-u samo Google review reply draft uz povezanu integraciju;
+- [x] tenant content translation i non-Google AI reply surface ostaju blokirani;
+- [x] tenant scope, surface, package, permission, integration, review source i quota guard;
+- [x] 01B završen bez API rute, quota persistence-a i content write-a;
+- [x] task-to-entitlement mapping za content translation i review reply draft;
+- [x] Groq server provider sa modelom `openai/gpt-oss-20b`;
+- [x] JSON Schema draft output bez reasoning payload-a;
+- [x] svaki rezultat zahteva ručnu potvrdu i ne dozvoljava auto-apply;
+- [x] private `GROQ_API_KEY` server granica;
+- [x] provider sloj bez Supabase write operacija;
+- [x] 01A završen bez API rute, quota persistence-a i automatskog upisa;
+- [x] ciljani testovi, TypeScript i `npm run check`;
+- [ ] 01A + 01B ciljani Git commit i push — 01B commit i push čekaju eksplicitnu autorizaciju.
+
+Detaljan zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md`.
+
 
 
 ### DEMO-I18N-01A — završen
