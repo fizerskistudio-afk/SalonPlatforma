@@ -9,12 +9,16 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import BusinessPackageManager from "@/components/platform-admin/BusinessPackageManager";
 import BusinessPublicLinkActions from "@/components/platform-admin/BusinessPublicLinkActions";
 import BusinessPublicationControls from "@/components/platform-admin/BusinessPublicationControls";
 import TenantReadinessCard from "@/components/platform-admin/TenantReadinessCard";
 import {
   buildBusinessPublicLinks,
 } from "@/lib/platform-admin/business-public-links";
+import {
+  loadBusinessPackageContext,
+} from "@/lib/platform-admin/business-package-server";
 import {
   loadTenantLifecycleContext,
 } from "@/lib/platform-admin/tenant-lifecycle-server";
@@ -130,12 +134,22 @@ export default async function BusinessManagementPage({
     notFound();
   }
 
-  const lifecycle =
-    await loadTenantLifecycleContext(
+  const [
+    lifecycle,
+    packageContext,
+  ] = await Promise.all([
+    loadTenantLifecycleContext(
       businessSlug
-    );
+    ),
+    loadBusinessPackageContext(
+      businessSlug
+    ),
+  ]);
 
-  if (!lifecycle) {
+  if (
+    !lifecycle ||
+    !packageContext
+  ) {
     notFound();
   }
 
@@ -241,6 +255,35 @@ export default async function BusinessManagementPage({
           icon={ShieldCheck}
         />
       </section>
+
+      <BusinessPackageManager
+        businessSlug={
+          business.slug
+        }
+        initialPackageKey={
+          packageContext
+            .access
+            .packageKey
+        }
+        initialContractVersion={
+          packageContext
+            .access
+            .contractVersion
+        }
+        initialAssignedAt={
+          packageContext
+            .packageAssignedAt
+        }
+        initialRequiresAttention={
+          packageContext
+            .access
+            .requiresAttention
+        }
+        expectedUpdatedAt={
+          packageContext
+            .updatedAt
+        }
+      />
 
       <TenantReadinessCard
         publicationStatus={

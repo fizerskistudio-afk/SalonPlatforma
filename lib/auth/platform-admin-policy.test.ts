@@ -125,6 +125,20 @@ describe(
         expect(
           hasPlatformAdminPermission(
             "sales",
+            "tenant.package.read"
+          )
+        ).toBe(true);
+
+        expect(
+          hasPlatformAdminPermission(
+            "sales",
+            "tenant.package.write"
+          )
+        ).toBe(true);
+
+        expect(
+          hasPlatformAdminPermission(
+            "sales",
             "tenant.preview.share"
           )
         ).toBe(true);
@@ -187,6 +201,20 @@ describe(
             "tenant.read"
           )
         ).toBe(true);
+
+        expect(
+          hasPlatformAdminPermission(
+            "it",
+            "tenant.package.read"
+          )
+        ).toBe(true);
+
+        expect(
+          hasPlatformAdminPermission(
+            "it",
+            "tenant.package.write"
+          )
+        ).toBe(false);
 
         expect(
           hasPlatformAdminPermission(

@@ -11,6 +11,8 @@ export const PLATFORM_ADMIN_PERMISSIONS = [
   "platform.members.manage",
   "tenant.read",
   "tenant.create",
+  "tenant.package.read",
+  "tenant.package.write",
   "tenant.profile.write",
   "tenant.branding.write",
   "tenant.theme.write",
@@ -37,6 +39,8 @@ const SALES_PERMISSIONS = [
   "platform.dashboard.read",
   "tenant.read",
   "tenant.create",
+  "tenant.package.read",
+  "tenant.package.write",
   "tenant.profile.write",
   "tenant.branding.write",
   "tenant.theme.write",
@@ -68,6 +72,7 @@ const IT_PERMISSIONS = [
   "platform.monitoring.read",
   "platform.audit.read",
   "tenant.read",
+  "tenant.package.read",
   "tenant.preview.read",
 ] as const satisfies
   readonly PlatformAdminPermission[];
