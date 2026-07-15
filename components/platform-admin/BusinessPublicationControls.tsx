@@ -23,6 +23,10 @@ import {
   usePlatformAdminAccess,
 } from "./PlatformAdminAccessProvider";
 import {
+  getLifecycleActionLabel,
+  getLifecycleConfirmationMessage,
+} from "@/lib/platform-admin/lifecycle-action-copy";
+import {
   getPublicationPermission,
 } from "@/lib/platform-admin/publication-permissions";
 import {
@@ -56,40 +60,6 @@ const STATUS_ICONS = {
   suspended: PauseCircle,
   archived: Archive,
 } as const;
-
-function getLifecycleActionLabel(
-  currentStatus: BusinessPublicationStatus,
-  nextStatus: BusinessPublicationStatus
-): string {
-  switch (nextStatus) {
-    case "published":
-      return "Objavi javno";
-    case "draft":
-      return currentStatus === "suspended" ||
-        currentStatus === "archived"
-        ? "Reaktiviraj kao draft"
-        : "Povuci u draft";
-    case "suspended":
-      return "Suspenduj";
-    case "archived":
-      return "Arhiviraj";
-  }
-}
-
-function getConfirmationMessage(
-  nextStatus: BusinessPublicationStatus
-): string {
-  switch (nextStatus) {
-    case "published":
-      return "Objaviti tenant? Javni sajt i booking postaće dostupni.";
-    case "draft":
-      return "Prebaciti tenant u draft? Javni sajt i booking neće biti dostupni.";
-    case "suspended":
-      return "Suspendovati tenant? Javni sajt i booking biće privremeno isključeni.";
-    case "archived":
-      return "Arhivirati tenant? Javni sajt i booking biće isključeni, a povratak ide prvo kroz draft.";
-  }
-}
 
 export default function BusinessPublicationControls({
   businessSlug,
@@ -186,7 +156,7 @@ export default function BusinessPublicationControls({
 
     if (
       !window.confirm(
-        getConfirmationMessage(
+        getLifecycleConfirmationMessage(
           nextStatus
         )
       )

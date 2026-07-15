@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery i runtime product package gates su završeni lokalno; sledeći aktivni milestone je `PLATFORM-ADMIN-OPERATIONS-01`.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery i runtime product package gates su završeni; platform-admin Operations je lokalno zatvoren, a sledeći aktivni milestone je `AI-CONTENT-ASSIST-FOUNDATION-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -256,9 +256,9 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 5. `PLATFORM-ADMIN-LIFECYCLE-READINESS-01` — završen;
 6. `PLATFORM-ADMIN-WORKSPACE-01` — završen;
 7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — završen;
-8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — lokalni closeout završen; commit i push čekaju eksplicitnu autorizaciju;
-9. `PLATFORM-ADMIN-OPERATIONS-01` — sledeći aktivni milestone;
-10. `AI-CONTENT-ASSIST-FOUNDATION-01`;
+8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — završen i pushovan;
+9. `PLATFORM-ADMIN-OPERATIONS-01` — lokalni closeout završen; commit i push čekaju eksplicitnu autorizaciju;
+10. `AI-CONTENT-ASSIST-FOUNDATION-01` — sledeći aktivni milestone;
 11. `CONTENT-STARTER-PACKS-01A`;
 12. `CLIENT-CONTENT-INTAKE-01`;
 13. `CLIENT-PREVIEW-SHARING-01`;
@@ -274,7 +274,7 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 
 Detaljan scope i granica između demo readiness-a i pravog production launch-a nalaze se u `docs/milestones/DEMO-PRODUCTION-READY-01.md`.
 
-### PRODUCT-PACKAGES-ENTITLEMENTS-01 — lokalni closeout završen
+### PRODUCT-PACKAGES-ENTITLEMENTS-01 — završen i pushovan
 
 - [x] zaključano pet kumulativnih paketa: Booking Page, Digital Studio, Operations Pro, Reputation Pro i Signature;
 - [x] centralni entitlement registry, persistence contract i server resolver;
@@ -287,9 +287,30 @@ Detaljan scope i granica između demo readiness-a i pravog production launch-a n
 - [x] svih pet paketa pokriveno runtime test matricom;
 - [x] platform-admin preview ostaje javni tenant preview sa `?preview=1`;
 - [x] završni TypeScript, ciljani package smoke i `npm run check`;
-- [ ] ciljani Git commit i push — čekaju eksplicitnu autorizaciju.
+- [x] ciljani Git commit i push završeni na radnoj grani.
 
 Detaljan closeout zapis: `docs/milestones/PRODUCT-PACKAGES-ENTITLEMENTS-CLOSEOUT-01.md`.
+
+### PLATFORM-ADMIN-OPERATIONS-01 — lokalni closeout završen
+
+- [x] server-only operational read model bez direktnih dashboard Supabase upita;
+- [x] owner, contact, template, package i upcoming booking signali;
+- [x] critical, warning i info attention severity;
+- [x] dedicated `/platform-admin/operations` workspace;
+- [x] bookmarkable attention, launch, published i all views;
+- [x] search, lifecycle, severity i package-state filteri;
+- [x] guarded lifecycle quick actions koriste postojeći publication API;
+- [x] permission, transition, readiness, optimistic-concurrency i audit granice ostaju server-side;
+- [x] shared lifecycle action i confirmation copy;
+- [x] automatizovani runtime permission/transition smoke;
+- [x] završni TypeScript, ciljani Operations testovi i `npm run check`;
+- [ ] browser lifecycle smoke ostaje eksplicitan kontrolisani test jer menja tenant podatke;
+- [ ] ciljani Git commit i push — commit i push čekaju eksplicitnu autorizaciju.
+
+Detaljan closeout zapis: `docs/milestones/PLATFORM-ADMIN-OPERATIONS-01D-CLOSEOUT.md`.
+
+Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMOKE.md`.
+
 
 ### DEMO-I18N-01A — završen
 

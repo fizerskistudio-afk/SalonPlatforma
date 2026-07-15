@@ -106,24 +106,24 @@ describe(
     );
 
     it(
-      "records the completed package chapter and the next operational milestone",
+      "records the completed package chapter and the next active milestone",
       () => {
         expect(
           ROADMAP
         ).toContain(
-          "PRODUCT-PACKAGES-ENTITLEMENTS-01 — lokalni closeout završen"
+          "PRODUCT-PACKAGES-ENTITLEMENTS-01 — završen i pushovan"
         );
 
         expect(
           ROADMAP
         ).toContain(
-          "`PLATFORM-ADMIN-OPERATIONS-01` — sledeći aktivni milestone"
+          "`PLATFORM-ADMIN-OPERATIONS-01` — lokalni closeout završen"
         );
 
         expect(
           ROADMAP
         ).toContain(
-          "`AI-CONTENT-ASSIST-FOUNDATION-01`"
+          "`AI-CONTENT-ASSIST-FOUNDATION-01` — sledeći aktivni milestone"
         );
       }
     );
@@ -152,18 +152,18 @@ describe(
     );
 
     it(
-      "does not claim that the closeout commit or push already happened",
+      "records the completed package Git checkpoint",
       () => {
         expect(
           ROADMAP
         ).toContain(
-          "commit i push čekaju eksplicitnu autorizaciju"
+          "ciljani Git commit i push završeni na radnoj grani."
         );
 
         expect(
           ROADMAP
         ).not.toContain(
-          "PRODUCT-PACKAGES-ENTITLEMENTS-CLOSEOUT-01 — pushovan"
+          "PRODUCT-PACKAGES-ENTITLEMENTS-01 — lokalni closeout završen"
         );
       }
     );

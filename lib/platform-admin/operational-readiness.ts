@@ -1,4 +1,7 @@
 import type {
+  ProductPackageAccessMode,
+} from "@/lib/product-packages/resolver";
+import type {
   BusinessPublicationStatus,
 } from "@/lib/publishing/status";
 
@@ -11,9 +14,20 @@ export type TenantOperationalInput = {
   hasActiveOwner: boolean;
   hasContact: boolean;
   hasTemplate: boolean;
+  packageLabel: string;
+  packageMode:
+    ProductPackageAccessMode;
+  packageRequiresAttention:
+    boolean;
   upcomingBookings: number;
   createdAt: string;
+  updatedAt: string;
 };
+
+export type TenantAttentionSeverity =
+  | "critical"
+  | "warning"
+  | "info";
 
 export type TenantAttentionItem = {
   id: string;
@@ -22,7 +36,20 @@ export type TenantAttentionItem = {
   publicationStatus:
     BusinessPublicationStatus;
   reasons: string[];
+  severity:
+    TenantAttentionSeverity;
+  packageLabel: string;
   upcomingBookings: number;
+};
+
+const ATTENTION_SEVERITY_RANK:
+  Record<
+    TenantAttentionSeverity,
+    number
+  > = {
+  critical: 0,
+  warning: 1,
+  info: 2,
 };
 
 export function getTenantAttentionReasons(
@@ -34,11 +61,9 @@ export function getTenantAttentionReasons(
 
   if (
     tenant.publicationStatus ===
-    "draft"
+    "archived"
   ) {
-    reasons.push(
-      "Čeka objavu"
-    );
+    return reasons;
   }
 
   if (
@@ -51,12 +76,28 @@ export function getTenantAttentionReasons(
   }
 
   if (
-    tenant.publicationStatus !==
-      "archived" &&
     !tenant.hasActiveOwner
   ) {
     reasons.push(
       "Nema aktivnog owner-a"
+    );
+  }
+
+  if (
+    tenant
+      .packageRequiresAttention
+  ) {
+    reasons.push(
+      "Package assignment zahteva proveru"
+    );
+  }
+
+  if (
+    tenant.publicationStatus ===
+    "draft"
+  ) {
+    reasons.push(
+      "Čeka objavu"
     );
   }
 
@@ -83,6 +124,40 @@ export function getTenantAttentionReasons(
   return reasons;
 }
 
+export function getTenantAttentionSeverity(
+  tenant:
+    TenantOperationalInput
+): TenantAttentionSeverity {
+  if (
+    tenant.publicationStatus ===
+      "suspended" ||
+    (
+      tenant.publicationStatus !==
+        "archived" &&
+      !tenant.hasActiveOwner
+    )
+  ) {
+    return "critical";
+  }
+
+  if (
+    tenant
+      .packageRequiresAttention ||
+    (
+      tenant.publicationStatus ===
+        "published" &&
+      (
+        !tenant.hasContact ||
+        !tenant.hasTemplate
+      )
+    )
+  ) {
+    return "warning";
+  }
+
+  return "info";
+}
+
 export function buildTenantAttentionQueue(
   tenants:
     readonly TenantOperationalInput[]
@@ -104,6 +179,12 @@ export function buildTenantAttentionQueue(
           getTenantAttentionReasons(
             tenant
           ),
+        severity:
+          getTenantAttentionSeverity(
+            tenant
+          ),
+        packageLabel:
+          tenant.packageLabel,
         upcomingBookings:
           tenant.upcomingBookings,
       })
@@ -120,22 +201,32 @@ export function buildTenantAttentionQueue(
         first,
         second
       ) => {
-        if (
-          first.publicationStatus ===
-            "draft" &&
-          second.publicationStatus !==
-            "draft"
-        ) {
-          return -1;
-        }
+        const severityDifference =
+          ATTENTION_SEVERITY_RANK[
+            first.severity
+          ] -
+          ATTENTION_SEVERITY_RANK[
+            second.severity
+          ];
 
         if (
-          second.publicationStatus ===
-            "draft" &&
-          first.publicationStatus !==
-            "draft"
+          severityDifference !==
+          0
         ) {
-          return 1;
+          return severityDifference;
+        }
+
+        const bookingDifference =
+          second
+            .upcomingBookings -
+          first
+            .upcomingBookings;
+
+        if (
+          bookingDifference !==
+          0
+        ) {
+          return bookingDifference;
         }
 
         return first.name.localeCompare(

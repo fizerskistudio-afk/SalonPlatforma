@@ -7,6 +7,7 @@ import {
 import {
   buildTenantAttentionQueue,
   getTenantAttentionReasons,
+  getTenantAttentionSeverity,
   type TenantOperationalInput,
 } from "./operational-readiness";
 
@@ -29,10 +30,18 @@ function operationalTenant(
       true,
     hasTemplate:
       true,
+    packageLabel:
+      "Digital Studio",
+    packageMode:
+      "assigned",
+    packageRequiresAttention:
+      false,
     upcomingBookings:
       4,
     createdAt:
       "2026-07-10T10:00:00.000Z",
+    updatedAt:
+      "2026-07-15T08:00:00.000Z",
     ...overrides,
   };
 }
@@ -41,7 +50,7 @@ describe(
   "tenant operational readiness",
   () => {
     it(
-      "flags draft and missing owner",
+      "flags the highest-risk reasons before informational onboarding state",
       () => {
         expect(
           getTenantAttentionReasons(
@@ -53,8 +62,8 @@ describe(
             })
           )
         ).toEqual([
-          "Čeka objavu",
           "Nema aktivnog owner-a",
+          "Čeka objavu",
         ]);
       }
     );
@@ -71,7 +80,7 @@ describe(
     );
 
     it(
-      "excludes archived tenant without owner from attention queue",
+      "excludes archived tenant from operational attention",
       () => {
         const queue =
           buildTenantAttentionQueue([
@@ -80,6 +89,10 @@ describe(
                 "archived",
               hasActiveOwner:
                 false,
+              packageMode:
+                "invalid_assignment",
+              packageRequiresAttention:
+                true,
             }),
           ]);
 
@@ -90,29 +103,112 @@ describe(
     );
 
     it(
-      "places draft tenant before suspended tenant",
+      "flags invalid package assignment without blocking legacy rollout mode",
+      () => {
+        expect(
+          getTenantAttentionReasons(
+            operationalTenant({
+              packageMode:
+                "invalid_assignment",
+              packageRequiresAttention:
+                true,
+            })
+          )
+        ).toContain(
+          "Package assignment zahteva proveru"
+        );
+
+        expect(
+          getTenantAttentionReasons(
+            operationalTenant({
+              packageLabel:
+                "Legacy full access",
+              packageMode:
+                "legacy_full_access",
+              packageRequiresAttention:
+                false,
+            })
+          )
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "derives critical, warning and info severity",
+      () => {
+        expect(
+          getTenantAttentionSeverity(
+            operationalTenant({
+              hasActiveOwner:
+                false,
+            })
+          )
+        ).toBe(
+          "critical"
+        );
+
+        expect(
+          getTenantAttentionSeverity(
+            operationalTenant({
+              packageMode:
+                "invalid_assignment",
+              packageRequiresAttention:
+                true,
+            })
+          )
+        ).toBe(
+          "warning"
+        );
+
+        expect(
+          getTenantAttentionSeverity(
+            operationalTenant({
+              publicationStatus:
+                "draft",
+            })
+          )
+        ).toBe(
+          "info"
+        );
+      }
+    );
+
+    it(
+      "orders critical before warning before info",
       () => {
         const queue =
           buildTenantAttentionQueue([
             operationalTenant({
               id:
-                "suspended",
+                "info",
               slug:
-                "suspended",
+                "info",
               name:
-                "Suspendovan",
+                "Info",
               publicationStatus:
-                "suspended",
+                "draft",
             }),
             operationalTenant({
               id:
-                "draft",
+                "warning",
               slug:
-                "draft",
+                "warning",
               name:
-                "Draft",
+                "Warning",
+              packageMode:
+                "invalid_assignment",
+              packageRequiresAttention:
+                true,
+            }),
+            operationalTenant({
+              id:
+                "critical",
+              slug:
+                "critical",
+              name:
+                "Critical",
               publicationStatus:
-                "draft",
+                "suspended",
             }),
           ]);
 
@@ -124,8 +220,54 @@ describe(
               item.id
           )
         ).toEqual([
-          "draft",
-          "suspended",
+          "critical",
+          "warning",
+          "info",
+        ]);
+      }
+    );
+
+    it(
+      "uses upcoming bookings as a same-severity risk tiebreaker",
+      () => {
+        const queue =
+          buildTenantAttentionQueue([
+            operationalTenant({
+              id:
+                "low",
+              slug:
+                "low",
+              name:
+                "Low",
+              hasActiveOwner:
+                false,
+              upcomingBookings:
+                1,
+            }),
+            operationalTenant({
+              id:
+                "high",
+              slug:
+                "high",
+              name:
+                "High",
+              hasActiveOwner:
+                false,
+              upcomingBookings:
+                12,
+            }),
+          ]);
+
+        expect(
+          queue.map(
+            (
+              item
+            ) =>
+              item.id
+          )
+        ).toEqual([
+          "high",
+          "low",
         ]);
       }
     );

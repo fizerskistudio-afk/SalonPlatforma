@@ -10,6 +10,7 @@ import {
   Boxes,
   Building2,
   LayoutDashboard,
+  ListFilter,
   PlusCircle,
 } from "lucide-react";
 
@@ -31,6 +32,23 @@ const navigationItems = [
       ) =>
         pathname ===
         "/platform-admin",
+  },
+  {
+    href:
+      "/platform-admin/operations",
+    label:
+      "Operacije",
+    icon:
+      ListFilter,
+    match:
+      (
+        pathname: string
+      ) =>
+        pathname ===
+          "/platform-admin/operations" ||
+        pathname.startsWith(
+          "/platform-admin/operations/"
+        ),
   },
   {
     href:

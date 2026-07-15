@@ -20,17 +20,15 @@ import BusinessPublicationBadge from "@/components/platform-admin/BusinessPublic
 
 import {
   buildTenantAttentionQueue,
-  type TenantOperationalInput,
 } from "@/lib/platform-admin/operational-readiness";
-
 import {
-  resolveBusinessPublicationStatus,
-  type BusinessPublicationStatus,
+  loadPlatformOperationsOverview,
+  type PlatformOperationsTenant,
+} from "@/lib/platform-admin/operations-server";
+
+import type {
+  BusinessPublicationStatus,
 } from "@/lib/publishing/status";
-
-import {
-  createAdminClient,
-} from "@/lib/supabase/admin";
 
 export const dynamic =
   "force-dynamic";
@@ -38,44 +36,8 @@ export const dynamic =
 export const revalidate =
   0;
 
-type BusinessRow = {
-  id: string;
-  slug: string;
-  name: string;
-  publication_status:
-    | string
-    | null;
-  is_active: boolean;
-  template_key:
-    | string
-    | null;
-  phone:
-    | string
-    | null;
-  email:
-    | string
-    | null;
-  created_at: string;
-};
-
-type MembershipRow = {
-  business_id: string;
-};
-
-type BookingRow = {
-  business_id: string;
-};
-
 type DashboardTenant =
-  TenantOperationalInput;
-
-type PlatformOverviewData = {
-  tenants:
-    DashboardTenant[];
-  upcomingBookingsTotal: number;
-  errors:
-    string[];
-};
+  PlatformOperationsTenant;
 
 function hasValue(
   value:
@@ -86,240 +48,6 @@ function hasValue(
   return Boolean(
     value?.trim()
   );
-}
-
-async function loadPlatformOverview():
-  Promise<PlatformOverviewData> {
-  const supabase =
-    createAdminClient();
-
-  const now =
-    new Date();
-
-  const sevenDaysFromNow =
-    new Date(
-      now.getTime() +
-      7 *
-        24 *
-        60 *
-        60 *
-        1000
-    );
-
-  const [
-    businessesResult,
-    membershipsResult,
-    bookingsResult,
-  ] =
-    await Promise.all([
-      supabase
-        .from(
-          "businesses"
-        )
-        .select(
-          `
-            id,
-            slug,
-            name,
-            publication_status,
-            is_active,
-            template_key,
-            phone,
-            email,
-            created_at
-          `
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              false,
-          }
-        ),
-
-      supabase
-        .from(
-          "business_members"
-        )
-        .select(
-          "business_id"
-        )
-        .eq(
-          "role",
-          "owner"
-        )
-        .eq(
-          "is_active",
-          true
-        ),
-
-      supabase
-        .from(
-          "bookings"
-        )
-        .select(
-          "business_id"
-        )
-        .gte(
-          "starts_at",
-          now.toISOString()
-        )
-        .lt(
-          "starts_at",
-          sevenDaysFromNow.toISOString()
-        )
-        .in(
-          "status",
-          [
-            "pending",
-            "confirmed",
-          ]
-        ),
-    ]);
-
-  const errors:
-    string[] = [];
-
-  if (
-    businessesResult.error
-  ) {
-    console.error(
-      "Platform overview business query failed:",
-      businessesResult.error
-    );
-
-    errors.push(
-      "Saloni nisu mogli potpuno da se učitaju."
-    );
-  }
-
-  if (
-    membershipsResult.error
-  ) {
-    console.error(
-      "Platform overview owner query failed:",
-      membershipsResult.error
-    );
-
-    errors.push(
-      "Owner status trenutno nije kompletan."
-    );
-  }
-
-  if (
-    bookingsResult.error
-  ) {
-    console.error(
-      "Platform overview booking query failed:",
-      bookingsResult.error
-    );
-
-    errors.push(
-      "Upcoming booking brojač trenutno nije dostupan."
-    );
-  }
-
-  const businessRows =
-    (
-      businessesResult.data ??
-      []
-    ) as unknown as
-      BusinessRow[];
-
-  const membershipRows =
-    (
-      membershipsResult.data ??
-      []
-    ) as unknown as
-      MembershipRow[];
-
-  const bookingRows =
-    (
-      bookingsResult.data ??
-      []
-    ) as unknown as
-      BookingRow[];
-
-  const ownerBusinessIds =
-    new Set(
-      membershipRows.map(
-        (
-          row
-        ) =>
-          row.business_id
-      )
-    );
-
-  const bookingCountByBusiness =
-    new Map<
-      string,
-      number
-    >();
-
-  for (
-    const booking of
-    bookingRows
-  ) {
-    bookingCountByBusiness.set(
-      booking.business_id,
-      (
-        bookingCountByBusiness.get(
-          booking.business_id
-        ) ??
-        0
-      ) +
-        1
-    );
-  }
-
-  const tenants:
-    DashboardTenant[] =
-    businessRows.map(
-      (
-        row
-      ) => ({
-        id:
-          row.id,
-        slug:
-          row.slug,
-        name:
-          row.name,
-        publicationStatus:
-          resolveBusinessPublicationStatus(
-            row.publication_status,
-            row.is_active
-          ),
-        hasActiveOwner:
-          ownerBusinessIds.has(
-            row.id
-          ),
-        hasContact:
-          hasValue(
-            row.phone
-          ) ||
-          hasValue(
-            row.email
-          ),
-        hasTemplate:
-          hasValue(
-            row.template_key
-          ),
-        upcomingBookings:
-          bookingCountByBusiness.get(
-            row.id
-          ) ??
-          0,
-        createdAt:
-          row.created_at,
-      })
-    );
-
-  return {
-    tenants,
-    upcomingBookingsTotal:
-      bookingRows.length,
-    errors,
-  };
 }
 
 type ConfigurationCheck = {
@@ -505,7 +233,7 @@ function formatDate(
 
 export default async function PlatformAdminPage() {
   const overview =
-    await loadPlatformOverview();
+    await loadPlatformOperationsOverview();
 
   const attentionQueue =
     buildTenantAttentionQueue(
@@ -729,6 +457,44 @@ export default async function PlatformAdminPage() {
                                   tenant.publicationStatus
                                 }
                               />
+
+                              <span
+                                className={[
+                                  "rounded-full",
+                                  "border",
+                                  "px-2.5",
+                                  "py-1",
+                                  "text-[10px]",
+                                  "font-semibold",
+                                  "uppercase",
+                                  "tracking-wider",
+                                  tenant.severity ===
+                                  "critical"
+                                    ? "border-red-300/20 bg-red-300/10 text-red-200"
+                                    : tenant.severity ===
+                                      "warning"
+                                      ? "border-amber-300/20 bg-amber-300/10 text-amber-100"
+                                      : "border-sky-300/20 bg-sky-300/10 text-sky-200",
+                                ].join(
+                                  " "
+                                )}
+                              >
+                                {
+                                  tenant.severity ===
+                                  "critical"
+                                    ? "Kritično"
+                                    : tenant.severity ===
+                                      "warning"
+                                      ? "Upozorenje"
+                                      : "Info"
+                                }
+                              </span>
+
+                              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold text-zinc-400">
+                                {
+                                  tenant.packageLabel
+                                }
+                              </span>
                             </div>
 
                             <p className="mt-2 text-sm text-zinc-500">
@@ -899,7 +665,7 @@ export default async function PlatformAdminPage() {
                         tenant.id
                       }
                       href={`/platform-admin/businesses/${tenant.slug}`}
-                      className="grid gap-3 px-5 py-4 transition hover:bg-white/[0.025] md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center md:px-6"
+                      className="grid gap-3 px-5 py-4 transition hover:bg-white/[0.025] md:grid-cols-[minmax(0,1fr)_auto_auto_auto] md:items-center md:px-6"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-semibold">
@@ -914,6 +680,12 @@ export default async function PlatformAdminPage() {
                           }
                         </p>
                       </div>
+
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-zinc-400">
+                        {
+                          tenant.packageLabel
+                        }
+                      </span>
 
                       <BusinessPublicationBadge
                         status={
