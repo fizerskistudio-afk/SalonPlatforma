@@ -123,7 +123,7 @@ describe(
         expect(
           ROADMAP
         ).toContain(
-          "`AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan"
+          "AI-CONTENT-ASSIST-FOUNDATION-01"
         );
       }
     );

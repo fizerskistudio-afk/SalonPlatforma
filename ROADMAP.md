@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates i platform-admin Operations su završeni; `AI-CONTENT-ASSIST-FOUNDATION-01A`, `01B`, `01C-A` i `01C-B` su pushovani, `01C-C` controlled runtime closeout je validiran i staged, a `CONTENT-STARTER-PACKS-01A` je sledeći proizvodni korak.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations i AI Content Assist application foundation su završeni i pushovani; `CONTENT-STARTER-PACKS-01A` contract, registry i svih deset vertical manifesta su validirani i staged, a `CONTENT-STARTER-PACKS-01B` je sledeći proizvodni korak.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -19,21 +19,26 @@
 - [x] ciljani AI testovi, kompletan Vitest suite, TypeScript i production build prošli;
 - [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-A` auth adapters i request boundary završeni i pushovani;
 - [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-B` internal routes i Google review context završeni i pushovani;
-- [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-C` controlled runtime smoke i foundation closeout validirani i staged;
+- [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-C` controlled runtime smoke i foundation closeout završeni i pushovani — `441a0fa2deb414a8c546b8e1a99b4c39daedc9da`;
 - [x] isti Request/Response orchestration koristi production composition root i kontrolisani runtime test;
 - [x] runtime pokriva 200/400/401/403/404/413/500/503/504 i stabilan `X-Request-ID`;
 - [x] success ostaje draft-only uz obavezno ručno odobrenje;
 - [x] nema automatskog content apply-a, Google reply publish-a ili usage write-a;
-- [x] ciljani 01C-C testovi, TypeScript i kompletan `npm run check` prošli;
 - [x] pravi usage persistence izdvojen u `AI-CONTENT-ASSIST-USAGE-01`;
-- [ ] 01C-C commit i push čekaju eksplicitnu autorizaciju;
-- [ ] `CONTENT-STARTER-PACKS-01A` je sledeći proizvodni korak posle push-a.
+- [x] `CONTENT-STARTER-PACKS-01A` universal contract, registry i svih deset vertical manifesta validirani;
+- [x] 21 zajednički optional/required modul i 106 starter usluga;
+- [x] sve starter cene ostaju `unset`, a copy/policies/SEO ostaju draft;
+- [x] preview resolver nema database apply ili publish granicu;
+- [x] dva legacy ROADMAP contract testa prebačena na stabilni milestone marker;
+- [x] ciljani testovi, TypeScript i kompletan `npm run check` prošli;
+- [ ] 01A commit i push čekaju eksplicitnu autorizaciju;
+- [ ] `CONTENT-STARTER-PACKS-01B` je sledeći proizvodni korak.
 
 ### Poslednji potvrđeni implementation checkpoint
 
 ```text
-1cb5987df0b65e1c4205b8052b7c8081720123c7
-feat(ai): add internal content assist routes
+441a0fa2deb414a8c546b8e1a99b4c39daedc9da
+feat(ai): close content assist foundation
 ```
 
 ---
@@ -289,17 +294,18 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — završen;
 8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — završen i pushovan;
 9. `PLATFORM-ADMIN-OPERATIONS-01` — završen i pushovan;
-10. `AI-CONTENT-ASSIST-FOUNDATION-01` — application foundation lokalno završen; 01A + 01B + 01C-A + 01C-B pushovani, 01C-C validiran i staged;
-11. `CONTENT-STARTER-PACKS-01A`;
-12. `CLIENT-CONTENT-INTAKE-01`;
-13. `CLIENT-PREVIEW-SHARING-01`;
-14. `DEMO-THEME-EDITORIAL-01`;
-15. `DEMO-THEME-BARBER-01`;
-16. `DEMO-THEME-NAILS-01`;
-17. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
-18. `DEMO-DATA-LANDING-01`;
-19. `MASTER-SYSTEM-QA-01`;
-20. `PREVIEW-SOFT-LAUNCH-GATE-01`.
+10. `AI-CONTENT-ASSIST-FOUNDATION-01` — application foundation završen i pushovan;
+11. `CONTENT-STARTER-PACKS-01A` — contract, registry i svih deset vertical manifesta validirani i staged;
+12. `CONTENT-STARTER-PACKS-01B`;
+13. `CLIENT-CONTENT-INTAKE-01`;
+14. `CLIENT-PREVIEW-SHARING-01`;
+15. `DEMO-THEME-EDITORIAL-01`;
+16. `DEMO-THEME-BARBER-01`;
+17. `DEMO-THEME-NAILS-01`;
+18. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
+19. `DEMO-DATA-LANDING-01`;
+20. `MASTER-SYSTEM-QA-01`;
+21. `PREVIEW-SOFT-LAUNCH-GATE-01`.
 
 `DEMO-THEME-WELLNESS-01` i `DEMO-THEME-BEAUTY-01` ostaju posle preview soft launch-a, kako nove vertikale ne bi blokirale proveru stvarnog client-preview prodajnog toka. `STUDIOBIBI-PILOT-01` ostaje production pilot posle backup, legal, domain i production environment gate-ova.
 
@@ -342,7 +348,7 @@ Detaljan closeout zapis: `docs/milestones/PLATFORM-ADMIN-OPERATIONS-01D-CLOSEOUT
 
 Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMOKE.md`.
 
-### AI-CONTENT-ASSIST-FOUNDATION-01 — foundation završen lokalno
+### AI-CONTENT-ASSIST-FOUNDATION-01 — završen i pushovan
 
 - [x] 01A domain i provider boundary završen i pushovan;
 - [x] 01B guarded invocation i surface policy završeni i pushovani;
@@ -384,8 +390,8 @@ Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMO
 - [x] success ostaje `draft`, `requiresHumanApproval=true` i `autoApplyAllowed=false`;
 - [x] ciljani 01C-C testovi, TypeScript i kompletan `npm run check` prošli;
 - [x] 01C-C nema content write, Google reply publish, usage increment, migraciju ili live provider smoke;
-- [x] application foundation je lokalno zatvoren;
-- [ ] 01C-C commit i push čekaju eksplicitnu autorizaciju.
+- [x] application foundation je zatvoren;
+- [x] 01C-C commit i push završeni — `441a0fa2deb414a8c546b8e1a99b4c39daedc9da`.
 
 Detaljan 01A zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md`.
 
@@ -410,7 +416,45 @@ Kontrolisani runtime runbook: `docs/qa/AI-CONTENT-ASSIST-01C-C-RUNTIME-SMOKE.md`
 
 Do tada ostaje eksplicitni `rollout_read_only_zero` režim. Package entitlement se proverava, ali mesečni limit se ne troši i ne predstavlja kao production billing enforcement.
 
-Sledeći proizvodni korak: `CONTENT-STARTER-PACKS-01A`.
+### CONTENT-STARTER-PACKS-01A — validiran i staged
+
+- [x] jedan zajednički domain contract umesto dupliranja sadržaja po temi;
+- [x] universal core za booking defaults, draft politike, FAQ, website sekcije, SEO i media slotove;
+- [x] module registry sa 21 modulom i required/recommended/optional/unsupported statusom po vertikali;
+- [x] tačno deset starter packova:
+  - `beauty-general`;
+  - `hair-salon`;
+  - `barber`;
+  - `nails`;
+  - `lashes-brows`;
+  - `massage`;
+  - `spa`;
+  - `waxing`;
+  - `laser-hair-removal`;
+  - `solarium`;
+- [x] ukupno 106 početnih usluga sa kategorijama, staff ulogama, intake pitanjima, trajanjem i bufferima;
+- [x] sve usluge imaju `priceStatus=unset`;
+- [x] nema numeričkih početnih cena;
+- [x] radno vreme, booking defaults, politike, FAQ, SEO i website copy zahtevaju potvrdu vlasnika;
+- [x] nema izmišljenih recenzija, zaposlenih ili fotografija;
+- [x] massage, spa, laser i solarium imaju forward-compatible room/device resurse bez tvrdnje da je runtime resource booking aktivan;
+- [x] laser zahteva health intake, consent, patch test, device/resource booking i aftercare module;
+- [x] solarium zahteva health intake, consent i device booking;
+- [x] `resolveStarterPackPreview` spaja universal core i vertical manifest;
+- [x] required module se automatski bira;
+- [x] unsupported module se odbija;
+- [x] preview vraća duboku kopiju i ne mutira registry;
+- [x] `applyAllowed=false`;
+- [x] `publishAllowed=false`;
+- [x] nema UI-ja, API rute, migracije, database write-a, apply-a ili publish-a;
+- [x] dva legacy closeout testa više ne zavise od promenljive ROADMAP statusne reči `aktivan`;
+- [x] ciljani starter-pack i legacy contract testovi prošli;
+- [x] TypeScript i kompletan `npm run check` prošli;
+- [ ] 01A commit i push čekaju eksplicitnu autorizaciju.
+
+Detaljan zapis: `docs/milestones/CONTENT-STARTER-PACKS-01A-CONTRACT-REGISTRY-MANIFESTS.md`.
+
+Sledeći korak: `CONTENT-STARTER-PACKS-01B` — Platform Admin preview, izbor modula, edit i eksplicitno potvrđen idempotentan apply koji ne pregazi postojeći tenant sadržaj.
 
 ### DEMO-I18N-01A — završen
 
@@ -1070,18 +1114,21 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji pushovani AI implementation checkpoint: 1cb5987df0b65e1c4205b8052b7c8081720123c7
+Poslednji pushovani implementation checkpoint: 441a0fa2deb414a8c546b8e1a99b4c39daedc9da
+Checkpoint subject: feat(ai): close content assist foundation
 Checkpoint tag: checkpoint/pre-platform-admin-review-2026-07-13
-Poslednji završen chapter: PLATFORM-ADMIN-OPERATIONS-01
+Poslednji završen chapter: AI-CONTENT-ASSIST-FOUNDATION-01
 Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
 Lumière: završena referentna tema; galerijski layout zaključan
 Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
-Aktivni milestone: AI-CONTENT-ASSIST-FOUNDATION-01C-C closeout
-Lokalni checkpoint: 01C-C PASS i staged; commit/push pending
-AI application foundation: lokalno zatvoren, bez live Groq/Google aktivacije
+Aktivni milestone: CONTENT-STARTER-PACKS-01A closeout
+Lokalni checkpoint: 12 starter-pack fajlova + 2 legacy contract testa PASS i staged; ROADMAP se dodaje kao 15. fajl
+Starter katalog: 10 vertikala, 21 modul i 106 usluga
+Starter granica: preview-only, cene unset, bez database apply-a ili publish-a
+AI application foundation: pushovan, bez live Groq/Google aktivacije
 AI usage: `rollout_read_only_zero`; pravi persistence odložen u AI-CONTENT-ASSIST-USAGE-01
-Sledeći korak posle push-a: CONTENT-STARTER-PACKS-01A
-Sledeći redosled: starter packs → content intake → shareable preview
+Sledeći korak posle push-a: CONTENT-STARTER-PACKS-01B
+Sledeći redosled: starter-pack preview/apply → content intake → shareable preview
 Teme posle platform-admin preview osnove: Editorial → Barber → Nails
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
 Main gate: kompletan platform-admin + Lumière/Editorial/Barber/Nails + domen + RBAC DB aktivacija + master QA + eksplicitna dozvola
