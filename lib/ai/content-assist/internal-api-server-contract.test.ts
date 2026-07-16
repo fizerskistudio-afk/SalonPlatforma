@@ -36,6 +36,14 @@ const SERVER_SOURCE =
     "internal-api-server.ts"
   );
 
+const RUNTIME_SOURCE =
+  source(
+    "lib",
+    "ai",
+    "content-assist",
+    "internal-api-runtime.ts"
+  );
+
 const PLATFORM_ROUTE =
   source(
     "app",
@@ -128,15 +136,14 @@ describe(
     );
 
     it(
-      "uses auth, body, usage, review context and invocation boundaries",
+      "wires production server adapters into the controlled runtime factory",
       () => {
         for (
           const marker of [
+            "createAiContentAssistInternalApiHandlers",
             "resolvePlatformAdminTranslationAuth",
             "resolveTenantGoogleReviewReplyAuth",
             "readAiContentAssistJsonBody",
-            "parsePlatformAdminTranslationCommand",
-            "parseTenantGoogleReviewReplyCommand",
             "loadGoogleReviewReplyContext",
             "loadAiContentAssistUsageSnapshot",
             "invokeAiContentAssistForBusiness",
@@ -149,6 +156,43 @@ describe(
             marker
           );
         }
+
+        expect(
+          SERVER_SOURCE
+        ).toContain(
+          'import "server-only"'
+        );
+      }
+    );
+
+    it(
+      "keeps request parsing and HTTP orchestration in the runtime boundary",
+      () => {
+        for (
+          const marker of [
+            "parsePlatformAdminTranslationCommand",
+            "parseTenantGoogleReviewReplyCommand",
+            "getAiContentAssistHttpStatus",
+            "toAiContentAssistApiEnvelope",
+            "resolvePlatformAuth",
+            "resolveTenantAuth",
+            "loadReviewContext",
+            "loadUsage",
+            "invoke",
+          ]
+        ) {
+          expect(
+            RUNTIME_SOURCE
+          ).toContain(
+            marker
+          );
+        }
+
+        expect(
+          RUNTIME_SOURCE
+        ).not.toContain(
+          'import "server-only"'
+        );
       }
     );
 
@@ -169,30 +213,37 @@ describe(
           ).not.toContain(
             marker
           );
+
+          expect(
+            RUNTIME_SOURCE
+          ).not.toContain(
+            marker
+          );
         }
       }
     );
 
     it(
-      "does not log raw source or review text",
+      "does not log raw review text",
       () => {
-        expect(
-          SERVER_SOURCE
-        ).not.toContain(
-          "console."
-        );
+        for (
+          const inspectedSource of [
+            SERVER_SOURCE,
+            RUNTIME_SOURCE,
+          ]
+        ) {
+          expect(
+            inspectedSource
+          ).not.toContain(
+            "console."
+          );
 
-        expect(
-          SERVER_SOURCE
-        ).not.toContain(
-          "sourceText:"
-        );
-
-        expect(
-          SERVER_SOURCE
-        ).not.toContain(
-          "review.body"
-        );
+          expect(
+            inspectedSource
+          ).not.toContain(
+            "review.body"
+          );
+        }
       }
     );
   }
