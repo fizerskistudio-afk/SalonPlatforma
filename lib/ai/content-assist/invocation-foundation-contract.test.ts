@@ -22,10 +22,12 @@ function projectPath(
   );
 }
 
-const ROADMAP =
+const MILESTONE =
   readFileSync(
     projectPath(
-      "ROADMAP.md"
+      "docs",
+      "milestones",
+      "AI-CONTENT-ASSIST-FOUNDATION-01B-GUARDED-INVOCATION.md"
     ),
     "utf8"
   ).replace(
@@ -65,36 +67,42 @@ describe(
     );
 
     it(
-      "records the controlled rollout surface policy",
+      "records the stable controlled rollout surface policy",
       () => {
         expect(
-          ROADMAP
+          MILESTONE
         ).toContain(
-          "AI prevodi su u prvom rollout-u samo Platform Admin alat"
+          "platform_admin_content_translation"
         );
 
         expect(
-          ROADMAP
+          MILESTONE
         ).toContain(
-          "tenant AI je u prvom rollout-u samo Google review reply draft"
+          "tenant_google_review_reply"
         );
 
         expect(
-          ROADMAP
+          MILESTONE
         ).toContain(
-          "bez API rute, quota persistence-a i content write-a"
+          "Ne uvodi se opšti tenant AI endpoint"
         );
 
         expect(
-          ROADMAP
+          MILESTONE
         ).toContain(
-          "01A + 01B ciljani Git commit i push završeni"
+          "01B ne dodaje:"
         );
 
         expect(
-          ROADMAP
+          MILESTONE
         ).toContain(
-          "AI-CONTENT-ASSIST-FOUNDATION-01C — AUTH ADAPTERS AND INTERNAL API"
+          "usage persistence"
+        );
+
+        expect(
+          MILESTONE
+        ).toContain(
+          "content apply"
         );
       }
     );

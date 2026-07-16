@@ -109,6 +109,14 @@ describe(
         ).toContain(
           "tenant.publish"
         );
+
+        expect(
+          getPlatformAdminPermissions(
+            "super_admin"
+          )
+        ).toContain(
+          "tenant.content.translate"
+        );
       }
     );
 
@@ -140,6 +148,13 @@ describe(
           hasPlatformAdminPermission(
             "sales",
             "tenant.preview.share"
+          )
+        ).toBe(true);
+
+        expect(
+          hasPlatformAdminPermission(
+            "sales",
+            "tenant.content.translate"
           )
         ).toBe(true);
 
@@ -220,6 +235,13 @@ describe(
           hasPlatformAdminPermission(
             "it",
             "tenant.profile.write"
+          )
+        ).toBe(false);
+
+        expect(
+          hasPlatformAdminPermission(
+            "it",
+            "tenant.content.translate"
           )
         ).toBe(false);
       }

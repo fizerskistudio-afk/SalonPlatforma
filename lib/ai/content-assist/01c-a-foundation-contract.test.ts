@@ -27,7 +27,7 @@ const MILESTONE =
     projectPath(
       "docs",
       "milestones",
-      "AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md"
+      "AI-CONTENT-ASSIST-FOUNDATION-01C-A-AUTH-REQUEST-BOUNDARY.md"
     ),
     "utf8"
   ).replace(
@@ -36,17 +36,16 @@ const MILESTONE =
   );
 
 const REQUIRED_FILES = [
-  "lib/ai/content-assist/domain.ts",
-  "lib/ai/content-assist/provider.ts",
-  "lib/ai/content-assist/groq-contract.ts",
-  "lib/ai/content-assist/config-server.ts",
-  "lib/ai/content-assist/groq-provider-server.ts",
-  "lib/ai/content-assist/provider-registry-server.ts",
-  "docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md",
+  "lib/ai/content-assist/auth-adapters.ts",
+  "lib/ai/content-assist/auth-adapters-server.ts",
+  "lib/ai/content-assist/request-contract.ts",
+  "lib/ai/content-assist/request-body-server.ts",
+  "lib/ai/content-assist/usage-server.ts",
+  "docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01C-A-AUTH-REQUEST-BOUNDARY.md",
 ] as const;
 
 describe(
-  "AI content assist foundation contract",
+  "AI content assist 01C-A foundation",
   () => {
     it.each(
       REQUIRED_FILES
@@ -68,53 +67,47 @@ describe(
     );
 
     it(
-      "locks the stable 01A provider boundary",
+      "locks the two auth surfaces without a generic tenant AI endpoint",
       () => {
         expect(
           MILESTONE
         ).toContain(
-          "content_translation → ai.content_translation"
+          "platform_admin_content_translation"
         );
 
         expect(
           MILESTONE
         ).toContain(
-          "review_reply_draft → ai.review_reply_drafts"
+          "tenant_google_review_reply"
         );
 
         expect(
           MILESTONE
         ).toContain(
-          "requiresHumanApproval = true"
+          "01C-A ne uvodi opšti AI endpoint"
         );
 
         expect(
           MILESTONE
         ).toContain(
-          "autoApplyAllowed = false"
+          "AI-CONTENT-ASSIST-FOUNDATION-01C-B — INTERNAL ROUTES AND GOOGLE REVIEW CONTEXT"
         );
       }
     );
 
     it(
-      "keeps API, persistence and automatic apply outside 01A",
+      "keeps ROADMAP status outside the code installer contract",
       () => {
         expect(
           MILESTONE
         ).toContain(
-          "01A ne dodaje:"
+          "ROADMAP update je zaseban manual docs korak"
         );
 
         expect(
           MILESTONE
         ).toContain(
-          "quota persistence"
-        );
-
-        expect(
-          MILESTONE
-        ).toContain(
-          "content write/apply servis"
+          "Posle uspešnog code PASS-a koristi se zaseban"
         );
       }
     );
