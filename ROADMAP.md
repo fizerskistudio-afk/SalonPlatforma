@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates i platform-admin Operations su završeni; `AI-CONTENT-ASSIST-FOUNDATION-01A` i `01B` su pushovani, `01C` je aktivan, a `01C-A` je validiran i staged.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates i platform-admin Operations su završeni; `AI-CONTENT-ASSIST-FOUNDATION-01A`, `01B` i `01C-A` su pushovani, `01C-B` je validiran i staged, a `01C-C` route runtime smoke i foundation closeout je sledeći korak.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -17,18 +17,23 @@
 - [x] AI prevodi zaključani kao Platform Admin assisted-content alat;
 - [x] tenant AI zaključan na Google review reply draft uz povezanu integraciju;
 - [x] ciljani AI testovi, kompletan Vitest suite, TypeScript i production build prošli;
-- [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-A` auth adapters i request boundary validirani i staged;
+- [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-A` auth adapters i request boundary završeni i pushovani;
 - [x] AI contract testovi odvojeni od promenljivih ROADMAP statusnih rečenica;
 - [x] ROADMAP update prebačen u zaseban full-file docs updater;
-- [ ] `AI-CONTENT-ASSIST-FOUNDATION-01C-B — INTERNAL ROUTES AND GOOGLE REVIEW CONTEXT` je sledeći korak;
-- [ ] 01C-A commit i push čekaju eksplicitnu autorizaciju;
-- [ ] nema opšteg tenant AI endpointa niti automatskog content/review apply-a.
+- [x] `AI-CONTENT-ASSIST-FOUNDATION-01C-B` internal routes i Google review context validirani i staged;
+- [x] dve fizički odvojene interne POST rute bez generic tenant AI endpointa;
+- [x] tenant Google reply request prihvata samo `reviewId`, target locale i tone;
+- [x] review tekst, source, tenant scope i Google connection učitavaju se server-side;
+- [x] ciljani 01C-B testovi, TypeScript i kompletan `npm run check` prošli;
+- [ ] `AI-CONTENT-ASSIST-FOUNDATION-01C-C — ROUTE RUNTIME SMOKE AND FOUNDATION CLOSEOUT` je sledeći korak;
+- [ ] 01C-B commit i push čekaju eksplicitnu autorizaciju;
+- [ ] nema automatskog content apply-a, Google reply publish-a ili usage write-a.
 
 ### Poslednji potvrđeni implementation checkpoint
 
 ```text
-13494f95a9b55aeb59f83c267c28d35fd5d5a4ba
-feat(ai): add guarded content assist foundation
+07e624694878c14412ad5415207e294bd7d25cc7
+feat(ai): add auth and request boundary
 ```
 
 ---
@@ -284,7 +289,7 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 7. `PLATFORM-ADMIN-ACCESS-RECOVERY-01` — završen;
 8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — završen i pushovan;
 9. `PLATFORM-ADMIN-OPERATIONS-01` — završen i pushovan;
-10. `AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan; 01A + 01B pushovani, 01C-A validiran i staged, 01C-B sledeći;
+10. `AI-CONTENT-ASSIST-FOUNDATION-01` — aktivan; 01A + 01B + 01C-A pushovani, 01C-B validiran i staged, 01C-C sledeći;
 11. `CONTENT-STARTER-PACKS-01A`;
 12. `CLIENT-CONTENT-INTAKE-01`;
 13. `CLIENT-PREVIEW-SHARING-01`;
@@ -355,7 +360,7 @@ Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMO
 - [x] 01A završen bez API rute, quota persistence-a i automatskog upisa;
 - [x] ciljani testovi, TypeScript i `npm run check`;
 - [x] 01A + 01B ciljani Git commit i push završeni na radnoj grani;
-- [x] 01C-A auth adapters i request boundary validirani i staged;
+- [x] 01C-A auth adapters i request boundary završeni i pushovani — `07e624694878c14412ad5415207e294bd7d25cc7`;
 - [x] nova `tenant.content.translate` Platform Admin permission;
 - [x] Sales, Launch Manager i Super Admin imaju translation permission, IT ostaje read-only;
 - [x] tenant Google reply auth koristi isključivo aktivni tenant context;
@@ -366,7 +371,19 @@ Kontrolisani runtime runbook: `docs/qa/PLATFORM-ADMIN-OPERATIONS-01D-RUNTIME-SMO
 - [x] privremeni read-only usage adapter `rollout_read_only_zero`;
 - [x] AI foundation contract testovi čitaju stabilne milestone dokumente umesto promenljivih ROADMAP statusa;
 - [x] 01C-A završen bez API rute, Google review loadera ili database write-a;
-- [ ] 01C-A commit i push čekaju eksplicitnu autorizaciju.
+- [x] 01C-B dodaje `POST /api/platform-admin/ai/content-translation`;
+- [x] 01C-B dodaje `POST /api/admin/reviews/google/reply-draft`;
+- [x] nema `/api/admin/ai` niti generic content-assist tenant rute;
+- [x] Platform Admin translation ruta koristi 01C-A permission, body i request-ID granicu;
+- [x] tenant Google reply ruta koristi samo aktivni owner/manager tenant context;
+- [x] review query zahteva isti `reviewId + business_id`;
+- [x] Google connection query zahteva isti `business_id + provider=google`;
+- [x] originalni review tekst i source dolaze isključivo iz server-loaded reda;
+- [x] non-Google source i disconnected integracija ostaju blokirani u postojećem invocation guard-u;
+- [x] stabilan HTTP status i response envelope sa `X-Request-ID`;
+- [x] 01C-B nema content write, reply publish, usage increment ili migraciju;
+- [x] ciljani 01C-B testovi, TypeScript i kompletan `npm run check` prošli;
+- [ ] 01C-B commit i push čekaju eksplicitnu autorizaciju.
 
 Detaljan 01A zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01A-DOMAIN-PROVIDER-BOUNDARY.md`.
 
@@ -374,9 +391,11 @@ Detaljan 01B zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01B-GUARDED-IN
 
 Detaljan 01C-A zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01C-A-AUTH-REQUEST-BOUNDARY.md`.
 
-Sledeći korak: `AI-CONTENT-ASSIST-FOUNDATION-01C-B — INTERNAL ROUTES AND GOOGLE REVIEW CONTEXT`.
+Detaljan 01C-B zapis: `docs/milestones/AI-CONTENT-ASSIST-FOUNDATION-01C-B-INTERNAL-ROUTES.md`.
 
-01C-B uvodi dve fizički odvojene interne rute — Platform Admin translation i tenant Google review reply — bez opšteg tenant AI endpointa i bez automatskog apply-a. Tenant reply ruta server-side učitava review i Google provider connection pre invocation-a.
+Sledeći korak: `AI-CONTENT-ASSIST-FOUNDATION-01C-C — ROUTE RUNTIME SMOKE AND FOUNDATION CLOSEOUT`.
+
+01C-C proverava obe interne rute u kontrolisanom runtime-u, potvrđuje auth/error/provider granice bez automatskog content apply-a ili Google publish-a, zatvara AI foundation chapter i odlučuje da li usage persistence ide odmah ili u poseban rollout milestone.
 
 ### DEMO-I18N-01A — završen
 
@@ -1036,16 +1055,17 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji pushovani AI implementation checkpoint: 13494f95a9b55aeb59f83c267c28d35fd5d5a4ba
+Poslednji pushovani AI implementation checkpoint: 07e624694878c14412ad5415207e294bd7d25cc7
 Checkpoint tag: checkpoint/pre-platform-admin-review-2026-07-13
 Poslednji završen chapter: PLATFORM-ADMIN-OPERATIONS-01
 Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
 Lumière: završena referentna tema; galerijski layout zaključan
 Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
 Aktivni milestone: AI-CONTENT-ASSIST-FOUNDATION-01C
-Lokalni checkpoint: 01C-A PASS i staged; commit/push pending
-Sledeći korak: 01C-B internal routes + server-side Google review context
-Sledeći redosled: AI 01C-B → AI foundation closeout → starter packs → content intake → shareable preview
+Lokalni checkpoint: 01C-B PASS i staged; commit/push pending
+Dostupne interne rute: Platform Admin translation + tenant Google review reply draft
+Sledeći korak: 01C-C controlled route runtime smoke + AI foundation closeout
+Sledeći redosled: AI 01C-C → starter packs → content intake → shareable preview
 Teme posle platform-admin preview osnove: Editorial → Barber → Nails
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
 Main gate: kompletan platform-admin + Lumière/Editorial/Barber/Nails + domen + RBAC DB aktivacija + master QA + eksplicitna dozvola
