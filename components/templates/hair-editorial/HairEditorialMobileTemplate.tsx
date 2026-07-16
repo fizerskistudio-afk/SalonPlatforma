@@ -404,6 +404,16 @@ export default function HairEditorialMobileTemplate({
                 </article>
               )
             )}
+
+            {visibleEmployees.length ===
+              0 && (
+              <div className="w-full rounded-[1.5rem] border border-dashed border-[var(--brand-border)] px-5 py-12 text-center text-sm text-[var(--brand-muted)]">
+                {t(
+                  editorialLabels.noTeam,
+                  locale
+                )}
+              </div>
+            )}
           </div>
         </section>
 

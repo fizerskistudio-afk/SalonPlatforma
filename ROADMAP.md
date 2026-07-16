@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist application foundation i `CONTENT-STARTER-PACKS-01A` su završeni i pushovani; `CONTENT-STARTER-PACKS-01B` visible builder i atomski draft provisioning su validirani i staged, a sledeći vidljivi proizvodni korak je `DEMO-THEME-EDITORIAL-01`.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-01` visual/demo acceptance je validiran i staged, a sledeći vidljivi proizvodni korak je `DEMO-THEME-BARBER-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -37,14 +37,21 @@
 - [x] novi tenant ostaje draft i ne objavljuje se automatski;
 - [x] nema nove migracije, browser Supabase write-a, email aktivacije ili cron aktivacije;
 - [x] ciljani 01B testovi, TypeScript i kompletan `npm run check` prošli;
-- [ ] kontrolisani browser provisioning smoke radi se posle 01B commit/push checkpointa;
-- [ ] sledeći vidljivi milestone: `DEMO-THEME-EDITORIAL-01`.
+- [x] 01B commit i push završeni — `de3351ed09550b39ffea754d0501820e8e7f947c`;
+- [ ] kontrolisani browser provisioning smoke ostaje za theme/browser acceptance ciklus;
+- [x] `DEMO-THEME-EDITORIAL-01` visual/demo acceptance validiran i staged;
+- [x] Editorial manifest usklađen sa stvarnim Reviews rendererom;
+- [x] Editorial desktop i mobile dobijaju localized team empty state za 01B draft tenant;
+- [x] Editorial ostaje pošteno `monolith/monolith` sa `architecture.acceptance=pending`;
+- [x] ciljani registry, architecture i Editorial testovi, TypeScript i kompletan `npm run check` prošli;
+- [ ] kontrolisani Editorial browser smoke radi se posle commit/push checkpointa;
+- [ ] sledeći vidljivi milestone: `DEMO-THEME-BARBER-01`.
 
 ### Poslednji potvrđeni implementation checkpoint
 
 ```text
-6261d56e96a685905fe0a00f2357d26aa331104f
-feat(content): add starter pack registry and vertical manifests
+de3351ed09550b39ffea754d0501820e8e7f947c
+feat(content): add starter pack business builder
 ```
 
 ---
@@ -460,7 +467,7 @@ Do tada ostaje eksplicitni `rollout_read_only_zero` režim. Package entitlement 
 
 Detaljan zapis: `docs/milestones/CONTENT-STARTER-PACKS-01A-CONTRACT-REGISTRY-MANIFESTS.md`.
 
-### CONTENT-STARTER-PACKS-01B — visible builder validiran i staged
+### CONTENT-STARTER-PACKS-01B — završen i pushovan
 
 - [x] novi Platform Admin ekran `/platform-admin/businesses/new/starter-pack`;
 - [x] ulazna kartica dodata na postojeći `/platform-admin/businesses/new`;
@@ -489,19 +496,44 @@ Detaljan zapis: `docs/milestones/CONTENT-STARTER-PACKS-01A-CONTRACT-REGISTRY-MAN
 - [x] ciljani provisioning i contract testovi prošli;
 - [x] TypeScript i kompletan `npm run check` prošli;
 - [ ] kontrolisani browser smoke treba da kreira jedan disposable draft tenant i potvrdi workspace + `?preview=1`;
-- [ ] 01B commit i push čekaju eksplicitnu autorizaciju.
+- [x] 01B commit i push završeni — `de3351ed09550b39ffea754d0501820e8e7f947c`.
 
 Detaljan zapis: `docs/milestones/CONTENT-STARTER-PACKS-01B-VISUAL-BUILDER-ATOMIC-PROVISIONING.md`.
 
-Sledeći vidljivi redosled, po dogovoru:
+### DEMO-THEME-EDITORIAL-01 — visual/demo acceptance validiran i staged
+
+- [x] Hair Editorial ostaje registrovan kao `live`;
+- [x] manifest sada iskreno navodi `reviews` sekciju i `supportsReviews=true`;
+- [x] desktop renderer zadržava hero, services, team, gallery, reviews, contact i booking akcije;
+- [x] mobile renderer zadržava app-like monolith prikaz, booking akcije i desktop switch;
+- [x] desktop team sekcija ima localized empty state kada 01B tenant nema zaposlene;
+- [x] mobile team sekcija ima localized empty state kada 01B tenant nema zaposlene;
+- [x] gallery i shared reviews empty/preview stanja ostaju aktivna;
+- [x] Editorial nema hardkodovani Lumière tenant ili Hair Luxury zavisnost;
+- [x] Lumière desktop/mobile i zaključani gallery layout nisu menjani;
+- [x] registry capability, architecture snapshot i stvarni renderer su usklađeni;
+- [x] architecture contract ostaje pošten: `desktop=monolith`, `mobile=monolith`, `acceptance=pending`;
+- [x] `isTemplateArchitectureAccepted(hair-editorial)` ostaje `false` dok se theme ne modularizuje;
+- [x] visual/demo readiness i architecture acceptance su formalno razdvojeni;
+- [x] ciljani registry, architecture, Editorial acceptance i utility testovi prošli;
+- [x] TypeScript i kompletan `npm run check` prošli;
+- [x] nema nove migracije, database write-a, auto-publish-a ili tenant mutation-a;
+- [ ] kontrolisani browser test treba da kreira `Atelier Editorial Demo` kroz Starter Pack Business Builder;
+- [ ] proveriti desktop preview, mobile preview i Lumière regression;
+- [ ] Editorial commit i push čekaju eksplicitnu autorizaciju.
+
+Detaljan zapis: `docs/milestones/DEMO-THEME-EDITORIAL-01.md`.
+
+Browser runbook: `docs/qa/DEMO-THEME-EDITORIAL-01-ACCEPTANCE.md`.
+
+Sledeći vidljivi redosled:
 
 ```text
-DEMO-THEME-EDITORIAL-01
-→ DEMO-THEME-BARBER-01
+DEMO-THEME-BARBER-01
 → DEMO-THEME-NAILS-01
 ```
 
-Lumière ostaje završena referentna tema. Posle ova tri milestone-a platforma ima četiri različita demo biznisa za kontrolisano kreiranje, browser testiranje i završni content/preview tok.
+Lumière je završena referentna tema, a Editorial je drugi vizuelno spreman demo renderer. Posle Barber i Nails milestone-a platforma ima četiri različita demo biznisa za kontrolisano kreiranje, browser testiranje i završni content/preview tok.
 
 ### DEMO-I18N-01A — završen
 
@@ -1179,7 +1211,7 @@ Starter katalog: 10 vertikala, 21 modul i 106 usluga
 01B runtime: kontrolisani browser provisioning smoke još nije izvršen
 AI application foundation: pushovan, bez live Groq/Google aktivacije
 AI usage: `rollout_read_only_zero`; pravi persistence odložen u AI-CONTENT-ASSIST-USAGE-01
-Sledeći korak posle push-a: DEMO-THEME-EDITORIAL-01
+Sledeći korak posle push-a: DEMO-THEME-BARBER-01
 Vidljivi redosled: Editorial → Barber → Nails
 Posle tema: client content intake → shareable preview → Platform Admin E2E → demo data → master QA
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje

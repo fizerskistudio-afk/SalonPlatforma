@@ -200,6 +200,7 @@ export const TEMPLATE_REGISTRY:
       "services",
       "team",
       "gallery",
+      "reviews",
       "contact",
     ],
 
@@ -208,7 +209,7 @@ export const TEMPLATE_REGISTRY:
     supportsGallery:
       true,
     supportsReviews:
-      false,
+      true,
     defaultPalette:
       null,
   },

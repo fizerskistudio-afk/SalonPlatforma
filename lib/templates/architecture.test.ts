@@ -96,7 +96,7 @@ describe(
                 "pending",
             },
             supportsReviews:
-              false,
+              true,
             availability:
               "live",
           },

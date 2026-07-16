@@ -128,6 +128,15 @@ export const editorialLabels = {
     de: "Studio folgen",
     fr: "Suivre le studio",
   },
+  noTeam: {
+    "sr-Latn": "Profili tima biće uskoro predstavljeni.",
+    mk: "Профилите на тимот наскоро ќе бидат претставени.",
+    hr: "Profili tima bit će uskoro predstavljeni.",
+    sq: "Profilet e ekipit do të prezantohen së shpejti.",
+    en: "Team profiles will be introduced soon.",
+    de: "Die Teamprofile werden in Kürze vorgestellt.",
+    fr: "Les profils de l’équipe seront bientôt présentés.",
+  },
   noGallery: {
     "sr-Latn": "Galerija će uskoro biti dopunjena.",
     mk: "Галеријата наскоро ќе биде дополнета.",

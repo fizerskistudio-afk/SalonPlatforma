@@ -565,6 +565,16 @@ export default function HairEditorialDesktopTemplate({
                 </article>
               )
             )}
+
+            {visibleEmployees.length ===
+              0 && (
+              <div className="col-span-3 rounded-[2rem] border border-dashed border-[var(--brand-border)] px-8 py-20 text-center text-[var(--brand-muted)]">
+                {t(
+                  editorialLabels.noTeam,
+                  locale
+                )}
+              </div>
+            )}
           </div>
         </section>
 
