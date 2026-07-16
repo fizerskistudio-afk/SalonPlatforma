@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-01` visual/demo acceptance je validiran i staged, a sledeći vidljivi proizvodni korak je `DEMO-THEME-BARBER-01`.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-02` modular architecture closeout je završen i browser-preview smoke potvrđen, a sledeći vidljivi proizvodni korak je `DEMO-THEME-BARBER-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -38,21 +38,39 @@
 - [x] nema nove migracije, browser Supabase write-a, email aktivacije ili cron aktivacije;
 - [x] ciljani 01B testovi, TypeScript i kompletan `npm run check` prošli;
 - [x] 01B commit i push završeni — `de3351ed09550b39ffea754d0501820e8e7f947c`;
-- [ ] kontrolisani browser provisioning smoke ostaje za theme/browser acceptance ciklus;
-- [x] `DEMO-THEME-EDITORIAL-01` visual/demo acceptance validiran i staged;
-- [x] Editorial manifest usklađen sa stvarnim Reviews rendererom;
-- [x] Editorial desktop i mobile dobijaju localized team empty state za 01B draft tenant;
-- [x] Editorial ostaje pošteno `monolith/monolith` sa `architecture.acceptance=pending`;
-- [x] ciljani registry, architecture i Editorial testovi, TypeScript i kompletan `npm run check` prošli;
-- [ ] kontrolisani Editorial browser smoke radi se posle commit/push checkpointa;
+- [x] kontrolisani browser provisioning smoke prošao preko Starter Pack Business Builder-a;
+- [x] starter-pack preview API vratio `200`, a atomski provisioning novog Editorial tenant-a `201`;
+- [x] kreiran je stalni demo tenant `atelier-editorial-demo` sa `hair-editorial` temom;
+- [x] draft public preview ruta `/salon/atelier-editorial-demo?preview=1` radi;
+- [x] preview booking guard je potvrđen — booking write ostaje namerno onemogućen u preview režimu;
+- [x] `DEMO-THEME-EDITORIAL-01` visual/demo acceptance je ranije završen;
+- [x] `DEMO-THEME-EDITORIAL-02` deli desktop i mobile na zasebne, testabilne sekcije;
+- [x] Editorial viewport root fajlovi su tanki composition root-ovi;
+- [x] Editorial architecture je `modular/modular/passed`;
+- [x] shared Reviews contract testovi prate modularne review i navigation granice;
+- [x] localized team i gallery empty state ostaju podržani;
+- [x] ciljani registry, architecture, Editorial i Reviews testovi, TypeScript i kompletan `npm run check` prošli;
+- [x] ručni desktop/browser preview smoke prihvaćen bez blocker-a;
+- [x] poznati non-blocker: Builder success kartica ostaje ispod duge forme bez auto-scroll/toast povratne informacije;
+- [x] Lumière ostaje vizuelni i arhitektonski referentni standard; Editorial je prihvaćen kao sekundarna tema;
+- [ ] puni live booking, admin calendar, email i cross-tenant regression ostaje u `MASTER-SYSTEM-QA-01`;
 - [ ] sledeći vidljivi milestone: `DEMO-THEME-BARBER-01`.
 
-### Poslednji potvrđeni implementation checkpoint
+### Pre-closeout implementation checkpoint
 
 ```text
-de3351ed09550b39ffea754d0501820e8e7f947c
-feat(content): add starter pack business builder
+2796343d71c39ea5e957b428e9535cbae4fe9be4
+feat(theme): close editorial demo acceptance
 ```
+
+### Aktivni closeout
+
+```text
+DEMO-THEME-EDITORIAL-02
+feat(theme): modularize editorial experience
+```
+
+Commit SHA se čita iz Git istorije posle ovog closeout-a; ROADMAP namerno ne pokušava da ugradi SHA sopstvenog commit-a.
 
 ---
 

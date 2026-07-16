@@ -89,11 +89,11 @@ describe(
               contractVersion:
                 PUBLIC_TEMPLATE_CONTRACT_VERSION,
               desktop:
-                "monolith",
+                "modular",
               mobile:
-                "monolith",
+                "modular",
               acceptance:
-                "pending",
+                "passed",
             },
             supportsReviews:
               true,
@@ -123,7 +123,7 @@ describe(
     );
 
     it(
-      "accepts only the current reference architecture",
+      "accepts the reference and completed modular themes",
       () => {
         expect(
           isTemplateArchitectureAccepted(
@@ -139,7 +139,7 @@ describe(
               "hair-editorial"
             ]
           )
-        ).toBe(false);
+        ).toBe(true);
 
         expect(
           isTemplateArchitectureAccepted(

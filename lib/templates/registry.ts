@@ -183,11 +183,11 @@ export const TEMPLATE_REGISTRY:
       contractVersion:
         1,
       desktop:
-        "monolith",
+        "modular",
       mobile:
-        "monolith",
+        "modular",
       acceptance:
-        "pending",
+        "passed",
     },
 
     viewports: [

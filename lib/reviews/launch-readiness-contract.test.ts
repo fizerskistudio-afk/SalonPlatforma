@@ -50,8 +50,8 @@ const ADMIN_AND_WORKER_PATHS = [
 
 const REVIEW_THEME_PATHS = [
   "components/desktop/DesktopLanding.tsx",
-  "components/templates/hair-editorial/HairEditorialDesktopTemplate.tsx",
-  "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
+  "components/templates/hair-editorial/desktop/EditorialDesktopReviewsSection.tsx",
+  "components/templates/hair-editorial/mobile/EditorialMobileReviewsSection.tsx",
   "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx",
 ] as const;

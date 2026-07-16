@@ -28,8 +28,8 @@ function readSource(
 }
 
 const DIRECT_THEME_PATHS = [
-  "components/templates/hair-editorial/HairEditorialDesktopTemplate.tsx",
-  "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
+  "components/templates/hair-editorial/desktop/EditorialDesktopReviewsSection.tsx",
+  "components/templates/hair-editorial/mobile/EditorialMobileReviewsSection.tsx",
   "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx",
 ] as const;
@@ -279,7 +279,7 @@ describe(
       () => {
         const editorial =
           readSource(
-            "components/templates/hair-editorial/HairEditorialDesktopTemplate.tsx"
+            "components/templates/hair-editorial/desktop/EditorialDesktopHeader.tsx"
           );
 
         expect(

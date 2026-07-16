@@ -23,6 +23,28 @@ import {
 const ROOT =
   process.cwd();
 
+const DESKTOP_MODULES = [
+  "EditorialDesktopHeader",
+  "EditorialDesktopHeroSection",
+  "EditorialDesktopServicesSection",
+  "EditorialDesktopTeamSection",
+  "EditorialDesktopGallerySection",
+  "EditorialDesktopReviewsSection",
+  "EditorialDesktopContactSection",
+  "EditorialDesktopFooter",
+] as const;
+
+const MOBILE_MODULES = [
+  "EditorialMobileHeader",
+  "EditorialMobileHeroSection",
+  "EditorialMobileServicesSection",
+  "EditorialMobileTeamSection",
+  "EditorialMobileGallerySection",
+  "EditorialMobileReviewsSection",
+  "EditorialMobileContactSection",
+  "EditorialMobileBottomNav",
+] as const;
+
 function source(
   relativePath:
     string
@@ -39,11 +61,23 @@ function source(
   );
 }
 
+function moduleSource(
+  viewport:
+    "desktop" |
+    "mobile",
+  moduleName:
+    string
+): string {
+  return source(
+    `components/templates/hair-editorial/${viewport}/${moduleName}.tsx`
+  );
+}
+
 describe(
-  "DEMO-THEME-EDITORIAL-01 acceptance",
+  "DEMO-THEME-EDITORIAL-02 modular acceptance",
   () => {
     it(
-      "records visual readiness without misreporting monolith architecture",
+      "meets the public modular architecture contract",
       () => {
         const manifest =
           getTemplateManifest(
@@ -65,11 +99,11 @@ describe(
             true,
           architecture: {
             desktop:
-              "monolith",
+              "modular",
             mobile:
-              "monolith",
+              "modular",
             acceptance:
-              "pending",
+              "passed",
           },
         });
 
@@ -89,13 +123,13 @@ describe(
             manifest
           )
         ).toBe(
-          false
+          true
         );
       }
     );
 
     it(
-      "keeps desktop and mobile sections, booking actions and review presentation",
+      "keeps both viewport roots thin and composition-only",
       () => {
         const desktop =
           source(
@@ -107,8 +141,92 @@ describe(
             "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx"
           );
 
+        expect(
+          desktop
+            .split(
+              "\n"
+            )
+            .length
+        ).toBeLessThan(
+          180
+        );
+
+        expect(
+          mobile
+            .split(
+              "\n"
+            )
+            .length
+        ).toBeLessThan(
+          190
+        );
+
+        for (
+          const forbidden of [
+            "next/image",
+            "lucide-react",
+            "<section",
+            "<header",
+            "<footer",
+            "<nav",
+          ]
+        ) {
+          expect(
+            desktop
+          ).not.toContain(
+            forbidden
+          );
+
+          expect(
+            mobile
+          ).not.toContain(
+            forbidden
+          );
+        }
+
+        for (
+          const moduleName of
+          DESKTOP_MODULES
+        ) {
+          expect(
+            desktop
+          ).toContain(
+            moduleName
+          );
+        }
+
+        for (
+          const moduleName of
+          MOBILE_MODULES
+        ) {
+          expect(
+            mobile
+          ).toContain(
+            moduleName
+          );
+        }
+      }
+    );
+
+    it(
+      "preserves the complete desktop behavior in dedicated modules",
+      () => {
+        const combined =
+          DESKTOP_MODULES.map(
+            (
+              moduleName
+            ) =>
+              moduleSource(
+                "desktop",
+                moduleName
+              )
+          ).join(
+            "\n"
+          );
+
         for (
           const marker of [
+            "editorial-top",
             "editorial-services",
             "editorial-team",
             "editorial-gallery",
@@ -118,17 +236,38 @@ describe(
             "onBookService",
             "onBookEmployee",
             "editorialLabels.noTeam",
+            "editorialLabels.noGallery",
+            "LanguageSwitcher",
           ]
         ) {
           expect(
-            desktop
+            combined
           ).toContain(
             marker
           );
         }
+      }
+    );
+
+    it(
+      "preserves the complete mobile behavior in dedicated modules",
+      () => {
+        const combined =
+          MOBILE_MODULES.map(
+            (
+              moduleName
+            ) =>
+              moduleSource(
+                "mobile",
+                moduleName
+              )
+          ).join(
+            "\n"
+          );
 
         for (
           const marker of [
+            "editorial-mobile-home",
             "editorial-mobile-services",
             "editorial-mobile-team",
             "editorial-mobile-gallery",
@@ -139,10 +278,13 @@ describe(
             "onBookEmployee",
             "onSwitchToDesktop",
             "editorialLabels.noTeam",
+            "editorialLabels.noGallery",
+            "env(safe-area-inset-bottom)",
+            "LanguageSwitcher",
           ]
         ) {
           expect(
-            mobile
+            combined
           ).toContain(
             marker
           );
@@ -151,7 +293,7 @@ describe(
     );
 
     it(
-      "does not hardcode the Lumiere tenant or mutate the reference theme",
+      "remains tenant-neutral and independent from the Lumiere implementation",
       () => {
         const editorialSource =
           [
@@ -163,6 +305,24 @@ describe(
             ),
             source(
               "components/templates/hair-editorial/editorial-utils.ts"
+            ),
+            ...DESKTOP_MODULES.map(
+              (
+                moduleName
+              ) =>
+                moduleSource(
+                  "desktop",
+                  moduleName
+                )
+            ),
+            ...MOBILE_MODULES.map(
+              (
+                moduleName
+              ) =>
+                moduleSource(
+                  "mobile",
+                  moduleName
+                )
             ),
           ].join(
             "\n"
@@ -180,40 +340,42 @@ describe(
         ).not.toContain(
           "HairLuxury"
         );
+
+        expect(
+          editorialSource
+        ).not.toContain(
+          "@/components/desktop/"
+        );
+
+        expect(
+          editorialSource
+        ).not.toContain(
+          "@/components/mobile/"
+        );
       }
     );
 
     it(
-      "ships the acceptance runbook and milestone record",
+      "documents the modular closeout and reference standard",
       () => {
         const milestone =
           source(
-            "docs/milestones/DEMO-THEME-EDITORIAL-01.md"
-          );
-
-        const runbook =
-          source(
-            "docs/qa/DEMO-THEME-EDITORIAL-01-ACCEPTANCE.md"
+            "docs/milestones/DEMO-THEME-EDITORIAL-02-MODULAR-ARCHITECTURE.md"
           );
 
         for (
           const marker of [
-            "Hair Editorial",
+            "Lumière",
+            "modular",
             "desktop",
             "mobile",
+            "passed",
+            "TemplateRenderer",
             "Starter Pack Business Builder",
-            "Lumière",
-            "01B",
           ]
         ) {
           expect(
             milestone
-          ).toContain(
-            marker
-          );
-
-          expect(
-            runbook
           ).toContain(
             marker
           );
