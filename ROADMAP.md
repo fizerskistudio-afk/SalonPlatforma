@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations i AI Content Assist application foundation su završeni i pushovani; `CONTENT-STARTER-PACKS-01A` contract, registry i svih deset vertical manifesta su validirani i staged, a `CONTENT-STARTER-PACKS-01B` je sledeći proizvodni korak.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist application foundation i `CONTENT-STARTER-PACKS-01A` su završeni i pushovani; `CONTENT-STARTER-PACKS-01B` visible builder i atomski draft provisioning su validirani i staged, a sledeći vidljivi proizvodni korak je `DEMO-THEME-EDITORIAL-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -25,20 +25,26 @@
 - [x] success ostaje draft-only uz obavezno ručno odobrenje;
 - [x] nema automatskog content apply-a, Google reply publish-a ili usage write-a;
 - [x] pravi usage persistence izdvojen u `AI-CONTENT-ASSIST-USAGE-01`;
-- [x] `CONTENT-STARTER-PACKS-01A` universal contract, registry i svih deset vertical manifesta validirani;
+- [x] `CONTENT-STARTER-PACKS-01A` universal contract, registry i svih deset vertical manifesta završeni i pushovani — `6261d56e96a685905fe0a00f2357d26aa331104f`;
 - [x] 21 zajednički optional/required modul i 106 starter usluga;
-- [x] sve starter cene ostaju `unset`, a copy/policies/SEO ostaju draft;
-- [x] preview resolver nema database apply ili publish granicu;
-- [x] dva legacy ROADMAP contract testa prebačena na stabilni milestone marker;
-- [x] ciljani testovi, TypeScript i kompletan `npm run check` prošli;
-- [ ] 01A commit i push čekaju eksplicitnu autorizaciju;
-- [ ] `CONTENT-STARTER-PACKS-01B` je sledeći proizvodni korak.
+- [x] sve 01A starter cene ostaju `unset`, a copy/policies/SEO ostaju draft;
+- [x] `CONTENT-STARTER-PACKS-01B` visible Platform Admin builder validiran i staged;
+- [x] svih deset packova može da se preview-uje kroz server route;
+- [x] Platform Admin može da potvrdi module, uključi/isključi usluge i izmeni naziv, opis, trajanje i cenu;
+- [x] server ponovo materijalizuje trusted pack umesto prihvatanja client category/template payload-a;
+- [x] apply koristi postojeći atomski `provision_business` RPC;
+- [x] stabilan `applyKey` i slug guard sprečavaju dupliranje ili pregazivanje postojećeg tenant-a;
+- [x] novi tenant ostaje draft i ne objavljuje se automatski;
+- [x] nema nove migracije, browser Supabase write-a, email aktivacije ili cron aktivacije;
+- [x] ciljani 01B testovi, TypeScript i kompletan `npm run check` prošli;
+- [ ] kontrolisani browser provisioning smoke radi se posle 01B commit/push checkpointa;
+- [ ] sledeći vidljivi milestone: `DEMO-THEME-EDITORIAL-01`.
 
 ### Poslednji potvrđeni implementation checkpoint
 
 ```text
-441a0fa2deb414a8c546b8e1a99b4c39daedc9da
-feat(ai): close content assist foundation
+6261d56e96a685905fe0a00f2357d26aa331104f
+feat(content): add starter pack registry and vertical manifests
 ```
 
 ---
@@ -295,13 +301,13 @@ Završeni foundation milestone-ovi ostaju važeći. Operativni cilj ostaje da pl
 8. `PRODUCT-PACKAGES-ENTITLEMENTS-01` — završen i pushovan;
 9. `PLATFORM-ADMIN-OPERATIONS-01` — završen i pushovan;
 10. `AI-CONTENT-ASSIST-FOUNDATION-01` — application foundation završen i pushovan;
-11. `CONTENT-STARTER-PACKS-01A` — contract, registry i svih deset vertical manifesta validirani i staged;
-12. `CONTENT-STARTER-PACKS-01B`;
-13. `CLIENT-CONTENT-INTAKE-01`;
-14. `CLIENT-PREVIEW-SHARING-01`;
-15. `DEMO-THEME-EDITORIAL-01`;
-16. `DEMO-THEME-BARBER-01`;
-17. `DEMO-THEME-NAILS-01`;
+11. `CONTENT-STARTER-PACKS-01A` — završen i pushovan;
+12. `CONTENT-STARTER-PACKS-01B` — visible builder i atomski draft provisioning validirani i staged;
+13. `DEMO-THEME-EDITORIAL-01`;
+14. `DEMO-THEME-BARBER-01`;
+15. `DEMO-THEME-NAILS-01`;
+16. `CLIENT-CONTENT-INTAKE-01`;
+17. `CLIENT-PREVIEW-SHARING-01`;
 18. `PLATFORM-ADMIN-END-TO-END-REVIEW-02`;
 19. `DEMO-DATA-LANDING-01`;
 20. `MASTER-SYSTEM-QA-01`;
@@ -416,7 +422,7 @@ Kontrolisani runtime runbook: `docs/qa/AI-CONTENT-ASSIST-01C-C-RUNTIME-SMOKE.md`
 
 Do tada ostaje eksplicitni `rollout_read_only_zero` režim. Package entitlement se proverava, ali mesečni limit se ne troši i ne predstavlja kao production billing enforcement.
 
-### CONTENT-STARTER-PACKS-01A — validiran i staged
+### CONTENT-STARTER-PACKS-01A — završen i pushovan
 
 - [x] jedan zajednički domain contract umesto dupliranja sadržaja po temi;
 - [x] universal core za booking defaults, draft politike, FAQ, website sekcije, SEO i media slotove;
@@ -450,11 +456,52 @@ Do tada ostaje eksplicitni `rollout_read_only_zero` režim. Package entitlement 
 - [x] dva legacy closeout testa više ne zavise od promenljive ROADMAP statusne reči `aktivan`;
 - [x] ciljani starter-pack i legacy contract testovi prošli;
 - [x] TypeScript i kompletan `npm run check` prošli;
-- [ ] 01A commit i push čekaju eksplicitnu autorizaciju.
+- [x] 01A commit i push završeni — `6261d56e96a685905fe0a00f2357d26aa331104f`.
 
 Detaljan zapis: `docs/milestones/CONTENT-STARTER-PACKS-01A-CONTRACT-REGISTRY-MANIFESTS.md`.
 
-Sledeći korak: `CONTENT-STARTER-PACKS-01B` — Platform Admin preview, izbor modula, edit i eksplicitno potvrđen idempotentan apply koji ne pregazi postojeći tenant sadržaj.
+### CONTENT-STARTER-PACKS-01B — visible builder validiran i staged
+
+- [x] novi Platform Admin ekran `/platform-admin/businesses/new/starter-pack`;
+- [x] ulazna kartica dodata na postojeći `/platform-admin/businesses/new`;
+- [x] svih deset 01A vertical packova dostupno kroz server-side preview route;
+- [x] required moduli ostaju zaključani;
+- [x] recommended i optional moduli mogu da se izaberu;
+- [x] svaka starter usluga može da se uključi ili isključi;
+- [x] naziv, opis, trajanje i fixed/from/range cena mogu da se potvrde ili izmene;
+- [x] podržane početne valute: RSD, EUR i CHF;
+- [x] theme se bira iz postojećeg template registry-ja;
+- [x] server ne prihvata client category payload ili client template config;
+- [x] server ponovo učitava i materijalizuje trusted starter pack;
+- [x] apply zahteva eksplicitnu potvrdu Platform Admina;
+- [x] provisioning koristi postojeći server-only `provision_business` RPC;
+- [x] jedan RPC atomski kreira business, booking settings, kategorije, usluge i template config;
+- [x] stabilan `starterPack.applyKey` daje idempotent retry za isti slug;
+- [x] postojeći slug sa drugim apply ključem vraća conflict i ne menja tenant;
+- [x] nema `.update()` ili `.upsert()` existing-tenant toka;
+- [x] novi salon ostaje draft;
+- [x] nema automatskog publication status prelaza;
+- [x] nema nove migracije;
+- [x] nema browser Supabase write-a;
+- [x] nema email, cron, review ili AI usage aktivacije;
+- [x] V2 installer je uklonio CRLF/LF hash problem i rollback vraća tracked fajl direktno iz `HEAD`;
+- [x] V3 installer je uklonio Next ESLint konflikt `module` → `moduleItem`;
+- [x] ciljani provisioning i contract testovi prošli;
+- [x] TypeScript i kompletan `npm run check` prošli;
+- [ ] kontrolisani browser smoke treba da kreira jedan disposable draft tenant i potvrdi workspace + `?preview=1`;
+- [ ] 01B commit i push čekaju eksplicitnu autorizaciju.
+
+Detaljan zapis: `docs/milestones/CONTENT-STARTER-PACKS-01B-VISUAL-BUILDER-ATOMIC-PROVISIONING.md`.
+
+Sledeći vidljivi redosled, po dogovoru:
+
+```text
+DEMO-THEME-EDITORIAL-01
+→ DEMO-THEME-BARBER-01
+→ DEMO-THEME-NAILS-01
+```
+
+Lumière ostaje završena referentna tema. Posle ova tri milestone-a platforma ima četiri različita demo biznisa za kontrolisano kreiranje, browser testiranje i završni content/preview tok.
 
 ### DEMO-I18N-01A — završen
 
@@ -1114,22 +1161,27 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
 Grana: backup/theme-core-barber-beta
-Poslednji pushovani implementation checkpoint: 441a0fa2deb414a8c546b8e1a99b4c39daedc9da
-Checkpoint subject: feat(ai): close content assist foundation
+Poslednji pushovani implementation checkpoint: 6261d56e96a685905fe0a00f2357d26aa331104f
+Checkpoint subject: feat(content): add starter pack registry and vertical manifests
 Checkpoint tag: checkpoint/pre-platform-admin-review-2026-07-13
-Poslednji završen chapter: AI-CONTENT-ASSIST-FOUNDATION-01
+Poslednji završen i pushovan chapter: CONTENT-STARTER-PACKS-01A
 Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
 Lumière: završena referentna tema; galerijski layout zaključan
 Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
-Aktivni milestone: CONTENT-STARTER-PACKS-01A closeout
-Lokalni checkpoint: 12 starter-pack fajlova + 2 legacy contract testa PASS i staged; ROADMAP se dodaje kao 15. fajl
+Aktivni milestone: CONTENT-STARTER-PACKS-01B closeout
+Lokalni checkpoint: 9 visible-builder/provisioning fajlova PASS i staged; ROADMAP se dodaje kao 10. fajl
 Starter katalog: 10 vertikala, 21 modul i 106 usluga
-Starter granica: preview-only, cene unset, bez database apply-a ili publish-a
+01B UI: `/platform-admin/businesses/new/starter-pack`
+01B apply: trusted server rematerialization + postojeći atomski `provision_business` RPC
+01B idempotency: `starterPack.applyKey` + slug conflict guard
+01B publication: novi tenant ostaje draft; nema auto-publish-a
+01B database: nema nove migracije i nema existing-tenant overwrite-a
+01B runtime: kontrolisani browser provisioning smoke još nije izvršen
 AI application foundation: pushovan, bez live Groq/Google aktivacije
 AI usage: `rollout_read_only_zero`; pravi persistence odložen u AI-CONTENT-ASSIST-USAGE-01
-Sledeći korak posle push-a: CONTENT-STARTER-PACKS-01B
-Sledeći redosled: starter-pack preview/apply → content intake → shareable preview
-Teme posle platform-admin preview osnove: Editorial → Barber → Nails
+Sledeći korak posle push-a: DEMO-THEME-EDITORIAL-01
+Vidljivi redosled: Editorial → Barber → Nails
+Posle tema: client content intake → shareable preview → Platform Admin E2E → demo data → master QA
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
 Main gate: kompletan platform-admin + Lumière/Editorial/Barber/Nails + domen + RBAC DB aktivacija + master QA + eksplicitna dozvola
 Production track posle preview gate-a: backup → legal → brand → domains/env → StudioBiBi pilot
