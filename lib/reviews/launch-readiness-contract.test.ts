@@ -1,3 +1,4 @@
+
 import {
   existsSync,
   readFileSync,
@@ -52,8 +53,35 @@ const REVIEW_THEME_PATHS = [
   "components/desktop/DesktopLanding.tsx",
   "components/templates/hair-editorial/desktop/EditorialDesktopReviewsSection.tsx",
   "components/templates/hair-editorial/mobile/EditorialMobileReviewsSection.tsx",
-  "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
-  "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx",
+  "components/templates/barber-heritage/desktop/BarberDesktopReviewsSection.tsx",
+  "components/templates/barber-heritage/mobile/BarberMobileReviewsSection.tsx",
+] as const;
+
+const MODULAR_REVIEW_COMPOSITION = [
+  {
+    root:
+      "components/templates/hair-editorial/HairEditorialDesktopTemplate.tsx",
+    module:
+      "EditorialDesktopReviewsSection",
+  },
+  {
+    root:
+      "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
+    module:
+      "EditorialMobileReviewsSection",
+  },
+  {
+    root:
+      "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
+    module:
+      "BarberDesktopReviewsSection",
+  },
+  {
+    root:
+      "components/templates/barber-heritage/mobile/BarberMobileAppShell.tsx",
+    module:
+      "BarberMobileReviewsSection",
+  },
 ] as const;
 
 describe(
@@ -115,6 +143,75 @@ describe(
           source
         ).not.toContain(
           "@/lib/contentData"
+        );
+      }
+    );
+
+    it.each(
+      MODULAR_REVIEW_COMPOSITION
+    )(
+      "keeps modular review composition in $root",
+      (
+        {
+          root,
+          module,
+        }
+      ) => {
+        const source =
+          readSource(
+            root
+          );
+
+        expect(
+          source
+        ).toContain(
+          module
+        );
+
+        expect(
+          source
+        ).toContain(
+          "previewMode"
+        );
+
+        expect(
+          source
+        ).not.toContain(
+          "CatalogReviewsSection"
+        );
+
+        expect(
+          source
+        ).not.toContain(
+          "@/lib/contentData"
+        );
+      }
+    );
+
+    it(
+      "keeps Barber mobile root delegated to its app shell",
+      () => {
+        const root =
+          readSource(
+            "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx"
+          );
+
+        expect(
+          root
+        ).toContain(
+          "BarberMobileAppShell"
+        );
+
+        expect(
+          root
+        ).not.toContain(
+          "BarberMobileReviewsSection"
+        );
+
+        expect(
+          root
+        ).not.toContain(
+          "CatalogReviewsSection"
         );
       }
     );

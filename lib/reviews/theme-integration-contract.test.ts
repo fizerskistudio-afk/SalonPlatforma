@@ -1,3 +1,4 @@
+
 import {
   existsSync,
   readFileSync,
@@ -30,18 +31,28 @@ function readSource(
 const DIRECT_THEME_PATHS = [
   "components/templates/hair-editorial/desktop/EditorialDesktopReviewsSection.tsx",
   "components/templates/hair-editorial/mobile/EditorialMobileReviewsSection.tsx",
+  "components/templates/barber-heritage/desktop/BarberDesktopReviewsSection.tsx",
+  "components/templates/barber-heritage/mobile/BarberMobileReviewsSection.tsx",
+] as const;
+
+const MODULAR_REVIEW_ROOTS = [
+  "components/templates/hair-editorial/HairEditorialDesktopTemplate.tsx",
+  "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
-  "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx",
+  "components/templates/barber-heritage/mobile/BarberMobileAppShell.tsx",
 ] as const;
 
 const ALL_TEMPLATE_PATHS = [
   "components/templates/hair-luxury/HairLuxuryDesktopTemplate.tsx",
   "components/templates/hair-luxury/HairLuxuryMobileTemplate.tsx",
+  "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx",
+  ...MODULAR_REVIEW_ROOTS,
   ...DIRECT_THEME_PATHS,
 ] as const;
 
 const REVIEW_ACTION_TEMPLATE_PATHS = [
   "components/templates/hair-luxury/HairLuxuryDesktopTemplate.tsx",
+  ...MODULAR_REVIEW_ROOTS,
   ...DIRECT_THEME_PATHS,
 ] as const;
 
@@ -154,6 +165,60 @@ describe(
           source
         ).toContain(
           "previewMode"
+        );
+      }
+    );
+
+    it.each(
+      MODULAR_REVIEW_ROOTS
+    )(
+      "keeps review integration in modular composition root %s",
+      (
+        path
+      ) => {
+        const source =
+          readSource(
+            path
+          );
+
+        expect(
+          source
+        ).toContain(
+          "ReviewsSection"
+        );
+
+        expect(
+          source
+        ).toContain(
+          "previewMode"
+        );
+
+        expect(
+          source
+        ).not.toContain(
+          "CatalogReviewsSection"
+        );
+      }
+    );
+
+    it(
+      "keeps Barber mobile viewport root delegated to the app shell",
+      () => {
+        const mobileRoot =
+          readSource(
+            "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx"
+          );
+
+        expect(
+          mobileRoot
+        ).toContain(
+          "BarberMobileAppShell"
+        );
+
+        expect(
+          mobileRoot
+        ).not.toContain(
+          "ReviewsSection"
         );
       }
     );
@@ -290,7 +355,7 @@ describe(
 
         const barber =
           readSource(
-            "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx"
+            "components/templates/barber-heritage/desktop/BarberDesktopHeader.tsx"
           );
 
         expect(

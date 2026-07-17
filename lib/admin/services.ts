@@ -34,6 +34,8 @@ type ServiceCategoryRow = {
   name: LocalizedText;
   description: LocalizedText;
   icon_key: string | null;
+  image_url: string | null;
+  image_position: string | null;
   sort_order: number;
   is_active: boolean;
   created_at: string;
@@ -85,6 +87,8 @@ export type AdminServiceCategory = {
   description: LocalizedText;
 
   iconKey: string | null;
+  imageUrl: string;
+  imagePosition: string;
   sortOrder: number;
   isActive: boolean;
 
@@ -273,6 +277,8 @@ export async function getAdminServices(): Promise<AdminServicesResult> {
         "name",
         "description",
         "icon_key",
+        "image_url",
+        "image_position",
         "sort_order",
         "is_active",
         "created_at",
@@ -419,6 +425,13 @@ export async function getAdminServices(): Promise<AdminServicesResult> {
 
           iconKey:
             category.icon_key,
+
+          imageUrl:
+            category.image_url ?? "",
+
+          imagePosition:
+            category.image_position ??
+            "center center",
 
           sortOrder:
             category.sort_order,

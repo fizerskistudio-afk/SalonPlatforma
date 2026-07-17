@@ -649,8 +649,15 @@ function SalonPlatformContent({
       }
     >
       {previewMode ? (
-        <div className="fixed left-1/2 top-3 z-[80] -translate-x-1/2 rounded-full border border-sky-300/30 bg-zinc-950/95 px-4 py-2 text-center text-xs font-semibold text-sky-200 shadow-xl backdrop-blur">
-          Platform admin preview · booking je isključen
+        <div
+          role="status"
+          aria-label="Platform admin preview · booking je isključen"
+          title="Platform admin preview · booking je isključen"
+          className="pointer-events-none fixed right-0 top-1/2 z-[80] -translate-y-1/2 rounded-l-xl border border-r-0 border-sky-300/20 bg-zinc-950/80 px-1.5 py-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-sky-200/55 shadow-xl backdrop-blur"
+        >
+          <span className="block rotate-180 [writing-mode:vertical-rl]">
+            PREVIEW
+          </span>
         </div>
       ) : null}
 

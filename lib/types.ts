@@ -221,6 +221,8 @@ export type ServiceCategory = {
   icon: ServiceCategoryIcon;
   name: LocalizedText;
   description?: LocalizedText;
+  imageUrl?: string;
+  imagePosition?: string;
   sortOrder?: number;
   isActive: boolean;
 };

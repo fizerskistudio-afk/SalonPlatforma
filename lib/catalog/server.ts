@@ -113,6 +113,8 @@ type ServiceCategoryRow = {
   name: unknown;
   description: unknown;
   icon_key: string | null;
+  image_url: string | null;
+  image_position: string | null;
   sort_order: number;
   is_active: boolean;
 };
@@ -501,7 +503,7 @@ async function loadPublicCatalogUncached(
     supabase
       .from("service_categories")
       .select(
-        "id, slug, name, description, icon_key, sort_order, is_active"
+        "id, slug, name, description, icon_key, image_url, image_position, sort_order, is_active"
       )
       .eq(
         "business_id",
@@ -735,6 +737,11 @@ async function loadPublicCatalogUncached(
           toLocalizedText(
             category.description
           ),
+        imageUrl:
+          category.image_url ?? "",
+        imagePosition:
+          category.image_position ??
+          "center center",
         sortOrder:
           category.sort_order,
         isActive:

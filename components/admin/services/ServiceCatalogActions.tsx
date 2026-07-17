@@ -56,6 +56,8 @@ type CategoryFormState = {
   name: LocalizedTextInput;
   description: LocalizedTextInput;
   iconKey: string;
+  imageUrl: string;
+  imagePosition: string;
   sortOrder: string;
   isActive: boolean;
 };
@@ -198,6 +200,8 @@ function createEmptyCategoryForm(
     name: createEmptyLocalizedText(),
     description: createEmptyLocalizedText(),
     iconKey: "scissors",
+    imageUrl: "",
+    imagePosition: "center center",
     sortOrder: String(
       getNextCategorySortOrder(categories)
     ),
@@ -215,6 +219,8 @@ function createCategoryFormFromCategory(
       category.description
     ),
     iconKey: category.iconKey ?? "",
+    imageUrl: category.imageUrl,
+    imagePosition: category.imagePosition || "center center",
     sortOrder: String(category.sortOrder),
     isActive: category.isActive,
   };
@@ -711,6 +717,10 @@ export default function ServiceCatalogActions({
 
             iconKey: categoryForm.iconKey,
 
+            imageUrl: categoryForm.imageUrl,
+
+            imagePosition: categoryForm.imagePosition,
+
             sortOrder: Number(
               categoryForm.sortOrder
             ),
@@ -1198,6 +1208,77 @@ export default function ServiceCatalogActions({
                     )
                   }
                 />
+
+                <section className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5">
+                  <div>
+                    <h4 className="font-semibold text-white">Slika kategorije</h4>
+                    <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+                      Jedna slika predstavlja celu kategoriju na temama koje podržavaju category media.
+                    </p>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_14rem]">
+                    <div className="grid gap-4">
+                      <label>
+                        <span className="text-sm font-medium text-zinc-300">URL slike kategorije</span>
+                        <input
+                          type="url"
+                          maxLength={2048}
+                          value={categoryForm.imageUrl}
+                          onChange={(event) =>
+                            setCategoryForm((current) => ({
+                              ...current,
+                              imageUrl: event.target.value,
+                            }))
+                          }
+                          placeholder="https://images.unsplash.com/..."
+                          className="mt-2 h-11 w-full rounded-xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
+                        />
+                      </label>
+
+                      <label>
+                        <span className="text-sm font-medium text-zinc-300">Fokus slike</span>
+                        <input
+                          type="text"
+                          maxLength={80}
+                          value={categoryForm.imagePosition}
+                          onChange={(event) =>
+                            setCategoryForm((current) => ({
+                              ...current,
+                              imagePosition: event.target.value,
+                            }))
+                          }
+                          placeholder="65% center"
+                          className="mt-2 h-11 w-full rounded-xl border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-amber-300 focus:ring-2 focus:ring-amber-300/15"
+                        />
+                        <span className="mt-2 block text-xs text-zinc-600">
+                          Primeri: center center, 65% center, right 40%.
+                        </span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <span className="text-sm font-medium text-zinc-300">Pregled slike kategorije</span>
+                      <div
+                        role="img"
+                        aria-label="Pregled slike kategorije"
+                        className="mt-2 flex min-h-44 items-center justify-center rounded-2xl border border-white/[0.08] bg-black/30 bg-cover bg-no-repeat px-5 text-center text-xs leading-relaxed text-zinc-700"
+                        style={
+                          categoryForm.imageUrl
+                            ? {
+                                backgroundImage: `linear-gradient(rgba(0,0,0,0.18),rgba(0,0,0,0.5)),url(${categoryForm.imageUrl})`,
+                                backgroundPosition:
+                                  categoryForm.imagePosition || "center center",
+                              }
+                            : undefined
+                        }
+                      >
+                        {!categoryForm.imageUrl &&
+                          "Bez custom URL-a javna tema koristi svoj category fallback."}
+                      </div>
+                    </div>
+                  </div>
+                </section>
 
                 <section className="grid gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5 md:grid-cols-3">
                   <label className="md:col-span-2">

@@ -234,11 +234,11 @@ export const TEMPLATE_REGISTRY:
       contractVersion:
         1,
       desktop:
-        "monolith",
+        "modular",
       mobile:
-        "monolith",
+        "app-shell",
       acceptance:
-        "pending",
+        "passed",
     },
 
     viewports: [
@@ -251,6 +251,7 @@ export const TEMPLATE_REGISTRY:
       "services",
       "team",
       "gallery",
+      "reviews",
       "contact",
     ],
 
@@ -259,7 +260,7 @@ export const TEMPLATE_REGISTRY:
     supportsGallery:
       true,
     supportsReviews:
-      false,
+      true,
 
     defaultPalette: {
       primary:

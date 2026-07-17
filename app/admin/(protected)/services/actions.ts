@@ -35,6 +35,8 @@ export type SaveServiceCategoryInput = {
   description: LocalizedTextInput;
 
   iconKey?: string;
+  imageUrl?: string;
+  imagePosition?: string;
   sortOrder: number;
   isActive: boolean;
 };
@@ -154,6 +156,19 @@ function isValidSortOrder(value: number): boolean {
   );
 }
 
+function isValidPublicImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function isValidImagePosition(value: string): boolean {
+  return /^(?:(?:left|center|right)|(?:\d{1,3}(?:\.\d+)?%))(?:\s+(?:(?:top|center|bottom)|(?:\d{1,3}(?:\.\d+)?%)))?$/i.test(value);
+}
+
 function isValidPriceType(
   value: string
 ): value is ServicePriceType {
@@ -255,6 +270,33 @@ export async function saveServiceCategoryAction(
     };
   }
 
+  const imageUrl = input.imageUrl?.trim() || null;
+
+  if (
+    imageUrl &&
+    (imageUrl.length > 2048 || !isValidPublicImageUrl(imageUrl))
+  ) {
+    return {
+      ok: false,
+      message:
+        "URL slike mora biti ispravan HTTP ili HTTPS URL do 2048 karaktera.",
+    };
+  }
+
+  const imagePosition =
+    input.imagePosition?.trim() || "center center";
+
+  if (
+    imagePosition.length > 80 ||
+    !isValidImagePosition(imagePosition)
+  ) {
+    return {
+      ok: false,
+      message:
+        "Fokus slike koristi format poput 'center center' ili '65% center'.",
+    };
+  }
+
   const supabase = await createClient();
 
   let duplicateQuery = supabase
@@ -299,6 +341,8 @@ export async function saveServiceCategoryAction(
     name,
     description,
     icon_key: iconKey,
+    image_url: imageUrl,
+    image_position: imagePosition,
     sort_order: input.sortOrder,
     is_active: input.isActive,
     updated_at: new Date().toISOString(),

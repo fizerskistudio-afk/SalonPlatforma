@@ -1,3 +1,4 @@
+
 import {
   describe,
   expect,
@@ -107,14 +108,14 @@ describe(
               contractVersion:
                 PUBLIC_TEMPLATE_CONTRACT_VERSION,
               desktop:
-                "monolith",
+                "modular",
               mobile:
-                "monolith",
+                "app-shell",
               acceptance:
-                "pending",
+                "passed",
             },
             supportsReviews:
-              false,
+              true,
             availability:
               "beta",
           },
@@ -123,7 +124,7 @@ describe(
     );
 
     it(
-      "accepts the reference and completed modular themes",
+      "accepts the reference and completed architecture implementations",
       () => {
         expect(
           isTemplateArchitectureAccepted(
@@ -147,7 +148,7 @@ describe(
               "barber-heritage"
             ]
           )
-        ).toBe(false);
+        ).toBe(true);
       }
     );
   }

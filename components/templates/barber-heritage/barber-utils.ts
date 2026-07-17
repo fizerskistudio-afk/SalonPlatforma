@@ -265,6 +265,33 @@ export const barberLabels: Record<
     de: "Nächster Barbier",
     fr: "Barbier suivant",
   },
+  servicesEmpty: {
+    "sr-Latn": "Usluge će uskoro biti dodate.",
+    mk: "Услугите наскоро ќе бидат додадени.",
+    hr: "Usluge će uskoro biti dodane.",
+    sq: "Shërbimet do të shtohen së shpejti.",
+    en: "Services will be added soon.",
+    de: "Leistungen werden in Kürze hinzugefügt.",
+    fr: "Les services seront bientôt ajoutés.",
+  },
+  barbersEmpty: {
+    "sr-Latn": "Tim berberina će uskoro biti predstavljen.",
+    mk: "Тимот бербери наскоро ќе биде претставен.",
+    hr: "Tim barbera uskoro će biti predstavljen.",
+    sq: "Ekipi i berberëve do të prezantohet së shpejti.",
+    en: "The barber team will be introduced soon.",
+    de: "Das Barbier-Team wird in Kürze vorgestellt.",
+    fr: "L’équipe de barbiers sera bientôt présentée.",
+  },
+  navProfile: {
+    "sr-Latn": "Salon",
+    mk: "Салон",
+    hr: "Salon",
+    sq: "Salloni",
+    en: "Salon",
+    de: "Salon",
+    fr: "Salon",
+  },
 };
 
 function formatNumber(value: number, locale: Locale): string {
