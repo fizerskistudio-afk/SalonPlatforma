@@ -20,6 +20,7 @@ describe(
       "hair-luxury",
       "hair-editorial",
       "barber-heritage",
+      "nails-soft",
     ])(
       "accepts registered key %s",
       (
@@ -68,7 +69,7 @@ describe(
 
         expect(
           manifests
-        ).toHaveLength(3);
+        ).toHaveLength(4);
 
         expect(
           new Set(
@@ -79,7 +80,41 @@ describe(
                 manifest.key
             )
           ).size
-        ).toBe(3);
+        ).toBe(4);
+      }
+    );
+
+    it(
+      "registers the accepted Nails renderer with a beta rollout",
+      () => {
+        expect(
+          getTemplateManifest(
+            "nails-soft"
+          )
+        ).toMatchObject({
+          key:
+            "nails-soft",
+          businessType:
+            "nails",
+          availability:
+            "beta",
+          version:
+            2,
+          supportsBooking:
+            true,
+          supportsGallery:
+            true,
+          supportsReviews:
+            true,
+          architecture: {
+            desktop:
+              "modular",
+            mobile:
+              "modular",
+            acceptance:
+              "passed",
+          },
+        });
       }
     );
 

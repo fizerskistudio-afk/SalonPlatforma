@@ -6,6 +6,7 @@ import {
 
 import {
   createStarterPackServiceDrafts,
+  getRecommendedStarterPackTemplate,
   materializeStarterPackProvisioning,
   StarterPackProvisioningError,
 } from "./provisioning";
@@ -17,6 +18,19 @@ import {
 describe(
   "starter pack provisioning",
   () => {
+    it(
+      "recommends the dedicated Nails renderer",
+      () => {
+        expect(
+          getRecommendedStarterPackTemplate(
+            "nails"
+          )
+        ).toBe(
+          "nails-soft"
+        );
+      }
+    );
+
     it(
       "materializes a reviewed barber pack for the existing atomic RPC",
       () => {
@@ -144,7 +158,7 @@ describe(
             currency:
               "RSD",
             templateKey:
-              "hair-editorial",
+              "nails-soft",
             applyKey:
               "223e4567-e89b-42d3-a456-426614174000",
             confirmed:

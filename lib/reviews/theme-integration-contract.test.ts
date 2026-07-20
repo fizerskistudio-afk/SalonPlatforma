@@ -33,6 +33,8 @@ const DIRECT_THEME_PATHS = [
   "components/templates/hair-editorial/mobile/EditorialMobileReviewsSection.tsx",
   "components/templates/barber-heritage/desktop/BarberDesktopReviewsSection.tsx",
   "components/templates/barber-heritage/mobile/BarberMobileReviewsSection.tsx",
+  "components/templates/nails-soft/desktop/NailsDesktopReviewsSection.tsx",
+  "components/templates/nails-soft/mobile/NailsMobileReviewsSection.tsx",
 ] as const;
 
 const MODULAR_REVIEW_ROOTS = [
@@ -40,6 +42,8 @@ const MODULAR_REVIEW_ROOTS = [
   "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
   "components/templates/barber-heritage/mobile/BarberMobileAppShell.tsx",
+  "components/templates/nails-soft/NailsSoftDesktopTemplate.tsx",
+  "components/templates/nails-soft/NailsSoftMobileTemplate.tsx",
 ] as const;
 
 const ALL_TEMPLATE_PATHS = [
@@ -219,6 +223,50 @@ describe(
           mobileRoot
         ).not.toContain(
           "ReviewsSection"
+        );
+      }
+    );
+
+    it(
+      "keeps the Nails atelier review skin behind the shared catalog adapter",
+      () => {
+        const adapter =
+          readSource(
+            "components/reviews/CatalogReviewsSection.tsx"
+          );
+        const atelier =
+          readSource(
+            "components/reviews/NailsAtelierReviewsSection.tsx"
+          );
+
+        expect(
+          adapter
+        ).toContain(
+          '"nails-atelier"'
+        );
+
+        expect(
+          adapter
+        ).toContain(
+          "NailsAtelierReviewsSection"
+        );
+
+        expect(
+          atelier
+        ).toContain(
+          "previewMode"
+        );
+
+        expect(
+          atelier
+        ).toContain(
+          'data-shared-reviews="true"'
+        );
+
+        expect(
+          atelier
+        ).not.toContain(
+          "useCatalogData"
         );
       }
     );

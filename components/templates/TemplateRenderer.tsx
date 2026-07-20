@@ -78,6 +78,28 @@ const BarberHeritageMobileTemplate =
     }
   );
 
+const NailsSoftDesktopTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./nails-soft/NailsSoftDesktopTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
+const NailsSoftMobileTemplate =
+  dynamic<PublicTemplateProps>(
+    () =>
+      import(
+        "./nails-soft/NailsSoftMobileTemplate"
+      ),
+    {
+      loading: () => null,
+    }
+  );
+
 type TemplateRendererProps =
   PublicTemplateProps & {
     templateKey: TemplateKey;
@@ -109,6 +131,17 @@ function renderActiveTemplate(
         />
       ) : (
         <BarberHeritageDesktopTemplate
+          {...props}
+        />
+      );
+
+    case "nails-soft":
+      return viewport === "mobile" ? (
+        <NailsSoftMobileTemplate
+          {...props}
+        />
+      ) : (
+        <NailsSoftDesktopTemplate
           {...props}
         />
       );

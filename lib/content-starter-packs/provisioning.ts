@@ -46,7 +46,7 @@ export const STARTER_PACK_TEMPLATE_RECOMMENDATIONS:
   barber:
     "barber-heritage",
   nails:
-    "hair-editorial",
+    "nails-soft",
   "lashes-brows":
     "hair-luxury",
   massage:

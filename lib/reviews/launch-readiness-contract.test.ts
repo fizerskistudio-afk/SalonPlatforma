@@ -55,6 +55,8 @@ const REVIEW_THEME_PATHS = [
   "components/templates/hair-editorial/mobile/EditorialMobileReviewsSection.tsx",
   "components/templates/barber-heritage/desktop/BarberDesktopReviewsSection.tsx",
   "components/templates/barber-heritage/mobile/BarberMobileReviewsSection.tsx",
+  "components/templates/nails-soft/desktop/NailsDesktopReviewsSection.tsx",
+  "components/templates/nails-soft/mobile/NailsMobileReviewsSection.tsx",
 ] as const;
 
 const MODULAR_REVIEW_COMPOSITION = [
@@ -81,6 +83,18 @@ const MODULAR_REVIEW_COMPOSITION = [
       "components/templates/barber-heritage/mobile/BarberMobileAppShell.tsx",
     module:
       "BarberMobileReviewsSection",
+  },
+  {
+    root:
+      "components/templates/nails-soft/NailsSoftDesktopTemplate.tsx",
+    module:
+      "NailsDesktopReviewsSection",
+  },
+  {
+    root:
+      "components/templates/nails-soft/NailsSoftMobileTemplate.tsx",
+    module:
+      "NailsMobileReviewsSection",
   },
 ] as const;
 

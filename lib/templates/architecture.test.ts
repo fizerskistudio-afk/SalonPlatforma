@@ -119,6 +119,24 @@ describe(
             availability:
               "beta",
           },
+          {
+            key:
+              "nails-soft",
+            architecture: {
+              contractVersion:
+                PUBLIC_TEMPLATE_CONTRACT_VERSION,
+              desktop:
+                "modular",
+              mobile:
+                "modular",
+              acceptance:
+                "passed",
+            },
+            supportsReviews:
+              true,
+            availability:
+              "beta",
+          },
         ]);
       }
     );
@@ -146,6 +164,14 @@ describe(
           isTemplateArchitectureAccepted(
             TEMPLATE_REGISTRY[
               "barber-heritage"
+            ]
+          )
+        ).toBe(true);
+
+        expect(
+          isTemplateArchitectureAccepted(
+            TEMPLATE_REGISTRY[
+              "nails-soft"
             ]
           )
         ).toBe(true);

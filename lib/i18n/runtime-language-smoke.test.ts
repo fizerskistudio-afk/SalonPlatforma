@@ -33,6 +33,9 @@ import {
 import {
   editorialLabels,
 } from "@/components/templates/hair-editorial/editorial-utils";
+import {
+  nailsLabels,
+} from "@/components/templates/nails-soft/nails-utils";
 
 type TranslationLeaf = {
   path: string;
@@ -132,8 +135,11 @@ const PUBLIC_TEMPLATE_SOURCE_PATHS = [
   "components/templates/hair-editorial/HairEditorialMobileTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageDesktopTemplate.tsx",
   "components/templates/barber-heritage/BarberHeritageMobileTemplate.tsx",
+  "components/templates/nails-soft/NailsSoftDesktopTemplate.tsx",
+  "components/templates/nails-soft/NailsSoftMobileTemplate.tsx",
   "components/templates/hair-editorial/editorial-utils.ts",
   "components/templates/barber-heritage/barber-utils.ts",
+  "components/templates/nails-soft/nails-utils.ts",
 ] as const;
 
 describe(
@@ -213,7 +219,7 @@ describe(
     );
 
     it(
-      "resolves Editorial and Barber labels exactly in all seven locales",
+      "resolves every theme label exactly in all seven locales",
       () => {
         expectExactRuntimeResolution(
           "editorial",
@@ -222,6 +228,10 @@ describe(
         expectExactRuntimeResolution(
           "barber",
           barberLabels
+        );
+        expectExactRuntimeResolution(
+          "nails",
+          nailsLabels
         );
       }
     );

@@ -45,12 +45,19 @@ Department sloj nije potreban za aktivaciju ovih pravila. Kasnije može grupisat
 
 Aktivacija se radi tek posle četiri završene teme i spremnog domena, kroz zasebnu migraciju, verification paket, bootstrap i rollback plan.
 
-## Main branch gate
+## Main source integration i production-launch gate
 
-Push ili merge na `main` nije dozvoljen pre:
+Source integracija u `main` dozvoljena je kada:
 
-1. kompletno funkcionalnog platform-admin workflow-a;
-2. završenih Lumière, Editorial, Barber i Nails tema;
-3. odobrene RBAC database aktivacije;
-4. punog lint/test/TypeScript/build i browser smoke prolaza;
-5. eksplicitne dozvole vlasnika projekta.
+1. `main` i razvojna grana imaju pregledanu, konflikt-free topologiju;
+2. kompletan lint/test/TypeScript/build prolazi nad tačnim kandidatom;
+3. postoji rollback checkpoint starog `main`-a;
+4. vlasnik eksplicitno odobri commit, push i integraciju.
+
+Ovo ne aktivira niti proglašava završenim database RBAC rollout. Komercijalni production launch ostaje blokiran dok nisu završeni:
+
+1. kompletan platform-admin workflow i `MASTER-SYSTEM-QA-01`;
+2. domen, backup/restore i legal gate;
+3. zasebno odobrena RBAC database odluka za pending `029`;
+4. stvarni deployment/browser smoke;
+5. eksplicitna production-launch dozvola vlasnika projekta.

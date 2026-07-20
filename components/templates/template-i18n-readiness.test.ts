@@ -17,6 +17,9 @@ import {
 import {
   editorialLabels,
 } from "./hair-editorial/editorial-utils";
+import {
+  nailsLabels,
+} from "./nails-soft/nails-utils";
 
 type LabelSet =
   Record<
@@ -76,7 +79,7 @@ describe(
         expectCompleteLabelSet(
           "editorial",
           editorialLabels,
-          14
+          15
         );
       }
     );
@@ -87,7 +90,18 @@ describe(
         expectCompleteLabelSet(
           "barber",
           barberLabels,
-          28
+          31
+        );
+      }
+    );
+
+    it(
+      "covers all Nails labels in every ready UI locale",
+      () => {
+        expectCompleteLabelSet(
+          "nails",
+          nailsLabels,
+          27
         );
       }
     );

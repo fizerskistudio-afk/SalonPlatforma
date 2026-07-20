@@ -1,7 +1,7 @@
 # DEMO-THEME-BARBER-01 — PILOT VISUAL CLOSEOUT
 
 **Datum:** 20. jul 2026.
-**Status:** lokalni code PASS, ručni browser vizuelni PASS, staged; commit, tag i push čekaju eksplicitnu autorizaciju.
+**Status:** code PASS, ručni browser vizuelni PASS, commit i push završeni; annotated tag `barber-v2-pilot-01` pokazuje na release commit.
 **Branch:** `backup/theme-core-barber-beta`
 
 ## Cilj
@@ -110,16 +110,17 @@ Detaljan runbook: `docs/qa/BARBER-PILOT-ONBOARDING-01-RUNBOOK.md`.
 
 ## Release checkpoint
 
-Predloženi commit:
+Potvrđeni commit:
 
 ```text
+a690bd0f055c0541d31c711047d664f5015e38f5
 feat(theme): complete barber pilot visual experience
 ```
 
-Predloženi annotated tag:
+Potvrđeni annotated tag:
 
 ```text
 barber-v2-pilot-01
 ```
 
-Commit, tag i push se izvršavaju tek posle eksplicitne autorizacije vlasnika projekta.
+Commit, tag i branch push su završeni na `origin/backup/theme-core-barber-beta`.

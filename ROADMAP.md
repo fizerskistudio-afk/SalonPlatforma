@@ -4,11 +4,11 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-02` je završen, a `DEMO-THEME-BARBER-01` ima lokalni code PASS i ručni browser vizuelni PASS. Aktivni operativni korak je `BARBER-PILOT-ONBOARDING-01`, dok commit, tag i push Barber pilot closeout-a čekaju eksplicitnu autorizaciju.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-02` i `DEMO-THEME-BARBER-01` su završeni, a Nails desktop/mobile imaju ručni visual PASS. `MAIN-INTEGRATION-AUDIT-01` je potvrdio čist fast-forward put ka `main`; vlasnik je odobrio Nails release checkpoint, push i kontrolisanu `main` integraciju.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
-## 0. Trenutni operativni checkpoint — 16. jul 2026.
+## 0. Trenutni operativni checkpoint — 20. jul 2026.
 
 - [x] `PRODUCT-PACKAGES-ENTITLEMENTS-01` završen i pushovan;
 - [x] `PLATFORM-ADMIN-OPERATIONS-01` završen i pushovan;
@@ -58,10 +58,37 @@
 - [x] Barber Reviews ostaje na `CatalogReviewsSection` shared adapteru uz izdvojeni editorial variant u `components/reviews`;
 - [x] Barber mobile app-shell, booking domen, tenant podaci, baza i migracije nisu menjani;
 - [x] trenutni stilizovani lokacijski kadar ostaje pilot baseline i otvara stvarnu Google Maps pretragu;
+- [x] Barber closeout commit i push završeni — `a690bd0f055c0541d31c711047d664f5015e38f5`;
+- [x] annotated tag `barber-v2-pilot-01` pokazuje na Barber closeout commit;
+- [x] `DEMO-THEME-NAILS-01A` uvodi četvrti renderer kao `nails-soft` beta temu sa poštenim `architecture.acceptance=pending` statusom;
+- [x] Nails desktop i mobile imaju zasebne tanke composition root-ove i po osam namenski modularnih UI sekcija;
+- [x] Nails koristi portfolio-first redosled, sopstveni svetli atelier/lookbook identitet i tenant catalog bez hardkodovanog demo salona;
+- [x] shared booking callback-i, Reviews adapter, preview guard, empty states i sedam UI locale-a ostaju u zajedničkim platformskim granicama;
+- [x] ciljani Nails/registry/architecture/i18n/Reviews testovi, TypeScript i kompletan Vitest suite `838/838` prošli;
+- [x] production build prošao sa privremenim process-only Supabase placeholder env vrednostima i 4 GB Node heap-om; nijedna env vrednost nije upisana u repo;
+- [x] objedinjeni `npm run check` prošao sa istim process-only env vrednostima i 4 GB Node heap-om;
+- [x] prvi Nails browser pregled potvrdio je functional foundation, ali 01A visual identity nije prihvaćen jer je previše podsećao na rani Barber kompozicioni jezik;
+- [x] `DEMO-THEME-NAILS-01B` zamenjuje taj jezik Nail Art Atelier sistemom unutar postojećih modularnih renderer granica;
+- [x] 01B uvodi floating header, polish-board hero, nepravilni lookbook, lacquer treatment menu, artist desk, `nails-atelier` Reviews variant i appointment contact card;
+- [x] sekcijski brojevi `01 /`–`05 /` i dominant-photo/archive Barber ritam uklonjeni su iz Nails renderer-a;
+- [x] 01B kompletan `npm run check` prošao: lint bez error-a, kompletan Vitest suite `839/839`, TypeScript i production build;
+- [x] 01B browser pokušaj je dokazao da `atelier-luna-nails` još renderuje privremeni `hair-editorial`, pa poslati screenshotovi nisu Nails acceptance;
+- [x] Platform Admin izbor `nails-soft` reprodukovano vraća PostgreSQL `23514` jer DB constraint iz migracije `021` još ne poznaje četvrti template ključ;
+- [x] `DEMO-THEME-NAILS-01C-ACTIVATION` priprema uski `032` migration source, read-only verification, rollback runbook i Nails starter-pack wiring;
+- [x] korisnik je odobrio i primenio samo migraciju `032`; `atelier-luna-nails` sada stvarno renderuje `nails-soft`;
+- [x] prvi stvarni Nails desktop pregled dao je delimični visual PASS za identitet Nail Art Atelier-a;
+- [ ] formalni read-only DB verification output za `032` ostaje da se zabeleži;
+- [x] 01D desktop density korekcija i ručni desktop visual acceptance završeni;
+- [x] 01E source uvodi theme-owned mobile tab navigaciju i home bez page scrolla;
+- [x] mobile modular navigation source i code check završeni;
+- [x] mobile browser visual acceptance potvrđen;
+- [x] desktop-switch CTA položaj prihvaćen kao P2 za prvi kontrolisani live-tenant fix;
+- [x] Nails architecture acceptance prebačen na `passed`, dok rollout ostaje `beta`;
+- [ ] preview booking guard smoke nije ručno potvrđen u mobile closeout-u;
 - [ ] puni live booking, admin calendar, email i cross-tenant regression ostaje u `MASTER-SYSTEM-QA-01`;
 - [ ] aktivni operativni milestone: `BARBER-PILOT-ONBOARDING-01`;
 - [ ] prvi kontrolisani live theme update posle stabilnog baseline-a: `BARBER-V2-CONTACT-MAP-01`;
-- [ ] sledeća nova vizuelna tema: `DEMO-THEME-NAILS-01`.
+- [x] `MAIN-INTEGRATION-AUDIT-01` read-only audit završen; `main` je tačan predak razvojne grane i odobrena je kontrolisana fast-forward integracija.
 
 ### Pre-closeout implementation checkpoint
 
@@ -70,14 +97,13 @@
 feat(theme): refine barber visual experience and category media
 ```
 
-### Aktivni closeout
+### Potvrđeni Barber release
 
 ```text
-DEMO-THEME-BARBER-01
+a690bd0f055c0541d31c711047d664f5015e38f5
 feat(theme): complete barber pilot visual experience
+tag: barber-v2-pilot-01
 ```
-
-Commit SHA se čita iz Git istorije posle ovog closeout-a; ROADMAP namerno ne pokušava da ugradi SHA sopstvenog commit-a.
 
 ---
 
@@ -551,17 +577,29 @@ Detaljan zapis: `docs/milestones/DEMO-THEME-EDITORIAL-01.md`.
 
 Browser runbook: `docs/qa/DEMO-THEME-EDITORIAL-01-ACCEPTANCE.md`.
 
-Sledeći operativni redosled:
+Operativni pilot track:
 
 ```text
 BARBER-PILOT-ONBOARDING-01
 → BARBER-V2-CONTACT-MAP-01
-→ DEMO-THEME-NAILS-01
 ```
 
-Lumière je završena referentna tema, Editorial je drugi vizuelno spreman demo renderer, a Barber je prihvaćen kao pilot tema za prve stvarne salone. Nails ostaje sledeći novi vizuelni renderer, dok Barber pilot i kontrolisani live update teku kao operativna validacija platforme.
+Paralelni code track:
 
-### DEMO-THEME-BARBER-01 — pilot visual closeout validiran i staged
+```text
+DEMO-THEME-NAILS-01B
+→ DEMO-THEME-NAILS-01C-ACTIVATION
+→ DEMO-THEME-NAILS-01D-DESKTOP-DENSITY
+→ DEMO-THEME-NAILS-01E-MOBILE-NAVIGATION
+→ završni Nails browser acceptance
+→ MAIN-INTEGRATION-AUDIT-01
+→ kontrolisana merge odluka
+→ Nail Studio starter pack i demo tenant
+```
+
+Lumière je završena referentna tema, Editorial je drugi vizuelno spreman demo renderer, a Barber je prihvaćen kao pilot tema za prve stvarne salone. Barber mapa ostaje namerno odložena do nekoliko dana stabilnog aktivnog pilota, dok Nails code rad može da napreduje bez menjanja Barber, booking ili database granica.
+
+### DEMO-THEME-BARBER-01 — pilot visual closeout objavljen
 
 - [x] desktop Hero, Services, Team, Gallery, Reviews i Contact vizuelno prihvaćeni;
 - [x] Services category navigator i category media ostaju povezani sa postojećim service booking tokom;
@@ -575,13 +613,123 @@ Lumière je završena referentna tema, Editorial je drugi vizuelno spreman demo 
 - [x] ciljani acceptance testovi, Reviews contract testovi, TypeScript i kompletan `npm run check` prošli tokom primene;
 - [x] ručni browser vizuelni test prihvaćen bez blocker-a;
 - [x] trenutna stilizovana lokacija ostaje namerni pilot baseline;
-- [ ] commit, annotated tag `barber-v2-pilot-01` i push čekaju eksplicitnu autorizaciju;
+- [x] commit `a690bd0f055c0541d31c711047d664f5015e38f5`, annotated tag `barber-v2-pilot-01` i push završeni;
 - [ ] dva do tri salona iz Svilajnca ulaze u `BARBER-PILOT-ONBOARDING-01`;
 - [ ] prava Google mapa ide kroz `BARBER-V2-CONTACT-MAP-01` kao prvi kontrolisani update aktivnog tenant-a.
 
 Detaljan closeout: `docs/milestones/DEMO-THEME-BARBER-01-PILOT-CLOSEOUT.md`.
 
 Pilot runbook: `docs/qa/BARBER-PILOT-ONBOARDING-01-RUNBOOK.md`.
+
+### DEMO-THEME-NAILS-01A — modularna functional foundation implementirana
+
+- [x] `nails-soft` registrovan kao četvrti renderer sa `businessType=nails`;
+- [x] registry je tokom 01A pošteno počeo kao `availability=beta` i `architecture.acceptance=pending`;
+- [x] desktop i mobile imaju zasebne modularne Header, Hero, Gallery, Services, Team, Reviews i Contact sekcije;
+- [x] desktop ima zaseban Footer, a mobile zaseban safe-area BottomNav;
+- [x] portfolio-first redosled stavlja stvarne radove ispred cenovnika usluga;
+- [x] service i employee booking preselection ostaju povezani na shared callback contract;
+- [x] Reviews koristi `CatalogReviewsSection`, a preview booking guard ostaje centralan u `SalonPlatform`;
+- [x] Nails labels pokrivaju SR/MK/HR/SQ/EN/DE/FR;
+- [x] tenant catalog, branding, empty states i fallback slike rade bez hardkodovanog demo tenant-a;
+- [x] ciljani testovi, TypeScript, kompletan Vitest suite i production build prošli u kontrolisanom lokalnom okruženju;
+- [x] nema database, migration, auth, tenancy, Barber ili booking domain izmene;
+- [ ] ručni desktop/mobile browser acceptance;
+- [x] `architecture.acceptance=passed` posle desktop/mobile visual acceptance-a;
+- [ ] izlazak iz beta statusa ostaje zasebna rollout odluka posle kontrolisanog live update-a;
+- [ ] Nail Studio starter pack preporuka i reprezentativan demo tenant ostaju sledeći paket.
+
+Detaljan zapis: `docs/milestones/DEMO-THEME-NAILS-01.md`.
+
+### DEMO-THEME-NAILS-01B — Nail Art Atelier visual replacement
+
+- [x] postojeći desktop/mobile composition root-ovi i modularne sekcije ostaju granica;
+- [x] floating beauty header i asimetrični polish-board hero menjaju rani Barber skelet;
+- [x] lookbook koristi nepravilni editorial mosaic, a Services lacquer category selector i treatment menu;
+- [x] Team koristi artist desk kompoziciju bez niza ovalnih Barber portreta;
+- [x] Reviews ostaje iza `CatalogReviewsSection` i dobija namenski `nails-atelier` shared variant;
+- [x] Contact postaje appointment card sa stvarnom adresom, Maps linkom, kontaktom, timezone-om i booking CTA;
+- [x] mobile ima iste identitetske principe uz horizontalni lookbook, filtere tretmana i safe-area bottom nav;
+- [x] SR/MK/HR/SQ/EN/DE/FR Nails copy je dopunjen bez hardkodovanog tenant sadržaja;
+- [x] ciljani registry/architecture/i18n/Reviews testovi `92/92`, Nails acceptance/i18n testovi `9/9`, ciljani ESLint i TypeScript prošli;
+- [x] završni `npm run check` (lint bez error-a, kompletan Vitest suite `839/839`, TypeScript i production build);
+- [ ] ručni desktop browser acceptance na Nails demo tenant-u;
+- [ ] ručni mobile browser acceptance i preview booking guard;
+- [x] `architecture.acceptance=passed` nakon ručnog desktop/mobile visual acceptance-a;
+- [ ] izlazak iz beta statusa ostaje zasebna rollout odluka.
+
+Detaljan zapis: `docs/milestones/DEMO-THEME-NAILS-01.md`.
+
+### DEMO-THEME-NAILS-01C-ACTIVATION — primenjeno za Nails preview
+
+- [x] browser screenshot identifikovan kao `hair-editorial`, ne `nails-soft` renderer;
+- [x] database blocker reprodukovan kao `businesses_template_key_supported_check` / PostgreSQL `23514`;
+- [x] pripremljen `032_add_nails_theme_pack.sql` koji dodaje samo `nails-soft` postojećem skupu;
+- [x] pripremljeni read-only verification i tenant-safe rollback runbook;
+- [x] pending `029_platform_admin_rbac_foundation.sql` ostaje netaknut;
+- [x] korisnik je zasebno odobrio primenu samo aktivne migracije `032`;
+- [x] budući Nails starter pack preporučuje `nails-soft` umesto privremenog `hair-editorial`;
+- [x] ciljani activation/provisioning testovi `31/31`, TypeScript i završni `npm run check` (`848/848` testova i production build);
+- [x] uspešan Nails render potvrđuje da tenant više nije blokiran starim template-key constraintom;
+- [ ] sačuvati formalni read-only DB verification output;
+- [ ] završiti desktop i mobile visual/booking smoke.
+
+DB runbook: `docs/qa/DEMO-THEME-NAILS-01C-DB-RUNBOOK.md`.
+
+### DEMO-THEME-NAILS-01D-DESKTOP-DENSITY — desktop visual PASS
+
+- [x] Nail Art Atelier identitet dobio je delimični ručni visual PASS;
+- [x] desktop container sistem spušten je sa `1500px` na kompaktnu `1320px` granicu;
+- [x] Hero, Gallery, Team, Reviews i Contact imaju manje naslove, kraći vertikalni ritam i kompaktnije empty state-ove;
+- [x] Services više nema `Svi tretmani` filter koji odjednom renderuje do deset kartica;
+- [x] prva stvarna kategorija je početni prikaz, a kategorije ostaju direktno interaktivne;
+- [x] kompletan katalog ostaje dostupan kroz kompaktni CTA koji otvara postojeći shared booking flow;
+- [x] mobile renderer nije menjan u ovom paketu;
+- [x] ciljani Nails/activation/provisioning testovi `20/20`, ciljani ESLint i TypeScript `--noEmit`;
+- [x] kompletan `npm run check`: lint bez error-a, `848/848` testova, TypeScript i production build;
+- [x] ručni desktop browser visual acceptance na `atelier-luna-nails`.
+
+### DEMO-THEME-NAILS-01E-MOBILE-NAVIGATION — mobile visual PASS
+
+- [x] Nails composition root koristi `home`, `portfolio`, `services` i `contact` aktivne prikaze;
+- [x] footer navbar menja prikaz kroz state umesto anchor scrolla;
+- [x] centralna footer booking akcija ostaje na shared `onBook` callback-u;
+- [x] home je zaključan na `100dvh` bez vertikalnog scrolla;
+- [x] samo sadržajni tabovi koriste unutrašnji `overflow-y-auto`;
+- [x] Gallery + Team ostaju dostupni u Portfolio prikazu, Contact + Reviews u Contact prikazu;
+- [x] mobile Services počinje prvom stvarnom kategorijom i nema `Svi tretmani` masovni prikaz;
+- [x] ciljani Nails acceptance testovi `8/8`, ciljani ESLint i TypeScript;
+- [x] kompletan `npm run check` (lint bez error-a, `848/848` testova, TypeScript i production build);
+- [x] ručni mobile browser visual acceptance;
+- [ ] ručni preview booking guard smoke.
+
+### DEMO-THEME-NAILS-01F-CLOSEOUT — završeno
+
+- [x] `architecture.acceptance=passed` za modularni desktop i mobile renderer;
+- [x] `availability=beta` ostaje rollout granica, ne architecture dug;
+- [x] `Pređi na desktop` CTA radi, ali se nalazi pre Reviews sadržaja umesto na samom dnu;
+- [x] CTA položaj je prihvaćen kao P2 non-blocker i namerno ostavljen za live-tenant rollout probu;
+- [x] budući fix je ograničen na `NAILS-MOBILE-DESKTOP-CTA-LIVE-FIX-01`, bez booking ili database izmene;
+- [x] 01F ciljani Nails/registry/architecture testovi `30/30`, TypeScript i kompletan `npm run check` (`848/848` i production build);
+- [ ] ručni preview booking guard smoke ostaje otvoren.
+
+Posle mobile PASS-a: zaseban `MAIN-INTEGRATION-AUDIT-01` koji samo meri branch/commit/migration razliku prema `main` i predlaže rollback-safe merge redosled. Bez merge-a, commita ili push-a u samom auditu.
+
+### MAIN-INTEGRATION-AUDIT-01 — read-only PASS; source integration odobrena
+
+- [x] remote `main` checkpoint je `a3b6bfe2de704d135e4b249dc260db08fb90b31f`;
+- [x] `main` je tačan predak razvojne grane bez paralelne divergencije: `0 / 62` pre Nails checkpoint-a;
+- [x] Nails release kandidat dodaje jedan commit, pa finalni odnos postaje `0 / 63`;
+- [x] Nails staged paket pre integration docs dopune ima 39 fajlova i diff `+5515 / -32`;
+- [x] finalni source kandidat prema starom `main` obuhvata 581 fajl, `+109978 / -8432`;
+- [x] Git topologija dozvoljava isključivo `--ff-only` integraciju bez squashovanja istorije;
+- [x] postojeći GitHub CI pokreće lint, test i build, bez Supabase migration komandi;
+- [x] nezavisna Qwen evaluacija je uzeta kao production-readiness input: potvrđeni su domain, external observability, backup/restore, legal i Playwright booking E2E gapovi; zastarele su tvrdnje da nema runtime entitlement gate-ova, provisioning-a, monitoring osnove ili četvrte Nails teme;
+- [x] source integracija u `main` je odvojena od komercijalnog production-launch gate-a;
+- [x] vlasnik je eksplicitno odobrio commit, annotated tag, push razvojne grane, fast-forward `main` i push koji pokreće Vercel deployment;
+- [ ] GitHub Actions i Vercel deployment rezultat ne predstavljati kao PASS dok stvarni remote status ne bude potvrđen;
+- [ ] formalni read-only DB verification output za `032`, mobile preview booking guard i `MASTER-SYSTEM-QA-01` ostaju otvoreni;
+- [ ] pending `029_platform_admin_rbac_foundation.sql` ostaje source-only i ne izvršava se tokom Git integracije.
 
 ### DEMO-I18N-01A — završen
 
@@ -1263,6 +1411,6 @@ Sledeći korak posle push-a: DEMO-THEME-BARBER-01
 Vidljivi redosled: Editorial → Barber → Nails
 Posle tema: client content intake → shareable preview → Platform Admin E2E → demo data → master QA
 Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
-Main gate: kompletan platform-admin + Lumière/Editorial/Barber/Nails + domen + RBAC DB aktivacija + master QA + eksplicitna dozvola
+Main source integration: dozvoljena posle tačnog diff/QA audita i eksplicitne dozvole; commercial production-launch gate ostaje domen + RBAC DB odluka + backup/legal + master QA + eksplicitna dozvola
 Production track posle preview gate-a: backup → legal → brand → domains/env → StudioBiBi pilot
 ```

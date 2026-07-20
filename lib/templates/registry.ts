@@ -2,6 +2,7 @@ export const TEMPLATE_KEYS = [
   "hair-luxury",
   "hair-editorial",
   "barber-heritage",
+  "nails-soft",
 ] as const;
 
 export type TemplateKey =
@@ -228,7 +229,7 @@ export const TEMPLATE_REGISTRY:
     availability:
       "beta",
     version:
-      1,
+      2,
 
     architecture: {
       contractVersion:
@@ -279,20 +280,76 @@ export const TEMPLATE_REGISTRY:
         "#3a3228",
     },
   },
-};
 
-export const PLANNED_TEMPLATE_PACKS:
-  readonly PlannedTemplatePack[] = [
-  {
+  "nails-soft": {
     key:
       "nails-soft",
     name:
       "Nails Soft",
+    description:
+      "Svetao portfolio-first nail studio pack sa tretmanima, nail artistima i direktnim booking tokom.",
+    niche:
+      "Nail studio / manicure / nail art",
     businessType:
       "nails",
-    description:
-      "Svetao, vizuelan nail studio pack sa fokusom na portfolio i kategorije tretmana.",
+    availability:
+      "beta",
+    version:
+      2,
+
+    architecture: {
+      contractVersion:
+        1,
+      desktop:
+        "modular",
+      mobile:
+        "modular",
+      acceptance:
+        "passed",
+    },
+
+    viewports: [
+      "desktop",
+      "mobile",
+    ],
+
+    sections: [
+      "hero",
+      "gallery",
+      "services",
+      "team",
+      "reviews",
+      "contact",
+    ],
+
+    supportsBooking:
+      true,
+    supportsGallery:
+      true,
+    supportsReviews:
+      true,
+
+    defaultPalette: {
+      primary:
+        "#8e3f68",
+      secondary:
+        "#ead8df",
+      background:
+        "#fbf6f2",
+      surface:
+        "#fffaf8",
+      text:
+        "#2c2027",
+      muted:
+        "#77666f",
+      border:
+        "#dfccd3",
+    },
   },
+};
+
+export const PLANNED_TEMPLATE_PACKS:
+  readonly PlannedTemplatePack[] = [
   {
     key:
       "massage-earth",
