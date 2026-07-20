@@ -1,10 +1,10 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 16. jul 2026.
+**Ažurirano:** 20. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-02` modular architecture closeout je završen i browser-preview smoke potvrđen, a sledeći vidljivi proizvodni korak je `DEMO-THEME-BARBER-01`.
+**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-02` je završen, a `DEMO-THEME-BARBER-01` ima lokalni code PASS i ručni browser vizuelni PASS. Aktivni operativni korak je `BARBER-PILOT-ONBOARDING-01`, dok commit, tag i push Barber pilot closeout-a čekaju eksplicitnu autorizaciju.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -53,21 +53,28 @@
 - [x] ručni desktop/browser preview smoke prihvaćen bez blocker-a;
 - [x] poznati non-blocker: Builder success kartica ostaje ispod duge forme bez auto-scroll/toast povratne informacije;
 - [x] Lumière ostaje vizuelni i arhitektonski referentni standard; Editorial je prihvaćen kao sekundarna tema;
+- [x] `DEMO-THEME-BARBER-01` desktop visual closeout ima lokalni code PASS i ručni browser vizuelni PASS;
+- [x] Barber Services, Team, Gallery, Reviews i Contact koriste modularne desktop sekcije i zajednički viewport reveal jezik;
+- [x] Barber Reviews ostaje na `CatalogReviewsSection` shared adapteru uz izdvojeni editorial variant u `components/reviews`;
+- [x] Barber mobile app-shell, booking domen, tenant podaci, baza i migracije nisu menjani;
+- [x] trenutni stilizovani lokacijski kadar ostaje pilot baseline i otvara stvarnu Google Maps pretragu;
 - [ ] puni live booking, admin calendar, email i cross-tenant regression ostaje u `MASTER-SYSTEM-QA-01`;
-- [ ] sledeći vidljivi milestone: `DEMO-THEME-BARBER-01`.
+- [ ] aktivni operativni milestone: `BARBER-PILOT-ONBOARDING-01`;
+- [ ] prvi kontrolisani live theme update posle stabilnog baseline-a: `BARBER-V2-CONTACT-MAP-01`;
+- [ ] sledeća nova vizuelna tema: `DEMO-THEME-NAILS-01`.
 
 ### Pre-closeout implementation checkpoint
 
 ```text
-2796343d71c39ea5e957b428e9535cbae4fe9be4
-feat(theme): close editorial demo acceptance
+35a085f3131825b7160fb862c14778a8052798b5
+feat(theme): refine barber visual experience and category media
 ```
 
 ### Aktivni closeout
 
 ```text
-DEMO-THEME-EDITORIAL-02
-feat(theme): modularize editorial experience
+DEMO-THEME-BARBER-01
+feat(theme): complete barber pilot visual experience
 ```
 
 Commit SHA se čita iz Git istorije posle ovog closeout-a; ROADMAP namerno ne pokušava da ugradi SHA sopstvenog commit-a.
@@ -544,14 +551,37 @@ Detaljan zapis: `docs/milestones/DEMO-THEME-EDITORIAL-01.md`.
 
 Browser runbook: `docs/qa/DEMO-THEME-EDITORIAL-01-ACCEPTANCE.md`.
 
-Sledeći vidljivi redosled:
+Sledeći operativni redosled:
 
 ```text
-DEMO-THEME-BARBER-01
+BARBER-PILOT-ONBOARDING-01
+→ BARBER-V2-CONTACT-MAP-01
 → DEMO-THEME-NAILS-01
 ```
 
-Lumière je završena referentna tema, a Editorial je drugi vizuelno spreman demo renderer. Posle Barber i Nails milestone-a platforma ima četiri različita demo biznisa za kontrolisano kreiranje, browser testiranje i završni content/preview tok.
+Lumière je završena referentna tema, Editorial je drugi vizuelno spreman demo renderer, a Barber je prihvaćen kao pilot tema za prve stvarne salone. Nails ostaje sledeći novi vizuelni renderer, dok Barber pilot i kontrolisani live update teku kao operativna validacija platforme.
+
+### DEMO-THEME-BARBER-01 — pilot visual closeout validiran i staged
+
+- [x] desktop Hero, Services, Team, Gallery, Reviews i Contact vizuelno prihvaćeni;
+- [x] Services category navigator i category media ostaju povezani sa postojećim service booking tokom;
+- [x] Team koristi dominantni portret, interaktivni roster i employee booking;
+- [x] Gallery koristi dominantnu fotografiju, interaktivnu arhivu i kompaktni viewport layout;
+- [x] Reviews koriste shared catalog adapter, rating summary, dominantnu recenziju i interaktivni indeks;
+- [x] Contact koristi sekciju `05`, adresu, Google Maps link, booking CTA, kontakt i grupisano radno vreme;
+- [x] zajednički `useBarberSectionReveal` i reduced-motion podrška koriste se kroz desktop sekcije;
+- [x] mobile app-shell nije menjan;
+- [x] booking, tenant podaci, baza, migracije i `main` grana nisu menjani;
+- [x] ciljani acceptance testovi, Reviews contract testovi, TypeScript i kompletan `npm run check` prošli tokom primene;
+- [x] ručni browser vizuelni test prihvaćen bez blocker-a;
+- [x] trenutna stilizovana lokacija ostaje namerni pilot baseline;
+- [ ] commit, annotated tag `barber-v2-pilot-01` i push čekaju eksplicitnu autorizaciju;
+- [ ] dva do tri salona iz Svilajnca ulaze u `BARBER-PILOT-ONBOARDING-01`;
+- [ ] prava Google mapa ide kroz `BARBER-V2-CONTACT-MAP-01` kao prvi kontrolisani update aktivnog tenant-a.
+
+Detaljan closeout: `docs/milestones/DEMO-THEME-BARBER-01-PILOT-CLOSEOUT.md`.
+
+Pilot runbook: `docs/qa/BARBER-PILOT-ONBOARDING-01-RUNBOOK.md`.
 
 ### DEMO-I18N-01A — završen
 

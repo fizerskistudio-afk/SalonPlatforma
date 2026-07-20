@@ -27,6 +27,7 @@ import {
   formatServicePrice,
 } from "../barber-utils";
 import BarberDesktopServicesBackdrop from "./BarberDesktopServicesBackdrop";
+import { useBarberSectionReveal } from "./useBarberSectionReveal";
 
 const desktopServicesSlogan = {
   "sr-Latn":
@@ -193,18 +194,32 @@ export default function BarberDesktopServicesSection({
       ]
     );
 
+  const {
+    isRevealed,
+    sectionRef,
+  } =
+    useBarberSectionReveal();
+
   return (
     <section
+      ref={sectionRef}
       id="services"
-      className="relative isolate overflow-hidden border-y border-[var(--brand-border)] bg-black"
+      data-barber-revealed={
+        isRevealed
+          ? "true"
+          : "false"
+      }
+      className="relative isolate scroll-mt-20 overflow-hidden border-y border-[var(--brand-border)] bg-black"
     >
-      <BarberDesktopServicesBackdrop
-        activeCategoryId={activeCategoryId}
-        categories={categoryOptions}
-      />
+      <div className="barber-services-backdrop-reveal absolute inset-0">
+        <BarberDesktopServicesBackdrop
+          activeCategoryId={activeCategoryId}
+          categories={categoryOptions}
+        />
+      </div>
 
       <div className="relative z-10 mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[1500px] grid-cols-[minmax(330px,0.36fr)_minmax(0,0.64fr)]">
-        <aside className="relative overflow-hidden bg-black/66 px-8 py-12 backdrop-blur-[2px] xl:px-12 xl:py-14">
+        <aside className="barber-services-enter-left relative overflow-hidden bg-black/66 px-8 py-12 backdrop-blur-[2px] xl:px-12 xl:py-14">
           <div className="pointer-events-none absolute -left-8 bottom-2 font-display text-[15rem] font-semibold leading-none tracking-[-0.08em] text-[var(--brand-primary)]/[0.025]">
             01
           </div>
@@ -276,7 +291,7 @@ export default function BarberDesktopServicesSection({
                               category.id
                             )
                           }
-                          className={`group relative grid min-h-[68px] w-full grid-cols-[2.2rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-[var(--brand-border)] px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-primary)] ${
+                          className={`barber-services-category-entry group relative grid min-h-[68px] w-full grid-cols-[2.2rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-[var(--brand-border)] px-4 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-primary)] ${
                             active
                               ? "bg-[color-mix(in_srgb,var(--brand-primary)_8%,transparent)] text-[var(--brand-primary)]"
                               : "text-[var(--brand-text)] hover:bg-[color-mix(in_srgb,var(--brand-primary)_4%,transparent)] hover:text-[var(--brand-primary)]"
@@ -345,7 +360,7 @@ export default function BarberDesktopServicesSection({
           </div>
         </aside>
 
-        <div className="relative overflow-hidden bg-black/38 px-8 py-12 backdrop-blur-[1px] xl:px-12 xl:py-14">
+        <div className="barber-services-enter-right relative overflow-hidden bg-black/38 px-8 py-12 backdrop-blur-[1px] xl:px-12 xl:py-14">
           <div className="pointer-events-none absolute right-8 top-3 font-display text-[16rem] font-semibold leading-none tracking-[-0.08em] text-[var(--brand-primary)]/[0.035]">
             {String(
               activeCategoryIndex +
@@ -434,7 +449,7 @@ export default function BarberDesktopServicesSection({
                           service.id
                         )
                       }
-                      className="group relative block min-h-[142px] w-full border-b border-[var(--brand-border)] py-7 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-primary)]"
+                      className="barber-services-item-entry group relative block min-h-[142px] w-full border-b border-[var(--brand-border)] py-7 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-primary)]"
                       aria-label={`${t(
                         barberLabels.bookService,
                         locale
@@ -520,6 +535,105 @@ export default function BarberDesktopServicesSection({
       </div>
 
       <style jsx global>{`
+        @media (prefers-reduced-motion: no-preference) {
+          .barber-services-backdrop-reveal,
+          .barber-services-enter-left,
+          .barber-services-enter-right {
+            transition:
+              opacity 760ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+          }
+
+          [data-barber-revealed="false"] .barber-services-backdrop-reveal {
+            opacity: 0;
+            transform: scale(1.035);
+          }
+
+          [data-barber-revealed="true"] .barber-services-backdrop-reveal {
+            opacity: 1;
+            transform: scale(1);
+          }
+
+          [data-barber-revealed="false"] .barber-services-enter-left {
+            opacity: 0;
+            transform: translateX(-32px);
+          }
+
+          [data-barber-revealed="true"] .barber-services-enter-left {
+            opacity: 1;
+            transform: translateX(0);
+          }
+
+          [data-barber-revealed="false"] .barber-services-enter-right {
+            opacity: 0;
+            transform: translateX(38px);
+          }
+
+          [data-barber-revealed="true"] .barber-services-enter-right {
+            opacity: 1;
+            transform: translateX(0);
+          }
+
+          .barber-services-category-entry,
+          .barber-services-item-entry {
+            transition:
+              opacity 560ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 560ms cubic-bezier(0.16, 1, 0.3, 1),
+              color 200ms ease,
+              background-color 200ms ease;
+            will-change: opacity, transform;
+          }
+
+          [data-barber-revealed="false"] .barber-services-category-entry {
+            opacity: 0;
+            transform: translateX(-22px);
+          }
+
+          [data-barber-revealed="false"] .barber-services-item-entry {
+            opacity: 0;
+            transform: translateX(28px);
+          }
+
+          [data-barber-revealed="true"] .barber-services-category-entry,
+          [data-barber-revealed="true"] .barber-services-item-entry {
+            opacity: 1;
+            transform: translateX(0);
+          }
+
+          [data-barber-revealed="true"] .barber-services-category-entry:nth-child(1) {
+            transition-delay: 120ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-category-entry:nth-child(2) {
+            transition-delay: 175ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-category-entry:nth-child(3) {
+            transition-delay: 230ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-category-entry:nth-child(4) {
+            transition-delay: 285ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-item-entry:nth-child(1) {
+            transition-delay: 170ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-item-entry:nth-child(2) {
+            transition-delay: 240ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-item-entry:nth-child(3) {
+            transition-delay: 310ms;
+          }
+
+          [data-barber-revealed="true"] .barber-services-item-entry:nth-child(4) {
+            transition-delay: 380ms;
+          }
+        }
+
         @keyframes barberServicesPanelIn {
           from {
             opacity: 0;

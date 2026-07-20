@@ -7,7 +7,12 @@ import type {
   Locale,
 } from "@/lib/types";
 
+import BarberEditorialReviewsSection from "./BarberEditorialReviewsSection";
 import SharedReviewsSection from "./SharedReviewsSection";
+
+export type CatalogReviewsVariant =
+  | "default"
+  | "barber-editorial";
 
 type CatalogReviewsSectionProps = {
   locale: Locale;
@@ -16,6 +21,7 @@ type CatalogReviewsSectionProps = {
   className?: string;
   contentClassName?: string;
   cardClassName?: string;
+  variant?: CatalogReviewsVariant;
 };
 
 export default function CatalogReviewsSection({
@@ -25,6 +31,7 @@ export default function CatalogReviewsSection({
   className = "",
   contentClassName = "",
   cardClassName = "",
+  variant = "default",
 }: CatalogReviewsSectionProps) {
   const {
     business,
@@ -32,6 +39,43 @@ export default function CatalogReviewsSection({
     reviewSummary,
     reviewConfig,
   } = useCatalogData();
+
+  if (
+    variant ===
+    "barber-editorial"
+  ) {
+    return (
+      <BarberEditorialReviewsSection
+        reviews={
+          reviews
+        }
+        reviewSummary={
+          reviewSummary
+        }
+        reviewConfig={
+          reviewConfig
+        }
+        locale={
+          locale
+        }
+        businessSlug={
+          business.slug
+        }
+        previewMode={
+          previewMode
+        }
+        id={
+          id
+        }
+        className={
+          className
+        }
+        contentClassName={
+          contentClassName
+        }
+      />
+    );
+  }
 
   return (
     <SharedReviewsSection

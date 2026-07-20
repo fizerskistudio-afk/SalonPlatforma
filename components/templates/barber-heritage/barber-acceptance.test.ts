@@ -420,6 +420,531 @@ describe(
     );
 
     it(
+      "renders a premium interactive desktop barber roster without changing mobile team",
+      () => {
+        const desktopTeam =
+          moduleSource(
+            "desktop",
+            "BarberDesktopTeamSection"
+          );
+
+        const mobileTeam =
+          moduleSource(
+            "mobile",
+            "BarberMobileTeamSection"
+          );
+
+        for (
+          const marker of [
+            "useState",
+            "useEffect",
+            "useMemo",
+            "activeEmployeeId",
+            "activeEmployee",
+            "aria-pressed",
+            "onMouseEnter",
+            "onFocus",
+            "data-barber-portrait",
+            "transition-[opacity,transform,filter]",
+            "min-h-[calc(100dvh-5rem)]",
+            "grid-cols-[minmax(0,1.12fr)_minmax(420px,0.88fr)]",
+            "barber-team-copy",
+            "barberTeamCopyIn",
+            "prefers-reduced-motion",
+          ]
+        ) {
+          expect(
+            desktopTeam
+          ).toContain(
+            marker
+          );
+        }
+
+        expect(
+          desktopTeam
+        ).not.toContain(
+          "grid-cols-4"
+        );
+
+        for (
+          const preservedMobileMarker of [
+            'id="barber-mobile-team"',
+            "carouselIndex",
+            "scrollToIndex",
+            "snap-mandatory",
+            "onBookEmployee",
+          ]
+        ) {
+          expect(
+            mobileTeam
+          ).toContain(
+            preservedMobileMarker
+          );
+        }
+
+        expect(
+          mobileTeam
+        ).not.toContain(
+          "activeEmployeeId"
+        );
+      }
+    );
+
+
+it(
+  "coordinates desktop Services and Team entrance motion without changing mobile screens",
+  () => {
+    const revealHook =
+      source(
+        "components/templates/barber-heritage/desktop/useBarberSectionReveal.ts"
+      );
+
+    const desktopServices =
+      moduleSource(
+        "desktop",
+        "BarberDesktopServicesSection"
+      );
+
+    const desktopTeam =
+      moduleSource(
+        "desktop",
+        "BarberDesktopTeamSection"
+      );
+
+    const mobileCombined =
+      MOBILE_SCREEN_MODULES.map(
+        (
+          moduleName
+        ) =>
+          moduleSource(
+            "mobile",
+            moduleName
+          )
+      ).join(
+        "\n"
+      );
+
+    for (
+      const marker of [
+        "IntersectionObserver",
+        "window.matchMedia",
+        "prefers-reduced-motion",
+        "observer.disconnect",
+        "rootMargin",
+        "threshold",
+      ]
+    ) {
+      expect(
+        revealHook
+      ).toContain(
+        marker
+      );
+    }
+
+    for (
+      const marker of [
+        "useBarberSectionReveal",
+        "sectionRef",
+        "data-barber-revealed",
+        "barber-services-backdrop-reveal",
+        "barber-services-enter-left",
+        "barber-services-enter-right",
+        "barber-services-category-entry",
+        "barber-services-item-entry",
+      ]
+    ) {
+      expect(
+        desktopServices
+      ).toContain(
+        marker
+      );
+    }
+
+    for (
+      const marker of [
+        "useBarberSectionReveal",
+        "sectionRef",
+        "data-barber-revealed",
+        "barber-team-enter-left",
+        "barber-team-enter-right",
+        "barber-team-roster-entry",
+        "items-stretch",
+        "min-h-[720px]",
+      ]
+    ) {
+      expect(
+        desktopTeam
+      ).toContain(
+        marker
+      );
+    }
+
+    expect(
+      desktopTeam
+    ).not.toContain(
+      "employees.length -"
+    );
+
+    expect(
+      desktopServices
+    ).not.toContain(
+      "window.scrollTo"
+    );
+
+    expect(
+      desktopTeam
+    ).not.toContain(
+      "window.scrollTo"
+    );
+
+    expect(
+      mobileCombined
+    ).not.toContain(
+      "useBarberSectionReveal"
+    );
+
+    expect(
+      mobileCombined
+    ).not.toContain(
+      "data-barber-revealed"
+    );
+  }
+);
+
+
+it(
+  "renders a premium interactive desktop gallery without changing the mobile gallery",
+  () => {
+    const desktopGallery =
+      moduleSource(
+        "desktop",
+        "BarberDesktopGallerySection"
+      );
+
+    const mobileGallery =
+      moduleSource(
+        "mobile",
+        "BarberMobileGallerySection"
+      );
+
+    for (
+      const marker of [
+        "useState",
+        "useEffect",
+        "useMemo",
+        "useBarberSectionReveal",
+        "activeGalleryId",
+        "setActiveGalleryId",
+        "data-barber-revealed",
+        "barber-gallery-stage",
+        "barber-gallery-archive",
+        "barber-gallery-thumbnail",
+        "aria-pressed",
+        "onMouseEnter",
+        "onFocus",
+        "sticky top-24",
+        "galleryItems.map",
+        "prefers-reduced-motion",
+      ]
+    ) {
+      expect(
+        desktopGallery
+      ).toContain(
+        marker
+      );
+    }
+
+    expect(
+      desktopGallery
+    ).toContain(
+      "gallery.filter"
+    );
+
+    expect(
+      desktopGallery
+    ).toContain(
+      "barberLabels.galleryEmpty"
+    );
+
+    expect(
+      desktopGallery
+    ).not.toContain(
+      "auto-rows-[125px]"
+    );
+
+for (
+  const compactViewportMarker of [
+    "h-[calc(90dvh-7.2rem)]",
+    "min-h-[550px]",
+    "max-h-[700px]",
+    "text-[clamp(3rem,4.15vw,5.2rem)]",
+    "min-h-[148px]",
+    "mt-8 grid items-start",
+  ]
+) {
+  expect(
+    desktopGallery
+  ).toContain(
+    compactViewportMarker
+  );
+}
+
+expect(
+  desktopGallery
+).not.toContain(
+  "h-[calc(100dvh-8rem)]"
+);
+
+expect(
+  desktopGallery
+).not.toContain(
+  "text-[clamp(3.8rem,5vw,6.3rem)]"
+);
+
+    for (
+      const preservedMobileMarker of [
+        'id="barber-mobile-gallery"',
+        "gallery.map",
+        "barberLabels.galleryEmpty",
+      ]
+    ) {
+      expect(
+        mobileGallery
+      ).toContain(
+        preservedMobileMarker
+      );
+    }
+
+    expect(
+      mobileGallery
+    ).not.toContain(
+      "activeGalleryId"
+    );
+
+    expect(
+      mobileGallery
+    ).not.toContain(
+      "useBarberSectionReveal"
+    );
+  }
+);
+
+
+it(
+  "renders Barber desktop reviews through the shared catalog adapter and editorial variant",
+  () => {
+    const desktopReviews =
+      moduleSource(
+        "desktop",
+        "BarberDesktopReviewsSection"
+      );
+
+    const mobileReviews =
+      moduleSource(
+        "mobile",
+        "BarberMobileReviewsSection"
+      );
+
+    const adapter =
+      source(
+        "components/reviews/CatalogReviewsSection.tsx"
+      );
+
+    const editorialReviews =
+      source(
+        "components/reviews/BarberEditorialReviewsSection.tsx"
+      );
+
+    for (
+      const marker of [
+        "CatalogReviewsSection",
+        'variant="barber-editorial"',
+        'id="reviews"',
+        "previewMode",
+      ]
+    ) {
+      expect(
+        desktopReviews
+      ).toContain(
+        marker
+      );
+    }
+
+    for (
+      const forbidden of [
+        "useCatalogData",
+        "reviewSummary.distribution",
+        "reviews.map(",
+        "activeReviewId",
+      ]
+    ) {
+      expect(
+        desktopReviews
+      ).not.toContain(
+        forbidden
+      );
+    }
+
+    for (
+      const adapterMarker of [
+        "useCatalogData",
+        "SharedReviewsSection",
+        "BarberEditorialReviewsSection",
+        '"barber-editorial"',
+        "reviewSummary",
+        "reviewConfig",
+      ]
+    ) {
+      expect(
+        adapter
+      ).toContain(
+        adapterMarker
+      );
+    }
+
+    for (
+      const editorialMarker of [
+        "useState",
+        "useEffect",
+        "useMemo",
+        "useRef",
+        "IntersectionObserver",
+        "activeReviewId",
+        "setActiveReviewId",
+        "barber-reviews-stage",
+        "barber-reviews-summary",
+        "barber-reviews-index",
+        "barber-review-index-item",
+        "ReviewStars",
+        "ReviewTrustBadge",
+        "aria-pressed",
+        "onMouseEnter",
+        "onFocus",
+        "directReviewHref",
+        "googleReviewHref",
+        "reviewSummary.distribution",
+        "ownerReply",
+        "prefers-reduced-motion",
+      ]
+    ) {
+      expect(
+        editorialReviews
+      ).toContain(
+        editorialMarker
+      );
+    }
+
+    for (
+      const preservedMobileMarker of [
+        "CatalogReviewsSection",
+        'id="barber-mobile-reviews"',
+        "previewMode",
+        "pb-32",
+      ]
+    ) {
+      expect(
+        mobileReviews
+      ).toContain(
+        preservedMobileMarker
+      );
+    }
+
+    expect(
+      mobileReviews
+    ).not.toContain(
+      'variant="barber-editorial"'
+    );
+  }
+);
+
+
+it(
+  "renders a premium desktop contact and location closeout without changing mobile contact",
+  () => {
+    const desktopContact =
+      moduleSource(
+        "desktop",
+        "BarberDesktopContactSection"
+      );
+
+    const mobileContact =
+      moduleSource(
+        "mobile",
+        "BarberMobileContactSection"
+      );
+
+    for (
+      const marker of [
+        "useMemo",
+        "useBarberSectionReveal",
+        "groupWorkingHours",
+        "formatDayRange",
+        "business.workingHours",
+        "workingHoursGroups.map",
+        "https://www.google.com/maps/search/?api=1&query=",
+        "encodeURIComponent",
+        "barber-contact-location",
+        "barber-contact-booking",
+        "barber-contact-details",
+        "barber-contact-hours",
+        "data-barber-revealed",
+        "05 /",
+        "onClick",
+        "tel:",
+        "mailto:",
+        "InstagramIcon",
+        "prefers-reduced-motion",
+      ]
+    ) {
+      expect(
+        desktopContact
+      ).toContain(
+        marker
+      );
+    }
+
+    expect(
+      desktopContact
+    ).not.toContain(
+      "04 /"
+    );
+
+    for (
+      const preservedMobileMarker of [
+        'id="barber-mobile-contact"',
+        "onSwitchToDesktop",
+        "CalendarPlus",
+        "business.phone",
+        "business.email",
+        "business.instagramUrl",
+        "onClick={onBook}",
+      ]
+    ) {
+      expect(
+        mobileContact
+      ).toContain(
+        preservedMobileMarker
+      );
+    }
+
+    for (
+      const desktopOnlyMarker of [
+        "useBarberSectionReveal",
+        "groupWorkingHours",
+        "google.com/maps/search",
+        "barber-contact-hours",
+      ]
+    ) {
+      expect(
+        mobileContact
+      ).not.toContain(
+        desktopOnlyMarker
+      );
+    }
+  }
+);
+
+    it(
       "preserves the complete desktop behavior in dedicated modules",
       () => {
         const combined =
@@ -494,7 +1019,6 @@ describe(
             '\"home\"',
             '\"services\"',
             '\"team\"',
-            '\"profile\"',
             "h-[100dvh]",
             "isHome",
             "overflow-hidden pb-24",
@@ -567,6 +1091,7 @@ describe(
             "aria-current",
             "env(safe-area-inset-bottom)",
             "barberLabels.navProfile",
+            '\"profile\"',
           ]
         ) {
           expect(
