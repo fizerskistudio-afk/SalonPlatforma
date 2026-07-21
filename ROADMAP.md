@@ -2,9 +2,9 @@
 
 **Ažurirano:** 21. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `main`
+**Aktivna grana:** `milestone/ordum-admin-ia-01`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` je production i aktivna razvojna osnova; Ordum production domen, Resend test-mode E2E, platform landing i `MASTER-SYSTEM-QA-01A-R4` read-only baseline su završeni. Authenticated/mutating booking, admin calendar, Google Calendar, production email/cron i puni cross-tenant regression ostaju otvoreni pod `MASTER-SYSTEM-QA-01B`.
+**Status:** `main` ostaje production baseline. `ORDUM-ADMIN-IA-01A` ima code PASS i desktop browser acceptance na grani `milestone/ordum-admin-ia-01`; mobile acceptance je eksplicitno odložen za kasniji admin UI/polish ciklus. Sledeći aktivni arhitektonski korak je `PLATFORM-GROWTH-ARCHITECTURE-01`, a zatim dorada platformske landing stranice.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -96,6 +96,16 @@
 - [x] Playwright runtime i završni evidence držani su van repozitorijuma u Windows `%TEMP%\OrdumStudios\master-system-qa\...`;
 - [ ] `MASTER-SYSTEM-QA-01B` ostaje za authenticated/mutating production regression: live booking, admin calendar, staff workflow, Google Calendar, production recipient email, cron i puni cross-tenant test;
 - [ ] production contact-form Resend smoke, mobile preview booking guard, migration `029` odluka i formalni read-only DB verification output za migraciju `032` ostaju zasebno otvoreni.
+
+- [x] `ORDUM-ADMIN-IA-01A` uvodi centralni typed admin navigation registry i uklanja paralelnu hardkodovanu navigation istinu iz `AdminShell`-a;
+- [x] desktop owner/manager panel je grupisan na jasne kategorije i ručni desktop browser acceptance je prihvaćen — kategorije staju na jedan ekran i trenutni UI nema blocker;
+- [x] postojeće admin rute, package gate odluke, review attention badge, multi-tenant izbor, auth, booking domen, baza i migracije nisu menjani;
+- [x] ciljani ESLint, TypeScript i contract testovi, kao i kompletan `npm run check`, prošli su nakon migracije zastarelih source-contract testova na centralni registry;
+- [x] mobile primarna navigaciona infrastruktura `Danas | Kalendar | Klijenti | Više` postoji u source-u;
+- [ ] mobile browser acceptance nije izvršen i ostaje eksplicitno odložen za kasniji admin UI/polish ciklus;
+- [ ] `PLATFORM-GROWTH-ARCHITECTURE-01` je sledeći konkretan milestone: read-only audit postojeće availability/SQL osnove, discovery/marketplace query contract, SEO/blog content graph, grad–usluga landing stranice i merljiv redirect ka tenant booking toku;
+- [ ] Google Business Profile, fiskalizacija, knjigovodstvo, lager i ostale integracije ostaju opcioni budući moduli; sada se ne tretiraju kao hitni launch blocker;
+- [ ] dorada platformske landing stranice sledi nakon growth architecture audita, kako bi positioning i CTA pratili stvarne podržane poslovne modele.
 
 ### Pre-closeout implementation checkpoint
 

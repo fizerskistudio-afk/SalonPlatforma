@@ -147,7 +147,7 @@ describe(
       "Potvrđena poseta",
       "Odgovor salona",
       "Traže pažnju",
-      "aria-modal=\"true\"",
+      'aria-modal="true"',
     ])(
       "contains moderation UI marker %s",
       (marker) => {
@@ -164,13 +164,24 @@ describe(
         "components/admin/AdminShell.tsx"
       );
 
+    const navigation =
+      readSource(
+        "lib/admin/admin-navigation.ts"
+      );
+
     it(
       "adds review navigation and attention count",
       () => {
         expect(
-          shell
+          navigation
         ).toContain(
           'href: "/admin/reviews"'
+        );
+
+        expect(
+          navigation
+        ).toContain(
+          'badgeKey: "reviews"'
         );
 
         expect(

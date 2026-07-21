@@ -1,41 +1,63 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useState } from "react";
+import type {
+  ReactNode,
+} from "react";
+import {
+  useState,
+} from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import {
+  usePathname,
+} from "next/navigation";
 import {
   Bell,
   CalendarClock,
   CalendarDays,
+  ChevronDown,
   ChevronRight,
   ExternalLink,
+  Grid2X2,
   Images,
   LayoutDashboard,
   LockKeyhole,
   LogOut,
   Menu,
   MessageSquareText,
+  Repeat2,
   Scissors,
   Settings,
   ShieldCheck,
-  Repeat2,
   UserRoundCog,
   UsersRound,
   X,
   type LucideIcon,
 } from "lucide-react";
 
-import { signOutAction } from "@/app/admin/(protected)/actions";
+import {
+  signOutAction,
+} from "@/app/admin/(protected)/actions";
+import {
+  ADMIN_NAVIGATION_GROUPS,
+  getAdminMobilePrimaryItems,
+  getAdminNavigationGroupForPath,
+  getAdminNavigationGroups,
+  getAdminNavigationItemForPath,
+  isAdminNavigationItemActive,
+  type AdminNavigationGroupKey,
+  type AdminNavigationIconKey,
+  type AdminNavigationItemDefinition,
+} from "@/lib/admin/admin-navigation";
 import {
   resolveProductFeatureGate,
-  type ProductFeatureKey,
 } from "@/lib/product-packages/gates";
 import type {
   ProductPackageAccess,
 } from "@/lib/product-packages/resolver";
 
-type AdminRole = "owner" | "manager";
+type AdminRole =
+  | "owner"
+  | "manager";
 
 type AdminShellProps = {
   children: ReactNode;
@@ -54,122 +76,54 @@ type AdminShellProps = {
   };
 };
 
-type NavigationItem = {
-  label: string;
-  description: string;
-  href: string;
-  featureKey:
-    ProductFeatureKey;
-  icon: LucideIcon;
-  enabled: boolean;
+type NavigationStatus = {
+  packageLocked: boolean;
+  badgeCount: number;
 };
 
-const navigationItems: NavigationItem[] = [
-  {
-    label: "Dashboard",
-    description: "Pregled poslovanja",
-    href: "/admin",
-    featureKey:
-      "admin.dashboard",
-    icon: LayoutDashboard,
-    enabled: true,
-  },
-  {
-    label: "Rezervacije",
-    description: "Termini i raspored",
-    href: "/admin/bookings",
-    featureKey:
-      "admin.bookings",
-    icon: CalendarDays,
-    enabled: true,
-  },
-  {
-    label: "Klijenti",
-    description: "Kontakti i istorija",
-    href: "/admin/customers",
-    featureKey:
-      "admin.customers",
-    icon: UsersRound,
-    enabled: true,
-  },
-  {
-    label: "Usluge",
-    description: "Katalog i cene",
-    href: "/admin/services",
-    featureKey:
-      "admin.services",
-    icon: Scissors,
-    enabled: true,
-  },
-  {
-    label: "Tim",
-    description: "Zaposleni i njihove usluge",
-    href: "/admin/team",
-    featureKey:
-      "admin.team",
-    icon: UserRoundCog,
-    enabled: true,
-  },
-  {
-    label: "Galerija",
-    description: "Fotografije javnog sajta",
-    href: "/admin/gallery",
-    featureKey:
-      "admin.gallery",
-    icon: Images,
-    enabled: true,
-  },
-  {
-    label: "Raspored",
-    description: "Radno vreme i odsustva",
-    href: "/admin/schedule",
-    featureKey:
-      "admin.schedule",
-    icon: CalendarClock,
-    enabled: true,
-  },
-  {
-    label: "Članovi",
-    description: "Korisnici, pristup i uloge",
-    href: "/admin/members",
-    featureKey:
-      "admin.members",
-    icon: ShieldCheck,
-    enabled: true,
-  },
-  {
-    label: "Recenzije",
-    description: "Moderacija i odgovori",
-    href: "/admin/reviews",
-    featureKey:
-      "admin.reviews",
-    icon: MessageSquareText,
-    enabled: true,
-  },
-  {
-    label: "Notifikacije",
-    description: "Email pravila i delivery log",
-    href: "/admin/notifications",
-    featureKey:
-      "admin.notifications",
-    icon: Bell,
-    enabled: true,
-  },
-  {
-    label: "Podešavanja",
-    description: "Salon i booking pravila",
-    href: "/admin/settings",
-    featureKey:
-      "admin.settings",
-    icon: Settings,
-    enabled: true,
-  },
-];
+const navigationGroups =
+  getAdminNavigationGroups();
 
-const roleLabels: Record<AdminRole, string> = {
-  owner: "Vlasnik",
-  manager: "Menadžer",
-};
+const mobilePrimaryItems =
+  getAdminMobilePrimaryItems();
+
+const navigationIconMap:
+  Record<
+    AdminNavigationIconKey,
+    LucideIcon
+  > = {
+    dashboard:
+      LayoutDashboard,
+    bookings:
+      CalendarDays,
+    customers:
+      UsersRound,
+    schedule:
+      CalendarClock,
+    services:
+      Scissors,
+    team:
+      UserRoundCog,
+    gallery:
+      Images,
+    reviews:
+      MessageSquareText,
+    members:
+      ShieldCheck,
+    notifications:
+      Bell,
+    settings:
+      Settings,
+  };
+
+const roleLabels:
+  Record<
+    AdminRole,
+    string
+  > = {
+    owner: "Vlasnik",
+    manager: "Menadžer",
+  };
 
 function getInitials(
   value: string
@@ -190,23 +144,184 @@ function getInitials(
   }
 
   return `${words[0][0]}${
-    words[words.length - 1][0]
+    words[
+      words.length - 1
+    ][0]
   }`.toUpperCase();
 }
 
-function isNavigationItemActive(
-  pathname: string,
-  href: string
-): boolean {
-  if (href === "/admin") {
-    return pathname === "/admin";
+function getNavigationStatus({
+  item,
+  productAccess,
+  reviewAttentionCount,
+}: {
+  item:
+    AdminNavigationItemDefinition;
+  productAccess:
+    ProductPackageAccess;
+  reviewAttentionCount: number;
+}): NavigationStatus {
+  const gateDecision =
+    resolveProductFeatureGate({
+      access:
+        productAccess,
+      featureKey:
+        item.featureKey,
+      permissionGranted:
+        true,
+      integrationConnected:
+        true,
+    });
+
+  const packageLocked =
+    gateDecision.blockedBy ===
+    "package";
+
+  return {
+    packageLocked,
+    badgeCount:
+      !packageLocked &&
+      item.badgeKey ===
+        "reviews"
+        ? reviewAttentionCount
+        : 0,
+  };
+}
+
+function NavigationBadge({
+  count,
+  active,
+}: {
+  count: number;
+  active: boolean;
+}) {
+  if (count <= 0) {
+    return null;
   }
 
   return (
-    pathname === href ||
-    pathname.startsWith(
-      `${href}/`
-    )
+    <span
+      className={
+        active
+          ? "rounded-full bg-zinc-950/10 px-2 py-0.5 text-[10px] font-bold text-zinc-950"
+          : "rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold text-amber-300"
+      }
+      aria-label={
+        count === 1
+          ? "1 stavka traži pažnju"
+          : `${count} stavki traži pažnju`
+      }
+    >
+      {count > 99
+        ? "99+"
+        : count}
+    </span>
+  );
+}
+
+function NavigationItemLink({
+  item,
+  pathname,
+  productAccess,
+  reviewAttentionCount,
+  onNavigate,
+}: {
+  item:
+    AdminNavigationItemDefinition;
+  pathname: string;
+  productAccess:
+    ProductPackageAccess;
+  reviewAttentionCount: number;
+  onNavigate?: () => void;
+}) {
+  const Icon =
+    navigationIconMap[
+      item.iconKey
+    ];
+
+  const isActive =
+    isAdminNavigationItemActive(
+      pathname,
+      item.href
+    );
+
+  const {
+    packageLocked,
+    badgeCount,
+  } = getNavigationStatus({
+    item,
+    productAccess,
+    reviewAttentionCount,
+  });
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={
+        isActive
+          ? "page"
+          : undefined
+      }
+      className={`group flex items-center gap-3 rounded-2xl px-3 py-3 transition focus:outline-none focus:ring-2 focus:ring-amber-300 ${
+        isActive
+          ? "bg-amber-300 text-zinc-950 shadow-lg shadow-amber-300/10"
+          : "text-zinc-400 hover:bg-white/[0.05] hover:text-white"
+      }`}
+    >
+      <div
+        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition ${
+          isActive
+            ? "bg-zinc-950/10"
+            : "bg-white/[0.04] text-zinc-500 group-hover:text-amber-300"
+        }`}
+      >
+        <Icon
+          className="h-5 w-5"
+          aria-hidden="true"
+        />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-sm font-semibold">
+            {item.label}
+          </span>
+
+          {packageLocked ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/15 bg-amber-300/[0.08] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-amber-300">
+              <LockKeyhole
+                className="h-2.5 w-2.5"
+                aria-hidden="true"
+              />
+              Paket
+            </span>
+          ) : null}
+
+          <NavigationBadge
+            count={badgeCount}
+            active={isActive}
+          />
+        </div>
+
+        <div
+          className={`mt-0.5 truncate text-xs ${
+            isActive
+              ? "text-zinc-950/60"
+              : "text-zinc-600"
+          }`}
+        >
+          {item.description}
+        </div>
+      </div>
+
+      {isActive ? (
+        <ChevronRight
+          className="h-4 w-4 flex-shrink-0"
+          aria-hidden="true"
+        />
+      ) : null}
+    </Link>
   );
 }
 
@@ -220,6 +335,9 @@ function SidebarContent({
   productAccess,
   reviewAttentionCount,
   tenantCount,
+  collapsedGroups,
+  activeGroupKey,
+  onToggleGroup,
   onNavigate,
 }: {
   pathname: string;
@@ -232,6 +350,15 @@ function SidebarContent({
     ProductPackageAccess;
   reviewAttentionCount: number;
   tenantCount: number;
+  collapsedGroups:
+    AdminNavigationGroupKey[];
+  activeGroupKey:
+    AdminNavigationGroupKey | null;
+  onToggleGroup:
+    (
+      groupKey:
+        AdminNavigationGroupKey
+    ) => void;
   onNavigate?: () => void;
 }) {
   return (
@@ -254,169 +381,88 @@ function SidebarContent({
               {businessName}
             </div>
             <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-              Salon administration
+              Ordum Business OS
             </div>
           </div>
         </Link>
       </div>
 
       <nav
-        className="flex-1 overflow-y-auto px-3 py-5"
+        className="flex-1 overflow-y-auto px-3 py-4"
         aria-label="Admin navigacija"
       >
-        <div className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-          Upravljanje
-        </div>
+        <div className="space-y-3">
+          {navigationGroups.map(
+            (group) => {
+              const forceOpen =
+                activeGroupKey ===
+                group.key;
 
-        <div className="space-y-1.5">
-          {navigationItems.map(
-            (item) => {
-              const Icon = item.icon;
-              const isActive =
-                isNavigationItemActive(
-                  pathname,
-                  item.href
+              const collapsed =
+                !forceOpen &&
+                collapsedGroups.includes(
+                  group.key
                 );
-
-              const gateDecision =
-                resolveProductFeatureGate({
-                  access:
-                    productAccess,
-                  featureKey:
-                    item.featureKey,
-                  permissionGranted:
-                    true,
-                  integrationConnected:
-                    true,
-                });
-
-              const packageLocked =
-                gateDecision.blockedBy ===
-                  "package";
-
-              const badgeCount =
-                !packageLocked &&
-                item.href ===
-                  "/admin/reviews"
-                  ? reviewAttentionCount
-                  : 0;
-
-              if (!item.enabled) {
-                return (
-                  <div
-                    key={item.href}
-                    className="flex cursor-not-allowed items-center gap-3 rounded-2xl px-3 py-3 opacity-45"
-                    aria-disabled="true"
-                  >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-zinc-500">
-                      <Icon
-                        className="h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium text-zinc-400">
-                          {item.label}
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-zinc-600">
-                          Uskoro
-                        </span>
-                      </div>
-                      <div className="mt-0.5 truncate text-xs text-zinc-700">
-                        {item.description}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onNavigate}
-                  aria-current={
-                    isActive
-                      ? "page"
-                      : undefined
-                  }
-                  className={`group flex items-center gap-3 rounded-2xl px-3 py-3 transition focus:outline-none focus:ring-2 focus:ring-amber-300 ${
-                    isActive
-                      ? "bg-amber-300 text-zinc-950 shadow-lg shadow-amber-300/10"
-                      : "text-zinc-400 hover:bg-white/[0.05] hover:text-white"
-                  }`}
+                <section
+                  key={group.key}
+                  className="rounded-2xl border border-white/[0.05] bg-white/[0.015] p-1"
                 >
-                  <div
-                    className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition ${
-                      isActive
-                        ? "bg-zinc-950/10"
-                        : "bg-white/[0.04] text-zinc-500 group-hover:text-amber-300"
-                    }`}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onToggleGroup(
+                        group.key
+                      )
+                    }
+                    aria-expanded={
+                      !collapsed
+                    }
+                    className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/[0.04] focus:outline-none focus:ring-2 focus:ring-amber-300"
                   >
-                    <Icon
-                      className="h-5 w-5"
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                        {group.label}
+                      </div>
+                      <div className="mt-0.5 truncate text-[11px] text-zinc-700">
+                        {group.description}
+                      </div>
+                    </div>
+
+                    <ChevronDown
+                      className={`h-4 w-4 flex-shrink-0 text-zinc-600 transition-transform ${
+                        collapsed
+                          ? "-rotate-90"
+                          : "rotate-0"
+                      }`}
                       aria-hidden="true"
                     />
-                  </div>
+                  </button>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold">
-                        {item.label}
-                      </span>
-
-                      {packageLocked ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/15 bg-amber-300/[0.08] px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-amber-300">
-                          <LockKeyhole
-                            className="h-2.5 w-2.5"
-                            aria-hidden="true"
+                  {!collapsed ? (
+                    <div className="mt-1 space-y-1">
+                      {group.items.map(
+                        (item) => (
+                          <NavigationItemLink
+                            key={item.key}
+                            item={item}
+                            pathname={pathname}
+                            productAccess={
+                              productAccess
+                            }
+                            reviewAttentionCount={
+                              reviewAttentionCount
+                            }
+                            onNavigate={
+                              onNavigate
+                            }
                           />
-                          Paket
-                        </span>
-                      ) : null}
-
-                      {badgeCount > 0 && (
-                        <span
-                          className={
-                            isActive
-                              ? "rounded-full bg-zinc-950/10 px-2 py-0.5 text-[10px] font-bold text-zinc-950"
-                              : "rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold text-amber-300"
-                          }
-                          aria-label={
-                            badgeCount === 1
-                              ? "1 recenzija traži pažnju"
-                              : String(
-                                  badgeCount
-                                ) +
-                                " recenzija traži pažnju"
-                          }
-                        >
-                          {badgeCount > 99
-                            ? "99+"
-                            : badgeCount}
-                        </span>
+                        )
                       )}
                     </div>
-                    <div
-                      className={`mt-0.5 truncate text-xs ${
-                        isActive
-                          ? "text-zinc-950/60"
-                          : "text-zinc-600"
-                      }`}
-                    >
-                      {item.description}
-                    </div>
-                  </div>
-
-                  {isActive && (
-                    <ChevronRight
-                      className="h-4 w-4 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                  )}
-                </Link>
+                  ) : null}
+                </section>
               );
             }
           )}
@@ -430,7 +476,9 @@ function SidebarContent({
             onClick={onNavigate}
             className="mb-3 flex min-h-11 items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 text-sm text-zinc-400 transition hover:border-amber-300/30 hover:bg-amber-300/[0.06] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
           >
-            <span>Promeni salon</span>
+            <span>
+              Promeni salon
+            </span>
             <Repeat2
               className="h-4 w-4"
               aria-hidden="true"
@@ -439,9 +487,7 @@ function SidebarContent({
         ) : null}
 
         <a
-          href={
-            publicUrl
-          }
+          href={publicUrl}
           target="_blank"
           rel="noreferrer"
           className="mb-3 flex items-center justify-between rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 text-sm text-zinc-400 transition hover:border-white/15 hover:bg-white/[0.05] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -495,76 +541,228 @@ function SidebarContent({
   );
 }
 
+function MobileBottomNavigation({
+  pathname,
+  productAccess,
+  onOpenMore,
+}: {
+  pathname: string;
+  productAccess:
+    ProductPackageAccess;
+  onOpenMore: () => void;
+}) {
+  const primaryRouteActive =
+    mobilePrimaryItems.some(
+      (item) =>
+        isAdminNavigationItemActive(
+          pathname,
+          item.href
+        )
+    );
+
+  return (
+    <nav
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-zinc-950/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 backdrop-blur-xl lg:hidden"
+      aria-label="Brza admin navigacija"
+    >
+      <div className="grid grid-cols-4 gap-1">
+        {mobilePrimaryItems.map(
+          (item) => {
+            const Icon =
+              navigationIconMap[
+                item.iconKey
+              ];
+
+            const isActive =
+              isAdminNavigationItemActive(
+                pathname,
+                item.href
+              );
+
+            const {
+              packageLocked,
+            } = getNavigationStatus({
+              item,
+              productAccess,
+              reviewAttentionCount:
+                0,
+            });
+
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                aria-current={
+                  isActive
+                    ? "page"
+                    : undefined
+                }
+                className={`relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-2 text-[10px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-amber-300 ${
+                  isActive
+                    ? "bg-amber-300/12 text-amber-200"
+                    : "text-zinc-500 hover:bg-white/[0.05] hover:text-white"
+                }`}
+              >
+                <Icon
+                  className="h-5 w-5"
+                  aria-hidden="true"
+                />
+                <span>
+                  {item.mobileLabel}
+                </span>
+
+                {packageLocked ? (
+                  <LockKeyhole
+                    className="absolute right-2 top-2 h-2.5 w-2.5 text-amber-300"
+                    aria-label="Dostupno u višem paketu"
+                  />
+                ) : null}
+              </Link>
+            );
+          }
+        )}
+
+        <button
+          type="button"
+          onClick={onOpenMore}
+          aria-label="Otvori sve admin module"
+          aria-expanded="false"
+          className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-2 text-[10px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-amber-300 ${
+            primaryRouteActive
+              ? "text-zinc-500 hover:bg-white/[0.05] hover:text-white"
+              : "bg-amber-300/12 text-amber-200"
+          }`}
+        >
+          <Grid2X2
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+          <span>
+            Više
+          </span>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
 export default function AdminShell({
   children,
   admin,
   productAccess,
   reviewAttentionCount,
 }: AdminShellProps) {
-  const pathname = usePathname();
+  const pathname =
+    usePathname();
 
   const [
     mobileMenuOpen,
     setMobileMenuOpen,
   ] = useState(false);
 
+  const [
+    collapsedGroups,
+    setCollapsedGroups,
+  ] = useState<
+    AdminNavigationGroupKey[]
+  >(() =>
+    ADMIN_NAVIGATION_GROUPS
+      .filter(
+        (group) =>
+          group.defaultCollapsed
+      )
+      .map(
+        (group) =>
+          group.key
+      )
+  );
+
   const currentNavigationItem =
-    navigationItems.find(
-      (item) =>
-        isNavigationItemActive(
-          pathname,
-          item.href
-        )
+    getAdminNavigationItemForPath(
+      pathname
     );
+
+  const activeGroupKey =
+    getAdminNavigationGroupForPath(
+      pathname
+    )?.key ??
+    null;
 
   const pageTitle =
     currentNavigationItem?.label ??
     "Administracija";
 
+  function toggleGroup(
+    groupKey:
+      AdminNavigationGroupKey
+  ) {
+    setCollapsedGroups(
+      (current) =>
+        current.includes(
+          groupKey
+        )
+          ? current.filter(
+              (item) =>
+                item !==
+                groupKey
+            )
+          : [
+              ...current,
+              groupKey,
+            ]
+    );
+  }
+
+  const sidebarProps = {
+    pathname,
+    businessName:
+      admin.business.name,
+    businessSlug:
+      admin.business.slug,
+    publicUrl:
+      admin.business.publicUrl,
+    email:
+      admin.email,
+    role:
+      admin.role,
+    productAccess,
+    reviewAttentionCount,
+    tenantCount:
+      admin.tenantCount,
+    collapsedGroups,
+    activeGroupKey,
+    onToggleGroup:
+      toggleGroup,
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/[0.07] bg-zinc-950 lg:block">
         <SidebarContent
-          pathname={pathname}
-          businessName={
-            admin.business.name
-          }
-          businessSlug={
-            admin.business.slug
-          }
-          publicUrl={
-            admin.business.publicUrl
-          }
-          email={admin.email}
-          role={admin.role}
-          productAccess={
-            productAccess
-          }
-          reviewAttentionCount={
-            reviewAttentionCount
-          }
-          tenantCount={
-            admin.tenantCount
-          }
+          {...sidebarProps}
         />
       </aside>
 
-      {mobileMenuOpen && (
+      {mobileMenuOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             aria-label="Zatvori navigaciju"
             onClick={() =>
-              setMobileMenuOpen(false)
+              setMobileMenuOpen(
+                false
+              )
             }
           />
 
-          <aside className="absolute inset-y-0 left-0 w-[min(90vw,20rem)] border-r border-white/10 bg-zinc-950 shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 w-[min(90vw,21rem)] border-r border-white/10 bg-zinc-950 shadow-2xl">
             <button
               type="button"
               onClick={() =>
-                setMobileMenuOpen(false)
+                setMobileMenuOpen(
+                  false
+                )
               }
               aria-label="Zatvori meni"
               className="absolute right-3 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.05] text-zinc-400 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -576,34 +774,16 @@ export default function AdminShell({
             </button>
 
             <SidebarContent
-              pathname={pathname}
-              businessName={
-                admin.business.name
-              }
-              businessSlug={
-                admin.business.slug
-              }
-              publicUrl={
-                admin.business.publicUrl
-              }
-              email={admin.email}
-              role={admin.role}
-              productAccess={
-                productAccess
-              }
-              reviewAttentionCount={
-                reviewAttentionCount
-              }
-              tenantCount={
-                admin.tenantCount
-              }
+              {...sidebarProps}
               onNavigate={() =>
-                setMobileMenuOpen(false)
+                setMobileMenuOpen(
+                  false
+                )
               }
             />
           </aside>
         </div>
-      )}
+      ) : null}
 
       <div className="lg:pl-72">
         <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-zinc-950/80 backdrop-blur-xl">
@@ -612,7 +792,9 @@ export default function AdminShell({
               <button
                 type="button"
                 onClick={() =>
-                  setMobileMenuOpen(true)
+                  setMobileMenuOpen(
+                    true
+                  )
                 }
                 aria-label="Otvori admin meni"
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:bg-white/[0.08] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300 lg:hidden"
@@ -672,10 +854,22 @@ export default function AdminShell({
           </div>
         </header>
 
-        <main className="min-h-[calc(100vh-5rem)]">
+        <main className="min-h-[calc(100vh-5rem)] pb-24 lg:pb-0">
           {children}
         </main>
       </div>
+
+      <MobileBottomNavigation
+        pathname={pathname}
+        productAccess={
+          productAccess
+        }
+        onOpenMore={() =>
+          setMobileMenuOpen(
+            true
+          )
+        }
+      />
     </div>
   );
 }

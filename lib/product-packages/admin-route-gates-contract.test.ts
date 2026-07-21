@@ -21,6 +21,9 @@ function readSource(
       ...segments
     ),
     "utf8"
+  ).replace(
+    /\r\n/g,
+    "\n"
   );
 }
 
@@ -37,6 +40,13 @@ const SHELL_SOURCE =
     "components",
     "admin",
     "AdminShell.tsx"
+  );
+
+const NAVIGATION_SOURCE =
+  readSource(
+    "lib",
+    "admin",
+    "admin-navigation.ts"
   );
 
 const GALLERY_PAGE_SOURCE =
@@ -124,7 +134,7 @@ describe(
     );
 
     it(
-      "keeps locked navigation routes clickable and marks them as package features",
+      "keeps locked navigation routes clickable through the central registry",
       () => {
         expect(
           SHELL_SOURCE
@@ -135,7 +145,7 @@ describe(
         expect(
           SHELL_SOURCE
         ).toMatch(
-          /blockedBy\s*===\s*"package"/
+          /blockedBy\s*===\s*[\n\s]*"package"/
         );
 
         expect(
@@ -145,15 +155,21 @@ describe(
         );
 
         expect(
-          SHELL_SOURCE
+          NAVIGATION_SOURCE
         ).toContain(
           'href: "/admin/gallery"'
         );
 
         expect(
-          SHELL_SOURCE
+          NAVIGATION_SOURCE
         ).toContain(
           'href: "/admin/reviews"'
+        );
+
+        expect(
+          SHELL_SOURCE
+        ).toContain(
+          "@/lib/admin/admin-navigation"
         );
       }
     );
