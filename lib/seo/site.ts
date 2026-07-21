@@ -3,16 +3,16 @@ import type {
 } from "next";
 
 export const SITE_NAME =
-  "Salon Platforma";
+  "Ordum Studios";
 
 export const SITE_SHORT_NAME =
-  "Platforma";
+  "Ordum";
 
 export const SITE_DESCRIPTION =
-  "Platforma za online zakazivanje i upravljanje beauty i wellness biznisima.";
+  "Profesionalni sajt, online zakazivanje i operativni alati za beauty i wellness studije.";
 
 export const DEFAULT_SITE_URL =
-  "https://salon-platforma.vercel.app";
+  "https://ordumstudios.com";
 
 export const PRIVATE_PAGE_ROBOTS:
   Metadata["robots"] = {

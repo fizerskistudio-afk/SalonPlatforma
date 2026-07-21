@@ -1,6 +1,6 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 20. jul 2026.
+**Ažurirano:** 21. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`  
 **Aktivna grana:** `backup/theme-core-barber-beta`  
 **Radni naziv:** `Salon Platforma`  
@@ -1271,13 +1271,18 @@ Stavke u ovom odeljku ostaju važeće kao istorijski i production hardening plan
 
 ### 11. PLATFORM-LANDING-01
 
-- [ ] product brief
-- [ ] Qwen desktop/mobile koncept
-- [ ] implementacija odobrenog dizajna
-- [ ] demo tenant kartice
-- [ ] benefit i feature sekcije
-- [ ] FAQ i CTA
-- [ ] landing SEO sadržaj
+- [x] product brief i mirniji Ordum art direction zaključani
+- [x] Qwen koncept pregledan kao nezavisna narativna referenca, bez preuzimanja kič/glow jezika i neproverenih tvrdnji
+- [x] modularna desktop/mobile responsive implementacija pripremljena za browser acceptance
+- [x] live Barber i Nails tenant kartice koriste shared hostname boundary
+- [x] benefit, capability, onboarding i registry-backed pricing sekcije
+- [x] FAQ i zaštićen Resend kontakt CTA bez database write-a
+- [x] landing SEO naslov, opis, canonical i Ordum site metadata
+- [x] inicijalni desktop/mobile visual acceptance potvrđen; landing je prihvaćen kao production baseline
+- [ ] production contact-form smoke i potvrđena Resend isporuka
+- [ ] P2 brand refinement: finalni Ordum logo, favicon i dodatno usklađivanje vizuelnog identiteta
+
+Detaljan 01A implementation zapis: `docs/milestones/PLATFORM-LANDING-ORDUM-01A.md`.
 
 ### 12. PRODUCTION-DOMAINS-ENV-01
 
