@@ -1,14 +1,14 @@
 # Salon Platforma — Product & Engineering Roadmap
 
 **Ažurirano:** 21. jul 2026.
-**Repo:** `fizerskistudio-afk/SalonPlatforma`  
-**Aktivna grana:** `backup/theme-core-barber-beta`  
-**Radni naziv:** `Salon Platforma`  
-**Status:** multi-tenant core, Reviews foundation, platform-admin access recovery, runtime product package gates, platform-admin Operations, AI Content Assist foundation, `CONTENT-STARTER-PACKS-01A` i `CONTENT-STARTER-PACKS-01B` su završeni i pushovani; `DEMO-THEME-EDITORIAL-02` i `DEMO-THEME-BARBER-01` su završeni, a Nails desktop/mobile imaju ručni visual PASS. `MAIN-INTEGRATION-AUDIT-01` je potvrdio čist fast-forward put ka `main`; vlasnik je odobrio Nails release checkpoint, push i kontrolisanu `main` integraciju.
+**Repo:** `fizerskistudio-afk/SalonPlatforma`
+**Aktivna grana:** `main`
+**Radni naziv:** `Salon Platforma`
+**Status:** `main` je production i aktivna razvojna osnova; Ordum production domen, Resend test-mode E2E, platform landing i `MASTER-SYSTEM-QA-01A-R4` read-only baseline su završeni. Authenticated/mutating booking, admin calendar, Google Calendar, production email/cron i puni cross-tenant regression ostaju otvoreni pod `MASTER-SYSTEM-QA-01B`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
-## 0. Trenutni operativni checkpoint — 20. jul 2026.
+## 0. Trenutni operativni checkpoint — 21. jul 2026.
 
 - [x] `PRODUCT-PACKAGES-ENTITLEMENTS-01` završen i pushovan;
 - [x] `PLATFORM-ADMIN-OPERATIONS-01` završen i pushovan;
@@ -89,6 +89,13 @@
 - [ ] aktivni operativni milestone: `BARBER-PILOT-ONBOARDING-01`;
 - [ ] prvi kontrolisani live theme update posle stabilnog baseline-a: `BARBER-V2-CONTACT-MAP-01`;
 - [x] `MAIN-INTEGRATION-AUDIT-01` read-only audit završen; `main` je tačan predak razvojne grane i odobrena je kontrolisana fast-forward integracija.
+- [x] kontrolisana fast-forward integracija i kasniji production closeout commit-i završeni; aktivni checkpoint je `96c5bdf029d3e29d1a0ccf8ae56cfbdaad4422ea`;
+- [x] `MASTER-SYSTEM-QA-01A-R4` read-only baseline završen — kompletan `npm run check`, sekvencijalni runtime health preflight i Playwright desktop/mobile matrica `18/18` imaju PASS;
+- [x] potvrđeni su Ordum landing, Barber i Nails javni tenant, unknown-tenant private/noindex granica, anonymous admin/staff/platform-admin auth boundary i read-only catalog/availability validation;
+- [x] R4 nije menjao application source, bazu, migracije, rezervacije, email, tenant lifecycle ili Git istoriju;
+- [x] Playwright runtime i završni evidence držani su van repozitorijuma u Windows `%TEMP%\OrdumStudios\master-system-qa\...`;
+- [ ] `MASTER-SYSTEM-QA-01B` ostaje za authenticated/mutating production regression: live booking, admin calendar, staff workflow, Google Calendar, production recipient email, cron i puni cross-tenant test;
+- [ ] production contact-form Resend smoke, mobile preview booking guard, migration `029` odluka i formalni read-only DB verification output za migraciju `032` ostaju zasebno otvoreni.
 
 ### Pre-closeout implementation checkpoint
 
@@ -1402,10 +1409,10 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
-Production grana: main
-Production source checkpoint: 4e23d5f7902e7f3b1521e5825c0fd10e1955904c
-Checkpoint subject: feat(theme): add modular nails atelier experience
-Release tag: nails-v1-preview-01
+Aktivna i production grana: main
+Production source checkpoint: 96c5bdf029d3e29d1a0ccf8ae56cfbdaad4422ea
+Checkpoint subject: feat(platform): launch Ordum Studios landing experience
+Release tags: barber-v2-pilot-01, nails-v1-preview-01
 Istorijska grana: backup/theme-core-barber-beta je zamrznuta i ne koristi se za novi rad
 Razvojni model: kratka milestone grana iz latest main → QA → eksplicitno odobren merge u main
 Production domen: https://ordumstudios.com
@@ -1414,11 +1421,15 @@ Barber tenant: https://heritage-barber-demo.ordumstudios.com
 Nails tenant: https://atelier-luna-nails.ordumstudios.com
 Production email: Resend test-mode E2E PASS; pravi recipient režim nije aktiviran
 Webhook: potpisani provider status se vidi kao Poslato Resendu i Isporučeno u admin delivery logu
+MASTER-SYSTEM-QA-01A-R4: read-only local production baseline PASS; npm run check + health preflight + Playwright 18/18
+MASTER-SYSTEM-QA-01B: pending authenticated/mutating production regression
 Cron: secret postoji, aktivni schedule nije uveden
 Google Calendar: novi production callback i cross-subdomain auth/cookie granica ostaju otvoreni
 DMARC i finalni reply-to inbox: otvoreno
 Migration 029: pending; ne koristiti običan supabase db push
-Aktivni docs closeout: PRODUCTION-DOMAINS-ENV-01B
-Sledeći kontrolisani paket: PRODUCTION-DOMAINS-ENV-01C — email domain hardening i Google OAuth callback odluka
-Commercial launch gate: backup/restore + legal + master QA + pravi pilot + eksplicitna odluka
+Migration 032: primenjena; formalni read-only DB verification output ostaje da se zabeleži
+Aktivni docs closeout: MASTER-SYSTEM-QA-01A-R4
+Sledeći QA paket: MASTER-SYSTEM-QA-01B — authenticated/mutating production regression
+Paralelni production hardening: PRODUCTION-DOMAINS-ENV-01C — email domain hardening i Google OAuth callback odluka
+Commercial launch gate: backup/restore + legal + puni master QA + pravi pilot + eksplicitna odluka
 ```
