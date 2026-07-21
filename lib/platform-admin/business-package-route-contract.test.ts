@@ -23,6 +23,9 @@ const ROUTE_SOURCE =
       "route.ts"
     ),
     "utf8"
+  ).replace(
+    /\r\n?/g,
+    "\n"
   );
 
 describe(

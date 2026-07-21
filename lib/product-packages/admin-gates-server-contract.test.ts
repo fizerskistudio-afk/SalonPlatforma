@@ -20,6 +20,9 @@ const SOURCE =
       "admin-gates-server.ts"
     ),
     "utf8"
+  ).replace(
+    /\r\n?/g,
+    "\n"
   );
 
 describe(

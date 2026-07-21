@@ -1264,10 +1264,10 @@ Stavke u ovom odeljku ostaju važeće kao istorijski i production hardening plan
 
 - [ ] finalno ime
 - [ ] pravna i domain provera
-- [ ] domen
+- [x] production domen `ordumstudios.com`
 - [ ] logo i favicon
 - [ ] tipografija i boje
-- [ ] platform email branding
+- [x] početni platform email branding `Ordum Studios` u test režimu
 
 ### 11. PLATFORM-LANDING-01
 
@@ -1281,16 +1281,25 @@ Stavke u ovom odeljku ostaju važeće kao istorijski i production hardening plan
 
 ### 12. PRODUCTION-DOMAINS-ENV-01
 
-- [ ] apex i `www`
+- [x] apex `ordumstudios.com` i `www` redirect
 - [ ] `app`
-- [ ] wildcard tenant domeni
-- [ ] Vercel konfiguracija
+- [x] wildcard tenant domeni `*.ordumstudios.com`
+- [x] Vercel domain i Production ENV konfiguracija
 - [ ] production Supabase odluka/setup
 - [ ] production Resend domen, SPF, DKIM i DMARC
+  - [x] Resend sender domen, SPF i DKIM verifikovani
+  - [x] test booking → Resend → mailbox → webhook → admin delivery status
+  - [ ] DMARC politika i finalni reply-to inbox
 - [ ] Google OAuth callback URL-ovi
 - [ ] cron secret i schedule
-- [ ] production rate-limit secret
+  - [x] `CRON_SECRET` konfigurisan bez aktivnog schedule-a
+  - [ ] aktivni schedule tek posle kontrolisanog cron E2E testa
+- [x] production rate-limit secret
 - [ ] preview/production env separation
+
+Detaljan 01B closeout: `docs/milestones/PRODUCTION-DOMAINS-ENV-01B.md`.
+
+- [x] Windows source-contract testovi normalizuju CRLF/LF pre tekstualnih assertion-a
 
 ### 13. PILOT-ACCEPTANCE-01
 
@@ -1337,7 +1346,7 @@ Stavke u ovom odeljku ostaju važeće kao istorijski i production hardening plan
 - Globalni `app/loading.tsx` ostaje za platform/private rute; `app/salon/loading.tsx` sprečava platformski splash na tenant ruti.
 - View override je session-only; path i tenant poddomen ne dele localStorage, pa trajna preferencija nije deo javnog runtime ugovora.
 - Public salon SSR dobija početni viewport hint iz request headera da bi hydration krenuo sa istim rendererom.
-- Finalni tržišni brend još nije usvojen; `ORDO` je kandidat, ne finalna odluka.
+- Produkcioni domen je `ordumstudios.com`; finalna pravna i žig provera brenda ostaje otvorena.
 - Klasičan PHP/WordPress hosting nije primarni runtime platforme.
 
 ---
@@ -1388,29 +1397,23 @@ Environment fajlovi ostaju lokalni i ignorisani kroz `.gitignore`.
 
 ```text
 Repo: fizerskistudio-afk/SalonPlatforma
-Grana: backup/theme-core-barber-beta
-Poslednji pushovani implementation checkpoint: 6261d56e96a685905fe0a00f2357d26aa331104f
-Checkpoint subject: feat(content): add starter pack registry and vertical manifests
-Checkpoint tag: checkpoint/pre-platform-admin-review-2026-07-13
-Poslednji završen i pushovan chapter: CONTENT-STARTER-PACKS-01A
-Reviews foundation: završena lokalna i source osnova; production email/cron aktivacija odložena
-Lumière: završena referentna tema; galerijski layout zaključan
-Admin locales: ADMIN-LOCALES-DYNAMIC-01A i 01B PASS
-Aktivni milestone: CONTENT-STARTER-PACKS-01B closeout
-Lokalni checkpoint: 9 visible-builder/provisioning fajlova PASS i staged; ROADMAP se dodaje kao 10. fajl
-Starter katalog: 10 vertikala, 21 modul i 106 usluga
-01B UI: `/platform-admin/businesses/new/starter-pack`
-01B apply: trusted server rematerialization + postojeći atomski `provision_business` RPC
-01B idempotency: `starterPack.applyKey` + slug conflict guard
-01B publication: novi tenant ostaje draft; nema auto-publish-a
-01B database: nema nove migracije i nema existing-tenant overwrite-a
-01B runtime: kontrolisani browser provisioning smoke još nije izvršen
-AI application foundation: pushovan, bez live Groq/Google aktivacije
-AI usage: `rollout_read_only_zero`; pravi persistence odložen u AI-CONTENT-ASSIST-USAGE-01
-Sledeći korak posle push-a: DEMO-THEME-BARBER-01
-Vidljivi redosled: Editorial → Barber → Nails
-Posle tema: client content intake → shareable preview → Platform Admin E2E → demo data → master QA
-Preview soft launch: bez produkcionog emaila, review crona i live booking tvrdnje
-Main source integration: dozvoljena posle tačnog diff/QA audita i eksplicitne dozvole; commercial production-launch gate ostaje domen + RBAC DB odluka + backup/legal + master QA + eksplicitna dozvola
-Production track posle preview gate-a: backup → legal → brand → domains/env → StudioBiBi pilot
+Production grana: main
+Production source checkpoint: 4e23d5f7902e7f3b1521e5825c0fd10e1955904c
+Checkpoint subject: feat(theme): add modular nails atelier experience
+Release tag: nails-v1-preview-01
+Istorijska grana: backup/theme-core-barber-beta je zamrznuta i ne koristi se za novi rad
+Razvojni model: kratka milestone grana iz latest main → QA → eksplicitno odobren merge u main
+Production domen: https://ordumstudios.com
+Tenant wildcard: https://<business-slug>.ordumstudios.com
+Barber tenant: https://heritage-barber-demo.ordumstudios.com
+Nails tenant: https://atelier-luna-nails.ordumstudios.com
+Production email: Resend test-mode E2E PASS; pravi recipient režim nije aktiviran
+Webhook: potpisani provider status se vidi kao Poslato Resendu i Isporučeno u admin delivery logu
+Cron: secret postoji, aktivni schedule nije uveden
+Google Calendar: novi production callback i cross-subdomain auth/cookie granica ostaju otvoreni
+DMARC i finalni reply-to inbox: otvoreno
+Migration 029: pending; ne koristiti običan supabase db push
+Aktivni docs closeout: PRODUCTION-DOMAINS-ENV-01B
+Sledeći kontrolisani paket: PRODUCTION-DOMAINS-ENV-01C — email domain hardening i Google OAuth callback odluka
+Commercial launch gate: backup/restore + legal + master QA + pravi pilot + eksplicitna odluka
 ```
