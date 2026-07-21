@@ -2,9 +2,9 @@
 
 **Ažurirano:** 21. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/ordum-product-ladder-01`
+**Aktivna grana:** `milestone/platform-growth-architecture-01`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` ostaje production baseline. `ORDUM-ADMIN-IA-01A` je integrisan, a `ORDUM-PRODUCT-LADDER-01A` ima code PASS na grani `milestone/ordum-product-ladder-01`. V1 product strategy sada odvaja tehničke entitlement pakete, javne komercijalne ponude, rollout statuse i Ordum level-e. Sledeći aktivni korak je read-only `PLATFORM-GROWTH-ARCHITECTURE-01` audit, zatim platformska landing stranica, blog/content foundation i lokalni discovery MVP.
+**Status:** `main` ostaje production baseline. `ORDUM-PRODUCT-LADDER-01A` je integrisan, a `PLATFORM-GROWTH-ARCHITECTURE-01A` ima code PASS na grani `milestone/platform-growth-architecture-01`. Read-only audit i typed contracts sada zaključavaju discovery, SEO/index, redirect/preselection i pseudonymous attribution granice bez runtime ili database izmene. Sledeći korak je `PLATFORM-GROWTH-ARCHITECTURE-01B` canonical location/service registry, zatim `PLATFORM-LANDING-02`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -117,6 +117,19 @@
 - [ ] `PLATFORM-GROWTH-ARCHITECTURE-01` je sledeći konkretan milestone i počinje read-only auditom availability, lokacija, service taxonomy, SEO/sitemap i redirect/attribution osnove;
 - [ ] nakon audita sledi `PLATFORM-LANDING-02`, pa blog/content foundation i `SVILAJNAC-DISCOVERY-MVP-01`;
 - [ ] cene, statusi i prioriteti ostaju v1 proizvodna odluka i mogu se menjati kada realni klijenti, prodaja ili tehnička ograničenja daju bolji signal.
+
+- [x] `PLATFORM-GROWTH-ARCHITECTURE-01A` završava read-only audit postojećeg tenant catalog, availability, booking, SEO, sitemap i public-route baseline-a;
+- [x] potvrđeno je da `get_available_slots` podržava sve eligible zaposlene kada je `employee_id = null`, ali ostaje striktno vezan za jedan `business_id` i jedan tenant `service_id`;
+- [x] potvrđeno je da trenutni localized `city/country` tekst i tenant-specifični service UUID/slugs nisu dovoljni za pouzdan cross-tenant discovery bez canonical location i canonical service sloja;
+- [x] typed discovery contract zaključava marketplace opt-in, aktivno service mapiranje, earliest-available sortiranje i tenant booking handoff bez paralelnog booking engine-a;
+- [x] typed redirect/preselection contract koristi `book`, `serviceId`, `employeeId`, `startsAt` i pseudonymous `ordum_ref`, uz obaveznu buduću server-side revalidaciju termina;
+- [x] SEO contract zaključava blog, guide, city i city-service rute, conditional inventory indeksiranje, runtime filtere van canonical URL-a i `noindex` redirect rutu;
+- [x] attribution contract ne dozvoljava customer ime, telefon, email, napomenu ili raw IP u growth event dimenzijama;
+- [x] ciljani ESLint, ciljani Vitest, kompletan `npm run check` i `git diff --cached --check` prošli su;
+- [x] ručni browser acceptance nije primenljiv jer 01A ne uvodi UI, javnu rutu, API runtime, bazu ili migraciju;
+- [x] milestone ne uvodi marketplace runtime, blog UI, cross-tenant query, landing izmenu, booking izmenu ili duplicate `/saloni/[businessSlug]` profil;
+- [ ] `PLATFORM-GROWTH-ARCHITECTURE-01B` je sledeći konkretan milestone: canonical location registry, canonical service registry, početni `rs:svilajnac` i `barber:musko-sisanje` seed contract i mapping policy bez DB migracije;
+- [ ] nakon 01B sledi `PLATFORM-LANDING-02`, zatim `CONTENT-FOUNDATION-01`, `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01`.
 
 ### Pre-closeout implementation checkpoint
 
