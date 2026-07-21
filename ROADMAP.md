@@ -2,9 +2,9 @@
 
 **Ažurirano:** 21. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/platform-growth-architecture-01`
+**Aktivna grana:** `milestone/platform-growth-architecture-01b`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` ostaje production baseline. `ORDUM-PRODUCT-LADDER-01A` je integrisan, a `PLATFORM-GROWTH-ARCHITECTURE-01A` ima code PASS na grani `milestone/platform-growth-architecture-01`. Read-only audit i typed contracts sada zaključavaju discovery, SEO/index, redirect/preselection i pseudonymous attribution granice bez runtime ili database izmene. Sledeći korak je `PLATFORM-GROWTH-ARCHITECTURE-01B` canonical location/service registry, zatim `PLATFORM-LANDING-02`.
+**Status:** `main` ostaje production baseline. `PLATFORM-GROWTH-ARCHITECTURE-01A` je integrisan, root `README.md` je osvežen za Ordum Studios identitet i aktuelnu product/growth arhitekturu, a aktivna grana je `milestone/platform-growth-architecture-01b`. Sledeći konkretan korak je `PLATFORM-GROWTH-ARCHITECTURE-01B` canonical location/service registry, zatim `PLATFORM-LANDING-02`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -130,6 +130,14 @@
 - [x] milestone ne uvodi marketplace runtime, blog UI, cross-tenant query, landing izmenu, booking izmenu ili duplicate `/saloni/[businessSlug]` profil;
 - [ ] `PLATFORM-GROWTH-ARCHITECTURE-01B` je sledeći konkretan milestone: canonical location registry, canonical service registry, početni `rs:svilajnac` i `barber:musko-sisanje` seed contract i mapping policy bez DB migracije;
 - [ ] nakon 01B sledi `PLATFORM-LANDING-02`, zatim `CONTENT-FOUNDATION-01`, `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01`.
+
+- [x] `DOCS-ORDUM-README-01` zamenjuje zastareli root README stabilnim Ordum Studios projektnim vodičem;
+- [x] README sada razlikuje tehničke pakete, komercijalne ponude i rollout statuse, prikazuje Ordum level mapu i upućuje na versioned Product Ladder i Growth Architecture dokumente;
+- [x] uklonjene su zastarele tvrdnje da tržišni naziv i domen nisu izabrani, da je root privremeni demo hub i da je stara `backup/theme-core-barber-beta` grana aktivna;
+- [x] dokumentovani su aktuelni tenant/admin/staff/platform-admin/growth slojevi, lokalni setup, QA workflow, security pravila i production domen `ordumstudios.com`;
+- [x] docs-only promena ne menja runtime, UI source, booking, bazu, migracije ili provider integracije;
+- [x] README payload, interni dokumentacioni linkovi i `git diff --cached --check` validirani su;
+- [ ] `PLATFORM-GROWTH-ARCHITECTURE-01B` ostaje aktivni sledeći milestone na grani `milestone/platform-growth-architecture-01b`.
 
 ### Pre-closeout implementation checkpoint
 
