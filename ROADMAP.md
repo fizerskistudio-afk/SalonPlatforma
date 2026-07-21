@@ -2,9 +2,9 @@
 
 **Ažurirano:** 21. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/ordum-admin-ia-01`
+**Aktivna grana:** `milestone/ordum-product-ladder-01`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` ostaje production baseline. `ORDUM-ADMIN-IA-01A` ima code PASS i desktop browser acceptance na grani `milestone/ordum-admin-ia-01`; mobile acceptance je eksplicitno odložen za kasniji admin UI/polish ciklus. Sledeći aktivni arhitektonski korak je `PLATFORM-GROWTH-ARCHITECTURE-01`, a zatim dorada platformske landing stranice.
+**Status:** `main` ostaje production baseline. `ORDUM-ADMIN-IA-01A` je integrisan, a `ORDUM-PRODUCT-LADDER-01A` ima code PASS na grani `milestone/ordum-product-ladder-01`. V1 product strategy sada odvaja tehničke entitlement pakete, javne komercijalne ponude, rollout statuse i Ordum level-e. Sledeći aktivni korak je read-only `PLATFORM-GROWTH-ARCHITECTURE-01` audit, zatim platformska landing stranica, blog/content foundation i lokalni discovery MVP.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -106,6 +106,17 @@
 - [ ] `PLATFORM-GROWTH-ARCHITECTURE-01` je sledeći konkretan milestone: read-only audit postojeće availability/SQL osnove, discovery/marketplace query contract, SEO/blog content graph, grad–usluga landing stranice i merljiv redirect ka tenant booking toku;
 - [ ] Google Business Profile, fiskalizacija, knjigovodstvo, lager i ostale integracije ostaju opcioni budući moduli; sada se ne tretiraju kao hitni launch blocker;
 - [ ] dorada platformske landing stranice sledi nakon growth architecture audita, kako bi positioning i CTA pratili stvarne podržane poslovne modele.
+
+- [x] `ORDUM-PRODUCT-LADDER-01A` uvodi odvojene registry-je za feature rollout, komercijalne ponude i Ordum platform level-e bez izmene postojećeg `PRODUCT_PACKAGES` entitlement sloja;
+- [x] rollout contract razlikuje `live`, `beta`, `coming_soon`, `research` i `retired`, tako da postojanje tehničkog entitlement-a više nije isto što i javno obećana spremnost funkcije;
+- [x] v1 komercijalna ponuda definiše `Ordum Launch Partner` i ograničenu `Founding Partner` ponudu, uz infrastrukturu za subscription, pilot, custom quote, pay-per-lead, commission i hybrid modele;
+- [x] platform progression je zaključan kao šest nivoa: Digitalni salon, Growth Platform, Local Discovery, Salon Operations, Business OS i Regionalna mreža;
+- [x] Level 1 je označen kao otključan, Level 2 kao aktivan, a kasniji nivoi ostaju zaključani dok ne ispune definisane uslove;
+- [x] ciljani ESLint, ciljani Vitest i kompletan `npm run check` prošli su;
+- [x] milestone nije menjao landing UI, admin/tenant UI, bazu, migracije, booking, auth, Google Calendar, email runtime ili postojeće tehničke pakete;
+- [ ] `PLATFORM-GROWTH-ARCHITECTURE-01` je sledeći konkretan milestone i počinje read-only auditom availability, lokacija, service taxonomy, SEO/sitemap i redirect/attribution osnove;
+- [ ] nakon audita sledi `PLATFORM-LANDING-02`, pa blog/content foundation i `SVILAJNAC-DISCOVERY-MVP-01`;
+- [ ] cene, statusi i prioriteti ostaju v1 proizvodna odluka i mogu se menjati kada realni klijenti, prodaja ili tehnička ograničenja daju bolji signal.
 
 ### Pre-closeout implementation checkpoint
 
