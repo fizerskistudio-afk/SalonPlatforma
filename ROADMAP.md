@@ -2,9 +2,9 @@
 
 **Ažurirano:** 22. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/ordum-workspace-appshell-01a`
+**Aktivna grana:** `milestone/ordum-workspace-appshell-01b`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` production baseline je `c60b550` sa završenim `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`. `ORDUM-WORKSPACE-APPSHELL-01A` ima source-only code PASS na aktivnoj grani: typed App Registry, role-specific route contract, Product Package entitlement provera, dependency/rollout visibility resolver i server-only entrypoint su završeni bez UI-ja, baze, migracije ili PWA izmene. Sledeći konkretan milestone je `ORDUM-WORKSPACE-APPSHELL-01B`.
+**Status:** `main` production baseline je `ffce602` sa završenim `ORDUM-WORKSPACE-APPSHELL-01A`. `ORDUM-WORKSPACE-APPSHELL-01B` ima code PASS i funkcionalni desktop/mobile browser PASS na aktivnoj grani: privatni tenant-aware `/workspace` launcher, postojeći admin/staff identity adapteri, registry-backed Studio/Content kartice i noindex granica rade bez admin route rewrite-a, baze, migracije ili PWA izmene. Vizuelni smer je prihvaćen samo kao funkcionalni foundation; budući launcher polish ide ka jednostavnijem Citrix Workspace obrascu. Sledeći konkretan milestone je `ORDUM-DOCUMENTATION-IA-01`, zatim `ORDUM-PWA-FOUNDATION-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -200,6 +200,24 @@
 - [ ] sledeći milestone je `ORDUM-WORKSPACE-APPSHELL-01B`: tenant-aware `/workspace` launcher, server-side role/package resolution, Studio adapter ka postojećem `/admin` ili `/staff` i pošten locked/coming-soon prikaz;
 - [ ] 01B zahteva desktop i mobile browser acceptance, ali ne radi veliki admin route rewrite, novu bazu ili PWA service worker;
 - [ ] nakon stabilnog 01B shell-a sledi `ORDUM-PWA-FOUNDATION-01`.
+
+- [x] `ORDUM-WORKSPACE-APPSHELL-01B` uvodi privatnu `/workspace` rutu i `/workspace/login` selector koji koristi postojeće admin i staff prijavne tokove bez nove lozinke ili paralelne sesije;
+- [x] centralni `server-only` Workspace context adapter koristi postojeći `AdminContext`, `StaffContext`, aktivni tenant i `ProductPackageAccess`;
+- [x] owner/manager Workspace prikazuje LIVE `Studio` i zaključani `Content` sa poštenim `COMING SOON` statusom;
+- [x] staff Workspace prikazuje samo LIVE `Studio`; owner/manager Content kartica i research moduli nisu dostupni staff kontekstu;
+- [x] role-specific Studio adapter zadržava postojeće rute: owner/manager vodi na `/admin`, a staff na `/staff`;
+- [x] postojeći admin i staff shell imaju eksplicitne `Ordum Workspace` ulaze bez izmene admin navigation registry-ja ili staff permission modela;
+- [x] direktni `/workspace` proverava postojeći admin pa staff identity, dok eksplicitni `context=admin|staff` ne prelazi automatski u drugi membership kontekst;
+- [x] privremena lozinka, izbor aktivnog salona i staff setup-required guardovi ostaju na postojećim rutama;
+- [x] `/workspace` i `/workspace/login` su privatne `noindex, nofollow, noarchive, nosnippet` površine;
+- [x] ciljani ESLint, ciljani Vitest, kompletan `npm run check` i `git diff --cached --check` prošli su;
+- [x] ručni funkcionalni desktop/mobile browser acceptance prošao je: anonymous redirect/login selector, owner/manager launcher, staff launcher, Studio deep linkovi, Content locked state, public-site link i responsive prikaz rade bez blocker-a;
+- [x] trenutni vizuelni dizajn je prihvaćen samo kao funkcionalni foundation, ne kao finalni UX standard;
+- [ ] budući Workspace visual polish treba da prati jednostavniji Citrix Workspace smer: kompaktniji app grid, manje hero prostora, jasnija hijerarhija i brži ulaz u aplikacije;
+- [x] milestone ne menja booking, availability, bazu, RLS, migracije, Product Package registry, Product Strategy registry, PWA manifest, service worker ili Network runtime;
+- [x] detaljan implementation i acceptance zapis nalazi se u `docs/milestones/ORDUM-WORKSPACE-APPSHELL-01B.md`;
+- [ ] sledeći milestone je `ORDUM-DOCUMENTATION-IA-01`: skraćuje operativni `ROADMAP.md`, uvodi jasan current-status dokument i premešta završenu istoriju u arhivu bez gubitka milestone evidencije;
+- [ ] posle dokumentacionog cleanup-a sledi `ORDUM-PWA-FOUNDATION-01`.
 
 ### Pre-closeout implementation checkpoint
 

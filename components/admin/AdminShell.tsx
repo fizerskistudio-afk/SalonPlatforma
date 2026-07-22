@@ -470,6 +470,20 @@ function SidebarContent({
       </nav>
 
       <div className="border-t border-white/[0.07] p-3">
+        <Link
+          href="/workspace?context=admin"
+          onClick={onNavigate}
+          className="mb-3 flex min-h-11 items-center justify-between rounded-2xl border border-amber-300/15 bg-amber-300/[0.06] px-4 py-3 text-sm font-medium text-amber-200 transition hover:border-amber-300/30 hover:bg-amber-300/[0.1] focus:outline-none focus:ring-2 focus:ring-amber-300"
+        >
+          <span>
+            Ordum Workspace
+          </span>
+          <Grid2X2
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+        </Link>
+
         {tenantCount > 1 ? (
           <Link
             href="/admin/select-business"

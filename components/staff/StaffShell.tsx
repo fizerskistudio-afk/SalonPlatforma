@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   CalendarDays,
   ExternalLink,
+  Grid2X2,
   LockKeyhole,
   LogOut,
   Scissors,
@@ -82,6 +83,22 @@ export default function StaffShell({
           </Link>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/workspace?context=staff"
+              title="Ordum Workspace"
+              aria-label="Otvori Ordum Workspace"
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-amber-300/15 bg-amber-300/[0.06] px-3 text-xs font-medium text-amber-200 transition hover:border-amber-300/30 hover:bg-amber-300/[0.1] focus:outline-none focus:ring-2 focus:ring-amber-300"
+            >
+              <Grid2X2
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+
+              <span className="hidden lg:inline">
+                Workspace
+              </span>
+            </Link>
+
             <Link
               href="/staff/calendar"
               className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-400/15 bg-blue-400/[0.06] px-3 text-xs font-medium text-blue-200 transition hover:border-blue-400/25 hover:bg-blue-400/10"

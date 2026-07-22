@@ -13,6 +13,7 @@ const PRIVATE_PATH_PREFIXES = [
   "/admin",
   "/staff",
   "/platform-admin",
+  "/workspace",
   "/auth",
   "/api",
 ] as const;
