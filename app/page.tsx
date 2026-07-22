@@ -31,7 +31,7 @@ export default function Home() {
     <OrdumLandingPage
       demos={{
         barber: buildTenantPublicUrl("heritage-barber-demo"),
-        nails: buildTenantPublicUrl("atelier-luna-nails"),
+        lumiere: buildTenantPublicUrl("lumiere-studio"),
       }}
     />
   );

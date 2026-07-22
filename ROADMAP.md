@@ -1,10 +1,10 @@
 # Salon Platforma — Product & Engineering Roadmap
 
-**Ažurirano:** 21. jul 2026.
+**Ažurirano:** 22. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/platform-growth-architecture-01b`
+**Aktivna grana:** `milestone/platform-landing-02`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` ostaje production baseline. `PLATFORM-GROWTH-ARCHITECTURE-01B` ima code PASS na grani `milestone/platform-growth-architecture-01b`. Canonical registry sada zaključava početne identitete `rs:svilajnac` i `barber:musko-sisanje`, Serbian Latin/Cyrillic lookup normalizaciju i human-reviewed discovery mapping policy bez baze ili runtime izmene. Sledeći konkretan milestone je `PLATFORM-LANDING-02`.
+**Status:** `main` ostaje production baseline. `PLATFORM-LANDING-02A` ima code PASS i prihvaćen desktop/mobile browser pregled na grani `milestone/platform-landing-02`. Javni landing sada koristi Commercial Offer, rollout i platform-level registry-je, transparentno razlikuje LIVE/BETA/COMING SOON i ističe Heritage Barber + Lumière Studio kao primarni showcase. Sledeći konkretan korak je docs-only `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`, zatim prvi code milestone `ORDUM-WORKSPACE-APPSHELL-01`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -151,6 +151,22 @@
 - [x] milestone ne menja `businesses`, tenant localized lokaciju, `services`, availability, booking, landing, sitemap, admin UI, RLS ili migracije;
 - [ ] `PLATFORM-LANDING-02` je sledeći konkretan milestone: landing koristi Product Ladder registry, transparentno prikazuje LIVE/BETA/COMING SOON i vodi ka Launch Partner prodajnom toku;
 - [ ] nakon landing closeout-a sledi `CONTENT-FOUNDATION-01`, zatim `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01`.
+
+- [x] `PLATFORM-LANDING-02A` uklanja direktno javno predstavljanje internih `PRODUCT_PACKAGES` entitlement paketa i koristi `COMMERCIAL_OFFERS` kao komercijalni izvor istine;
+- [x] landing prikazuje `Ordum Launch Partner`, ograničeni `Ordum Founding Partner` i quote-only `Ordum Signature` bez izmišljenih cena ili neproverenih obećanja;
+- [x] rollout površina transparentno razdvaja `LIVE`, managed `BETA` i `COMING SOON`; research funkcije nisu predstavljene kao aktivna prodajna garancija;
+- [x] svih šest Ordum nivoa renderuje se iz `PLATFORM_LEVELS`, sa `Digitalni salon` kao otključanim, `Growth Platform` kao aktivnim i kasnijim nivoima kao zaključanim;
+- [x] nova `#ponude` sekcija zadržava backward-compatible `#paketi` anchor i ne prekida stare deep linkove ili legacy acceptance contract;
+- [x] primarni landing showcase je `Heritage Barber Demo` + `Lumière Studio`; `Atelier Luna Nails` ostaje aktivan tenant, ali nije deo primarnog showcase para;
+- [x] Lumière koristi shared hostname boundary sa slugom `lumiere-studio` i zaseban luxury editorial preview umesto preimenovane Nails kartice;
+- [x] ciljani ESLint, ciljani landing Vitest testovi, kompletan `npm run check` i `git diff --cached --check` prošli su;
+- [x] ručni desktop/mobile browser pregled i završni Lumière polish prihvaćeni su bez blocker-a;
+- [x] milestone ne menja tenant booking, availability, admin/staff/platform-admin tokove, bazu, RLS, migracije, contact API, Resend runtime ili product-strategy registry vrednosti;
+- [x] detaljan implementation i acceptance zapis nalazi se u `docs/milestones/PLATFORM-LANDING-02.md`;
+- [ ] sledeći docs-only milestone je `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`: zaključava centralni Workspace AppShell, modularni App Registry, Ordum Network granicu, dve PWA identity površine, role/entitlement model i migracioni put postojećeg `/admin` panela;
+- [ ] prvi code milestone nakon novog roadmap-a je `ORDUM-WORKSPACE-APPSHELL-01`: centralni launcher i registry-backed aplikacije, uz `Studio` adapter koji koristi postojeći admin bez velikog route rewrite-a;
+- [ ] `ORDUM-PWA-FOUNDATION-01` sledi nakon stabilnog AppShell-a i uvodi odvojene Workspace/Network manifeste, installability, safe caching granice i kasniji TWA/Capacitor put;
+- [ ] `CONTENT-FOUNDATION-01`, `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01` ostaju važeći pravci i biće uklopljeni u novi Workspace + Network master redosled, ne brišu se niti predstavljaju kao završeni.
 
 ### Pre-closeout implementation checkpoint
 

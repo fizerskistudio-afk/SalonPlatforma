@@ -94,7 +94,7 @@
 .ordum-section-heading{display:grid;grid-template-columns:180px 1fr minmax(260px,370px);align-items:end;gap:30px;margin-bottom:58px}.ordum-section-heading h2{margin:0;font-size:clamp(2.8rem,4vw,4.6rem);font-weight:500;line-height:1;letter-spacing:-.05em}.ordum-section-heading p{margin:0;color:var(--o-muted);line-height:1.7}.ordum-section-heading em{color:var(--o-brass)}
 .ordum-capabilities{background:var(--o-paper)}.ordum-capability-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--o-line);border-left:1px solid var(--o-line)}.ordum-capability-grid article{min-height:310px;padding:36px;border-right:1px solid var(--o-line);border-bottom:1px solid var(--o-line)}.ordum-capability-grid article>div{display:grid;width:42px;height:42px;place-items:center;border-radius:50%;background:#ece5d8;color:var(--o-brass)}.ordum-capability-grid svg{width:18px}.ordum-capability-grid span{display:block;margin-top:40px;color:var(--o-brass);font-size:9px;letter-spacing:.15em;text-transform:uppercase}.ordum-capability-grid h3{max-width:280px;margin:12px 0;font-family:Georgia,serif;font-size:25px;font-weight:400;line-height:1.15}.ordum-capability-grid p{margin:0;color:var(--o-muted);font-size:13px;line-height:1.65}
 
-.ordum-demos{padding:120px max(32px,calc((100vw - 1280px)/2));background:#171a18;color:#f4f1e8}.ordum-section-heading-light p{color:rgba(255,255,255,.55)}.ordum-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.ordum-demo-card{overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:3px;background:#222522}.ordum-demo-preview{padding:30px 30px 0}.ordum-demo-browser{display:flex;align-items:center;gap:5px;height:33px;padding:0 12px;border-radius:8px 8px 0 0;background:#e9e5dd;color:#222;font-size:8px}.ordum-demo-browser i{width:5px;height:5px;border-radius:50%;background:#aaa}.ordum-demo-browser span{margin-left:auto;opacity:.55}.ordum-barber-art,.ordum-nails-art{height:330px;padding:48px;background:#090a09}.ordum-barber-art small,.ordum-nails-art small{font-size:8px;letter-spacing:.2em}.ordum-barber-art small{color:#c89b59}.ordum-barber-art strong,.ordum-nails-art strong{display:block;margin-top:32px;font-family:Georgia,serif;font-size:52px;line-height:.93;font-weight:400}.ordum-barber-art span{display:inline-block;margin-top:45px;border-bottom:1px solid #c89b59;padding-bottom:5px;color:#d8b47b;font-size:9px}.ordum-nails-art{background:#f6edea;color:#352027}.ordum-nails-art small{color:#a4426e}.ordum-nails-art strong{font-size:48px}.ordum-nails-art strong em{color:#a4426e}.ordum-nails-art>div{display:flex;align-items:end;gap:8px;justify-content:flex-end;margin-top:25px}.ordum-nails-art>div i{width:23px;height:60px;border-radius:15px 15px 3px 3px;background:#bf2d67}.ordum-nails-art>div i:nth-child(2){height:78px;background:#742b4c}.ordum-nails-art>div i:nth-child(3){height:68px;background:#ea8864}.ordum-nails-art>div i:nth-child(4){height:85px;background:#d56393}.ordum-demo-copy{padding:28px 30px 32px}.ordum-demo-copy>span{font-size:9px;color:#c5a16e;letter-spacing:.17em;text-transform:uppercase}.ordum-demo-copy h3{margin:8px 0 10px;font-family:Georgia,serif;font-size:28px;font-weight:400}.ordum-demo-copy p{min-height:44px;margin:0;color:rgba(255,255,255,.55);font-size:12px;line-height:1.6}.ordum-demo-copy a{display:inline-flex;align-items:center;gap:8px;margin-top:22px;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:5px;font-size:11px}.ordum-demo-copy svg{width:13px}
+.ordum-demos{padding:120px max(32px,calc((100vw - 1280px)/2));background:#171a18;color:#f4f1e8}.ordum-section-heading-light p{color:rgba(255,255,255,.55)}.ordum-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.ordum-demo-card{overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:3px;background:#222522}.ordum-demo-preview{padding:30px 30px 0}.ordum-demo-browser{display:flex;align-items:center;gap:5px;height:33px;padding:0 12px;border-radius:8px 8px 0 0;background:#e9e5dd;color:#222;font-size:8px}.ordum-demo-browser i{width:5px;height:5px;border-radius:50%;background:#aaa}.ordum-demo-browser span{margin-left:auto;opacity:.55}.ordum-barber-art,.ordum-lumiere-art{height:330px;padding:48px;background:#090a09}.ordum-barber-art small,.ordum-lumiere-art small{font-size:8px;letter-spacing:.2em}.ordum-barber-art small{color:#c89b59}.ordum-barber-art strong,.ordum-lumiere-art strong{display:block;margin-top:32px;font-family:Georgia,serif;font-size:52px;line-height:.93;font-weight:400}.ordum-barber-art span{display:inline-block;margin-top:45px;border-bottom:1px solid #c89b59;padding-bottom:5px;color:#d8b47b;font-size:9px}.ordum-lumiere-art{position:relative;overflow:hidden;background:linear-gradient(135deg,#f5f0e8 0%,#e5dbce 55%,#d6c5b2 100%);color:#26332d}.ordum-lumiere-art::after{content:"";position:absolute;right:-55px;bottom:-85px;width:230px;height:230px;border:1px solid rgba(72,91,81,.22);border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.16),0 0 0 68px rgba(255,255,255,.09)}.ordum-lumiere-art small{position:relative;z-index:1;color:#786858}.ordum-lumiere-art strong{position:relative;z-index:1;font-size:48px}.ordum-lumiere-art strong em{color:#667f6c}.ordum-lumiere-art>span{position:relative;z-index:1;display:inline-block;margin-top:40px;border-top:1px solid rgba(38,51,45,.25);padding-top:10px;color:#566a5d;font-size:9px;letter-spacing:.13em;text-transform:uppercase}.ordum-demo-copy{padding:28px 30px 32px}.ordum-demo-copy>span{font-size:9px;color:#c5a16e;letter-spacing:.17em;text-transform:uppercase}.ordum-demo-copy h3{margin:8px 0 10px;font-family:Georgia,serif;font-size:28px;font-weight:400}.ordum-demo-copy p{min-height:44px;margin:0;color:rgba(255,255,255,.55);font-size:12px;line-height:1.6}.ordum-demo-copy a{display:inline-flex;align-items:center;gap:8px;margin-top:22px;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:5px;font-size:11px}.ordum-demo-copy svg{width:13px}
 
 .ordum-process{background:var(--o-ivory)}.ordum-process .ordum-section-heading{grid-template-columns:180px 1fr}.ordum-process ol{margin:0;padding:0;border-top:1px solid var(--o-line);list-style:none}.ordum-process li{display:grid;grid-template-columns:180px 1fr;padding:34px 0;border-bottom:1px solid var(--o-line)}.ordum-process li>b{font-family:Georgia,serif;color:var(--o-brass);font-size:30px;font-weight:400}.ordum-process li>div{display:grid;grid-template-columns:180px 1fr 1fr;align-items:start;gap:40px}.ordum-process li span{color:var(--o-brass);font-size:9px;letter-spacing:.15em;text-transform:uppercase}.ordum-process li h3{margin:0;font-family:Georgia,serif;font-size:25px;font-weight:400}.ordum-process li p{margin:0;color:var(--o-muted);font-size:13px;line-height:1.7}
 .ordum-pricing{background:var(--o-paper)}.ordum-package-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.ordum-package-grid article{position:relative;display:flex;min-height:610px;flex-direction:column;border:1px solid var(--o-line);padding:38px;background:#f8f5ee}.ordum-package-grid article.featured{background:#233c34;color:#fff;border-color:#233c34;transform:translateY(-12px);box-shadow:0 26px 60px rgba(31,52,45,.18)}.ordum-package-badge{position:absolute;right:18px;top:18px;border-radius:99px;background:#d3ba92;color:#243c34;padding:7px 9px;font-size:8px;letter-spacing:.12em}.ordum-package-grid article>span{color:var(--o-brass);font-size:9px;text-transform:uppercase;letter-spacing:.14em}.ordum-package-grid h3{margin:13px 0 8px;font-family:Georgia,serif;font-size:32px;font-weight:400}.ordum-package-grid article>p{min-height:44px;margin:0;color:var(--o-muted);font-size:12px;line-height:1.6}.ordum-package-grid .featured>p{color:rgba(255,255,255,.58)}.ordum-price{display:grid;margin-top:35px;padding-bottom:22px;border-bottom:1px solid var(--o-line)}.featured .ordum-price{border-color:rgba(255,255,255,.14)}.ordum-price b{font-family:Georgia,serif;font-size:38px;font-weight:400}.ordum-price small{margin-top:3px;color:var(--o-muted);font-size:9px;text-transform:uppercase;letter-spacing:.12em}.featured .ordum-price small{color:rgba(255,255,255,.5)}.ordum-package-grid p.ordum-setup{min-height:0;margin-top:17px;font-size:10px}.ordum-package-grid ul{display:grid;gap:13px;margin:28px 0;padding:0;list-style:none;font-size:12px}.ordum-package-grid li{display:flex;gap:9px;align-items:center}.ordum-package-grid li svg{width:14px;color:var(--o-brass)}.ordum-package-grid article>a{display:flex;align-items:center;justify-content:space-between;margin-top:auto;border-top:1px solid var(--o-line);padding-top:19px;font-size:11px}.featured>a{border-color:rgba(255,255,255,.14)!important}.ordum-package-grid article>a svg{width:14px}.ordum-pricing-note{text-align:center;margin:30px 0 0;color:var(--o-muted);font-size:11px}
@@ -116,7 +116,7 @@
   .ordum-product-proof{width:100%;border-radius:12px}.ordum-proof-body{min-height:380px;grid-template-columns:1fr}.ordum-proof-body aside{display:none}.ordum-proof-main{padding:18px}.ordum-proof-heading strong{font-size:19px}.ordum-proof-heading button{padding:9px}.ordum-proof-stats{grid-template-columns:1fr}.ordum-proof-stats article:nth-child(2){display:none}.ordum-floating-note{right:-8px;bottom:20px}.ordum-proof-row{grid-template-columns:42px 1fr auto;padding:11px}.ordum-proof-row em{font-size:6px}
   .ordum-statement,.ordum-capabilities,.ordum-process,.ordum-pricing,.ordum-faq{padding:80px 20px}.ordum-statement h2{margin-bottom:35px;font-size:clamp(2.8rem,13vw,4.2rem)}.ordum-statement-grid{grid-template-columns:1fr;gap:30px}.ordum-statement-grid span{justify-content:flex-start;flex-wrap:wrap;line-height:2}
   .ordum-section-heading{display:block;margin-bottom:35px}.ordum-section-heading h2{margin-top:20px;font-size:clamp(2.6rem,12vw,3.8rem)}.ordum-section-heading p{margin-top:18px}.ordum-capability-grid{grid-template-columns:1fr}.ordum-capability-grid article{min-height:0;padding:28px}.ordum-capability-grid span{margin-top:28px}
-  .ordum-demos{padding:80px 20px}.ordum-demo-grid{grid-template-columns:1fr}.ordum-demo-preview{padding:14px 14px 0}.ordum-barber-art,.ordum-nails-art{height:260px;padding:30px}.ordum-barber-art strong,.ordum-nails-art strong{font-size:39px}.ordum-demo-copy p{min-height:auto}
+  .ordum-demos{padding:80px 20px}.ordum-demo-grid{grid-template-columns:1fr}.ordum-demo-preview{padding:14px 14px 0}.ordum-barber-art,.ordum-lumiere-art{height:260px;padding:30px}.ordum-barber-art strong,.ordum-lumiere-art strong{font-size:39px}.ordum-demo-copy p{min-height:auto}
   .ordum-process li{grid-template-columns:50px 1fr}.ordum-process li>div{display:block}.ordum-process li h3{margin:12px 0}.ordum-process li p{font-size:12px}.ordum-package-grid article{padding:30px 25px}.ordum-faq summary{grid-template-columns:30px 1fr auto;font-size:17px}.ordum-faq details p{margin-left:40px}
   .ordum-contact{padding:80px 20px}.ordum-contact-intro h2{font-size:clamp(2.8rem,13vw,4rem)}.ordum-contact-intro>div{margin-top:38px}.ordum-contact-form{padding:28px 20px}.ordum-form-grid{grid-template-columns:1fr;gap:0}.ordum-form-submit{align-items:flex-start;flex-direction:column}.ordum-form-submit button{width:100%;justify-content:center}
   .ordum-footer{grid-template-columns:1fr;gap:22px;padding:35px 20px;text-align:left}.ordum-footer p,.ordum-footer>span{justify-self:start}
@@ -124,4 +124,294 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ordum-primary-button,.ordum-faq summary span{transition:none}.ordum-spin{animation:none}
+}
+
+/* PLATFORM-LANDING-02A — product truth, offers and level map */
+
+.ordum-header nav {
+  gap: 24px;
+}
+
+.ordum-hero-offer-note {
+  position: relative;
+  z-index: 2;
+  margin: 22px 0 0;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.ordum-hero-offer-note strong {
+  color: #d7be98;
+  font-weight: 650;
+}
+
+.ordum-status,
+.ordum-levels {
+  padding: 120px max(32px, calc((100vw - 1280px) / 2));
+}
+
+.ordum-status {
+  background: #ece6da;
+}
+
+.ordum-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ordum-status-card {
+  display: flex;
+  min-height: 430px;
+  flex-direction: column;
+  border: 1px solid var(--o-line);
+  padding: 34px;
+  background: rgba(255, 255, 255, 0.46);
+}
+
+.ordum-status-card > strong {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.ordum-status-live > strong {
+  background: #dce9e2;
+  color: #285441;
+}
+
+.ordum-status-beta > strong {
+  background: #eee1ca;
+  color: #7b5720;
+}
+
+.ordum-status-coming_soon > strong {
+  background: #e3e0dc;
+  color: #5e5a54;
+}
+
+.ordum-status-card > p {
+  min-height: 92px;
+  margin: 25px 0 0;
+  color: var(--o-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ordum-status-card ul {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--o-line);
+  list-style: none;
+  font-size: 12px;
+}
+
+.ordum-status-card li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  line-height: 1.45;
+}
+
+.ordum-status-card li svg {
+  width: 14px;
+  flex: 0 0 14px;
+  color: var(--o-brass);
+}
+
+.ordum-status-card small {
+  margin-top: auto;
+  padding-top: 25px;
+  color: var(--o-muted);
+  font-size: 9px;
+}
+
+.ordum-pricing {
+  position: relative;
+}
+
+.ordum-anchor-alias {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ordum-package-grid article.ordum-offer-limited {
+  border-color: rgba(167, 125, 66, 0.55);
+}
+
+.ordum-package-badge.ordum-badge-active {
+  background: #d3ba92;
+  color: #243c34;
+}
+
+.ordum-package-badge.ordum-badge-limited {
+  background: #f0dfc2;
+  color: #6f4b18;
+}
+
+.ordum-package-badge.ordum-badge-quote_only {
+  background: #e4e0d8;
+  color: #59564f;
+}
+
+.ordum-package-grid p.ordum-offer-condition,
+.ordum-package-grid p.ordum-offer-beta-note {
+  min-height: 0;
+  color: var(--o-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.ordum-package-grid .featured p.ordum-offer-condition,
+.ordum-package-grid .featured p.ordum-offer-beta-note {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.ordum-package-grid p.ordum-offer-condition {
+  margin-top: 9px;
+}
+
+.ordum-package-grid p.ordum-offer-beta-note {
+  margin: 0 0 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--o-line);
+}
+
+.ordum-package-grid .featured p.ordum-offer-beta-note {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.ordum-levels {
+  background: #171a18;
+  color: #f4f1e8;
+}
+
+.ordum-levels .ordum-section-heading p {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ordum-level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.ordum-level-card {
+  min-height: 280px;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 30px;
+}
+
+.ordum-level-card > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ordum-level-card > div span,
+.ordum-level-card > div strong {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+}
+
+.ordum-level-card > div span {
+  color: #d2b78f;
+}
+
+.ordum-level-card > div strong {
+  border-radius: 999px;
+  padding: 7px 9px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ordum-level-unlocked > div strong {
+  background: rgba(95, 153, 125, 0.22);
+  color: #b9dfcb;
+}
+
+.ordum-level-active {
+  background: rgba(167, 125, 66, 0.13);
+}
+
+.ordum-level-active > div strong {
+  background: #d2b78f;
+  color: #263c34;
+}
+
+.ordum-level-locked {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.ordum-level-card h3 {
+  margin: 58px 0 15px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.ordum-level-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 1050px) {
+  .ordum-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ordum-status-card {
+    min-height: auto;
+  }
+
+  .ordum-status-card > p {
+    min-height: 0;
+  }
+
+  .ordum-level-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .ordum-status,
+  .ordum-levels {
+    padding: 80px 20px;
+  }
+
+  .ordum-hero-offer-note {
+    max-width: 330px;
+  }
+
+  .ordum-status-card {
+    padding: 28px;
+  }
+
+  .ordum-level-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ordum-level-card {
+    min-height: 240px;
+    padding: 25px;
+  }
+
+  .ordum-level-card h3 {
+    margin-top: 42px;
+  }
 }

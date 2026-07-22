@@ -8,7 +8,7 @@ const route = readFileSync("app/api/contact/route.ts", "utf8");
 describe("PLATFORM-LANDING-ORDUM-01A acceptance", () => {
   it("koristi potvrđene live tenant linkove kroz shared hostname boundary", () => {
     expect(page).toContain('buildTenantPublicUrl("heritage-barber-demo")');
-    expect(page).toContain('buildTenantPublicUrl("atelier-luna-nails")');
+    expect(page).toContain('buildTenantPublicUrl("lumiere-studio")');
   });
 
   it("ostavlja landing sekcije modularnim i kontakt client granicu izdvojenom", () => {
