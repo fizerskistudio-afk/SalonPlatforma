@@ -12,6 +12,13 @@ Ordum spaja profesionalni tenant sajt, online zakazivanje, tim, administraciju i
 
 > Repo je istorijski zadržao naziv `SalonPlatforma`, dok je tržišni i platformski identitet **Ordum Studios**.
 
+## Brzi dokumentacioni ulazi
+
+- [`docs/MANIFESTO.md`](docs/MANIFESTO.md) — ko smo, šta gradimo i koje principe čuvamo;
+- [`docs/STATUS.md`](docs/STATUS.md) — šta danas stvarno postoji;
+- [`ROADMAP.md`](ROADMAP.md) — aktivni milestone, sledeći redosled i blockeri;
+- [`docs/DOCUMENTATION-INDEX.md`](docs/DOCUMENTATION-INDEX.md) — mapa architecture, milestone i history dokumentacije.
+
 ## Šta je Ordum
 
 Ordum nije samo booking link i nije generički marketplace profil.
