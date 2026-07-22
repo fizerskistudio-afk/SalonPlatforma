@@ -39,7 +39,9 @@ function readProjectFile(
 
 const ROADMAP =
   readProjectFile(
-    "ROADMAP.md"
+    "docs",
+    "history",
+    "ROADMAP-LEGACY-2026-07-22.md"
   );
 
 const OPERATIONS_PAGE =

@@ -64,6 +64,16 @@ function applyRobotsPrivacyHeader(
       "X-Robots-Tag",
       "noindex, nofollow, noarchive, nosnippet"
     );
+
+    response.headers.set(
+      "Cache-Control",
+      "private, no-store, max-age=0, must-revalidate"
+    );
+
+    response.headers.set(
+      "Pragma",
+      "no-cache"
+    );
   }
 
   return response;

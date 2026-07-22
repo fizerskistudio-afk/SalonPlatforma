@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="sr-Latn">
+  <head>
+    <meta charset="utf-8">
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    >
+    <meta
+      name="theme-color"
+      content="#09090a"
+    >
+    <meta
+      name="robots"
+      content="noindex,nofollow,noarchive,nosnippet"
+    >
+    <title>Ordum Workspace — offline</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: #09090a;
+        color: #fafafa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(252, 211, 77, 0.12),
+            transparent 34%
+          ),
+          #09090a;
+      }
+
+      main {
+        width: min(100%, 520px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px;
+        padding: 32px;
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+      }
+
+      .mark {
+        width: 56px;
+        height: 56px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+        padding: 12px;
+        border-radius: 18px;
+        background: #fcd34d;
+      }
+
+      .mark span {
+        border-radius: 4px;
+        background: #09090a;
+      }
+
+      p {
+        color: #a1a1aa;
+        line-height: 1.75;
+      }
+
+      a {
+        min-height: 48px;
+        margin-top: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        padding: 0 20px;
+        background: #fcd34d;
+        color: #09090a;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      small {
+        display: block;
+        margin-top: 24px;
+        color: #52525b;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div
+        class="mark"
+        aria-hidden="true"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <h1>Workspace trenutno nema mrežu.</h1>
+
+      <p>
+        Ordum ne čuva rezervacije, klijente ili poslovne promene kao lažni
+        offline rezultat. Poveži uređaj sa internetom i pokušaj ponovo.
+      </p>
+
+      <a href="/workspace">
+        Pokušaj ponovo
+      </a>
+
+      <small>
+        Offline je dostupan samo ovaj bezbedni shell. Studio, admin, staff i
+        booking podaci ostaju network-only.
+      </small>
+    </main>
+  </body>
+</html>
