@@ -2,9 +2,9 @@
 
 **Ažurirano:** 22. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/platform-landing-02`
+**Aktivna grana:** `milestone/ordum-workspace-network-roadmap-01`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` ostaje production baseline. `PLATFORM-LANDING-02A` ima code PASS i prihvaćen desktop/mobile browser pregled na grani `milestone/platform-landing-02`. Javni landing sada koristi Commercial Offer, rollout i platform-level registry-je, transparentno razlikuje LIVE/BETA/COMING SOON i ističe Heritage Barber + Lumière Studio kao primarni showcase. Sledeći konkretan korak je docs-only `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`, zatim prvi code milestone `ORDUM-WORKSPACE-APPSHELL-01`.
+**Status:** `main` production baseline je `cef7299` sa završenim `PLATFORM-LANDING-02A`. Aktivni docs-only milestone je `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`: zaključava dve aplikacije — Ordum Workspace za poslovne korisnike i Ordum Network za klijente — uz modularni monolit, centralni App Registry, postojeći `/admin` kao Studio aplikaciju i PWA-first/native-later put. Prvi code milestone je `ORDUM-WORKSPACE-APPSHELL-01A`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -167,6 +167,22 @@
 - [ ] prvi code milestone nakon novog roadmap-a je `ORDUM-WORKSPACE-APPSHELL-01`: centralni launcher i registry-backed aplikacije, uz `Studio` adapter koji koristi postojeći admin bez velikog route rewrite-a;
 - [ ] `ORDUM-PWA-FOUNDATION-01` sledi nakon stabilnog AppShell-a i uvodi odvojene Workspace/Network manifeste, installability, safe caching granice i kasniji TWA/Capacitor put;
 - [ ] `CONTENT-FOUNDATION-01`, `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01` ostaju važeći pravci i biće uklopljeni u novi Workspace + Network master redosled, ne brišu se niti predstavljaju kao završeni.
+
+- [x] `ORDUM-WORKSPACE-NETWORK-ROADMAP-01` zaključava dve glavne korisničke površine: privatni `Ordum Workspace` i javni `Ordum Network`;
+- [x] Workspace koristi jednu aplikaciju za owner/manager/staff i buduće poslovne role; ne pravi se poseban mobilni binary po roli;
+- [x] centralni Workspace App Registry određuje route, rollout status, release policy, role, entitlement i dependency uslove;
+- [x] postojeći `/admin` ostaje LIVE `Studio` aplikacija i ne prepisuje se u prvom AppShell ciklusu;
+- [x] `Content` je prvi planirani novi Workspace modul; `Finance`, `Operations` i `Store` ostaju research dok realni korisnici ne potvrde scope i prioritet;
+- [x] Network počinje kao web/PWA discovery i booking-handoff površina, bez paralelnog booking engine-a;
+- [x] arhitektura ostaje modularni monolit dok stvarni scaling, provider ili compliance signal ne opravda izdvajanje servisa;
+- [x] PWA se uvodi nakon stabilnog AppShell-a kroz zaseban Workspace i Network manifest identitet, sa strogim cache/privacy granicama;
+- [x] Android TWA i kasniji Capacitor ostaju progresivni distribucioni put, ne trenutni rewrite;
+- [x] tenant podaci ostaju vlasništvo salona, dok canonical taxonomy, discovery indeks, attribution i platform-wide moderation pripadaju Ordum platformi;
+- [x] `CONTENT-FOUNDATION-01`, `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01` uklopljeni su u širi Workspace + Network redosled;
+- [x] detaljan master plan nalazi se u `docs/architecture/ORDUM-WORKSPACE-NETWORK-ROADMAP-01.md`;
+- [ ] prvi code milestone je `ORDUM-WORKSPACE-APPSHELL-01A`: source-only app registry, server-side visibility resolver, route contract i testovi bez UI-ja, baze ili migracije;
+- [ ] zatim sledi `ORDUM-WORKSPACE-APPSHELL-01B`: tenant-aware `/workspace` launcher i Studio adapter ka postojećem `/admin`;
+- [ ] nakon stabilnog shell-a sledi `ORDUM-PWA-FOUNDATION-01`, pa Content, Network shell, discovery data i Svilajnac MVP.
 
 ### Pre-closeout implementation checkpoint
 
