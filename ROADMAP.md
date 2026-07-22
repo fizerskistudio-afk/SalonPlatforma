@@ -4,7 +4,7 @@
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
 **Aktivna grana:** `milestone/platform-growth-architecture-01b`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` ostaje production baseline. `PLATFORM-GROWTH-ARCHITECTURE-01A` je integrisan, root `README.md` je osvežen za Ordum Studios identitet i aktuelnu product/growth arhitekturu, a aktivna grana je `milestone/platform-growth-architecture-01b`. Sledeći konkretan korak je `PLATFORM-GROWTH-ARCHITECTURE-01B` canonical location/service registry, zatim `PLATFORM-LANDING-02`.
+**Status:** `main` ostaje production baseline. `PLATFORM-GROWTH-ARCHITECTURE-01B` ima code PASS na grani `milestone/platform-growth-architecture-01b`. Canonical registry sada zaključava početne identitete `rs:svilajnac` i `barber:musko-sisanje`, Serbian Latin/Cyrillic lookup normalizaciju i human-reviewed discovery mapping policy bez baze ili runtime izmene. Sledeći konkretan milestone je `PLATFORM-LANDING-02`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
@@ -138,6 +138,19 @@
 - [x] docs-only promena ne menja runtime, UI source, booking, bazu, migracije ili provider integracije;
 - [x] README payload, interni dokumentacioni linkovi i `git diff --cached --check` validirani su;
 - [ ] `PLATFORM-GROWTH-ARCHITECTURE-01B` ostaje aktivni sledeći milestone na grani `milestone/platform-growth-architecture-01b`.
+
+- [x] `PLATFORM-GROWTH-ARCHITECTURE-01B` uvodi source-only canonical registry i mapping policy za prvi Ordum local discovery slice;
+- [x] početni canonical location je `rs:svilajnac`, sa Latin i Cyrillic alias resolution podrškom;
+- [x] početni canonical service je `barber:musko-sisanje`, sa namerno uskim aliasima za muško šišanje;
+- [x] generičko `šišanje` se ne mapira automatski jer je semantički preširoko;
+- [x] Serbian lookup normalizacija podržava trim, lowercase, ćirilica→latinica transliteraciju, dijakritike, `đ`→`dj` i stabilan slug format;
+- [x] alias pogodak pravi samo `suggested` mapping; ne može automatski da postane `approved` ili discoverable;
+- [x] discovery publication zahteva human review, reviewer/timestamp, aktivnu canonical uslugu, tenant opt-in, aktivan i objavljen tenant i aktivnu tenant uslugu;
+- [x] ciljani ESLint, ciljani Vitest `7/7`, kompletan `npm run check` i `git diff --cached --check` prošli su;
+- [x] ručni browser acceptance nije primenljiv jer 01B ne uvodi UI, javnu rutu, API runtime, bazu ili migraciju;
+- [x] milestone ne menja `businesses`, tenant localized lokaciju, `services`, availability, booking, landing, sitemap, admin UI, RLS ili migracije;
+- [ ] `PLATFORM-LANDING-02` je sledeći konkretan milestone: landing koristi Product Ladder registry, transparentno prikazuje LIVE/BETA/COMING SOON i vodi ka Launch Partner prodajnom toku;
+- [ ] nakon landing closeout-a sledi `CONTENT-FOUNDATION-01`, zatim `DISCOVERY-DATA-FOUNDATION-01` i `SVILAJNAC-DISCOVERY-MVP-01`.
 
 ### Pre-closeout implementation checkpoint
 
