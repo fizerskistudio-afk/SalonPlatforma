@@ -2,13 +2,13 @@
 
 **Ažurirano:** 22. jul 2026.
 **Repo:** `fizerskistudio-afk/SalonPlatforma`
-**Aktivna grana:** `milestone/ordum-workspace-network-roadmap-01`
+**Aktivna grana:** `milestone/ordum-workspace-appshell-01a`
 **Radni naziv:** `Salon Platforma`
-**Status:** `main` production baseline je `cef7299` sa završenim `PLATFORM-LANDING-02A`. Aktivni docs-only milestone je `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`: zaključava dve aplikacije — Ordum Workspace za poslovne korisnike i Ordum Network za klijente — uz modularni monolit, centralni App Registry, postojeći `/admin` kao Studio aplikaciju i PWA-first/native-later put. Prvi code milestone je `ORDUM-WORKSPACE-APPSHELL-01A`.
+**Status:** `main` production baseline je `c60b550` sa završenim `ORDUM-WORKSPACE-NETWORK-ROADMAP-01`. `ORDUM-WORKSPACE-APPSHELL-01A` ima source-only code PASS na aktivnoj grani: typed App Registry, role-specific route contract, Product Package entitlement provera, dependency/rollout visibility resolver i server-only entrypoint su završeni bez UI-ja, baze, migracije ili PWA izmene. Sledeći konkretan milestone je `ORDUM-WORKSPACE-APPSHELL-01B`.
 
 > Ovaj dokument je operativni izvor istine za nastavak rada i handoff između chatova. Nezavršene stavke se ne predstavljaju kao završene.
 
-## 0. Trenutni operativni checkpoint — 21. jul 2026.
+## 0. Trenutni operativni checkpoint — 22. jul 2026.
 
 - [x] `PRODUCT-PACKAGES-ENTITLEMENTS-01` završen i pushovan;
 - [x] `PLATFORM-ADMIN-OPERATIONS-01` završen i pushovan;
@@ -183,6 +183,23 @@
 - [ ] prvi code milestone je `ORDUM-WORKSPACE-APPSHELL-01A`: source-only app registry, server-side visibility resolver, route contract i testovi bez UI-ja, baze ili migracije;
 - [ ] zatim sledi `ORDUM-WORKSPACE-APPSHELL-01B`: tenant-aware `/workspace` launcher i Studio adapter ka postojećem `/admin`;
 - [ ] nakon stabilnog shell-a sledi `ORDUM-PWA-FOUNDATION-01`, pa Content, Network shell, discovery data i Svilajnac MVP.
+
+- [x] `ORDUM-WORKSPACE-APPSHELL-01A` uvodi jedan typed source of truth za `studio`, `content`, `finance`, `operations` i `store`;
+- [x] `Studio` je jedina LIVE Workspace aplikacija; `Content` je pošteno `COMING SOON`, dok `Finance`, `Operations` i `Store` ostaju `RESEARCH`;
+- [x] Workspace role contract koristi postojeće tenant role `owner`, `manager` i `staff`; Platform Admin nije tenant Workspace aplikacija;
+- [x] role-specific route contract zadržava postojeće tokove: owner/manager `Studio` vodi na `/admin`, a staff `Studio` na `/staff`;
+- [x] registry koristi postojeće Product Strategy rollout/release-policy tipove i postojeći Product Package entitlement sloj umesto paralelnog RBAC ili package sistema;
+- [x] owner/manager `Studio` zahteva `booking.management`, a staff `Studio` zahteva `staff.portal`;
+- [x] čist visibility resolver razlikuje `available`, `locked` i `hidden` odluke za role, package, dependency, managed beta, coming-soon, research, retired i hidden-release granice;
+- [x] research aplikacije su podrazumevano skrivene i mogu se eksplicitno prikazati samo kao zaključan interni signal;
+- [x] `server-only` entrypoint priprema budući `/workspace` composition root bez učitavanja Supabase-a, navigacionog redirecta ili nove auth sesije u 01A;
+- [x] ciljani ESLint, ciljani Vitest, kompletan `npm run check` i `git diff --cached --check` prošli su u završnom REV3 installer toku;
+- [x] ručni browser acceptance nije primenljiv jer milestone ne uvodi `/workspace` rutu, novi UI, manifest, service worker ili runtime ponašanje;
+- [x] milestone ne menja `/admin`, `/staff`, booking, availability, customer podatke, bazu, RLS, migracije, Product Package registry ili Product Strategy registry;
+- [x] detaljan implementation i acceptance zapis nalazi se u `docs/milestones/ORDUM-WORKSPACE-APPSHELL-01A.md`;
+- [ ] sledeći milestone je `ORDUM-WORKSPACE-APPSHELL-01B`: tenant-aware `/workspace` launcher, server-side role/package resolution, Studio adapter ka postojećem `/admin` ili `/staff` i pošten locked/coming-soon prikaz;
+- [ ] 01B zahteva desktop i mobile browser acceptance, ali ne radi veliki admin route rewrite, novu bazu ili PWA service worker;
+- [ ] nakon stabilnog 01B shell-a sledi `ORDUM-PWA-FOUNDATION-01`.
 
 ### Pre-closeout implementation checkpoint
 
