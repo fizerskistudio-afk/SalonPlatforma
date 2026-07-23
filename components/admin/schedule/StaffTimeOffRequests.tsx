@@ -196,13 +196,6 @@ export default function StaffTimeOffRequests({
                           }
                         </span>
 
-                        {request.requesterEmail && (
-                          <span className="text-xs text-zinc-600">
-                            {
-                              request.requesterEmail
-                            }
-                          </span>
-                        )}
                       </div>
 
                       <div className="mt-3 text-sm text-zinc-300">

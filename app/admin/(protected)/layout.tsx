@@ -8,9 +8,6 @@ import type {
 
 import AdminShell from "@/components/admin/AdminShell";
 import {
-  getAdminReviewAttentionCount,
-} from "@/lib/admin/reviews";
-import {
   getAdminContext,
   requireAdmin,
 } from "@/lib/auth/admin";
@@ -23,11 +20,16 @@ import {
 import {
   buildBusinessPublicLinks,
 } from "@/lib/platform-admin/business-public-links";
+import { measureAdminServerStep } from "@/lib/performance/admin-server-timing";
 
 export async function generateMetadata():
   Promise<Metadata> {
   const admin =
-    await getAdminContext();
+    await measureAdminServerStep(
+      "admin.metadata.context",
+      () =>
+        getAdminContext()
+    );
 
   if (!admin) {
     return {
@@ -55,11 +57,23 @@ export default async function ProtectedAdminLayout({
   children,
 }: ProtectedAdminLayoutProps) {
   const admin =
-    await requireAdmin();
+    await measureAdminServerStep(
+      "admin.layout.requireAdmin",
+      () =>
+        requireAdmin()
+    );
 
   const productAccess =
-    await loadProductPackageAccessForBusinessId(
-      admin.business.id
+    await measureAdminServerStep(
+      "admin.layout.productAccess",
+      () =>
+        admin.productAccess
+          ? Promise.resolve(
+              admin.productAccess
+            )
+          : loadProductPackageAccessForBusinessId(
+              admin.business.id
+            )
     );
 
   if (!productAccess) {
@@ -80,13 +94,6 @@ export default async function ProtectedAdminLayout({
         true,
     });
 
-  const reviewAttentionCount =
-    reviewsDecision.allowed
-      ? await getAdminReviewAttentionCount(
-          admin.business.id
-        )
-      : 0;
-
   const publicLinks =
     buildBusinessPublicLinks(
       admin.business.slug
@@ -97,8 +104,8 @@ export default async function ProtectedAdminLayout({
       productAccess={
         productAccess.access
       }
-      reviewAttentionCount={
-        reviewAttentionCount
+      reviewsEnabled={
+        reviewsDecision.allowed
       }
       admin={{
         email: admin.email,

@@ -42,6 +42,15 @@ const SHELL_SOURCE =
     "AdminShell.tsx"
   );
 
+const REVIEW_ATTENTION_ROUTE_SOURCE =
+  readSource(
+    "app",
+    "api",
+    "admin",
+    "review-attention",
+    "route.ts"
+  );
+
 const NAVIGATION_SOURCE =
   readSource(
     "lib",
@@ -101,34 +110,24 @@ describe(
     );
 
     it(
-      "skips the reviews badge query when the package does not include reviews",
+      "defers and gates the reviews badge query",
       () => {
-        const decisionIndex =
-          LAYOUT_SOURCE.indexOf(
-            "reviewsDecision"
-          );
-
-        const countIndex =
-          LAYOUT_SOURCE.indexOf(
-            "await getAdminReviewAttentionCount("
-          );
-
         expect(
-          decisionIndex
-        ).toBeGreaterThan(
-          -1
-        );
-
-        expect(
-          countIndex
-        ).toBeGreaterThan(
-          decisionIndex
+          LAYOUT_SOURCE
+        ).toMatch(
+          /reviewsEnabled\s*=\s*{\s*reviewsDecision\.allowed\s*}/
         );
 
         expect(
           LAYOUT_SOURCE
-        ).toContain(
-          "reviewsDecision.allowed"
+        ).not.toContain(
+          "getAdminReviewAttentionCount"
+        );
+
+        expect(
+          REVIEW_ATTENTION_ROUTE_SOURCE
+        ).toMatch(
+          /reviewsDecision\.allowed[\s\S]*getAdminReviewAttentionCount\s*\(/
         );
       }
     );

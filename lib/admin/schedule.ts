@@ -2,6 +2,7 @@ import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { measureAdminServerStep } from "@/lib/performance/admin-server-timing";
 
 export type ScheduleDayOfWeek =
   | 0
@@ -447,6 +448,72 @@ function mapTimeOff(
   };
 }
 
+function getScheduleErrorField(
+  error: unknown,
+  field: string
+): string | null {
+  if (
+    typeof error !==
+      "object" ||
+    error === null ||
+    !(field in error)
+  ) {
+    return null;
+  }
+
+  const value =
+    (
+      error as Record<
+        string,
+        unknown
+      >
+    )[field];
+
+  return typeof value ===
+    "string"
+    ? value
+    : null;
+}
+
+function logScheduleQueryError(
+  label: string,
+  error: unknown
+) {
+  if (
+    process.env.ADMIN_PERF_DEBUG !==
+    "1"
+  ) {
+    return;
+  }
+
+  console.error(
+    "[ADMIN_PERF_ERROR]",
+    JSON.stringify({
+      label,
+      code:
+        getScheduleErrorField(
+          error,
+          "code"
+        ),
+      message:
+        getScheduleErrorField(
+          error,
+          "message"
+        ),
+      details:
+        getScheduleErrorField(
+          error,
+          "details"
+        ),
+      hint:
+        getScheduleErrorField(
+          error,
+          "hint"
+        ),
+    })
+  );
+}
+
 export async function getAdminSchedule(): Promise<AdminScheduleResult> {
   const admin = await requireAdmin();
 
@@ -459,99 +526,171 @@ export async function getAdminSchedule(): Promise<AdminScheduleResult> {
     workingHoursResult,
     timeOffResult,
   ] = await Promise.all([
-    supabase
-      .from("businesses")
-      .select(
-        "id, name, slug, timezone"
-      )
-      .eq("id", admin.business.id)
-      .single(),
+    measureAdminServerStep(
+      "admin.schedule.business",
+      async () =>
+        await supabase
+          .from(
+            "businesses"
+          )
+          .select(
+            "id, name, slug, timezone"
+          )
+          .eq(
+            "id",
+            admin.business.id
+          )
+          .single()
+    ),
 
-    supabase
-      .from("employees")
-      .select(
-        "id, slug, name, sort_order, is_active"
-      )
-      .eq(
-        "business_id",
-        admin.business.id
-      )
-      .order("sort_order", {
-        ascending: true,
-      })
-      .order("name", {
-        ascending: true,
-      }),
+    measureAdminServerStep(
+      "admin.schedule.employees",
+      async () =>
+        await supabase
+          .from(
+            "employees"
+          )
+          .select(
+            "id, slug, name, sort_order, is_active"
+          )
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .order(
+            "sort_order",
+            {
+              ascending:
+                true,
+            }
+          )
+          .order(
+            "name",
+            {
+              ascending:
+                true,
+            }
+          )
+    ),
 
-    supabase
-      .from("working_hours")
-      .select(
-        `
-          id,
-          business_id,
-          employee_id,
-          day_of_week,
-          is_closed,
-          open_time,
-          close_time,
-          created_at,
-          updated_at
-        `
-      )
-      .eq(
-        "business_id",
-        admin.business.id
-      )
-      .order("day_of_week", {
-        ascending: true,
-      }),
+    measureAdminServerStep(
+      "admin.schedule.workingHours",
+      async () =>
+        await supabase
+          .from(
+            "working_hours"
+          )
+          .select(
+            `
+              id,
+              business_id,
+              employee_id,
+              day_of_week,
+              is_closed,
+              open_time,
+              close_time,
+              created_at,
+              updated_at
+            `
+          )
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .order(
+            "day_of_week",
+            {
+              ascending:
+                true,
+            }
+          )
+    ),
 
-    supabase
-      .from("time_off")
-      .select(
-        `
-          id,
-          business_id,
-          employee_id,
-          block_type,
-          starts_at,
-          ends_at,
-          reason,
-          created_at,
-          updated_at
-        `
-      )
-      .eq(
-        "business_id",
-        admin.business.id
-      )
-      .order("starts_at", {
-        ascending: true,
-      }),
+    measureAdminServerStep(
+      "admin.schedule.timeOff",
+      async () =>
+        await supabase
+          .from(
+            "time_off"
+          )
+          .select(
+            `
+              id,
+              business_id,
+              employee_id,
+              block_type,
+              starts_at,
+              ends_at,
+              reason,
+              created_at,
+              updated_at
+            `
+          )
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .order(
+            "starts_at",
+            {
+              ascending:
+                true,
+            }
+          )
+    ),
   ]);
 
   if (
     businessResult.error ||
     !businessResult.data
   ) {
+    logScheduleQueryError(
+      "admin.schedule.business",
+      businessResult.error ?? {
+        message:
+          "Business data missing.",
+      }
+    );
+
     throw new Error(
       "Nije moguće učitati podatke salona za raspored."
     );
   }
 
-  if (employeesResult.error) {
+  if (
+    employeesResult.error
+  ) {
+    logScheduleQueryError(
+      "admin.schedule.employees",
+      employeesResult.error
+    );
+
     throw new Error(
       "Nije moguće učitati zaposlene za raspored."
     );
   }
 
-  if (workingHoursResult.error) {
+  if (
+    workingHoursResult.error
+  ) {
+    logScheduleQueryError(
+      "admin.schedule.workingHours",
+      workingHoursResult.error
+    );
+
     throw new Error(
       "Nije moguće učitati radno vreme."
     );
   }
 
-  if (timeOffResult.error) {
+  if (
+    timeOffResult.error
+  ) {
+    logScheduleQueryError(
+      "admin.schedule.timeOff",
+      timeOffResult.error
+    );
+
     throw new Error(
       "Nije moguće učitati odsustva i blokade."
     );

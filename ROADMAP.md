@@ -1,8 +1,8 @@
 # Ordum Studios — Operativni Roadmap
 
-**Ažurirano:** 22. jul 2026.
+**Ažurirano:** 23. jul 2026.
 **Production baseline:** `main` @ `1343df48`
-**Sledeći milestone:** `ORDUM-PWA-FOUNDATION-01`
+**Sledeći milestone:** `PUBLIC-BOOKING-LOAD-01`
 
 > Ovaj dokument odgovara samo na pet pitanja: gde smo, šta je aktivno, šta ide sledeće, šta je blokirano i po kojim pravilima isporučujemo. Kompletna istorija je u [`docs/history/ROADMAP-LEGACY-2026-07-22.md`](docs/history/ROADMAP-LEGACY-2026-07-22.md).
 
@@ -25,10 +25,10 @@ Završeni temelji:
 Najnoviji završeni milestone:
 
 ```text
-ORDUM-DOCUMENTATION-IA-01
+ORDUM-ADMIN-PERFORMANCE-01
 ```
 
-Dokumentacija je razdvojena na operativni roadmap, trenutni status, manifest, arhitekturu, milestone zapise i istoriju.
+Admin critical path je optimizovan kroz loading skeleton, paralelizovane read tokove, precizna server timing merenja, SQL audit, request-scoped package snapshot, jedan authenticated tenant read i non-blocking review badge. Warm admin context je smanjen sa dva sekvencijalna tenant round-trip-a na jedan, bez zaobilaženja RLS-a. Povremeni provider i network outlieri ostaju obaveza za monitoring i ponovno merenje pod realnim opterećenjem.
 
 ## 2. Proizvodne površine
 
@@ -53,48 +53,43 @@ Status znači:
 - **PLANNED** — definisana buduća faza bez obećanog roka;
 - **RESEARCH** — problem i ROI još moraju biti potvrđeni.
 
-## 3. Aktivni milestone — ORDUM-PWA-FOUNDATION-01
+## 3. Aktivni milestone — PUBLIC-BOOKING-LOAD-01
 
 ### Cilj
 
-Uvesti instalabilnu Workspace PWA osnovu bez ugrožavanja privatnih podataka, auth tokova ili booking pouzdanosti.
+Izmeriti i potvrditi ponašanje javnog booking toka pod realnim i vršnim opterećenjem pre prvih klijenata.
 
 ### Scope
 
-- Workspace web manifest i identity;
-- Network manifest contract bez lažnog Network runtime-a;
-- icon i screenshot ownership;
-- installability provera;
-- bezbedna service-worker i caching politika;
-- offline fallback za shell, ne za mutirajuće poslovne podatke;
-- korisni shortcuts;
-- desktop/mobile browser acceptance.
+- mapiranje browser i backend request amplification-a po booking sesiji;
+- realan dataset sa više tenant-a, usluga, zaposlenih, radnih vremena i postojećih rezervacija;
+- load scenariji za 25, 50, 100 i 250 istovremenih korisnika;
+- p50, p95, p99, error rate i timeout evidencija;
+- provera duplog bookinga i ponašanja pri konkurentnom izboru istog termina;
+- identifikacija sledećeg najmanjeg bezbednog availability i booking concurrency reza.
 
 ### Ne radimo u ovom milestone-u
 
-- TWA ili Capacitor binary;
-- offline rezervacije;
-- agresivno keširanje admin/staff podataka;
-- background write queue;
-- customer account;
-- Network discovery runtime;
-- veliki redesign Workspace launchera.
+- nasumično dodavanje cache-a privatnim ili promenljivim podacima;
+- paralelni booking engine;
+- optimizacije bez izmerenog bottleneck-a;
+- billing, payment ili customer account;
+- veliki UI redesign.
 
 ### Acceptance
 
-1. Workspace se može instalirati iz podržanog browser-a;
-2. privatni admin/staff odgovori nisu trajno keširani;
-3. mutacije nikada ne glume uspeh offline;
-4. logout i promena tenant-a ne ostavljaju tuđe podatke u cache-u;
-5. postojeći `/admin`, `/staff` i booking tokovi ostaju funkcionalni;
-6. ciljane provere i kompletan `npm run check` prolaze;
-7. ručni desktop/mobile PWA acceptance je dokumentovan.
+1. broj requestova po booking sesiji je izmeren i dokumentovan;
+2. postoji ponovljiv load test za najmanje 25, 50 i 100 concurrent korisnika;
+3. p50, p95, p99 i error rate su zabeleženi;
+4. potvrđeno je da duple rezervacije ne nastaju u testiranom toku ili je otvoren obavezan concurrency milestone;
+5. sledeći performance rez je zasnovan na dokazima, ne pretpostavci;
+6. kompletan `npm run check` i ciljani booking testovi prolaze.
 
 ## 4. Redosled isporuke
 
-### 1. ORDUM-PWA-FOUNDATION-01
+### 1. PUBLIC-BOOKING-LOAD-01
 
-Instalabilni i bezbedni Workspace shell.
+Realni load profil javnog booking toka, concurrency dokaz i izbor sledećeg najmanjeg bezbednog reza.
 
 ### 2. CONTENT-FOUNDATION-01
 

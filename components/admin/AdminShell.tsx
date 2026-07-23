@@ -4,6 +4,7 @@ import type {
   ReactNode,
 } from "react";
 import {
+  useEffect,
   useState,
 } from "react";
 import Link from "next/link";
@@ -63,7 +64,7 @@ type AdminShellProps = {
   children: ReactNode;
   productAccess:
     ProductPackageAccess;
-  reviewAttentionCount: number;
+  reviewsEnabled: boolean;
   admin: {
     email: string | null;
     role: AdminRole;
@@ -664,10 +665,114 @@ export default function AdminShell({
   children,
   admin,
   productAccess,
-  reviewAttentionCount,
+  reviewsEnabled,
 }: AdminShellProps) {
   const pathname =
     usePathname();
+
+  const [
+    reviewAttentionCount,
+    setReviewAttentionCount,
+  ] = useState(0);
+
+  useEffect(
+    () => {
+      if (
+        !reviewsEnabled
+      ) {
+        return;
+      }
+
+      const controller =
+        new AbortController();
+      let active =
+        true;
+
+      async function loadReviewAttention() {
+        try {
+          const response =
+            await fetch(
+              "/api/admin/review-attention",
+              {
+                cache:
+                  "no-store",
+                signal:
+                  controller.signal,
+              }
+            );
+
+          if (
+            !response.ok
+          ) {
+            return;
+          }
+
+          const payload:
+            unknown =
+              await response.json();
+
+          if (
+            !active ||
+            typeof payload !==
+              "object" ||
+            payload === null ||
+            !(
+              "count" in
+              payload
+            )
+          ) {
+            return;
+          }
+
+          const count =
+            (
+              payload as {
+                count?: unknown;
+              }
+            ).count;
+
+          if (
+            typeof count ===
+              "number" &&
+            Number.isFinite(
+              count
+            )
+          ) {
+            setReviewAttentionCount(
+              Math.max(
+                0,
+                Math.trunc(
+                  count
+                )
+              )
+            );
+          }
+        } catch (
+          error
+        ) {
+          if (
+            error instanceof
+              DOMException &&
+            error.name ===
+              "AbortError"
+          ) {
+            return;
+          }
+        }
+      }
+
+      void loadReviewAttention();
+
+      return () => {
+        active =
+          false;
+        controller.abort();
+      };
+    },
+    [
+      reviewsEnabled,
+    ]
+  );
 
   const [
     mobileMenuOpen,

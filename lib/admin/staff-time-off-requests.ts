@@ -2,12 +2,12 @@ import "server-only";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { measureAdminServerStep } from "@/lib/performance/admin-server-timing";
 
 export type AdminStaffTimeOffRequest = {
   id: string;
   employeeId: string;
   employeeName: string;
-  requesterEmail: string | null;
 
   startsAt: string;
   endsAt: string;
@@ -26,7 +26,6 @@ export type AdminStaffTimeOffRequest = {
 type RequestRow = {
   id: string;
   employee_id: string;
-  member_id: string;
   starts_at: string;
   ends_at: string;
   reason: string;
@@ -44,14 +43,8 @@ type EmployeeRow = {
   name: string;
 };
 
-type MemberRow = {
-  id: string;
-  user_id: string;
-};
-
 export async function getAdminStaffTimeOffRequests():
   Promise<{
-    timezone: string;
     requests: AdminStaffTimeOffRequest[];
   }> {
   const admin =
@@ -61,44 +54,38 @@ export async function getAdminStaffTimeOffRequests():
     createAdminClient();
 
   const {
-    data: businessData,
-    error: businessError,
-  } = await adminClient
-    .from("businesses")
-    .select("timezone")
-    .eq("id", admin.business.id)
-    .single();
-
-  if (
-    businessError ||
-    !businessData
-  ) {
-    throw new Error(
-      "Timezone salona nije učitan."
-    );
-  }
-
-  const {
     data: requestData,
     error: requestError,
-  } = await adminClient
-    .from(
-      "staff_time_off_requests"
-    )
-    .select(
-      "id, employee_id, member_id, starts_at, ends_at, reason, status, review_note, created_at"
-    )
-    .eq(
-      "business_id",
-      admin.business.id
-    )
-    .order(
-      "created_at",
-      {
-        ascending: false,
-      }
-    )
-    .limit(100);
+  } =
+    await measureAdminServerStep(
+      "admin.schedule.staffRequests",
+      async () =>
+        await adminClient
+          .from(
+            "staff_time_off_requests"
+          )
+          .select(
+            "id, employee_id, starts_at, ends_at, reason, status, review_note, created_at"
+          )
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .eq(
+            "status",
+            "pending"
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false,
+            }
+          )
+          .limit(
+            100
+          )
+    );
 
   if (requestError) {
     throw new Error(
@@ -112,10 +99,6 @@ export async function getAdminStaffTimeOffRequests():
 
   if (rows.length === 0) {
     return {
-      timezone:
-        String(
-          businessData.timezone
-        ),
       requests: [],
     };
   }
@@ -129,56 +112,41 @@ export async function getAdminStaffTimeOffRequests():
     ),
   ];
 
-  const memberIds = [
-    ...new Set(
-      rows.map(
-        (row) =>
-          row.member_id
-      )
-    ),
-  ];
-
-  const [
-    employeeResult,
-    memberResult,
-  ] = await Promise.all([
-    adminClient
-      .from("employees")
-      .select("id, name")
-      .eq(
-        "business_id",
-        admin.business.id
-      )
-      .in("id", employeeIds),
-
-    adminClient
-      .from(
-        "business_members"
-      )
-      .select("id, user_id")
-      .eq(
-        "business_id",
-        admin.business.id
-      )
-      .in("id", memberIds),
-  ]);
+  const {
+    data: employeeData,
+    error: employeeError,
+  } =
+    await measureAdminServerStep(
+      "admin.schedule.staffRequestEmployees",
+      async () =>
+        await adminClient
+          .from(
+            "employees"
+          )
+          .select(
+            "id, name"
+          )
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .in(
+            "id",
+            employeeIds
+          )
+    );
 
   if (
-    employeeResult.error ||
-    memberResult.error
+    employeeError
   ) {
     throw new Error(
-      "Podaci za staff zahteve nisu učitani."
+      "Podaci zaposlenih za staff zahteve nisu učitani."
     );
   }
 
   const employees =
-    (employeeResult.data ??
+    (employeeData ??
       []) as unknown as EmployeeRow[];
-
-  const members =
-    (memberResult.data ??
-      []) as unknown as MemberRow[];
 
   const employeeNameById =
     new Map(
@@ -190,63 +158,7 @@ export async function getAdminStaffTimeOffRequests():
       )
     );
 
-  const userIdByMemberId =
-    new Map(
-      members.map(
-        (member) => [
-          member.id,
-          member.user_id,
-        ]
-      )
-    );
-
-  const emailByMemberId =
-    new Map<
-      string,
-      string | null
-    >();
-
-  await Promise.all(
-    memberIds.map(
-      async (memberId) => {
-        const userId =
-          userIdByMemberId.get(
-            memberId
-          );
-
-        if (!userId) {
-          emailByMemberId.set(
-            memberId,
-            null
-          );
-          return;
-        }
-
-        const {
-          data,
-        } =
-          await adminClient
-            .auth
-            .admin
-            .getUserById(
-              userId
-            );
-
-        emailByMemberId.set(
-          memberId,
-          data.user?.email ??
-            null
-        );
-      }
-    )
-  );
-
   return {
-    timezone:
-      String(
-        businessData.timezone
-      ),
-
     requests:
       rows.map((row) => ({
         id: row.id,
@@ -257,11 +169,6 @@ export async function getAdminStaffTimeOffRequests():
             row.employee_id
           ) ??
           "Nepoznati zaposleni",
-        requesterEmail:
-          emailByMemberId.get(
-            row.member_id
-          ) ??
-          null,
         startsAt:
           row.starts_at,
         endsAt:

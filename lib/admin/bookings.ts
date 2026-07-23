@@ -7,6 +7,7 @@ import {
   type LocaleCode,
 } from "@/lib/i18n/locales";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { measureAdminServerStep } from "@/lib/performance/admin-server-timing";
 import type { LocalizedText } from "@/lib/types";
 
 export const BOOKING_STATUSES = [
@@ -294,35 +295,43 @@ export async function getAdminBookings(): Promise<AdminBookingsResult> {
     ),
   ];
 
-  const {
-    data: serviceData,
-    error: serviceError,
-  } = await adminClient
-    .from("services")
-    .select("id, name")
-    .eq(
-      "business_id",
-      admin.business.id
-    )
-    .in("id", serviceIds);
+  const [
+    {
+      data: serviceData,
+      error: serviceError,
+    },
+    {
+      data: employeeData,
+      error: employeeError,
+    },
+  ] = await measureAdminServerStep(
+    "admin.bookings.lookups",
+    () =>
+      Promise.all([
+        adminClient
+          .from("services")
+          .select("id, name")
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .in("id", serviceIds),
+        adminClient
+          .from("employees")
+          .select("id, name")
+          .eq(
+            "business_id",
+            admin.business.id
+          )
+          .in("id", employeeIds),
+      ])
+  );
 
   if (serviceError) {
     throw new Error(
       `Unable to load booking services: ${serviceError.message}`
     );
   }
-
-  const {
-    data: employeeData,
-    error: employeeError,
-  } = await adminClient
-    .from("employees")
-    .select("id, name")
-    .eq(
-      "business_id",
-      admin.business.id
-    )
-    .in("id", employeeIds);
 
   if (employeeError) {
     throw new Error(

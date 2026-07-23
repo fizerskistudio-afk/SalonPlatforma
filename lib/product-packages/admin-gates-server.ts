@@ -51,6 +51,7 @@ export async function loadAdminProductFeatureContext(
     await requireAdmin();
 
   const productAccess =
+    admin.productAccess ??
     await loadProductPackageAccessForBusinessId(
       admin.business.id
     );

@@ -9,8 +9,13 @@ import {
   type AdminTenantOption,
   type AdminTenantRole,
 } from "@/lib/auth/admin-tenants";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { measureAdminServerStep } from "@/lib/performance/admin-server-timing";
+import {
+  resolveBusinessProductAccess,
+  type BusinessProductAccessRow,
+  type BusinessProductAccessSnapshot,
+} from "@/lib/product-packages/business-access";
 
 export type AdminRole = AdminTenantRole;
 
@@ -24,12 +29,19 @@ type MembershipRow = {
   is_active: boolean;
 };
 
-type BusinessRow = {
-  id: string;
-  name: string;
-  slug: string;
-  is_active: boolean;
-};
+type BusinessRow =
+  BusinessProductAccessRow & {
+    name: string;
+    is_active: boolean;
+  };
+
+type MembershipBusinessRow =
+  MembershipRow & {
+    businesses:
+      | BusinessRow
+      | BusinessRow[]
+      | null;
+  };
 
 export type AdminContext = {
   userId: string;
@@ -39,6 +51,8 @@ export type AdminContext = {
   mustChangePassword: boolean;
   tenants: AdminTenantOption[];
   requiresTenantSelection: boolean;
+  productAccess?:
+    BusinessProductAccessSnapshot;
 
   business: {
     id: string;
@@ -101,13 +115,21 @@ function getMustChangePassword(
 export const getAdminContext = cache(
   async (): Promise<AdminContext | null> => {
     const supabase =
-      await createClient();
+      await measureAdminServerStep(
+        "admin.context.createClient",
+        () =>
+          createClient()
+      );
 
     const {
       data: claimsData,
       error: claimsError,
     } =
-      await supabase.auth.getClaims();
+      await measureAdminServerStep(
+        "admin.context.claims",
+        () =>
+          supabase.auth.getClaims()
+      );
 
     /*
      * Eksplicitno proveravamo claimsData
@@ -136,71 +158,106 @@ export const getAdminContext = cache(
     }
 
     const {
-      data: membershipData,
-      error: membershipError,
-    } = await supabase
-      .from("business_members")
-      .select(
-        "id, business_id, role, is_active"
-      )
-      .eq("user_id", userId)
-      .eq("is_active", true)
-      .in("role", [
-        "owner",
-        "manager",
-      ])
-      .order("created_at", {
-        ascending: true,
+      data: tenantData,
+      error: tenantError,
+    } =
+      await measureAdminServerStep(
+        "admin.context.tenantRead",
+        async () =>
+          await supabase
+            .from("business_members")
+            .select(
+              `
+                id,
+                business_id,
+                role,
+                is_active,
+                businesses!inner (
+                  id,
+                  name,
+                  slug,
+                  is_active,
+                  package_key,
+                  package_contract_version,
+                  package_assigned_at,
+                  package_assigned_by_user_id
+                )
+              `
+            )
+            .eq("user_id", userId)
+            .eq("is_active", true)
+            .in("role", [
+              "owner",
+              "manager",
+            ])
+            .eq(
+              "businesses.is_active",
+              true
+            )
+            .order("created_at", {
+              ascending: true,
+            })
+      );
+
+    if (
+      tenantError ||
+      !tenantData ||
+      tenantData.length === 0
+    ) {
+      return null;
+    }
+
+    const tenantRows =
+      tenantData as unknown as
+        MembershipBusinessRow[];
+
+    const memberships:
+      MembershipRow[] = [];
+    const businessById =
+      new Map<
+        string,
+        BusinessRow
+      >();
+
+    for (
+      const row of tenantRows
+    ) {
+      const business =
+        Array.isArray(
+          row.businesses
+        )
+          ? row.businesses[0] ??
+            null
+          : row.businesses;
+
+      if (
+        !business ||
+        !business.is_active
+      ) {
+        continue;
+      }
+
+      memberships.push({
+        id: row.id,
+        business_id:
+          row.business_id,
+        role: row.role,
+        is_active:
+          row.is_active,
       });
 
-    if (
-      membershipError ||
-      !membershipData ||
-      membershipData.length === 0
-    ) {
-      return null;
-    }
-
-    const memberships =
-      membershipData as unknown as MembershipRow[];
-
-    const adminClient =
-      createAdminClient();
-
-    const {
-      data: businessData,
-      error: businessError,
-    } = await adminClient
-      .from("businesses")
-      .select(
-        "id, name, slug, is_active"
-      )
-      .in(
-        "id",
-        memberships.map(
-          (membership) =>
-            membership.business_id
-        )
-      )
-      .eq("is_active", true);
-
-    if (
-      businessError ||
-      !businessData ||
-      businessData.length === 0
-    ) {
-      return null;
-    }
-
-    const businesses =
-      businessData as unknown as BusinessRow[];
-
-    const businessById = new Map(
-      businesses.map((business) => [
+      businessById.set(
         business.id,
-        business,
-      ])
-    );
+        business
+      );
+    }
+
+    if (
+      memberships.length === 0 ||
+      businessById.size === 0
+    ) {
+      return null;
+    }
 
     const tenants = memberships.flatMap(
       (membership): AdminTenantOption[] => {
@@ -229,10 +286,17 @@ export const getAdminContext = cache(
       }
     );
 
+    const preferredBusinessId =
+      await measureAdminServerStep(
+        "admin.context.preferredBusiness",
+        () =>
+          getPreferredAdminBusinessId()
+      );
+
     const selection =
       resolveAdminTenantSelection(
         tenants,
-        await getPreferredAdminBusinessId()
+        preferredBusinessId
       );
 
     if (
@@ -244,6 +308,17 @@ export const getAdminContext = cache(
 
     const selected =
       selection.selected ?? tenants[0];
+
+    const selectedBusiness =
+      businessById.get(
+        selected.businessId
+      );
+
+    if (
+      !selectedBusiness
+    ) {
+      return null;
+    }
 
     const emailClaim =
       claims.email;
@@ -271,6 +346,11 @@ export const getAdminContext = cache(
       tenants,
       requiresTenantSelection:
         selection.requiresSelection,
+
+      productAccess:
+        resolveBusinessProductAccess(
+          selectedBusiness
+        ),
 
       business: {
         id: selected.businessId,

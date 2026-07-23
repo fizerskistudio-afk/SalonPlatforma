@@ -19,7 +19,7 @@ export default async function AdminSchedulePage() {
     <>
       <StaffTimeOffRequests
         timezone={
-          staffRequests.timezone
+          result.business.timezone
         }
         requests={
           staffRequests.requests
