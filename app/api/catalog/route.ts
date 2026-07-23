@@ -1,4 +1,8 @@
 import {
+  performance,
+} from "node:perf_hooks";
+
+import {
   type NextRequest,
   NextResponse,
 } from "next/server";
@@ -42,9 +46,20 @@ export async function GET(
   }
 
   try {
+    const catalogStartedAt =
+      performance.now();
+
     const result =
       await loadPublicCatalog(
         businessSlug
+      );
+
+    const catalogDurationMs =
+      (
+        performance.now() -
+        catalogStartedAt
+      ).toFixed(
+        1
       );
 
     if (!result) {
@@ -70,6 +85,10 @@ export async function GET(
         headers: {
           "Cache-Control":
             "no-store, max-age=0",
+          "Server-Timing":
+            `catalog;dur=${catalogDurationMs}`,
+          "X-Ordum-Catalog-Policy":
+            "public-data-cache-30s",
         },
       }
     );

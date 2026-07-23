@@ -76,6 +76,15 @@ Izmeriti i potvrditi ponašanje javnog booking toka pod realnim i vršnim optere
 - billing, payment ili customer account;
 - veliki UI redesign.
 
+### Trenutni status
+
+- `PUBLIC-BOOKING-LOAD-01B` — **PASS**: ponovljiv GET-only baseline za 25, 50 i 100 concurrent sesija; 100% uspeh, bez timeout-a i bez 429 odgovora; tenant page p95 na nivou 100 bio je približno 4,70 s;
+- `PUBLIC-BOOKING-LOAD-01C` — **PASS**: tenant page, direktni `/api/catalog` i availability su izolovano izmereni kroz dve runde; direktni catalog p95 na nivou 100 bio je približno 4,01 s, availability p95 približno 743 ms;
+- `PUBLIC-BOOKING-LOAD-01D` — **IMPLEMENTATION QA PASS**: published public catalog koristi 30-sekundni Next Data Cache između zahteva; platform-admin preview i HTTP odgovori ostaju uncached; lint, kompletni testovi i production build prolaze;
+- **PENDING**: deploy 01D promene i identičan production 01C pre/post retest;
+- **PENDING**: kontrolisani nivo 250;
+- **PENDING**: runtime provera konkurentnog bookinga istog termina i dokaz da duple rezervacije ne nastaju.
+
 ### Acceptance
 
 1. broj requestova po booking sesiji je izmeren i dokumentovan;

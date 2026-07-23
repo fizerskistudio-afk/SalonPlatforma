@@ -3,6 +3,9 @@ import "server-only";
 import {
   cache,
 } from "react";
+import {
+  unstable_cache,
+} from "next/cache";
 
 import {
   buildCatalogReviewData,
@@ -962,16 +965,57 @@ async function loadPublicCatalogUncached(
   };
 }
 
+const PUBLIC_CATALOG_REVALIDATE_SECONDS =
+  30;
+
+const loadPublicCatalogAcrossRequests =
+  unstable_cache(
+    (
+      businessSlug:
+        string
+    ) =>
+      loadPublicCatalogUncached(
+        businessSlug,
+        "public"
+      ),
+    [
+      "public-catalog-v1",
+    ],
+    {
+      revalidate:
+        PUBLIC_CATALOG_REVALIDATE_SECONDS,
+      tags: [
+        "public-catalog",
+      ],
+    }
+  );
+
 export const loadPublicCatalog =
   cache(
     (
       rawBusinessSlug:
         string
-    ) =>
-      loadPublicCatalogUncached(
-        rawBusinessSlug,
-        "public"
-      )
+    ) => {
+      const businessSlug =
+        rawBusinessSlug
+          .trim()
+          .toLowerCase();
+
+      if (
+        !BUSINESS_SLUG_PATTERN.test(
+          businessSlug
+        )
+      ) {
+        return loadPublicCatalogUncached(
+          rawBusinessSlug,
+          "public"
+        );
+      }
+
+      return loadPublicCatalogAcrossRequests(
+        businessSlug
+      );
+    }
   );
 
 export const loadPlatformPreviewCatalog =
