@@ -4,11 +4,12 @@ import {
 } from "next/server";
 
 import {
+  requireAdmin,
+} from "@/lib/auth/admin";
+import {
   createGoogleOAuthState,
   generateGoogleAuthorizationUrl,
 } from "@/lib/google-calendar/oauth";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 export const dynamic =
   "force-dynamic";
@@ -37,24 +38,6 @@ function createNoStoreRedirect(
   return response;
 }
 
-function redirectToLogin(
-  request: NextRequest
-): NextResponse {
-  const loginUrl = new URL(
-    "/admin/login",
-    request.url
-  );
-
-  loginUrl.searchParams.set(
-    "next",
-    "/api/admin/google-calendar/connect"
-  );
-
-  return createNoStoreRedirect(
-    loginUrl
-  );
-}
-
 function redirectToSettings(
   request: NextRequest,
   status: string
@@ -77,116 +60,18 @@ function redirectToSettings(
 export async function GET(
   request: NextRequest
 ) {
+  const admin =
+    await requireAdmin();
+
   try {
-    const supabase =
-      await createClient();
-
-    const {
-      data: {
-        user,
-      },
-      error: userError,
-    } =
-      await supabase.auth.getUser();
-
-    if (
-      userError ||
-      !user
-    ) {
-      return redirectToLogin(
-        request
-      );
-    }
-
-    const adminClient =
-      createAdminClient();
-
-    const {
-      data: membership,
-      error: membershipError,
-    } = await adminClient
-      .from(
-        "business_members"
-      )
-      .select(
-        "business_id, role, is_active"
-      )
-      .eq(
-        "user_id",
-        user.id
-      )
-      .eq(
-        "is_active",
-        true
-      )
-      .in(
-        "role",
-        [
-          "owner",
-          "manager",
-        ]
-      )
-      .limit(1)
-      .maybeSingle();
-
-    if (membershipError) {
-      console.error(
-        "Failed to load Google Calendar membership:",
-        membershipError
-      );
-
-      return redirectToSettings(
-        request,
-        "membership_error"
-      );
-    }
-
-    if (!membership) {
-      return redirectToSettings(
-        request,
-        "forbidden"
-      );
-    }
-
-    const {
-      data: business,
-      error: businessError,
-    } = await adminClient
-      .from("businesses")
-      .select("id, is_active")
-      .eq(
-        "id",
-        membership.business_id
-      )
-      .eq(
-        "is_active",
-        true
-      )
-      .maybeSingle();
-
-    if (
-      businessError ||
-      !business
-    ) {
-      console.error(
-        "Failed to load Google Calendar business:",
-        businessError
-      );
-
-      return redirectToSettings(
-        request,
-        "business_error"
-      );
-    }
-
     const {
       state,
       nonce,
     } = createGoogleOAuthState({
       businessId:
-        membership.business_id,
+        admin.business.id,
       userId:
-        user.id,
+        admin.userId,
       target:
         "business",
     });
@@ -195,7 +80,7 @@ export async function GET(
       generateGoogleAuthorizationUrl({
         state,
         loginHint:
-          user.email ?? null,
+          admin.email,
       });
 
     const response =

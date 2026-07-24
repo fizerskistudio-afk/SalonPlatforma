@@ -11,6 +11,9 @@ const source =
   readFileSync(
     "scripts/performance/public-booking-load-01c-isolation.mjs",
     "utf8"
+  ).replace(
+    /\r\n?/g,
+    "\n"
   );
 
 describe(

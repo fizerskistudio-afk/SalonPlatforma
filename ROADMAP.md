@@ -130,7 +130,7 @@ Intervjui sa aktivnim biznisima, domain audit, provider/compliance provera i pot
 
 - `MASTER-SYSTEM-QA-01B`: authenticated i mutating regression;
 - puni live booking → admin calendar → staff workflow tok;
-- Google Calendar production regression;
+- Google Calendar production regression — `GOOGLE-CALENDAR-TENANT-CONTEXT-HOTFIX-01` je **LOCAL QA PASS**; tenant-aware connect koristi aktivni admin tenant umesto prve owner/manager članarine; deploy, Lumiere Studio reconnect i potvrda upisa na `lumiere-studio` su pending;
 - production recipient email i cron provera;
 - puni cross-tenant test;
 - production contact-form Resend smoke;
